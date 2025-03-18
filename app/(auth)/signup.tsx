@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     },
     buttonLog: {
         padding: 10,
-        backgroundColor: "blue",
+        backgroundColor: "#056EE9",
         borderRadius: 5,
         marginTop: 20,
         alignItems: 'center'
@@ -108,13 +108,14 @@ const styles = StyleSheet.create({
         fontWeight: "500"
     },
     takeButton: {
-        backgroundColor: 'blue',
+        backgroundColor: '#056EE9',
         height: 35,
         width: 100,
         borderRadius: 10,
         alignItems: 'center',
         alignContent: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        margin : 10
     },
     imageStyle: {
         margin: 20,

@@ -7,8 +7,10 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { ApolloProvider } from '@apollo/client/react/context/ApolloProvider';
+import client from './networking/data';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -28,13 +30,16 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{headerShown:false}} initialRouteName='index'>
-        <Stack.Screen name="index"  />
-        <Stack.Screen name="(tabs)"  />
-        <Stack.Screen name="(auth)"  />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <ApolloProvider client={client}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }} initialRouteName='index'>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(auth)" />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </ApolloProvider>
+
   );
 }
