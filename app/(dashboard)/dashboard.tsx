@@ -49,4 +49,4 @@ const Dashboard = () => {
         </NavigationContainer>
     );
 };
-export default Dashboard();
+export default Dashboard;

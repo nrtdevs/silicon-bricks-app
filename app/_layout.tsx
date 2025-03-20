@@ -10,11 +10,11 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { ApolloProvider } from "@apollo/client";
-import { client } from "@/hooks/ApoloClient";
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { ApolloProvider } from '@apollo/client/react/context/ApolloProvider';
+import client from './networking/data';
 
-// Prevent the splash screen from auto-hiding before asset loading is completed is ssssssssssssssss.
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -34,16 +34,16 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <ApolloProvider client={client}>
-        <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
+    <ApolloProvider client={client}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }} initialRouteName='index'>
           <Stack.Screen name="index" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(auth)" />
-          <Stack.Screen name="organisation" />
         </Stack>
         <StatusBar style="auto" />
-      </ApolloProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </ApolloProvider>
+
   );
 }
