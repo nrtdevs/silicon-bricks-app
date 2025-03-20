@@ -30,6 +30,8 @@ const SignUp = () => {
                 }}
                 showsVerticalScrollIndicator={false}
                 automaticallyAdjustKeyboardInsets={false}>
+                <Image source={require("../../assets/images/react-logo.png")} 
+                style={{ width: 100, height: 100, alignSelf: 'center', borderRadius: 50, margin: 10 }}/>
                 <Text style={styles.welcomeText}>Sign Up</Text>
                 {image && <Image source={{ uri: image }} style={styles.imageStyle} />}
                 <View id='buttons' style={{ justifyContent: 'center', alignItems: 'center', alignContent: 'center' }}>
@@ -115,7 +117,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         alignContent: 'center',
         justifyContent: 'center',
-        margin : 10
+        margin: 10
     },
     imageStyle: {
         margin: 20,
