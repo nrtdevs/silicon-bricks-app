@@ -1,8 +1,20 @@
 import { gql } from "@apollo/client";
 
-export const RegisterUser = gql`
-  extend type Query {
-    isLoggedIn: Boolean!
-    cartItems: [Launch]!
+export const GetAllOrganisations = gql`
+  query PaginatedOrganization($listInputDto: ListInputDTO!) {
+    paginatedOrganization(ListInputDTO: $listInputDto) {
+      meta {
+        totalItems
+        totalPages
+        currentPage
+        limit
+      }
+      data {
+        id
+        name
+        description
+        status
+      }
+    }
   }
 `;
