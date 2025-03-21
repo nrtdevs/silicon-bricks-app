@@ -9,6 +9,36 @@ const SignUp = () => {
     const [password, setPassword] = useState("");
     const [conPassword, setConPassword] = useState("");
     const [image, setImage] = useState('');
+    const [nameError, setNameError] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [conPasswordError, setConPasswordError] = useState("");
+
+    const validationInput = () => {
+        let isValid = true;
+        setNameError("");
+        setEmailError("");
+        if (!name.trim()) {
+            setNameError("Name is required");
+            isValid = false;
+        }
+        if (!email.trim()) {
+            setEmailError("Email is required");
+            isValid = false;
+        }
+        if (!password) {
+            setPasswordError("Password is required");
+            isValid = false;
+        }
+        if (!conPassword) {
+            setConPasswordError("Password is required");
+            isValid = false;
+        } else if (password !== conPassword) {
+            setConPasswordError("Password does not match");
+        }
+        return isValid;
+    };
+
     const handleImagePickerPress = async () => {
         let result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -20,6 +50,10 @@ const SignUp = () => {
             setImage(result.assets[0].uri)
         }
     }
+    const handleSignup = () => {
+        if (!validationInput()) return;
+        console.log("Sign up successful");
+    }
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
             <ScrollView keyboardShouldPersistTaps="handled"
@@ -30,8 +64,8 @@ const SignUp = () => {
                 }}
                 showsVerticalScrollIndicator={false}
                 automaticallyAdjustKeyboardInsets={false}>
-                <Image source={require("../../assets/images/react-logo.png")} 
-                style={{ width: 100, height: 100, alignSelf: 'center', borderRadius: 50, margin: 10 }}/>
+                <Image source={require("../../assets/images/react-logo.png")}
+                    style={{ width: 100, height: 100, alignSelf: 'center', borderRadius: 50, margin: 10 }} />
                 <Text style={styles.welcomeText}>Sign Up</Text>
                 {image && <Image source={{ uri: image }} style={styles.imageStyle} />}
                 <View id='buttons' style={{ justifyContent: 'center', alignItems: 'center', alignContent: 'center' }}>
@@ -45,31 +79,32 @@ const SignUp = () => {
                     style={styles.input}
                     value={name}
                     onChangeText={text => setName(text)}
-                >
-                </TextInput>
+                />
+                {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
                 <TextInput
                     placeholder="Enter Email"
                     style={styles.input}
                     value={email}
                     onChangeText={text => setEmail(text)}
-                >
-                </TextInput>
+                />
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
                 <TextInput
                     placeholder="Enter Password"
                     style={styles.input}
                     value={password}
                     onChangeText={text => setPassword(text)}
-                >
-                </TextInput>
+                />
+                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
                 <TextInput
                     placeholder="Enter Conform Password"
                     style={styles.input}
                     value={conPassword}
                     onChangeText={text => setConPassword(text)}
-                >
-                </TextInput>
+                />
+                {conPasswordError ? <Text style={styles.errorText}>{conPasswordError}</Text> : null}
                 <TouchableOpacity
                     style={styles.buttonLog}
+                    onPress={handleSignup}
                 >
                     <Text style={styles.loginStyle}>Sign Up</Text>
                 </TouchableOpacity>
@@ -127,5 +162,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         alignSelf: "center",
+    },
+    errorText: {
+        color: "red",
+        fontSize: 12,
+        marginBottom: 5,
     }
 });

@@ -52,7 +52,7 @@ const Index = () => {
             if (data?.login?.token) {
                 await SecureStore.setItemAsync("authToken", data.login.token);
                 alert(`Welcome, ${data.login.user.name}!`);
-                router.push("/(dashboard)/dashboard");
+                router.push("/(tabs)");
             }
         } catch (err) {
             console.error("Login Error:", err);
@@ -107,7 +107,8 @@ const Index = () => {
                     <Text style={{ marginLeft: 10, fontSize: 14, color: 'black' }}> Remeber Me</Text>
                 </View>
                 <Pressable style={styles.buttonLog}
-                    onPress={handleLogin}
+                    // onPress={handleLogin}
+                    onPress={() => router.push("/(tabs)")}
                 >
                     {loading ? <ActivityIndicator color="white" /> : <Text style={styles.loginStyle}>Login</Text>}
                 </Pressable>

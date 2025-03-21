@@ -3,6 +3,22 @@ import React, { useState } from 'react'
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
+    const [emailError, setEmailError] = useState("");
+
+    const validationInput = () =>{
+        let isValid = true;
+        setEmailError("");
+        if(!email.trim()){
+            setEmailError("Email is required");
+            isValid = false;
+        }
+        return isValid;
+    }
+    const handleForgot = () => {
+        if(validationInput()) return;
+        console.log("Otp send successful");
+    }
+
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
             <ScrollView keyboardShouldPersistTaps="handled"
@@ -26,7 +42,8 @@ const ForgotPassword = () => {
                     onChangeText={text => setEmail(text)}
                 >
                 </TextInput>
-                <Pressable style={styles.buttonLog}>
+                <Pressable style={styles.buttonLog}
+                >
                     <Text style={styles.loginStyle}>Get OTP</Text>
                 </Pressable>
             </ScrollView>
