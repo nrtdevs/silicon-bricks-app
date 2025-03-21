@@ -146,6 +146,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FF",
     paddingVertical: 20,
     alignItems: "center",
+    justifyContent : 'center'
   },
   otpContainer: {
     flexDirection: "row",
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   text: {
-    fontSize: 40,
+    fontSize: 30,
     fontWeight: "bold",
     color: "#3B82F6",
     marginBottom: 20,
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     backgroundColor: "#3B82F6",
     borderRadius: 10,
-    paddingVertical: 15,
+    paddingVertical: 10,
     width: width * 0.9,
     marginTop: 10,
   },
