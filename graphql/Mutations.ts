@@ -26,3 +26,35 @@ export const Login = gql`
     }
   }
 `;
+
+export const AddOrganization = gql`
+  mutation CreateOrganization(
+    $createOrganizationInput: CreateOrganizationDto!
+  ) {
+    createOrganization(createOrganizationInput: $createOrganizationInput) {
+      description
+      id
+      name
+      status
+    }
+  }
+`;
+
+export const UpdateOrganization = gql`
+  mutation CreateOrganization(
+    $updateOrganizationInput: UpdateOrganizationDto!
+  ) {
+    updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
+      status
+      name
+      id
+      description
+    }
+  }
+`;
+
+export const DeleteOrgaization = gql`
+  mutation DeleteOrganization($deleteOrganizationId: Int!) {
+    deleteOrganization(id: $deleteOrganizationId)
+  }
+`;
