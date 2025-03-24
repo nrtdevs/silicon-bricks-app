@@ -13,6 +13,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { ApolloProvider } from "@apollo/client/react/context/ApolloProvider";
 import client from "@/graphql/client";
+import { PaperProvider } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,15 +35,22 @@ export default function RootLayout() {
 
   return (
     <ApolloProvider client={client}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(tabs)" />
-          {/* <Stack.Screen name="(auth)" /> */}
-          {/* <Stack.Screen name="dashboard/_layout.tsx" /> */}
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <PaperProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Stack
+            screenOptions={{ headerShown: false }}
+            initialRouteName="index"
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(tabs)" />
+            {/* <Stack.Screen name="(auth)" /> */}
+            {/* <Stack.Screen name="dashboard/_layout.tsx" /> */}
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </PaperProvider>
     </ApolloProvider>
   );
 }
