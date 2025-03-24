@@ -2,8 +2,7 @@ import { TouchableOpacity, Image, View, Pressable, ActivityIndicator } from "rea
 import React, { useState } from "react";
 import { Controller, FieldError } from "react-hook-form";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
-import { AntDesign, Feather } from "@expo/vector-icons";
-import CustomButton from "./CustomButton";
+import { AntDesign, Feather } from "@expo/vector-icons"; 
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 import { Input, CheckBox } from "@rneui/themed";
@@ -12,6 +11,7 @@ import { Colors } from "@/constants/Colors";
 import * as ImagePicker from "expo-image-picker"; 
 import { useTheme } from "@/context/ThemeContext";
 import { checkUrlFormat } from "@/utils/checkUrlFormat";
+import CustomButton from "./CustomButton";
 
 
 type RequiredProps = {
