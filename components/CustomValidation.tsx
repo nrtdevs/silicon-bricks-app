@@ -8,11 +8,10 @@ import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 import { Input, CheckBox } from "@rneui/themed";
 import { ms, mvs, ScaledSheet, vs } from "react-native-size-matters";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import * as ImagePicker from "expo-image-picker";
-import { checkUrlFormat } from "@/utils/checkUrlFormat";
+import { Colors } from "@/constants/Colors"; 
+import * as ImagePicker from "expo-image-picker"; 
 import { useTheme } from "@/context/ThemeContext";
+import { checkUrlFormat } from "@/utils/checkUrlFormat";
 
 
 type RequiredProps = {
