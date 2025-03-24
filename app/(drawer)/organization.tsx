@@ -28,6 +28,7 @@ import {
   UpdateOrganization,
 } from "@/graphql/Mutations";
 import { Colors } from "@/constants/Colors";
+import { ScrollView } from "react-native-gesture-handler";
 
 interface OrganizationData {
   id: number;
@@ -40,9 +41,14 @@ const Organization = () => {
   const [visible, setVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [deletePopupVisible, setDeletePopupVisible] = useState(false);
+  const [viewButtonVisible, setViewButtonVisible] = useState(false);
 
   const [selectedOrganization, setSelectedOrganization] =
     useState<OrganizationData | null>(null);
+
+  const [deleteOrganizationId, setDeleteOrganizationId] = useState<
+    number | null
+  >(null);
 
   const [createAddRequestOrganization] = useMutation(AddOrganization);
   const [updateOrganization] = useMutation(UpdateOrganization);
@@ -58,21 +64,28 @@ const Organization = () => {
     setEditVisible(true);
   };
   const hideEditDialogue = () => {
-    setEditVisible(false);
     refetch();
+    setEditVisible(false);
   };
   const showDeleteDialogue = (organization: OrganizationData) => {
-    setEditVisible(true);
+    setDeleteOrganizationId(organization.id);
+    setDeletePopupVisible(true);
   };
   const hideDeleteDialogue = () => {
-    setDeletePopupVisible(false);
     refetch();
+    setDeletePopupVisible(false);
+  };
+
+  const showViewButton = (organization: OrganizationData) => {
+    setSelectedOrganization(organization);
+    setViewButtonVisible(true);
+  };
+  const hideViewButton = () => {
+    setViewButtonVisible(false);
   };
 
   const [getOrganizations, { data, loading, refetch, error }] =
     useLazyQuery(GetAllOrganisations);
-
-  console.log(data?.paginatedOrganization?.data, "data orgination");
 
   useEffect(() => {
     getOrganizations({
@@ -151,26 +164,53 @@ const Organization = () => {
 
       console.log(UpdateEditOrganization, "UpdateEditOrganization");
       refetch();
-      hideEditDialogue();
+      setEditVisible(false);
     } catch (error) {
       console.log("error", error);
     }
+    reset();
   };
 
-  const handleDelete = async (data: any) => {
+  const handleView = async (data: any) => {
     if (!selectedOrganization) return;
+    let param = {
+      id: Number(selectedOrganization.id),
+      name: data.name,
+      description: data.description,
+    };
+    try {
+      const UpdateEditOrganization = await updateOrganization({
+        variables: {
+          updateOrganizationInput: param,
+        },
+      });
+
+      console.log(UpdateEditOrganization, "UpdateEditOrganization");
+      refetch();
+      setEditVisible(false);
+    } catch (error) {
+      console.log("error", error);
+    }
+    reset();
+  };
+
+  const handleDelete = async () => {
     try {
       const DeleteOrganization = await deleteOrganization({
         variables: {
-          id: Number(selectedOrganization.id),
+          deleteOrganizationId: Number(deleteOrganizationId),
         },
       });
-      console.log(DeleteOrganization, "DeleteOrganization");
+      console.log(
+        DeleteOrganization,
+        "DeleteOrganization deleteOrganizationId rahul"
+      );
       refetch();
-      hideDeleteDialogue();
+      setDeletePopupVisible(false);
     } catch (error) {
       console.log("error", error);
     }
+    reset();
   };
 
   if (loading) {
@@ -180,6 +220,9 @@ const Organization = () => {
   if (error) {
     return <Text>Error fetching organizations: {error.message}</Text>;
   }
+
+  console.log(typeof Number(deleteOrganizationId), "deleteOrganizationId");
+  console.log(deleteOrganizationId, "deleteOrganizationId");
 
   return (
     <View style={styles.container}>
@@ -201,7 +244,7 @@ const Organization = () => {
               </View> */}
 
               <TouchableOpacity
-                onPress={() => showEditDialogue(item)}
+                onPress={() => showViewButton(item)}
                 style={styles.ViewButton}
               >
                 <Feather name="eye" size={24} color="white" />
@@ -215,7 +258,7 @@ const Organization = () => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => showEditDialogue(item)}
+                onPress={() => showDeleteDialogue(item)}
                 style={styles.deleteButton}
               >
                 <MaterialCommunityIcons
@@ -229,6 +272,7 @@ const Organization = () => {
         )}
         keyExtractor={(item: OrganizationData) => item.id.toString()}
       />
+
       {/* Floating Action Button (FAB) */}
       <View style={styles.fabButtonContainer}>
         <FAB
@@ -238,6 +282,7 @@ const Organization = () => {
           onPress={showDialogue}
         />
       </View>
+
       <Portal>
         <Dialog visible={visible} onDismiss={hideDialogue}>
           <Dialog.Title style={styles.dialogueTitle}>
@@ -355,6 +400,34 @@ const Organization = () => {
       </Portal>
 
       <Portal>
+        <Dialog visible={viewButtonVisible} onDismiss={hideViewButton}>
+          <Dialog.Title style={styles.dialogueTitle}>View Org</Dialog.Title>
+          <Dialog.Content>
+            <View style={styles.dialogueContent}>
+              <Text style={styles.viewLabel}>Name : </Text>
+              <Text style={styles.viewLabelFooter}>
+                {selectedOrganization?.name}
+              </Text>
+            </View>
+            <View style={styles.dialogueContent}>
+              <Text style={styles.viewLabel}>Description : </Text>
+              <Text style={styles.viewLabelFooter}>
+                {selectedOrganization?.description}
+              </Text>
+            </View>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <TouchableOpacity
+              onPress={hideViewButton}
+              style={styles.buttonContainerClose}
+            >
+              <Text>Close</Text>
+            </TouchableOpacity>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
+      <Portal>
         <Dialog visible={deletePopupVisible} onDismiss={hideDeleteDialogue}>
           <Dialog.Title style={styles.dialogueTitle}>Delete Org</Dialog.Title>
           <Dialog.Content>
@@ -364,13 +437,13 @@ const Organization = () => {
           </Dialog.Content>
           <Dialog.Actions>
             <TouchableOpacity
-              onPress={handleSubmit(handleDelete)}
+              onPress={handleDelete}
               style={styles.buttonContainerSave}
             >
               <Text>Yes</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={hideEditDialogue}
+              onPress={hideDeleteDialogue}
               style={styles.buttonContainerClose}
             >
               <Text>No</Text>
@@ -506,5 +579,30 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 20,
     marginRight: 8,
+  },
+  dialogueContent: {
+    marginBottom: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center", // Make sure items are vertically aligned
+    position: "relative",
+    flexWrap: "nowrap", // Prevent wrapping, so items stay in a single line
+  },
+
+  viewLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "black",
+    marginRight: 5,
+    maxWidth: "40%", // Adjust as per your layout requirement
+    flexShrink: 1,
+  },
+
+  viewLabelFooter: {
+    fontSize: 16,
+    color: "black",
+    position: "relative",
+    maxWidth: "55%", // Adjust as per your layout requirement
+    flexShrink: 1,
   },
 });
