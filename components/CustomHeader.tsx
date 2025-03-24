@@ -6,7 +6,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CustomHeader = ({ toggleValue, children, leftComponent, rightComponent }: any) => {
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (  

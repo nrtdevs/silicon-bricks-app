@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@apollo/client";
 import { REQUEST_OTP } from "@/graphql/Mutations";
 import { useRouter } from "expo-router";
+import { labels } from "@/constants/Labels";
 
 const schema = z.object({
   email: z.string().email({ message: "Email is required" }),
@@ -38,7 +39,8 @@ const Home = () => {
       email: "admin@newrise.in",
       password: "Password@123",
     },
-  });
+  }
+);
 
   const onSubmit = async (data: any) => {
     try {
@@ -49,7 +51,8 @@ const Home = () => {
             password: data.password,
           },
         },
-      });
+      }
+    );
 
       console.log(RequestOtp, "RequestOtp");
       toast.show({
@@ -62,7 +65,8 @@ const Home = () => {
           email: data.email,
           password: data.password,
         },
-      });
+      }
+    );
     } catch (error) {
       console.log(error);
     }
@@ -71,7 +75,7 @@ const Home = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.hero}>
-        <Text style={styles.text}>Login Account</Text>
+        <Text style={styles.text}>{labels?.loginAccount}</Text>
 
         {/* Create an account so you can explore jobs */}
         <Text style={styles.mainText}>
