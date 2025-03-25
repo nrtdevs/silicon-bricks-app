@@ -51,15 +51,15 @@
 // };
 // export default Dashboard;
 
-import React, { useState } from "react";
-import { View, Text, Button, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState } from 'react'
+import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native'
 
 const Index = () => {
-  const [message, setMessage] = useState("Hello World!!");
+  const [message, setMessage] = useState('Hello World!!')
 
   const changeMessage = () => {
-    setMessage("You clicked the button!");
-  };
+    setMessage('You clicked the button!')
+  }
 
   return (
     <View style={styles.container}>
@@ -81,54 +81,53 @@ const Index = () => {
         </TouchableOpacity>
       </View>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between", // Space elements evenly
-    alignItems: "center", // Center elements horizontally
-    backgroundColor: "#f8f9fa", // Light gray background
-    padding: 20,
+    justifyContent: 'space-between', // Space elements evenly
+    alignItems: 'center', // Center elements horizontally
+    backgroundColor: '#f8f9fa', // Light gray background
+    padding: 20
   },
   header: {
-    width: "100%", 
+    width: '100%',
     padding: 15,
-    backgroundColor: "#3B82F6", // Blue background for header
-   
-    marginBottom: 20,
+    backgroundColor: '#3B82F6', // Blue background for header
+
+    marginBottom: 20
   },
   headerText: {
     fontSize: 26,
-    fontWeight: "bold",
-    color: "#fff", // White text for header
-    textAlign: "center",
+    fontWeight: 'bold',
+    color: '#fff', // White text for header
+    textAlign: 'center'
   },
   content: {
     flex: 1,
-    justifyContent: "center", // Vertically center content
-    alignItems: "center", // Horizontally center content
-    marginBottom: 20,
+    justifyContent: 'center', // Vertically center content
+    alignItems: 'center', // Horizontally center content
+    marginBottom: 20
   },
   mainText: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#333", // Dark text for main message
-    marginBottom: 20,
+    fontWeight: 'bold',
+    color: '#333', // Dark text for main message
+    marginBottom: 20
   },
   footer: {
-    width: "100%",
+    width: '100%',
     padding: 15,
-    backgroundColor: "#3B82F6", // Blue background for footer
-    borderRadius: 10,
+    backgroundColor: '#3B82F6', // Blue background for footer
+    borderRadius: 10
   },
   footerText: {
     fontSize: 16,
-    color: "#fff", // White text for footer link
-    textAlign: "center",
-  },
-});
+    color: '#fff', // White text for footer link
+    textAlign: 'center'
+  }
+})
 
-export default Index;
-
+export default Index

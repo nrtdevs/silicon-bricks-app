@@ -1,6 +1,5 @@
-
 export default {
-    user:"user",
-    onboarding:"onboarding",
-    notification:"notification",
+  user: 'user',
+  onboarding: 'onboarding',
+  notification: 'notification'
 }

@@ -12,8 +12,8 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Login } from "@/graphql/Mutations";
 import * as SecureStore from "expo-secure-store";
+import { LoginDocument } from "@/graphql/generated";
 
 const { width } = Dimensions.get("window");
 
@@ -24,7 +24,7 @@ const Otp = () => {
   // Refs for OTP inputs
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
-  const [verifyOtp, { error }] = useMutation(Login);
+  const [verifyOtp, { error }] = useMutation(LoginDocument);
   const params = useLocalSearchParams();
 
   const {
@@ -48,8 +48,8 @@ const Otp = () => {
       const RequestOtp = await verifyOtp({
         variables: {
           loginData: {
-            email: params.email,
-            password: params.password,
+            email: String(params.email),
+            password: String(params.password),
             otp: otpValue,
           },
         },
@@ -71,7 +71,6 @@ const Otp = () => {
       console.error("error", error);
     }
   };
-
   const handleChange = (text: string, index: number) => {
     const newOtp = [...otp];
     newOtp[index] = text;
