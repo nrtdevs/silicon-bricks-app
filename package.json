@@ -25,6 +25,7 @@
     "@react-navigation/bottom-tabs": "^7.2.1",
     "@react-navigation/drawer": "^7.2.1",
     "@react-navigation/native": "^7.0.15",
+    "@rneui/base": "^4.0.0-rc.8",
     "@rneui/themed": "^4.0.0-rc.8",
     "expo": "~52.0.37",
     "expo-blur": "~14.0.3",

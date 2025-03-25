@@ -1,7 +1,6 @@
 import {
   DarkTheme,
   DefaultTheme,
-  ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -14,6 +13,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { ApolloProvider } from "@apollo/client/react/context/ApolloProvider";
 import client from "@/graphql/client";
 import { PaperProvider } from "react-native-paper";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,23 +34,19 @@ export default function RootLayout() {
   }
 
   return (
-    <ApolloProvider client={client}>
       <PaperProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
+        <ThemeProvider>
           <Stack
             screenOptions={{ headerShown: false }}
             initialRouteName="index"
           >
             <Stack.Screen name="index" />
             <Stack.Screen name="(tabs)" />
-            {/* <Stack.Screen name="(auth)" /> */}
+            <Stack.Screen name="(auth)" />
             {/* <Stack.Screen name="dashboard/_layout.tsx" /> */}
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
       </PaperProvider>
-    </ApolloProvider>
   );
 }
