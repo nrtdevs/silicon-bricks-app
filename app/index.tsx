@@ -1,27 +1,28 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import { Redirect } from 'expo-router'
-import * as SecureStore from 'expo-secure-store'
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+import { Redirect } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 
 const Index = () => {
-  const [token, setToken] = React.useState<string | null>(null)
+  const [token, setToken] = React.useState<string | null>(null);
 
   const getToken = async () => {
-    const token = await SecureStore.getItemAsync('accessToken')
-    setToken(token)
-    return token // Make sure the key is "accessToken" if you're using that.
-  }
+    const token = await SecureStore.getItemAsync("accessToken");
+    setToken(token);
+    return token; // Make sure the key is "accessToken" if you're using that.
+  };
 
   React.useEffect(() => {
-    getToken()
-  }, [])
+    getToken();
+  }, []);
   return token ? (
     <Redirect href="/(drawer)" />
   ) : (
-    <Redirect href="/(auth)/login" />
-  )
-}
+    // <Redirect href="/(auth)/login2" />
+    <Redirect href="/(drawer)" />
+  );
+};
 
-export default Index
+export default Index;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});
