@@ -31,3 +31,17 @@ mutation CreateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
 mutation DeleteOrganization($deleteOrganizationId: Int!) {
   deleteOrganization(id: $deleteOrganizationId)
 }
+
+#register mutation
+mutation Register($registerData: RegisterDto!) {
+  register(registerData: $registerData) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+  }
+}

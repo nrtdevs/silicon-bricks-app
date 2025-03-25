@@ -13,6 +13,9 @@ import CustomValidation from "@/components/CustomValidation";
 import asyncKeys from "@/constants/asyncKeys";
 import CustomButton from "@/components/CustomButton";
 import alertMsg from "@/constants/alertMsg";
+import { useMutation } from "@apollo/client";
+import { RequestOtpDocument } from "@/graphql/generated";
+import Toast from "react-native-toast-message";
 
 // Define form data types
 interface LoginFormData {
@@ -21,6 +24,7 @@ interface LoginFormData {
 }
 
 export default function LoginScreen() {
+  const [createRequestOpt, { error }] = useMutation(RequestOtpDocument);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const { theme } = useTheme();
@@ -30,15 +34,39 @@ export default function LoginScreen() {
     formState: { errors },
   } = useForm<LoginFormData>({
     defaultValues: {
-      email: "sidhdadatri@gmail.com",
-      password: "Test@1234",
+      email: "admin@newrise.in",
+      password: "Password@123",
     },
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    router.push("/(tabs)");
-  };
+  const onSubmit = async (data: any) => {
+    console.log(data);
+    try {
+      const RequestOtp = await createRequestOpt({
+        variables: {
+          otpRequestData: {
+            email: data.email,
+            password: data.password,
+          },
+        },
+      });
 
+      console.log(RequestOtp, "RequestOtp");
+      Toast.show({
+        type: "success",
+        text1: "Otp Send Successfully",
+      });
+      router.push({
+        pathname: "/otp",
+        params: {
+          email: data.email,
+          password: data.password,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <CustomHeader>
       <ScrollView
