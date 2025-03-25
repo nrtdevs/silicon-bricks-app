@@ -16,9 +16,9 @@ const Index = () => {
     getToken();
   }, []);
   return token ? (
-    <Redirect href="/(drawer)" />
+    <Redirect href="/(drawer)/(tabs)" />
   ) : (
-    <Redirect href="/(auth)/login2" />
+    <Redirect href="/(auth)/login" />
   );
 };
 

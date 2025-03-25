@@ -9,7 +9,7 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData
 } from 'react-native'
-import { ms, s, vs } from 'react-native-size-matters'
+import { ms, s, ScaledSheet, vs } from 'react-native-size-matters'
 import { ThemedText } from './ThemedText'
 import { useTheme } from '@/context/ThemeContext'
 
@@ -113,13 +113,12 @@ const OtpInput: React.FC<OtpInputProps> = ({
               style={[
                 styles.input,
                 {
-                  borderColor: error ? Colors.red : '#ccc',
+                  borderColor: error ? Colors.red : Colors.gray,
                   color: Colors[theme].text
                 }
               ]}
               keyboardType="number-pad"
-              maxLength={1}
-              // placeholder='*'
+              maxLength={1} 
               value={code[index]}
               onChangeText={text => handleChangeText(text, index)}
               onKeyPress={e => handleKeyPress(e, index)}
@@ -136,26 +135,24 @@ const OtpInput: React.FC<OtpInputProps> = ({
   )
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     flexDirection: 'row',
-    marginBottom: vs(5),
+    marginBottom: "5@vs",
     justifyContent: 'center',
     alignItems: 'center',
-    gap: s(10)
+    gap: "10@ms"
   },
   input: {
     borderWidth: 1,
     borderRadius: 10,
-    width: ms(45),
-    height: ms(45),
+    width: "45@ms",
+    height: "45@ms",
     textAlign: 'center',
-    fontSize: ms(16),
-    elevation: 5,
-    margin: 2
+    fontSize: "16@ms",  
   },
   errorText: {
-    fontSize: ms(14),
+    fontSize: "14@ms",
     color: Colors.red,
     fontFamily: 'medium',
     left: 10

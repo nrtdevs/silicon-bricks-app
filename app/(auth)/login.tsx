@@ -1,42 +1,38 @@
-import React from "react";
-import {
-  Text,
-  View,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Dimensions,
-  Image,
-} from "react-native";
-
+import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import toast from "react-native-toast-message";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@apollo/client";
-import { useRouter } from "expo-router";
+import { View, TouchableOpacity, Pressable, ScrollView } from "react-native";
+import { ms, ScaledSheet, vs } from "react-native-size-matters";
+import { Colors } from "@/constants/Colors";
+import { router } from "expo-router";
+import CustomHeader from "@/components/CustomHeader";
+import { ThemedText } from "@/components/ThemedText";
+import { useTheme } from "@/context/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
 import { labels } from "@/constants/Labels";
+import CustomValidation from "@/components/CustomValidation";
+import asyncKeys from "@/constants/asyncKeys";
+import CustomButton from "@/components/CustomButton";
+import alertMsg from "@/constants/alertMsg";
+import { useMutation } from "@apollo/client";
 import { RequestOtpDocument } from "@/graphql/generated";
+import Toast from "react-native-toast-message";
 
-const schema = z.object({
-  email: z.string().email({ message: "Email is required" }),
-  password: z.string().min(4, { message: " Password is required" }),
-});
+// Define form data types
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
-const { width } = Dimensions.get("window");
-
-const Home = () => {
+export default function LoginScreen() {
   const [createRequestOpt, { error }] = useMutation(RequestOtpDocument);
-  console.log(error);
-
-  const router = useRouter();
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [isFocused, setIsFocused] = useState("");
+  const { theme } = useTheme();
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(schema),
+  } = useForm<LoginFormData>({
     defaultValues: {
       email: "admin@newrise.in",
       password: "Password@123",
@@ -56,7 +52,7 @@ const Home = () => {
       });
 
       console.log(RequestOtp, "RequestOtp");
-      toast.show({
+      Toast.show({
         type: "success",
         text1: "Otp Send Successfully",
       });
@@ -71,198 +67,209 @@ const Home = () => {
       console.log(error);
     }
   };
-
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.hero}>
-        <Text style={styles.text}>{labels?.loginAccount}</Text>
+    <CustomHeader>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { backgroundColor: Colors[theme].background },
+        ]}
+      >
+        <View style={styles.content}>
+          {/* login Text for silicon bricks */}
+          <View>
+            <ThemedText type="title" style={styles.title}>
+              {labels.loginToSiliconBricks}
+            </ThemedText>
+            <ThemedText type="defaultSemiBold" style={styles.subtitle}>
+              {labels?.loginToAccount}
+            </ThemedText>
+          </View>
 
-        {/* Create an account so you can explore jobs */}
-        <Text style={styles.mainText}>
-          Login to account so you can explore all{" "}
-          <Text style={styles.spanText}> The Products</Text>
-        </Text>
-      </View>
-
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email</Text>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }: any) => (
-            <TextInput
-              placeholder="Email..."
-              style={styles.input}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
+          <View style={styles.form}>
+            <CustomValidation
+              type="input"
+              control={control}
+              labelStyle={styles.label}
+              name="email"
+              inputStyle={[{ lineHeight: ms(20) }]}
+              label={`${labels.email} / ${labels.username}`}
+              placeholder={`${labels.enter} ${labels.username}/${labels.email}`}
+              onFocus={() => setIsFocused("email")}
+              rules={{
+                required: labels.emailIsRequired,
+                pattern: {
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                  message: labels.enterAValidEmail,
+                },
+              }}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              containerStyle={[
+                {
+                  borderRadius: ms(20),
+                },
+                isFocused == "email"
+                  ? { borderColor: Colors[theme].text, borderWidth: 1 }
+                  : {},
+              ]}
             />
-          )}
-        />
-        {errors.email && (
-          <Text style={styles.error}>{errors.email.message}</Text>
-        )}
-        <Text style={styles.label}>Password</Text>
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }: any) => (
-            <TextInput
-              placeholder="Password..."
-              style={styles.input}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
+
+            <CustomValidation
+              type="input"
+              control={control}
+              name="password"
+              label={labels.password}
+              placeholder={labels.password}
+              labelStyle={styles.label}
+              secureTextEntry={!passwordVisible}
+              containerStyle={[
+                {
+                  borderRadius: ms(20),
+                },
+                isFocused == "password"
+                  ? { borderColor: Colors[theme].text, borderWidth: 1 }
+                  : {},
+              ]}
+              onFocus={() => setIsFocused("password")}
+              rightIcon={
+                <Pressable
+                  style={styles.eyeButton}
+                  onPress={() => setPasswordVisible(!passwordVisible)}
+                >
+                  <Ionicons
+                    name={passwordVisible ? "eye-off" : "eye"}
+                    size={ms(25)}
+                    color="#666"
+                  />
+                </Pressable>
+              }
+              rules={{
+                required: labels.passwordIsRequired,
+                minLength: {
+                  value: 6,
+                  message: labels?.passwordLength,
+                },
+              }}
             />
-          )}
-        />
-        {errors.password && (
-          <Text style={styles.error}>{errors.password.message}</Text>
-        )}
 
-        <TouchableOpacity
-          style={styles.buttonContainer}
-          onPress={handleSubmit(onSubmit)}
-        >
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-        <Text style={styles.account}>Already ? have an account </Text>
+            {/* Forgot Password */}
+            <View
+              style={{ justifyContent: "space-between", flexDirection: "row" }}
+            >
+              <TouchableOpacity onPress={() => router.push("/forgotpassword2")}>
+                <ThemedText
+                  style={[styles.forgotPassword, { color: Colors.grayText }]}
+                >
+                  {labels.forgotPassword}
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+            <View />
 
-        <View style={styles.orContainer}>
-          <Text style={styles.continue}>Or Continue With </Text>
+            {/* Login Button */}
+            <CustomButton
+              title={labels.login}
+              onPress={handleSubmit(onSubmit)}
+              isGradient
+            />
+
+            {/* Social Login */}
+            <View style={styles.socialLogin}>
+              <CustomButton
+                style={{ width: "48%", alignSelf: "center" }}
+                title={labels.google}
+                onPress={() => {}}
+              />
+            </View>
+
+            {/* Footer */}
+            <View style={styles.footerText}>
+              <ThemedText type="defaultSemiBold" style={styles.footerText}>
+                {labels.dontHaveAnAccount}
+              </ThemedText>
+              <Pressable onPress={() => router.push("/signup2")}>
+                <ThemedText
+                  style={[
+                    styles.linkText,
+                    { fontSize: ms(14), color: "#155B8E" },
+                  ]}
+                >
+                  {labels?.signUp}
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
         </View>
-
-        <View style={styles.socialContainer}>
-          <View style={styles.logo}>
-            <Image
-              source={require("../../assets/img/google.png")}
-              style={{ width: 24, height: 24 }}
-            />
-          </View>
-          <View style={styles.logo}>
-            <Image
-              source={require("../../assets/img/facebook.png")}
-              style={{ width: 24, height: 24 }}
-            />
-          </View>
-          <View style={styles.logo}>
-            <Image
-              source={require("../../assets/img/apple.png")}
-              style={{ width: 24, height: 24 }}
-            />
-          </View>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </CustomHeader>
   );
-};
-export default Home;
+}
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#f5f5f5",
-    paddingVertical: 20,
-    alignItems: "center",
+    padding: "12@ms",
   },
-  hero: {
-    alignItems: "center",
-    marginTop: 50,
-    paddingHorizontal: 20,
+  header: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: "10@vs",
+    gap: "8@ms",
   },
-  text: {
-    fontSize: 40,
-    fontWeight: "bold",
-    color: "#3B82F6",
-    marginBottom: 20,
+  content: {
+    flex: 1,
+    justifyContent: "center",
   },
-  spanText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#3B82F6",
+  title: {
+    fontSize: "32@ms",
   },
-  mainText: {
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 20,
-    paddingHorizontal: 10,
+  subtitle: {
+    fontSize: "18@ms",
+    marginBottom: "32@ms",
   },
-  inputContainer: {
-    marginTop: 50,
-    alignItems: "center",
-    width: width * 0.9,
+  form: {
+    gap: "10@vs",
+  },
+  label: {
+    color: Colors.grayText,
+    fontSize: "14@ms",
+    marginBottom: "12@ms",
+    fontWeight: 400,
   },
   input: {
-    width: width * 0.9,
-    height: 50,
+    borderRadius: "18@ms",
+    borderColor: Colors.inputBorder,
     borderWidth: 1,
-    borderColor: "#3B82F6",
-    borderRadius: 20,
-    padding: 10,
-    marginBottom: 15,
-    backgroundColor: "#F1F4FF",
+    width: "100%",
+    padding: "16@ms",
+    fontSize: "16@ms",
+    fontWeight: 500,
   },
-  buttonContainer: {
-    backgroundColor: "#3B82F6",
-    borderRadius: 10,
-    paddingVertical: 10,
-    width: width * 0.9,
-    marginTop: 10,
+  eyeButton: {
+    position: "absolute",
+    right: "16@ms",
   },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
+  forgotPassword: {
+    color: Colors.grayText,
+    textAlign: "right",
+    fontSize: "14@ms",
+    fontFamily: "medium",
   },
-  account: {
-    marginTop: 15,
-    fontSize: 16,
-    color: "#000000",
-    textAlign: "center",
-    fontWeight: "bold",
+  socialLogin: {
+    marginTop: "10@ms",
+    width: "100%",
   },
-  orContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 100,
-  },
-  continue: {
-    fontSize: 16,
-    color: "#000000",
-    textAlign: "center",
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  socialContainer: {
+  footerText: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20,
   },
-  logo: {
-    width: 60,
-    height: 44,
-    backgroundColor: "#ECECEC",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 30,
-    borderRadius: 10,
-    borderColor: "#3B82F6",
-    borderWidth: 1,
-  },
-  error: {
-    color: "red",
-    textAlign: "left",
-    alignSelf: "flex-start",
-    marginBottom: 10,
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#3B82F6",
-    marginBottom: 5,
-    textAlign: "left",
-    alignSelf: "flex-start",
+  linkText: {
+    fontSize: "5@vs",
+    textDecorationLine: "underline",
+    fontWeight: 600,
+    textAlign: "center",
+    fontFamily: "bold",
   },
 });

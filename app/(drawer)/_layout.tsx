@@ -52,4 +52,11 @@ export const CustomDrawerContent = (props: any) => {
   )
 }
 
-  
+export const Layout=()=>{
+  return (
+    <Drawer
+      screenOptions={{ headerShown: false }}
+      drawerContent={(props) => <CustomDrawerContent props={props} />}
+    />
+  )
+}

@@ -48,4 +48,8 @@ export const labels = {
   project:"Project",
   user:"user",
   RolesPermission:"Roles & Permission",
+  enterCode:"Enter Code",
+  enterCodeMsg:"Enter the code we sent to your email",
+  errorMessage:"Invalid OTP",
+  loginCode:"Login Code",
 };

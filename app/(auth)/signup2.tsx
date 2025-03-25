@@ -183,7 +183,7 @@ export default function signup() {
           <View style={styles.footer}>
             <ThemedText type="defaultSemiBold" style={styles.footerText}>
               {labels.alreadyHaveAccount}
-              <Pressable onPress={() => router.dismissTo("/login2")}>
+              <Pressable onPress={() => router.dismissTo("/login")}>
                 <Text
                   style={[
                     styles.linkText,
