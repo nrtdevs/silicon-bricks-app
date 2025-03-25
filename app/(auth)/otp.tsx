@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FF",
     paddingVertical: 20,
     alignItems: "center",
-    justifyContent : 'center'
+    justifyContent: "center",
   },
   otpContainer: {
     flexDirection: "row",

@@ -130,7 +130,7 @@ const Organization = () => {
 
   const onSubmit = async (data: any) => {
     try {
-      const AddOrganization = await createAddRequestOrganization({
+      createAddRequestOrganization({
         variables: {
           createOrganizationInput: {
             name: data.name,

@@ -1,7 +1,4 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-} from "@react-navigation/native";
+import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -34,8 +31,9 @@ export default function RootLayout() {
   }
 
   return (
-      <PaperProvider>
-        <ThemeProvider>
+    <PaperProvider>
+      <ThemeProvider>
+        <ApolloProvider client={client}>
           <Stack
             screenOptions={{ headerShown: false }}
             initialRouteName="index"
@@ -45,8 +43,9 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" />
             {/* <Stack.Screen name="dashboard/_layout.tsx" /> */}
           </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </PaperProvider>
+        </ApolloProvider>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </PaperProvider>
   );
 }

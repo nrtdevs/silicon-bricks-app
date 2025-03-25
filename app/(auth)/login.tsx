@@ -27,7 +27,9 @@ const schema = z.object({
 const { width } = Dimensions.get("window");
 
 const Home = () => {
-  const [createRequestOpt] = useMutation(REQUEST_OTP);
+  const [createRequestOpt, { error }] = useMutation(REQUEST_OTP);
+  console.log(error);
+
   const router = useRouter();
   const {
     control,
@@ -42,6 +44,7 @@ const Home = () => {
   });
 
   const onSubmit = async (data: any) => {
+    console.log(data);
     try {
       const RequestOtp = await createRequestOpt({
         variables: {
