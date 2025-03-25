@@ -42,3 +42,17 @@ export const GetAllPermissions = gql`
     }
   }
 `;
+
+export const GetAllProjects = gql`
+  query PaginatedProjects($listInputDto: ListInputDTO!) {
+    paginatedProjects(ListInputDTO: $listInputDto) {
+      data {
+        id
+        name
+        description
+        status
+        organizationId
+      }
+    }
+  }
+`;
