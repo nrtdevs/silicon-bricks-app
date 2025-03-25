@@ -78,6 +78,12 @@ import { Colors } from "react-native/Libraries/NewAppScreen";
 import { useScrollToTop } from "@react-navigation/native";
 
 const Permissions = () => {
+  const ref = React.useRef(null);
+
+  const handlescroll = () => {
+    useScrollToTop(ref);
+  };
+
   const [getAllPermissions, { data, loading, error }] =
     useLazyQuery(GetAllPermissions);
 
@@ -115,12 +121,6 @@ const Permissions = () => {
 
   const handleDelete = () => {
     console.log("deleted");
-  };
-
-  const ref = React.useRef(null);
-
-  const handlescroll = () => {
-    useScrollToTop(ref);
   };
 
   return (
