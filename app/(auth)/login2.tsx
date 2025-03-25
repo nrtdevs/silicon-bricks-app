@@ -18,6 +18,11 @@ import CustomValidation from "@/components/CustomValidation";
 import asyncKeys from "@/constants/asyncKeys";
 import CustomButton from "@/components/CustomButton";
 import alertMsg from "@/constants/alertMsg";
+import { useMutation } from "@apollo/client";
+import { REQUEST_OTP } from "@/graphql/Mutations";
+import toast from "react-native-toast-message";
+
+
 
 // Define form data types
 interface LoginFormData {
@@ -29,6 +34,7 @@ export default function LoginScreen() {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState("");
     const { theme } = useTheme();
+    // const [createRequestOpt] = useMutation(REQUEST_OTP);
     const {
         control,
         handleSubmit,
@@ -40,10 +46,43 @@ export default function LoginScreen() {
         },
     });
 
-    const onSubmit = (data: LoginFormData) => {
-        router.push("/(tabs)")
-    };
+    const onSubmit = async (data: any) => {
+        // try {
+        //     const RequestOtp = await createRequestOpt({
+        //         variables: {
+        //             otpRequestData: {
+        //                 email: data.email,
+        //                 password: data.password,
+        //             },
+        //         },
+        //     }
+        //     );
 
+        //     console.log(RequestOtp, "RequestOtp");
+        //     toast.show({
+        //         type: "success",
+        //         text1: "Otp Send Successfully",
+        //     });
+        //     router.push({
+        //         pathname: "/otp",
+        //         params: {
+        //             email: data.email,
+        //             password: data.password,
+        //         },
+        //     }
+        //     );
+        // } catch (error) {
+        //     console.log(error);
+        // }
+        router.push({
+            pathname: "/(drawer)",
+            params: {
+              email: data.email,
+              password: data.password,
+            },
+          }
+        );
+    };
     return (
         <CustomHeader>
             <ScrollView
@@ -147,7 +186,7 @@ export default function LoginScreen() {
                             <CustomButton
                                 style={{ width: "48%", alignSelf: "center" }}
                                 title={labels.google}
-                                onPress={() => {}}
+                                onPress={() => { }}
                             />
                         </View>
 

@@ -41,7 +41,7 @@ export default function RootLayout() {
             initialRouteName="index"
           >
             <Stack.Screen name="index" />
-            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="(drawer)" />
             <Stack.Screen name="(auth)" />
             {/* <Stack.Screen name="dashboard/_layout.tsx" /> */}
           </Stack>
