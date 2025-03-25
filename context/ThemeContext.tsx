@@ -1,6 +1,6 @@
 // import React, { createContext, useContext, useState, useEffect } from 'react';
-// import { Appearance, useColorScheme as useSystemColorScheme } from 'react-native'; 
-// import asyncStorage from '@/utils/asyncStorage'; 
+// import { Appearance, useColorScheme as useSystemColorScheme } from 'react-native';
+// import asyncStorage from '@/utils/asyncStorage';
 // import localStorageKey from '@/constants/localStorageKey';
 
 // type Theme = 'light' | 'dark';
@@ -17,7 +17,7 @@
 //   const [theme, setTheme] = useState<Theme>(systemColorScheme);
 
 //   useEffect(() => {
-//     const loadTheme = async () => { 
+//     const loadTheme = async () => {
 //       const storedTheme = await asyncStorage._retrieveData(localStorageKey.theme);
 //       if (storedTheme) {
 //         setTheme(storedTheme as Theme);
@@ -37,7 +37,7 @@
 
 //   const toggleTheme = async () => {
 //     const newTheme = theme === 'light' ? 'dark' : 'light';
-//     setTheme(newTheme); 
+//     setTheme(newTheme);
 //     await asyncStorage._storeData(localStorageKey.theme, newTheme);
 //   };
 
@@ -69,7 +69,13 @@ interface ThemeContextProps {
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
-export function ThemeProvider({ children, onThemeLoaded }: { children: React.ReactNode; onThemeLoaded?: () => void }) {
+export function ThemeProvider({
+  children,
+  onThemeLoaded,
+}: {
+  children: React.ReactNode;
+  onThemeLoaded?: () => void;
+}) {
   const systemTheme = useColorScheme(); // Detect system theme
   const [theme, setTheme] = useState<Theme>("system");
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");

@@ -8,19 +8,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { ms } from 'react-native-size-matters';
 
-
-const _layout = () => {
-  return (
-    <Drawer
-      screenOptions={{
-        headerShown: false,
-      }}
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
-    />
-  )
-}
-
-const CustomDrawerContent = (props: any) => {
+ 
+export const CustomDrawerContent = (props: any) => {
   const { theme } = useTheme();
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].background }}>
@@ -63,4 +52,4 @@ const CustomDrawerContent = (props: any) => {
   )
 }
 
-export default _layout
+  

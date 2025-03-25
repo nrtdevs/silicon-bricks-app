@@ -1,93 +1,93 @@
-import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, TextInput } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { DataTable, Text } from "react-native-paper";
+import React, { useState } from 'react'
+import { View, StyleSheet, TouchableOpacity, TextInput } from 'react-native'
+import { Picker } from '@react-native-picker/picker'
+import { DataTable, Text } from 'react-native-paper'
 
-import Zocial from "@expo/vector-icons/Zocial";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Zocial from '@expo/vector-icons/Zocial'
+import FontAwesome from '@expo/vector-icons/FontAwesome'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 
 interface Organisation {
-  id: number;
-  name: string;
-  description: string;
-  status: string;
+  id: number
+  name: string
+  description: string
+  status: string
 }
 
 // Fake JSON data
 const fakeData: Organisation[] = [
   {
     id: 1,
-    name: "Ankit",
-    description: "Lorem ipsum dolor sit amet.",
-    status: "Active",
+    name: 'Ankit',
+    description: 'Lorem ipsum dolor sit amet.',
+    status: 'Active'
   },
   {
     id: 2,
-    name: "Rahul",
-    description: "Consectetur adipiscing elit.",
-    status: "Inactive",
+    name: 'Rahul',
+    description: 'Consectetur adipiscing elit.',
+    status: 'Inactive'
   },
   {
     id: 3,
-    name: "Priya",
-    description: "Sed do eiusmod tempor incididunt.",
-    status: "Active",
+    name: 'Priya',
+    description: 'Sed do eiusmod tempor incididunt.',
+    status: 'Active'
   },
   {
     id: 4,
-    name: "Suman",
-    description: "Ut labore et dolore magna aliqua.",
-    status: "Active",
+    name: 'Suman',
+    description: 'Ut labore et dolore magna aliqua.',
+    status: 'Active'
   },
   {
     id: 5,
-    name: "Nina",
-    description: "Aliquam euismod libero vitae.",
-    status: "Inactive",
+    name: 'Nina',
+    description: 'Aliquam euismod libero vitae.',
+    status: 'Inactive'
   },
   {
     id: 6,
-    name: "Vijay",
-    description: "Amet consect adipiscing elit.",
-    status: "Active",
+    name: 'Vijay',
+    description: 'Amet consect adipiscing elit.',
+    status: 'Active'
   },
   {
     id: 7,
-    name: "Karan",
-    description: "Duis aute irure dolor in reprehenderit.",
-    status: "Active",
+    name: 'Karan',
+    description: 'Duis aute irure dolor in reprehenderit.',
+    status: 'Active'
   },
   {
     id: 8,
-    name: "Ravi",
-    description: "Excepteur sint occaecat cupidatat non proident.",
-    status: "Inactive",
-  },
-];
+    name: 'Ravi',
+    description: 'Excepteur sint occaecat cupidatat non proident.',
+    status: 'Inactive'
+  }
+]
 
 const Organisation = () => {
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const totalRows = fakeData.length;
+  const [page, setPage] = useState(1)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const totalRows = fakeData.length
 
   const dataToDisplay = fakeData.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
-  );
+  )
 
   const statusStyle = (status: string) => {
     switch (status) {
-      case "Active":
-        return styles.activeStatus;
-      case "Inactive":
-        return styles.inactiveStatus;
-      case "Pending":
-        return styles.pendingStatus;
-      case "Blocked":
-        return styles.blockedStatus;
+      case 'Active':
+        return styles.activeStatus
+      case 'Inactive':
+        return styles.inactiveStatus
+      case 'Pending':
+        return styles.pendingStatus
+      case 'Blocked':
+        return styles.blockedStatus
     }
-  };
+  }
 
   return (
     <View style={styles.container}>
@@ -106,7 +106,7 @@ const Organisation = () => {
           </DataTable.Title>
         </DataTable.Header>
         {/* Mapping through fake JSON data */}
-        {fakeData.map((item) => (
+        {fakeData.map(item => (
           <DataTable.Row
             key={item.id}
             style={[styles.row, item.id % 2 === 0 && styles.alternateRow]}
@@ -143,7 +143,7 @@ const Organisation = () => {
               </TouchableOpacity>
             </DataTable.Cell>
           </DataTable.Row>
-        ))}{" "}
+        ))}{' '}
       </DataTable>
       <View>
         <Text>Rows Per Page : </Text>
@@ -160,7 +160,7 @@ const Organisation = () => {
         <DataTable.Pagination
           page={page}
           numberOfPages={Math.ceil(totalRows / rowsPerPage)}
-          onPageChange={(newPage) => setPage(newPage)}
+          onPageChange={newPage => setPage(newPage)}
           label={`${(page - 1) * rowsPerPage + 1}-${Math.min(
             page * rowsPerPage,
             totalRows
@@ -168,101 +168,101 @@ const Organisation = () => {
         />
       </View>
     </View>
-  );
-};
+  )
+}
 
-export default Organisation;
+export default Organisation
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 50,
-    paddingHorizontal: 10,
+    paddingHorizontal: 10
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: "center",
-    color: "#333",
+    textAlign: 'center',
+    color: '#333'
   },
   table: {
     borderRadius: 8,
-    overflow: "hidden",
-    backgroundColor: "#fff",
-    elevation: 3,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    elevation: 3
   },
   header: {
-    backgroundColor: "#6300ee8b",
+    backgroundColor: '#6300ee8b'
   },
   headerText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14
   },
   row: {
-    backgroundColor: "#fff",
-    paddingHorizontal: 10,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10
   },
   alternateRow: {
-    backgroundColor: "#f4f4f4",
+    backgroundColor: '#f4f4f4'
   },
   status: {
     marginRight: 10,
-    color: "#007bff", // Blue color for status icon
+    color: '#007bff' // Blue color for status icon
   },
   edit: {
     marginRight: 10,
-    color: "#01a847", // Green color for edit icon
+    color: '#01a847' // Green color for edit icon
   },
   delete: {
     marginRight: 10,
-    color: "#ff0000", // Red color for delete icon
+    color: '#ff0000' // Red color for delete icon
   },
   activeStatus: {
-    color: "#01a847", // Blue color for active status
-    borderStyle: "solid",
-    borderColor: "green",
+    color: '#01a847', // Blue color for active status
+    borderStyle: 'solid',
+    borderColor: 'green',
     borderWidth: 1,
     borderRadius: 5,
-    padding: 7,
+    padding: 7
   },
   inactiveStatus: {
-    color: "black", // Red color for inactive status
-    borderStyle: "solid",
-    borderColor: "black",
+    color: 'black', // Red color for inactive status
+    borderStyle: 'solid',
+    borderColor: 'black',
     borderWidth: 1,
     borderRadius: 5,
-    padding: 5,
+    padding: 5
   },
   pendingStatus: {
-    color: "orange",
-    borderStyle: "solid",
-    borderColor: "orange",
+    color: 'orange',
+    borderStyle: 'solid',
+    borderColor: 'orange',
     borderWidth: 1,
     borderRadius: 5,
-    padding: 5,
+    padding: 5
   },
   blockedStatus: {
-    color: "red",
-    borderStyle: "solid",
-    borderColor: "red",
+    color: 'red',
+    borderStyle: 'solid',
+    borderColor: 'red',
     borderWidth: 1,
     borderRadius: 5,
-    padding: 5,
+    padding: 5
   },
   rowPerPageContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15
   },
   rowPerPageText: {
     fontSize: 16,
-    marginRight: 10,
+    marginRight: 10
   },
   picker: {
     height: 40,
     width: 120,
-    backgroundColor: "#f4f4f4",
-    borderRadius: 5,
-  },
-});
+    backgroundColor: '#f4f4f4',
+    borderRadius: 5
+  }
+})

@@ -1,0 +1,47 @@
+extend type Query {
+  isLoggedIn: Boolean!
+  cartItems: [Launch]!
+}
+
+mutation RequestOtp($otpRequestData: OtpRequestDto!) {
+  requestOtp(otpRequestData: $otpRequestData) {
+    otpGeneratedSuccessfully
+    otp
+  }
+}
+
+mutation Login($loginData: ValidateDto!) {
+  login(loginData: $loginData) {
+    user {
+      id
+    }
+    accessToken
+  }
+}
+
+mutation CreateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
+  updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
+    status
+    name
+    id
+    description
+  }
+}
+
+mutation DeleteOrganization($deleteOrganizationId: Int!) {
+  deleteOrganization(id: $deleteOrganizationId)
+}
+
+#register mutation
+mutation Register($registerData: RegisterDto!) {
+  register(registerData: $registerData) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+  }
+}

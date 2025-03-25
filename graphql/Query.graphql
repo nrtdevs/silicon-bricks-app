@@ -1,0 +1,48 @@
+query PaginatedOrganization($listInputDto: ListInputDTO!) {
+  paginatedOrganization(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      description
+      status
+    }
+  }
+}
+
+query Modules {
+  permissionGroup {
+    modules {
+      groups {
+        name
+        permissions {
+          action
+          appName
+          description
+          groupName
+          id
+          module
+          slug
+        }
+      }
+      name
+    }
+  }
+}
+
+query PaginatedProjects($listInputDto: ListInputDTO!) {
+  paginatedProjects(ListInputDTO: $listInputDto) {
+    data {
+      id
+      name
+      description
+      status
+      organizationId
+    }
+  }
+}

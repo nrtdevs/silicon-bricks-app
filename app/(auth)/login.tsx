@@ -15,9 +15,9 @@ import toast from "react-native-toast-message";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@apollo/client";
-import { REQUEST_OTP } from "@/graphql/Mutations";
 import { useRouter } from "expo-router";
 import { labels } from "@/constants/Labels";
+import { RequestOtpDocument } from "@/graphql/generated";
 
 const schema = z.object({
   email: z.string().email({ message: "Email is required" }),
@@ -27,7 +27,9 @@ const schema = z.object({
 const { width } = Dimensions.get("window");
 
 const Home = () => {
-  const [createRequestOpt] = useMutation(REQUEST_OTP);
+  const [createRequestOpt, { error }] = useMutation(RequestOtpDocument);
+  console.log(error);
+
   const router = useRouter();
   const {
     control,
@@ -39,10 +41,10 @@ const Home = () => {
       email: "admin@newrise.in",
       password: "Password@123",
     },
-  }
-);
+  });
 
   const onSubmit = async (data: any) => {
+    console.log(data);
     try {
       const RequestOtp = await createRequestOpt({
         variables: {
@@ -51,8 +53,7 @@ const Home = () => {
             password: data.password,
           },
         },
-      }
-    );
+      });
 
       console.log(RequestOtp, "RequestOtp");
       toast.show({
@@ -65,8 +66,7 @@ const Home = () => {
           email: data.email,
           password: data.password,
         },
-      }
-    );
+      });
     } catch (error) {
       console.log(error);
     }
