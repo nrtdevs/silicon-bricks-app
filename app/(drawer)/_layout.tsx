@@ -185,7 +185,7 @@ import {
 
 export default function Layout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 , }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
         screenOptions={{
           drawerStyle: {
@@ -273,7 +273,7 @@ export default function Layout() {
           }}
         />
         <Drawer.Screen
-          name="permissions"
+          name="permissions/permissions"
           options={{
             drawerLabel: ({ focused }) => (
               <Text
@@ -298,7 +298,7 @@ export default function Layout() {
           }}
         />
         <Drawer.Screen
-          name="roles"
+          name="roles/roles"
           options={{
             drawerLabel: ({ focused }) => (
               <Text
@@ -391,7 +391,6 @@ const CustomDrawerContent = (props: any) => {
             />
           )}
           onPress={() => {
-            // Handle logout action here
             console.log("Logging out...");
           }}
           style={styles.drawerItemStyle} // Apply the same drawer item style
@@ -411,19 +410,19 @@ const styles = StyleSheet.create({
     marginTop: 20,
     alignItems: "center",
     fontFamily: "Helvetica",
-    paddingVertical:10,
-    marginHorizontal:20,
+    paddingVertical: 10,
+    marginHorizontal: 20,
   },
   userImage: {
-    width: 70,  // Slightly larger image for prominence
-    height: 70, 
-    borderRadius: 35,  // Perfect circle for the profile picture
+    width: 70, // Slightly larger image for prominence
+    height: 70,
+    borderRadius: 35, // Perfect circle for the profile picture
     marginRight: 20,
-    borderWidth: 3,  // Border for a sleek modern look
-    borderColor: "#3B82F6",  // Color that ties with the theme
+    borderWidth: 3, // Border for a sleek modern look
+    borderColor: "#3B82F6", // Color that ties with the theme
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,  // Light shadow to make it pop
+    shadowOpacity: 0.2, // Light shadow to make it pop
     shadowRadius: 5, // Slight blur for depth
   },
   nameEmailContainer: {
@@ -434,7 +433,7 @@ const styles = StyleSheet.create({
     fontFamily: "sans-serif",
     fontWeight: "bold",
     fontSize: 20,
-    color: "#3B82F6"
+    color: "#3B82F6",
   },
   email: {
     fontFamily: "sans-serif",
@@ -459,16 +458,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#333333",
     letterSpacing: 0.3,
-    
   },
   activeDrawerItemLabel: {
     color: "#3B82F6", // Active color for labels
     fontWeight: "bold",
-    
   },
   iconActive: {
     transform: [{ scale: 1.1 }], // Slight scaling effect on active icons
-    
   },
   drawerItemStyle: {
     borderRadius: 1, // Rounded corners for the drawer item

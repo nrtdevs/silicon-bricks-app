@@ -1,10 +1,15 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import * as SecureStore from "expo-secure-store";
+import Constants from "expo-constants";
+
+const { BACKEND_URL }: any = Constants?.expoConfig?.extra;
+
+console.log(BACKEND_URL, "url"); // Should log "https://your-backend.com"
 
 // Define the HTTP link
 const httpLink = createHttpLink({
-  uri: "http://192.168.1.38:5001/graphql",
+  uri: BACKEND_URL,
 });
 
 // Define the Authentication Link

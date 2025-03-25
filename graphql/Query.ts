@@ -18,3 +18,27 @@ export const GetAllOrganisations = gql`
     }
   }
 `;
+
+// Permissisons
+
+export const GetAllPermissions = gql`
+  query Modules {
+    permissionGroup {
+      modules {
+        groups {
+          name
+          permissions {
+            action
+            appName
+            description
+            groupName
+            id
+            module
+            slug
+          }
+        }
+        name
+      }
+    }
+  }
+`;

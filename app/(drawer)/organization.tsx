@@ -138,7 +138,6 @@ const Organization = () => {
           },
         },
       });
-      console.log(AddOrganization, "AddOrganization");
 
       refetch();
       setVisible(false);
@@ -162,7 +161,6 @@ const Organization = () => {
         },
       });
 
-      console.log(UpdateEditOrganization, "UpdateEditOrganization");
       refetch();
       setEditVisible(false);
     } catch (error) {
@@ -185,7 +183,6 @@ const Organization = () => {
         },
       });
 
-      console.log(UpdateEditOrganization, "UpdateEditOrganization");
       refetch();
       setEditVisible(false);
     } catch (error) {
@@ -201,10 +198,7 @@ const Organization = () => {
           deleteOrganizationId: Number(deleteOrganizationId),
         },
       });
-      console.log(
-        DeleteOrganization,
-        "DeleteOrganization deleteOrganizationId rahul"
-      );
+
       refetch();
       setDeletePopupVisible(false);
     } catch (error) {
@@ -220,9 +214,6 @@ const Organization = () => {
   if (error) {
     return <Text>Error fetching organizations: {error.message}</Text>;
   }
-
-  console.log(typeof Number(deleteOrganizationId), "deleteOrganizationId");
-  console.log(deleteOrganizationId, "deleteOrganizationId");
 
   return (
     <View style={styles.container}>
@@ -518,7 +509,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     // backgroundColor: "#8ea8ff6e",
-    backgroundColor: "#898f97",
+    backgroundColor: "#dadada",
     padding: 10,
     margin: 8,
     borderRadius: 12,
@@ -551,7 +542,8 @@ const styles = StyleSheet.create({
   scoreContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#e2fcfe",
+    color: "black !important",
+    backgroundColor: "#ff00aa",
     borderRadius: 15,
     paddingVertical: 2,
     paddingHorizontal: 6,

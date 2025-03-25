@@ -39,8 +39,7 @@ const Home = () => {
       email: "admin@newrise.in",
       password: "Password@123",
     },
-  }
-);
+  });
 
   const onSubmit = async (data: any) => {
     try {
@@ -51,8 +50,7 @@ const Home = () => {
             password: data.password,
           },
         },
-      }
-    );
+      });
 
       console.log(RequestOtp, "RequestOtp");
       toast.show({
@@ -65,8 +63,7 @@ const Home = () => {
           email: data.email,
           password: data.password,
         },
-      }
-    );
+      });
     } catch (error) {
       console.log(error);
     }

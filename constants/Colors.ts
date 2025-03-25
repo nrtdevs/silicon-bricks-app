@@ -68,6 +68,7 @@ export const Colors = {
   transparent: "transparent",
   info: "#66A1FF",
   internalGray: "#C9C9C9",
-  backgroundColorPrimary:
-    "background: linear-gradient(90deg, rgb(29, 26, 75) 0%, rgba(9,9,121,1) 22%, rgba(0,212,255,1) 100%)",
+  backgroundColorPrimary: "#FDE2F3",
+  titleFooter: "#917FB3",
+  title: "#2A2F4F",
 };
