@@ -45,4 +45,7 @@ export const labels = {
   logout_msg:"Are you sure you want to logout?",
   cancel:"Cancel",
   logout:"Logout",
+  project:"Project",
+  user:"user",
+  RolesPermission:"Roles & Permission",
 };

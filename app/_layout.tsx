@@ -43,7 +43,6 @@ export default function RootLayout() {
             <Stack.Screen name="index" />
             <Stack.Screen name="(drawer)" />
             <Stack.Screen name="(auth)" />
-            {/* <Stack.Screen name="dashboard/_layout.tsx" /> */}
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>

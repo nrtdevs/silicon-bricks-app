@@ -1,15 +1,43 @@
-import { View, Text,SafeAreaView ,ScrollView} from 'react-native'
-import React from 'react'
-
+import {
+  View,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import React from "react";
+import { useNavigation } from "expo-router";
+import { DrawerActions } from "@react-navigation/native";
+import { Entypo } from "@expo/vector-icons";
+import { useTheme } from "@/context/ThemeContext";
+import { Colors } from "@/constants/Colors";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
 const index = () => {
+  const navigation = useNavigation();
+  const { theme } = useTheme();
   return (
-    <SafeAreaView style={{ paddingTop: 50, flex: 1 }}>
-      <ScrollView>
-        <Text>apps ss</Text>
+    <ThemedView style={{ paddingTop: 0, flex: 1 }}>
+      <ScrollView style={{ flex: 1, paddingTop: 50 }}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+          >
+            <Entypo name="menu" size={34} color={Colors[theme].text} />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-    </SafeAreaView>
-  )
-}
+    </ThemedView>
+  );
+};
 
-export default index
+export default index;

@@ -11,35 +11,38 @@ const _layout = () => {
   const { theme } = useTheme();
 
   return (
-    <Tabs screenOptions={{ headerShown: false,
+    <Tabs screenOptions={{
+      headerShown: false,
       tabBarStyle: Platform.select({
         ios: {
 
         },
         default: {
-          height: vs(100),
+          height: vs(45),
           backgroundColor: Colors[theme].cartBg,
           alignItems: "center",
-          
+          justifyContent: "center",
         },
       }),
-     }}>
+      
+    }}>
       <Tabs.Screen name="index"
+
         options={{
-          tabBarLabel: ({ focused }:any) => (
+          tabBarLabel: ({ focused }: any) => (
             <Text style={{ color: focused ? Colors.gradient1 : theme == 'dark' ? Colors.white : Colors.gray }}>{labels?.home}</Text>
           ),
-          tabBarIcon: ({ focused }:any) => (
+          tabBarIcon: ({ focused }: any) => (
             <Entypo name="home" size={ms(24)} color={focused ? Colors.gradient1 : theme == 'dark' ? Colors.white : Colors.gray} />
           ),
         }}
       />
       <Tabs.Screen name="setting"
         options={{
-          tabBarLabel: ({ focused }:any) => (
+          tabBarLabel: ({ focused }: any) => (
             <Text style={{ color: focused ? Colors.gradient1 : theme == 'dark' ? Colors.white : Colors.gray }}>{labels?.settings}</Text>
           ),
-          tabBarIcon: ({ color, focused }:any) => (
+          tabBarIcon: ({ color, focused }: any) => (
             <MaterialIcons name="settings" size={24} color={focused ? Colors.gradient1 : theme == 'dark' ? Colors.white : Colors.gray} />
           )
         }}
