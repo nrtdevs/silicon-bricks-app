@@ -18,7 +18,8 @@ const Index = () => {
   return token ? (
     <Redirect href="/(drawer)/(tabs)" />
   ) : (
-    <Redirect href="/(auth)/login" />
+    // <Redirect href="/(auth)/login" />
+    <Redirect href="/(drawer)/organization" />
   );
 };
 

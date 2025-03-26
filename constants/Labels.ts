@@ -52,4 +52,6 @@ export const labels = {
   enterCodeMsg:"Enter the code we sent to your email",
   errorMessage:"Invalid OTP",
   loginCode:"Login Code",
+  searchTeam:"Search Team",
+  createOraganization:"Create Organization",
 };

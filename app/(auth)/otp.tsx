@@ -232,17 +232,17 @@ import { useMutation } from "@apollo/client";
 import * as SecureStore from "expo-secure-store";
 
 const LoginCodeScreen = () => {
-  const { theme } = useTheme(); 
-  const [otp, setOtp] = useState(""); ;
+  const { theme } = useTheme();
+  const [otp, setOtp] = useState("123456");;
   const params = useLocalSearchParams();
-  const [verifyOtp, {data,error,loading,reset}] = useMutation(LoginDocument);
-  
+  const [verifyOtp, { data, error, loading, reset }] = useMutation(LoginDocument);
+
   const handleOtpFilled = (code: string) => {
     setOtp(code);
     console.log(code);
   };
 
-  
+
 
   const onSubmit = async () => {
     try {
@@ -260,10 +260,10 @@ const LoginCodeScreen = () => {
       });
 
       // Log the accessToken if it exists
-      const accessToken = response?.data?.login?.accessToken;
+      const accessToken: any = response?.data?.login?.accessToken;
       if (accessToken) {
         // Save the accessToken to SecureStore
-        await SecureStore.setItemAsync("accessToken", accessToken); 
+        await SecureStore.setItemAsync("accessToken", accessToken);
         // Retrieve the token from SecureStore
         const token = await SecureStore.getItemAsync("accessToken");
         router.replace("/(drawer)/(tabs)");
@@ -304,8 +304,8 @@ const LoginCodeScreen = () => {
             onCodeFilled={(code: any) => {
               handleOtpFilled(code);
             }}
-            error={error?.message?true:false}
-            setError={(value: any) => {}}
+            error={error?.message ? true : false}
+            setError={(value: any) => { }}
             errorMessage={labels?.errorMessage}
             defaultValue={otp}
           />

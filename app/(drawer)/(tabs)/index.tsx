@@ -5,14 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import React from "react";
-import { useNavigation } from "expo-router";
-import { DrawerActions } from "@react-navigation/native";
+import React from "react"; 
 import { Entypo } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 import { Colors } from "@/constants/Colors";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { useNavigation, DrawerActions } from "@react-navigation/native";
 
 const index = () => {
   const navigation = useNavigation();
