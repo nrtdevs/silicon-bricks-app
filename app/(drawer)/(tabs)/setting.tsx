@@ -150,6 +150,7 @@ const SettingScreen = () => {
       iconLib: AntDesign,
       iconName: "infocirlceo",
       onTouchAction: () => {
+        router.push("/about");
       },
     },
   ];

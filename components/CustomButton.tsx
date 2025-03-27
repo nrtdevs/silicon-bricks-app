@@ -6,7 +6,6 @@ import {
   View
 } from 'react-native'
 import React from 'react'
-import Svg, { Path } from 'react-native-svg'
 import { ScaledSheet } from 'react-native-size-matters'
 import { Colors } from '@/constants/Colors'
 import { ThemedText } from './ThemedText'

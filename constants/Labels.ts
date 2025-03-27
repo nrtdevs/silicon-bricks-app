@@ -54,4 +54,8 @@ export const labels = {
   loginCode:"Login Code",
   searchTeam:"Search Team",
   createOraganization:"Create Organization",
+  copyRight:"Copyright © 2023 Silicon Bricks. All rights reserved.",
+  termsOfService:"Terms of Service",
+  privacyPolicy:"Privacy Policy",
+  version:"Version",
 };

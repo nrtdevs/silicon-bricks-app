@@ -609,8 +609,8 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useLazyQuery } from "@apollo/client";
-import { PaginatedOrganizationDocument } from "@/graphql/generated";
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { CreateOrganizationDocument, PaginatedOrganizationDocument } from "@/graphql/generated";
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -625,19 +625,22 @@ import Modal from "react-native-modal";
 import { set, useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
+import Loader from "@/components/ui/Loader";
 
 const organization = () => {
   const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [organizationData, { error, data }] = useLazyQuery(
+  const [organizationData, { error, data, loading, refetch }] = useLazyQuery(
     PaginatedOrganizationDocument
   );
-  const [loading, setLoading] = useState(false);
+  const [createOrganization, createOrganizationState] = useMutation(CreateOrganizationDocument);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
-  const [isEditModalVisible, setEditModalVisible] = useState(false);
+  const [editModal, setEditModal] = useState(false);
   const [isStatusModalVisible, setStatusModalVisible] = useState(false);
-
+   console.log("data", createOrganizationState);
+   
+  // const 
   const pickerData = [
     { label: "Active", value: "Active" },
     { label: "Inactive", value: "Inactive" },
@@ -647,24 +650,41 @@ const organization = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+    reset,
+    watch,
+  } = useForm<{ name: string, description: string }>({
     defaultValues: {},
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await organizationData({
-          variables: {
-            listInputDto: {},
-          },
-        });
-      } catch (error) {
-        console.error("error", error);
-      }
-    };
-    fetchData();
+    organizationData({
+      variables: {
+        listInputDto: {},
+      },
+    });
   }, []);
+
+  const onSubmit = (data: any) => {
+    console.log("data", data);
+    setEditModal(false);
+    setModalVisible(false);
+    try {
+      createOrganization({
+        variables: {
+          createOrganizationInput: {
+            ...data
+          },
+        },
+      });
+    } catch (error) {
+      console.error("error", error);
+    }
+
+  };
+
+  if (loading) {
+    return <Loader />
+  }
 
   return (
     <CustomHeader>
@@ -714,7 +734,8 @@ const organization = () => {
                     />
                     <Feather
                       onPress={() => {
-                        setEditModalVisible(true);
+                        setModalVisible(true);
+                        setEditModal(true);
                       }}
                       name="edit"
                       size={ms(20)}
@@ -766,11 +787,12 @@ const organization = () => {
         <View
           style={{
             backgroundColor: Colors[theme].background,
-            height: 550,
+            height: vs(500),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
+            justifyContent: "center",
           }}
         >
           <View
@@ -778,10 +800,11 @@ const organization = () => {
               flexDirection: "row",
               justifyContent: "space-between",
               padding: 10,
+              bottom: 30
             }}
           >
             <ThemedText type="subtitle">
-              {labels?.createOraganization}
+              {editModal ? "Edit" : labels?.createOraganization}
             </ThemedText>
             <Pressable
               onPress={() => {
@@ -797,13 +820,13 @@ const organization = () => {
               type="input"
               control={control}
               labelStyle={styles.label}
-              name="moduleName"
+              name={"name"}
               inputStyle={[{ lineHeight: ms(20) }]}
               label={"Name"}
-              placeholder={"Enter Module"}
-              onFocus={() => setIsFocused("moduleName")}
+              placeholder={editModal ? "Test Organization" : "Enter Module"}
+              onFocus={() => setIsFocused("name")}
               rules={{
-                required: "Module name is required",
+                required: editModal ? "Text organization is required" : "Module name is required"
               }}
               autoCapitalize="none"
             />
@@ -811,122 +834,26 @@ const organization = () => {
             <CustomValidation
               type="input"
               control={control}
-              name="subscription"
-              label={"Subscription"}
-              placeholder={"Enter Module"}
-              labelStyle={styles.label}
-              onFocus={() => setIsFocused("subscription")}
-              rules={{
-                required: "Subscription is required",
-              }}
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              name="description"
+              name={"description"}
               label={"Description"}
-              placeholder={"Enter description"}
+              placeholder={editModal ? "Test organization description" : "Enter description"}
               labelStyle={styles.label}
-              onFocus={() => setIsFocused("description")}
+              onFocus={() => setIsFocused(editModal ? "testDescription" : "description")}
               rules={{
-                required: "Description is required",
+                required: editModal ? "Test organization description is required" : "Description is required",
               }}
             />
           </View>
 
           <CustomButton
             title="Submit"
-            onPress={() => { }}
-            style={{ backgroundColor: Colors[theme].cartBg, marginTop: vs(10) }}
-          />
-        </View>
-      </Modal>
-
-      <Modal
-        isVisible={isEditModalVisible}
-        onBackdropPress={() => setEditModalVisible(false)}
-      >
-        <View
-          style={{
-            backgroundColor: Colors[theme].background,
-            height: 550,
-            width: s(300),
-            borderRadius: 10,
-            alignSelf: "center",
-            padding: 10,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              padding: 10,
+            onPress={() => {
+              handleSubmit(onSubmit)();
             }}
-          >
-            <ThemedText type="subtitle">Edit</ThemedText>
-            <Pressable
-              onPress={() => {
-                setEditModalVisible(false);
-              }}
-            >
-              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
-            </Pressable>
-          </View>
-
-          <View style={{ padding: 10 }}>
-            <CustomValidation
-              type="input"
-              control={control}
-              labelStyle={styles.label}
-              name="testOrganization"
-              inputStyle={[{ lineHeight: ms(20) }]}
-              label={"Name"}
-              placeholder={"Test Organization"}
-              onFocus={() => setIsFocused("testOrganization")}
-              rules={{
-                required: "Text organization is required",
-              }}
-              autoCapitalize="none"
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              labelStyle={styles.label}
-              name="testOrganization"
-              inputStyle={[{ lineHeight: ms(20) }]}
-              label={"Subscription"}
-              placeholder={"Test Organization"}
-              onFocus={() => setIsFocused("testOrganization")}
-              rules={{
-                required: "Text organization is required",
-              }}
-              autoCapitalize="none"
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              name="testDescription"
-              label={"Description"}
-              placeholder={"Test organization description"}
-              labelStyle={styles.label}
-              onFocus={() => setIsFocused("testDescription")}
-              rules={{
-                required: "Test organization description is required",
-              }}
-            />
-          </View>
-
-          <CustomButton
-            title="Submit"
-            onPress={() => { }}
             style={{ backgroundColor: Colors[theme].cartBg, marginTop: vs(10) }}
           />
         </View>
       </Modal>
-
 
       <Modal
         isVisible={isStatusModalVisible}

@@ -179,7 +179,7 @@ export default function LoginScreen() {
               <CustomButton
                 style={{ width: "48%", alignSelf: "center" }}
                 title={labels.google}
-                onPress={() => {}}
+                onPress={() => { }}
               />
             </View>
 

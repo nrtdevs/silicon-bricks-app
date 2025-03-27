@@ -235,8 +235,10 @@ const LoginCodeScreen = () => {
   const { theme } = useTheme();
   const [otp, setOtp] = useState("123456");;
   const params = useLocalSearchParams();
-  const [verifyOtp, { data, error, loading, reset }] = useMutation(LoginDocument);
+  const [verifyOtp, verifyState] = useMutation(LoginDocument);
 
+  console.log("state data", JSON.stringify(verifyState));
+  
   const handleOtpFilled = (code: string) => {
     setOtp(code);
     console.log(code);
@@ -255,10 +257,13 @@ const LoginCodeScreen = () => {
             email: String(params.email),
             password: String(params.password),
             otp: otpValue,
+
           },
         },
       });
 
+      console.log("res",response);
+      
       // Log the accessToken if it exists
       const accessToken: any = response?.data?.login?.accessToken;
       if (accessToken) {
@@ -304,7 +309,7 @@ const LoginCodeScreen = () => {
             onCodeFilled={(code: any) => {
               handleOtpFilled(code);
             }}
-            error={error?.message ? true : false}
+            // error={error?.message ? true : false}
             setError={(value: any) => { }}
             errorMessage={labels?.errorMessage}
             defaultValue={otp}

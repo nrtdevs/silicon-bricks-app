@@ -19,15 +19,6 @@ mutation Login($loginData: ValidateDto!) {
   }
 }
 
-mutation CreateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
-  updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
-    status
-    name
-    id
-    description
-  }
-}
-
 mutation DeleteOrganization($deleteOrganizationId: Int!) {
   deleteOrganization(id: $deleteOrganizationId)
 }
@@ -70,5 +61,14 @@ mutation CreateMeeting($data: CreateMeetingDto!) {
     createdAt
     updatedAt
     deletedAt
+  }
+}
+
+mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
+  createOrganization(createOrganizationInput: $createOrganizationInput) {
+    id
+    name
+    description
+    status
   }
 }
