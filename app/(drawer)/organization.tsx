@@ -600,18 +600,420 @@
 //   }
 // })
 
-
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { useLazyQuery } from "@apollo/client";
+import { PaginatedOrganizationDocument } from "@/graphql/generated";
+import CustomHeader from "@/components/CustomHeader";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
+import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
+import { ScrollView } from "react-native";
+import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/context/ThemeContext";
+import CustomSearchBar from "@/components/CustomSearchBar";
+import { labels } from "@/constants/Labels";
+import Modal from "react-native-modal";
+import { set, useForm } from "react-hook-form";
+import CustomValidation from "@/components/CustomValidation";
+import CustomButton from "@/components/CustomButton";
 
 const organization = () => {
+  const { theme } = useTheme();
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [organizationData, { error, data }] = useLazyQuery(
+    PaginatedOrganizationDocument
+  );
+  const [loading, setLoading] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isFocused, setIsFocused] = useState("");
+  const [isEditModalVisible, setEditModalVisible] = useState(false);
+  const [isStatusModalVisible, setStatusModalVisible] = useState(false);
+
+  const pickerData = [
+    { label: "Active", value: "Active" },
+    { label: "Inactive", value: "Inactive" },
+  ];
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {},
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await organizationData({
+          variables: {
+            listInputDto: {},
+          },
+        });
+      } catch (error) {
+        console.error("error", error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
-    <View>
-      <Text>organization</Text>
-    </View>
-  )
-}
+    <CustomHeader>
+      <ThemedView style={styles.contentContainer}>
+        <View style={styles.searchContainer}>
+          <View style={{ width: "90%" }}>
+            <CustomSearchBar
+              searchQuery={searchQuery}
+              onChangeText={(text) => {
+                setSearchQuery(text);
+              }}
+              placeholder={labels?.searchTeam}
+              loading={loading}
+              onClear={() => {
+                setSearchQuery("");
+              }}
+            />
+          </View>
+          <Pressable
+            style={styles.buttonContainer}
+            onPress={() => setModalVisible(true)}
+          >
+            <Feather name="plus-square" size={24} color={Colors[theme].text} />
+          </Pressable>
+        </View>
+        <View style={styles.organizationParentContainer}>
+          <FlatList
+            data={data?.paginatedOrganization?.data}
+            renderItem={({ item, index }) => (
+              <View
+                key={index}
+                style={[
+                  styles.organizationContainer,
+                  { backgroundColor: Colors[theme].cartBg },
+                ]}
+              >
+                <View style={styles.organizationHeader}>
+                  <ThemedText type="subtitle">{item?.name}</ThemedText>
+                  <View style={styles.organizationInfo}>
+                    <MaterialIcons
+                      name="attractions"
+                      size={ms(20)}
+                      color={Colors[theme].text}
+                      onPress={() => {
+                        setStatusModalVisible(true);
+                      }}
+                    />
+                    <Feather
+                      onPress={() => {
+                        setEditModalVisible(true);
+                      }}
+                      name="edit"
+                      size={ms(20)}
+                      color={Colors[theme].text}
+                    />
+                    <MaterialIcons
+                      name="delete-outline"
+                      size={ms(20)}
+                      color={Colors[theme].text}
+                      onPress={() => {
+                        Alert.alert(
+                          "Delete",
+                          "Are you sure you want to delete?",
+                          [
+                            { text: "Yes", onPress: () => { } },
+                            { text: "No", onPress: () => { } },
+                          ]
+                        );
+                      }}
+                    />
+                  </View>
+                </View>
+                <ThemedText
+                  style={[
+                    styles.status,
+                    {
+                      color:
+                        item.status == "active" ? Colors?.green : "#6d6d1b",
+                      backgroundColor:
+                        theme == "dark" ? Colors?.white : "#e6e2e2",
+                    },
+                  ]}
+                >
+                  {item?.status}
+                </ThemedText>
+                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                  {item?.description}
+                </ThemedText>
+              </View>
+            )}
+          />
+        </View>
+      </ThemedView>
 
-export default organization
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+      >
+        <View
+          style={{
+            backgroundColor: Colors[theme].background,
+            height: 550,
+            width: s(300),
+            borderRadius: 10,
+            alignSelf: "center",
+            padding: 10,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 10,
+            }}
+          >
+            <ThemedText type="subtitle">
+              {labels?.createOraganization}
+            </ThemedText>
+            <Pressable
+              onPress={() => {
+                setModalVisible(false);
+              }}
+            >
+              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+            </Pressable>
+          </View>
 
-const styles = StyleSheet.create({})
+          <View style={{ padding: 10 }}>
+            <CustomValidation
+              type="input"
+              control={control}
+              labelStyle={styles.label}
+              name="moduleName"
+              inputStyle={[{ lineHeight: ms(20) }]}
+              label={"Name"}
+              placeholder={"Enter Module"}
+              onFocus={() => setIsFocused("moduleName")}
+              rules={{
+                required: "Module name is required",
+              }}
+              autoCapitalize="none"
+            />
+
+            <CustomValidation
+              type="input"
+              control={control}
+              name="subscription"
+              label={"Subscription"}
+              placeholder={"Enter Module"}
+              labelStyle={styles.label}
+              onFocus={() => setIsFocused("subscription")}
+              rules={{
+                required: "Subscription is required",
+              }}
+            />
+
+            <CustomValidation
+              type="input"
+              control={control}
+              name="description"
+              label={"Description"}
+              placeholder={"Enter description"}
+              labelStyle={styles.label}
+              onFocus={() => setIsFocused("description")}
+              rules={{
+                required: "Description is required",
+              }}
+            />
+          </View>
+
+          <CustomButton
+            title="Submit"
+            onPress={() => { }}
+            style={{ backgroundColor: Colors[theme].cartBg, marginTop: vs(10) }}
+          />
+        </View>
+      </Modal>
+
+      <Modal
+        isVisible={isEditModalVisible}
+        onBackdropPress={() => setEditModalVisible(false)}
+      >
+        <View
+          style={{
+            backgroundColor: Colors[theme].background,
+            height: 550,
+            width: s(300),
+            borderRadius: 10,
+            alignSelf: "center",
+            padding: 10,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 10,
+            }}
+          >
+            <ThemedText type="subtitle">Edit</ThemedText>
+            <Pressable
+              onPress={() => {
+                setEditModalVisible(false);
+              }}
+            >
+              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+            </Pressable>
+          </View>
+
+          <View style={{ padding: 10 }}>
+            <CustomValidation
+              type="input"
+              control={control}
+              labelStyle={styles.label}
+              name="testOrganization"
+              inputStyle={[{ lineHeight: ms(20) }]}
+              label={"Name"}
+              placeholder={"Test Organization"}
+              onFocus={() => setIsFocused("testOrganization")}
+              rules={{
+                required: "Text organization is required",
+              }}
+              autoCapitalize="none"
+            />
+
+            <CustomValidation
+              type="input"
+              control={control}
+              labelStyle={styles.label}
+              name="testOrganization"
+              inputStyle={[{ lineHeight: ms(20) }]}
+              label={"Subscription"}
+              placeholder={"Test Organization"}
+              onFocus={() => setIsFocused("testOrganization")}
+              rules={{
+                required: "Text organization is required",
+              }}
+              autoCapitalize="none"
+            />
+
+            <CustomValidation
+              type="input"
+              control={control}
+              name="testDescription"
+              label={"Description"}
+              placeholder={"Test organization description"}
+              labelStyle={styles.label}
+              onFocus={() => setIsFocused("testDescription")}
+              rules={{
+                required: "Test organization description is required",
+              }}
+            />
+          </View>
+
+          <CustomButton
+            title="Submit"
+            onPress={() => { }}
+            style={{ backgroundColor: Colors[theme].cartBg, marginTop: vs(10) }}
+          />
+        </View>
+      </Modal>
+
+
+      <Modal
+        isVisible={isStatusModalVisible}
+        onBackdropPress={() => setStatusModalVisible(false)}
+      >
+        <View
+          style={{
+            backgroundColor: Colors?.white,
+            height: 250,
+            width: s(300),
+            borderRadius: 10,
+            alignSelf: "center",
+            padding: 10,
+          }}
+        >
+          <CustomValidation
+            data={pickerData}
+            type="picker"
+            hideStar
+            control={control}
+            keyToShowData="title"
+            keyToCompareData="_id"
+            name="topic"
+            placeholder="Topic"
+            inputStyle={{ height: vs(50) }}
+            rules={{
+              required: {
+                value: true,
+                message: "Select a topic",
+              },
+            }}
+          />
+        </View>
+      </Modal>
+    </CustomHeader>
+  );
+};
+
+export default organization;
+
+const styles = ScaledSheet.create({
+  container: {
+    flexGrow: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: "12@ms",
+  },
+  searchContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "12@ms",
+  },
+  buttonContainer: {},
+  organizationParentContainer: {
+    marginTop: "12@ms",
+  },
+  organizationContainer: {
+    width: "100%",
+    padding: "12@ms",
+    borderRadius: "8@ms",
+    marginBottom: "16@ms",
+    gap: "8@ms",
+  },
+  organizationHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  organizationInfo: {
+    width: "30%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  status: {
+    color: "green",
+    borderRadius: "10@ms",
+    width: "60@ms",
+    textAlign: "center",
+    fontSize: "12@ms",
+  },
+  label: {
+    color: Colors.grayText,
+    fontSize: "14@ms",
+    marginBottom: "12@ms",
+    fontWeight: 400,
+  },
+});

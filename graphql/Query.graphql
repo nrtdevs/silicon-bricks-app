@@ -46,3 +46,22 @@ query PaginatedProjects($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+#organization list
+
+query PaginatedOrganization($listInputDto: ListInputDTO!) {
+  paginatedOrganization(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      description
+      status
+    }
+  }
+}

@@ -8,11 +8,11 @@ import { useTheme } from '@/context/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { ms } from 'react-native-size-matters';
 
- 
-export const CustomDrawerContent = (props: any) => {
+
+const CustomDrawerContent = (props: any) => {
   const { theme } = useTheme();
   return (
-    <DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].background }}>
+    <DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cartBg }}>
       <DrawerItem
         icon={({ color, size }) => <MaterialCommunityIcons name="view-dashboard-edit-outline" size={ms(24)} color={Colors[theme].text} />}
         label={labels?.home}
@@ -52,11 +52,18 @@ export const CustomDrawerContent = (props: any) => {
   )
 }
 
-export const Layout=()=>{
+const Layout = () => {
+  const { theme } = useTheme();
   return (
     <Drawer
-      screenOptions={{ headerShown: false }}
-      drawerContent={(props) => <CustomDrawerContent props={props} />}
-    />
+      screenOptions={{
+        headerShown: false,
+        drawerStyle: {
+          backgroundColor: Colors[theme].cartBg ,
+        },
+      }}
+      drawerContent={(props) => <CustomDrawerContent {...props} />} />
   )
 }
+
+export default Layout

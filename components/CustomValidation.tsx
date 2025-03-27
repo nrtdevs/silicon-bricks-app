@@ -57,30 +57,30 @@ interface TextInputProps extends RequiredProps {
   onLongPress?: () => void
   onPress?: () => void
   keyboardType?:
-    | 'default'
-    | 'number-pad'
-    | 'decimal-pad'
-    | 'numeric'
-    | 'email-address'
-    | 'url'
-    | 'phone-pad'
+  | 'default'
+  | 'number-pad'
+  | 'decimal-pad'
+  | 'numeric'
+  | 'email-address'
+  | 'url'
+  | 'phone-pad'
   mode?: 'dialog' | 'dropdown'
   inputMode?: 'outlined' | 'flat'
   position?: 'auto' | 'top' | 'bottom'
   checkBoxPosition?: 'leading' | 'trailing'
   labelVariant?:
-    | 'displayLarge'
-    | 'displayMedium'
-    | 'displaySmall'
-    | 'titleLarge'
-    | 'titleMedium'
-    | 'titleSmall'
-    | 'labelLarge'
-    | 'labelMedium'
-    | 'labelSmall'
-    | 'bodyLarge'
-    | 'bodyMedium'
-    | 'bodySmall'
+  | 'displayLarge'
+  | 'displayMedium'
+  | 'displaySmall'
+  | 'titleLarge'
+  | 'titleMedium'
+  | 'titleSmall'
+  | 'labelLarge'
+  | 'labelMedium'
+  | 'labelSmall'
+  | 'bodyLarge'
+  | 'bodyMedium'
+  | 'bodySmall'
   size?: number
   uncheckedIcon?: string
   checkedIcon?: string
@@ -254,8 +254,8 @@ const CustomValidation = (props: TextInputProps) => {
                     : props.onPressIcon
                       ? props.onPressIcon
                       : () => {
-                          console.log('onPress')
-                        }
+                        console.log('onPress')
+                      }
                 }
               >
                 {inputMode !== 'flat' && (
@@ -325,14 +325,14 @@ const CustomValidation = (props: TextInputProps) => {
                       ? props.rightIcon
                       : value && !props.disabled && !props.editable
                         ? {
-                            type: 'AntDesign ',
-                            name: 'close',
-                            color: Colors[theme].text,
-                            size: ms(16),
-                            onPress(event: any) {
-                              props.disabled ? null : onChange(null)
-                            }
+                          type: 'AntDesign ',
+                          name: 'close',
+                          color: Colors[theme].text,
+                          size: ms(16),
+                          onPress(event: any) {
+                            props.disabled ? null : onChange(null)
                           }
+                        }
                         : null
                   }
                   disabled={props.disabled}
@@ -355,7 +355,7 @@ const CustomValidation = (props: TextInputProps) => {
                   ]}
                   leftIconContainerStyle={styles.leftIconContainerStyle}
                   renderErrorMessage={false}
-                  // defaultValue={props.defaultValue}
+                // defaultValue={props.defaultValue}
                 />
               </Pressable>
             )}
