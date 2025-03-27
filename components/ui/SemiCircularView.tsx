@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { ms } from 'react-native-size-matters'; // For scaling
+import React from 'react'
+import { View, Text, StyleSheet } from 'react-native'
+import { ms } from 'react-native-size-matters' // For scaling
 
 const SemiCircularView = () => {
   return (
@@ -9,8 +9,8 @@ const SemiCircularView = () => {
         Semi-Circular View
       </Text>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -20,8 +20,8 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 100,
     borderBottomRightRadius: 100,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+    alignItems: 'center'
+  }
+})
 
-export default SemiCircularView;
+export default SemiCircularView

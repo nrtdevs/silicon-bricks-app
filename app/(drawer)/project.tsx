@@ -1,29 +1,102 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, TextInput } from 'react-native'
+import { View, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from '@expo/vector-icons';
-import { GetAllProjects } from '@/graphql/Query';
+import { gql, useMutation } from "@apollo/client";
 import { useLazyQuery } from '@apollo/client';
-import { Dialog, Portal } from "react-native-paper";
-import { Controller, useForm } from "react-hook-form";
+import { Dialog, Portal, } from "react-native-paper";
+import { useForm } from "react-hook-form";
 import { Colors } from '@/constants/Colors';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import CustomHeader from '@/components/CustomHeader';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemeProvider } from '@/context/ThemeContext';
+import CustomValidation from '@/components/CustomValidation';
+import { labels } from '@/constants/Labels';
+import { ms, ScaledSheet } from 'react-native-size-matters';
+
 interface ProjectData {
   id: number;
   name: string;
   description: string;
   status: string;
 }
+const GetAllProjects = gql`
+  query PaginatedProjects($listInputDto: ListInputDTO!) {
+    paginatedProjects(ListInputDTO: $listInputDto) {
+      data {
+        id
+        name
+        description
+        status
+        organizationId
+      }
+    }
+  }
+`;
+const CREATE_PROJECT_MUTATION = gql`
+  mutation CreateProject($createProjectInput: CreateProjectDto!) {
+    createProject(createProjectInput: $createProjectInput) {
+      id
+      name
+      description
+      status
+      organizationId
+    }
+  }
+`;
+
+const DELETE_PROJECT = gql`
+  mutation DeleteProject($deleteProjectId: Int!) {
+    deleteProject(id: $deleteProjectId)
+  }
+`;
+const UPDATE_PROJECT = gql`
+  mutation UpdateProject($updateProjectInput: UpdateProjectDto!) {
+    updateProject(updateProjectInput: $updateProjectInput) {
+      id
+      name
+      description
+      status
+      organizationId
+    }
+  }
+`;
 
 const Project = () => {
+  const [updateProject] = useMutation(UPDATE_PROJECT);
   const [visible, setVisible] = useState(false);
   const [deletePopupVisible, setDeletePopupVisible] = useState(false);
   const showDialogue = () => setVisible(true);
   const [editVisible, setEditVisible] = useState(false);
   const [getProjects, { data, refetch }] = useLazyQuery(GetAllProjects);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+
   const datax = data?.paginatedProjects?.data;
+  const [createProject, { loading }] = useMutation(CREATE_PROJECT_MUTATION, {
+    onCompleted: (data) => {
+      reset()
+      Alert.alert("success", "Project create successfully!");
+      hideDialogue();
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    }
+  });
+  type fromDataType = {
+    name: string;
+    description: string;
+  }
+  const onSubmit = (fromData: fromDataType) => {
+    createProject({
+      variables: {
+        createProjectInput: { ...fromData, organizationId: 1 }
+      }
+    })
+  }
+
   const hideDialogue = () => {
     setVisible(false);
     refetch();
@@ -32,24 +105,45 @@ const Project = () => {
     name: z.string().min(4, { message: "Name is required" }),
     description: z.string().min(4, { message: "Description is required" }),
   });
-  const {control,formState: { errors }} = useForm({
+  const { control, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
   });
-  const hideDeleteDialogue = () => {
-    refetch();
-    setDeletePopupVisible(false);
-  };
-
-  const showDeleteDialogue = () => {
-    setDeletePopupVisible(true);
-  };
-  const showEditDialogue = () => {
+  const showEditDialogue = (project: any) => {
+    setSelectedProjectId(project.id);
+    reset({ name: project.name, description: project.description });
     setEditVisible(true);
   };
   const hideEditDialogue = () => {
-    refetch();
     setEditVisible(false);
+    refetch(); // Refresh Project List
   };
+
+
+  const handleEdit = async (formData: any) => {
+    if (!selectedProjectId) {
+      console.error("No project selected for update");
+      return;
+    }
+    try {
+      const { data } = await updateProject({
+        variables: {
+          updateProjectInput: {
+            id: Number(selectedProjectId),
+            name: formData.name,
+            description: formData.description,
+            organizationId: 1,
+          },
+        },
+      });
+
+      console.log("Project Updated:", data);
+      hideEditDialogue();
+    } catch (error) {
+      console.error("Error updating project:", error);
+    }
+  };
+
+
   useEffect(() => {
     getProjects({
       variables: {
@@ -60,206 +154,233 @@ const Project = () => {
       },
     });
   }, [getProjects])
-  return (
-    <View style={styles.container}>
-      <View style={styles.scrollContainer}>
-        <FlatList
-          data={datax}
-          keyExtractor={(item: ProjectData) => item.id.toString()}
-          renderItem={({ item }) => (
-            <LinearGradient
-              colors={["#0a54c9", "#5087de"]}
-              style={styles.card}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.cardTitle}>Name</Text>
-                <Text style={styles.cardDot}>:</Text>
-                <Text style={styles.cardDot}>{item.name}</Text>
-              </View>
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.cardTitle}>Status</Text>
-                <Text style={styles.cardDot}>:</Text>
-                <Text style={styles.cardDot}>{item.status}</Text>
-              </View>
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.cardTitle}>Description</Text>
-                <Text style={styles.cardDot}>:</Text>
-                <Text style={styles.cardDot}>{item.description}</Text>
-              </View>
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.cardTitle}>Action</Text>
-                <Text style={styles.cardDot}>: </Text>
-                <TouchableOpacity
-                  onPress={() => showEditDialogue()}>
-                  <Feather name="edit" color="white" size={24} />
-                </TouchableOpacity>
-                <View style={{width : 10}}></View>
-                <TouchableOpacity
-                  onPress={() => showDeleteDialogue()}
-                >
-                  <MaterialCommunityIcons
-                  name="delete-empty"
-                  size={26}
-                  color="red"
-                />
-                </TouchableOpacity>
-              </View>
-            </LinearGradient>
-          )}
-        />
 
+  const [deleteProject] = useMutation(DELETE_PROJECT, {
+    onCompleted: () => {
+      console.log("Project deleted successfully");
+      setDeletePopupVisible(false);
+      // Refresh the list after deletion 
+    },
+    onError: (error) => {
+      console.error("Error deleting project:", error);
+    },
+  });
+
+  const showDeleteDialogue = (id: number) => {
+    setSelectedProjectId(id);
+    setDeletePopupVisible(true);
+  };
+
+  const hideDeleteDialogue = () => {
+    setDeletePopupVisible(false);
+    setSelectedProjectId(null);
+  };
+
+  const handleDelete = async () => {
+    if (selectedProjectId !== null) {
+      try {
+        await deleteProject({ variables: { deleteProjectId: Number(selectedProjectId)} });
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+  };
+  return (
+    <CustomHeader>
+      <View style={styles.container}>
+        <View style={styles.scrollContainer}>
+          <FlatList
+            data={datax}
+            keyExtractor={(item: ProjectData) => item.id.toString()}
+            renderItem={({ item }) => (
+              <LinearGradient
+                colors={["#0a54c9", "#5087de"]}
+                style={styles.card}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={{ flexDirection: "row" }}>
+                  <ThemedText style={styles.cardTitle}>Name</ThemedText>
+                  <ThemedText style={styles.cardDot}>:</ThemedText>
+                  <ThemedText style={styles.cardDot}>{item.name}</ThemedText>
+                </View>
+                <View style={{ flexDirection: "row" }}>
+                  <ThemedText style={styles.cardTitle}>Status</ThemedText>
+                  <ThemedText style={styles.cardDot}>:</ThemedText>
+                  <ThemedText style={styles.cardDot}>{item.status}</ThemedText>
+                </View>
+                <View style={{ flexDirection: "row" }}>
+                  <ThemedText style={styles.cardTitle}>Description</ThemedText>
+                  <ThemedText style={styles.cardDot}>:</ThemedText>
+                  <ThemedText style={styles.cardDot}>{item.description}</ThemedText>
+                </View>
+                <View style={{ flexDirection: "row" }}>
+                  <ThemedText style={styles.cardTitle}>Action</ThemedText>
+                  <ThemedText style={styles.cardDot}>: </ThemedText>
+                  <TouchableOpacity
+                    onPress={() => showEditDialogue(item)}>
+                    <Feather name="edit" color="white" size={24} />
+                  </TouchableOpacity>
+                  <View style={{ width: 10 }}></View>
+                  <TouchableOpacity
+                   onPress={() => showDeleteDialogue(item.id)}
+                  >
+                    <MaterialCommunityIcons
+                      name="delete-empty"
+                      size={26}
+                      color="red"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </LinearGradient>
+            )}
+          />
+
+        </View>
+        <TouchableOpacity style={styles.fab}
+          onPress={showDialogue}>
+          <Feather name="plus" color="white" size={24}></Feather>
+        </TouchableOpacity>
+
+        <Portal>
+          <ThemeProvider>
+            <Dialog visible={visible} onDismiss={hideDialogue}>
+              <Dialog.Content>
+                <CustomValidation
+                  type="input"
+                  control={control}
+                  labelStyle={styles.label}
+                  name="name"
+                  inputStyle={[{ lineHeight: ms(20) }]}
+                  label={`${labels.projectName}`}
+                  placeholder={`${labels.projectName}`}
+                  // onFocus={() => setIsFocused("email")}
+                  rules={{
+                    required: labels.projectName,
+                  }}
+                />
+                <CustomValidation
+                  type="input"
+                  control={control}
+                  labelStyle={styles.label}
+                  name="description"
+                  inputStyle={[{ lineHeight: ms(20) }]}
+                  label={`${labels.description}`}
+                  placeholder={`${labels.description}`}
+                  // onFocus={() => setIsFocused("email")}
+                  rules={{
+                    required: labels.description,
+                  }}
+                />
+              </Dialog.Content>
+              <Dialog.Actions>
+
+
+                <TouchableOpacity
+                  onPress={handleSubmit(onSubmit)}
+                  style={styles.buttonContainerSave}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={hideDialogue}
+                  style={styles.buttonContainerClose}
+                >
+                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
+                </TouchableOpacity>
+              </Dialog.Actions>
+            </Dialog>
+          </ThemeProvider>
+        </Portal>
+
+        <Portal>
+          <ThemeProvider>
+            <Dialog visible={editVisible} onDismiss={hideEditDialogue}>
+              <Dialog.Content>
+                <CustomValidation
+                  type="input"
+                  control={control}
+                  labelStyle={styles.label}
+                  name="name"
+                  inputStyle={[{ lineHeight: ms(20) }]}
+                  label={`${labels.projectName}`}
+                  placeholder={`${labels.projectName}`}
+                  // onFocus={() => setIsFocused("email")}
+                  rules={{
+                    required: labels.projectName,
+                  }}
+                />
+                <CustomValidation
+                  type="input"
+                  control={control}
+                  labelStyle={styles.label}
+                  name="description"
+                  inputStyle={[{ lineHeight: ms(20) }]}
+                  label={`${labels.description}`}
+                  placeholder={`${labels.description}`}
+                  // onFocus={() => setIsFocused("email")}
+                  rules={{
+                    required: labels.description,
+                  }}
+                />
+              </Dialog.Content>
+              <Dialog.Actions>
+                <TouchableOpacity
+                  onPress={handleSubmit(handleEdit)}
+                  style={styles.buttonContainerSave}
+                >
+                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={hideEditDialogue}
+                  style={styles.buttonContainerClose}
+                >
+                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
+                </TouchableOpacity>
+              </Dialog.Actions>
+            </Dialog>
+          </ThemeProvider>
+        </Portal>
+
+        <Portal>
+          <ThemeProvider>
+            <Dialog visible={deletePopupVisible} onDismiss={hideDeleteDialogue}>
+              <Dialog.Title style={styles.dialogueTitle}>Delete Project</Dialog.Title>
+              <Dialog.Content>
+                <ThemedText style={styles.label}>
+                  Do You Want To Really Delete The Project
+                </ThemedText>
+              </Dialog.Content>
+              <Dialog.Actions>
+                <TouchableOpacity
+                  onPress={handleDelete}
+                  style={styles.buttonContainerSave}
+                >
+                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={hideDeleteDialogue}
+                  style={styles.buttonContainerClose}
+                >
+                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
+                </TouchableOpacity>
+              </Dialog.Actions>
+            </Dialog>
+          </ThemeProvider>
+        </Portal>
       </View>
-      <TouchableOpacity style={styles.fab}
-        onPress={showDialogue}>
-        <Feather name="plus" color="white" size={24}></Feather>
-      </TouchableOpacity>
-      <Portal>
-        <Dialog visible={visible} onDismiss={hideDialogue}>
-          <Dialog.Title style={styles.dialogueTitle}>
-            Add Project
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text style={styles.label}>Name</Text>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, onBlur, value } }: any) => (
-                <TextInput
-                  placeholder="Name..."
-                  style={styles.input}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                />
-              )}
-            />
-            {errors.name && (
-              <Text style={styles.error}>{errors.name.message}</Text>
-            )}
-            <Text style={styles.label}>Description</Text>
-            <Controller
-              control={control}
-              name="description"
-              render={({ field: { onChange, onBlur, value } }: any) => (
-                <TextInput
-                  placeholder="Description..."
-                  style={styles.input}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                />
-              )}
-            />
-            {errors.description && (
-              <Text style={styles.error}>{errors.description.message}</Text>
-            )}
-          </Dialog.Content>
-          <Dialog.Actions>
-            <TouchableOpacity
-              // onPress={handleSubmit(onSubmit)}
-              style={styles.buttonContainerSave}
-            >
-              <Text>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={hideDialogue}
-              style={styles.buttonContainerClose}
-            >
-              <Text>Close</Text>
-            </TouchableOpacity>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-      <Portal>
-        <Dialog visible={editVisible} onDismiss={hideEditDialogue}>
-          <Dialog.Title style={styles.dialogueTitle}>Edit Project</Dialog.Title>
-          <Dialog.Content>
-            <Text style={styles.label}>Name</Text>
-            <Controller
-              control={control}
-              name="name"
-              defaultValue={""}
-              render={({ field: { onChange, onBlur, value } }: any) => (
-                <TextInput
-                  placeholder="Name..."
-                  style={styles.input}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                />
-              )}
-            />
-            {errors.name && (
-              <Text style={styles.error}>{errors.name.message}</Text>
-            )}
-            <Text style={styles.label}>Description</Text>
-            <Controller
-              control={control}
-              name="description"
-              defaultValue={""}
-              render={({ field: { onChange, onBlur, value } }: any) => (
-                <TextInput
-                  placeholder="Description..."
-                  style={styles.input}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                />
-              )}
-            />
-            {errors.description && (
-              <Text style={styles.error}>{errors.description.message}</Text>
-            )}
-          </Dialog.Content>
-          <Dialog.Actions>
-            <TouchableOpacity
-              // onPress={handleSubmit(handleEdit)}
-              style={styles.buttonContainerSave}
-            >
-              <Text>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={hideEditDialogue}
-              style={styles.buttonContainerClose}
-            >
-              <Text>Close</Text>
-            </TouchableOpacity>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-      <Portal>
-        <Dialog visible={deletePopupVisible} onDismiss={hideDeleteDialogue}>
-          <Dialog.Title style={styles.dialogueTitle}>Delete Project</Dialog.Title>
-          <Dialog.Content>
-            <Text style={styles.label}>
-              Do You Want To Really Delete The Project{" "}
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <TouchableOpacity
-              // onPress={handleDelete}
-              style={styles.buttonContainerSave}
-            >
-              <Text>Yes</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={hideDeleteDialogue}
-              style={styles.buttonContainerClose}
-            >
-              <Text>No</Text>
-            </TouchableOpacity>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </View>
+    </CustomHeader>
   );
 };
 
 export default Project;
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
@@ -289,9 +410,9 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   label: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: Colors.backgroundColorPrimary,
+    fontSize: "16@ms",
+    fontWeight: "normal",
+    color: "black",
     marginBottom: 5,
     textAlign: "left",
     alignSelf: "flex-start",
@@ -331,20 +452,23 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   dialogueTitle: {
-    fontSize: 20,
+    fontSize: "14@ms",
     fontWeight: "bold",
+    justifyContent: "center",
+    alignSelf: "center"
   },
   buttonContainerClose: {
-    backgroundColor: "gray",
     borderRadius: 10,
-    paddingVertical: 15,
+    paddingVertical: 5,
     marginTop: 10,
     paddingHorizontal: 20,
+    borderColor: "black",
+    borderWidth: 0.5,
   },
   buttonContainerSave: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#E06557",
     borderRadius: 10,
-    paddingVertical: 15,
+    paddingVertical: 5,
     marginTop: 10,
     paddingHorizontal: 20,
   },

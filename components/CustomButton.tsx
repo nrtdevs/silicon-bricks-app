@@ -3,33 +3,33 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  View,
-} from "react-native";
-import React from "react";
-import Svg, { Path } from "react-native-svg";
-import { ScaledSheet } from "react-native-size-matters";
-import { Colors } from "@/constants/Colors";
-import { ThemedText } from "./ThemedText";
-import { LinearGradient } from "expo-linear-gradient";
-import { ThemedView } from "./ThemedView";
-import { useTheme } from "@/context/ThemeContext";
+  View
+} from 'react-native'
+import React from 'react'
+import Svg, { Path } from 'react-native-svg'
+import { ScaledSheet } from 'react-native-size-matters'
+import { Colors } from '@/constants/Colors'
+import { ThemedText } from './ThemedText'
+import { LinearGradient } from 'expo-linear-gradient'
+import { ThemedView } from './ThemedView'
+import { useTheme } from '@/context/ThemeContext'
 
 interface CustomButtonProps {
-  onPress: () => void;
-  isLoading?: boolean;
-  isIcon?: JSX.Element;
-  iconStyle?: any;
-  style?: any;
-  disabled?: boolean;
-  numberOfLines?: number;
-  title: string;
-  titleStyle?: any;
-  isGradient?: boolean;
-  textType?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  onPress: () => void
+  isLoading?: boolean
+  isIcon?: JSX.Element
+  iconStyle?: any
+  style?: any
+  disabled?: boolean
+  numberOfLines?: number
+  title: string
+  titleStyle?: any
+  isGradient?: boolean
+  textType?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link'
 }
 
 const CustomButton = (props: CustomButtonProps) => {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
   if (props.isGradient) {
     return (
       <Pressable
@@ -40,9 +40,9 @@ const CustomButton = (props: CustomButtonProps) => {
           {
             backgroundColor: !props.disabled
               ? Colors.gradient1
-              : Colors.gradient1,
+              : Colors.gradient1
           },
-          props.style,
+          props.style
         ]}
       >
         <LinearGradient
@@ -52,7 +52,7 @@ const CustomButton = (props: CustomButtonProps) => {
           style={[styles.gradient, props.style]}
         >
           {props.isLoading ? (
-            <ActivityIndicator size={"small"} color={Colors.white} />
+            <ActivityIndicator size={'small'} color={Colors.white} />
           ) : (
             <View style={styles.iconContainer}>
               <View style={[styles.iconStyle, props.iconStyle]}>
@@ -61,8 +61,8 @@ const CustomButton = (props: CustomButtonProps) => {
 
               <ThemedText
                 numberOfLines={props.numberOfLines}
-                style={[{color:Colors.white},props.titleStyle]}
-                type={props.textType ?? "defaultSemiBold"}
+                style={[{ color: Colors.white }, props.titleStyle]}
+                type={props.textType ?? 'defaultSemiBold'}
               >
                 {props.title}
               </ThemedText>
@@ -70,7 +70,7 @@ const CustomButton = (props: CustomButtonProps) => {
           )}
         </LinearGradient>
       </Pressable>
-    );
+    )
   } else {
     return (
       <Pressable
@@ -79,13 +79,13 @@ const CustomButton = (props: CustomButtonProps) => {
         style={[
           styles.gradient,
           {
-            backgroundColor: props.disabled ? Colors.gray : Colors[theme].cartBg,
+            backgroundColor: props.disabled ? Colors.gray : Colors[theme].cartBg
           },
-          props.style,
+          props.style
         ]}
       >
         {props.isLoading ? (
-          <ActivityIndicator size={"small"} color={Colors.white} />
+          <ActivityIndicator size={'small'} color={Colors.white} />
         ) : (
           <View style={styles.iconContainer}>
             <View style={[styles.iconStyle, props.iconStyle]}>
@@ -94,7 +94,7 @@ const CustomButton = (props: CustomButtonProps) => {
 
             <ThemedText
               numberOfLines={props.numberOfLines}
-              type={props.textType ?? "defaultSemiBold"}
+              type={props.textType ?? 'defaultSemiBold'}
               style={props.titleStyle}
             >
               {props.title}
@@ -102,27 +102,24 @@ const CustomButton = (props: CustomButtonProps) => {
           </View>
         )}
       </Pressable>
-    );
-  };
+    )
+  }
 }
 
-
-
-
-export default CustomButton;
+export default CustomButton
 
 const styles = ScaledSheet.create({
   button: {
-    borderRadius: "25@ms",
-    overflow: "hidden",
-    width:"100%",
+    borderRadius: '25@ms',
+    overflow: 'hidden',
+    width: '100%'
   },
   gradient: {
-    paddingVertical: "12@vs",
-    paddingHorizontal: "32@s",
-    borderRadius: "25@ms",
-    alignItems: "center",
-    justifyContent: "center",
+    paddingVertical: '12@vs',
+    paddingHorizontal: '32@s',
+    borderRadius: '25@ms',
+    alignItems: 'center',
+    justifyContent: 'center'
     // elevation: 5,
     // shadowColor: "#000",
     // shadowOffset: {
@@ -133,18 +130,18 @@ const styles = ScaledSheet.create({
     // shadowRadius: 3.84,
   },
   loaderStyle: {
-    position: "relative",
-    width: "80%",
-    backgroundColor: "transparent",
+    position: 'relative',
+    width: '80%',
+    backgroundColor: 'transparent'
   },
   iconContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   iconStyle: {
     marginRight: 5,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
+})

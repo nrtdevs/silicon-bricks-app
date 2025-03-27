@@ -1,8 +1,8 @@
 // CustomToast.js
-import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { Colors } from '@/constants/Colors';
+import React from 'react'
+import { View, Text, StyleSheet, Platform } from 'react-native'
+import { BlurView } from 'expo-blur'
+import { Colors } from '@/constants/Colors'
 
 const CustomToast = ({ text1, text2 }: any) => {
   return (
@@ -16,8 +16,8 @@ const CustomToast = ({ text1, text2 }: any) => {
         {text2 && <Text style={styles.text2}>{text2}</Text>}
       </View>
     </BlurView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -26,21 +26,21 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     padding: 15,
     backgroundColor: Colors.white,
-    zIndex: 10,
+    zIndex: 10
   },
   content: {
-    alignItems: 'center',
+    alignItems: 'center'
   },
   text1: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#000'
   },
   text2: {
     fontSize: 14,
     color: '#000',
-    marginTop: 5,
-  },
-});
+    marginTop: 5
+  }
+})
 
-export default CustomToast;
+export default CustomToast
