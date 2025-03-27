@@ -19,7 +19,8 @@ const Index = () => {
     <Redirect href="/(drawer)/(tabs)" />
   ) : (
     // <Redirect href="/(auth)/login" />
-    <Redirect href="/(drawer)/organization" />
+    <Redirect href="/(drawer)/(tabs)" />
+    // <Redirect href="/(drawer)/organization" />
   );
 };
 
