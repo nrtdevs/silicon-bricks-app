@@ -359,6 +359,7 @@ const CustomValidation = (props: TextInputProps) => {
                 />
               </Pressable>
             )}
+            
             {/* dropdown validation  */}
             {props?.type === 'picker' && (
               <View

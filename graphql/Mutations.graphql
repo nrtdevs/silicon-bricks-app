@@ -72,3 +72,26 @@ mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
     status
   }
 }
+
+mutation DeleteOrganization($deleteOrganizationId: Int!) {
+  deleteOrganization(id: $deleteOrganizationId)
+}
+
+mutation EnableOrganizationStatus($data: OrganizationStatusDto!) {
+  enableOrganizationStatus(data: $data) {
+    id
+    name
+    description
+    status
+  }
+}
+
+mutation UpdateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
+  updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
+    id
+    name
+    description
+    status
+  }
+}
+

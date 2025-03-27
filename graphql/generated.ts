@@ -182,7 +182,6 @@ export type CreateNotesDto = {
 
 export type CreateOfferDto = {
   cashbackAmount: Scalars['Float']['input'];
-  couponCode: Scalars['String']['input'];
   description: Scalars['String']['input'];
   discountType: DiscountType;
   discountValue: Scalars['Float']['input'];
@@ -191,6 +190,7 @@ export type CreateOfferDto = {
   minOrderAmount: Scalars['Float']['input'];
   offerType: OfferTypeStatus;
   startDate: Scalars['String']['input'];
+  title: Scalars['String']['input'];
   usageLimit: Scalars['Float']['input'];
 };
 
@@ -199,11 +199,30 @@ export type CreateOrganizationDto = {
   name: Scalars['String']['input'];
 };
 
+export type CreatePackageDto = {
+  description: Scalars['String']['input'];
+  discountedPrice: Scalars['Float']['input'];
+  name: Scalars['String']['input'];
+  offerId: Scalars['Float']['input'];
+  price: Scalars['Float']['input'];
+};
+
 export type CreatePermissionDto = {
   action: Scalars['String']['input'];
   appName: AppName;
   description: Scalars['String']['input'];
   module: Scalars['String']['input'];
+};
+
+export type CreatePlanDto = {
+  couponId: Scalars['Float']['input'];
+  description: Scalars['String']['input'];
+  discountedPrice: Scalars['Float']['input'];
+  duration: Scalars['Float']['input'];
+  name: Scalars['String']['input'];
+  offerId: Scalars['Float']['input'];
+  packageId: Scalars['Float']['input'];
+  price: Scalars['Float']['input'];
 };
 
 export type CreateProjectDto = {
@@ -393,13 +412,16 @@ export type ModuleStatusDto = {
 export type Mutation = {
   __typename?: 'Mutation';
   addMediaToBreakdown: Array<BreakdownMedia>;
+  assignModuleToPkg: Package;
   assignPermissionsToRole: Role;
   assignRoleToUser: User;
   changeBreakdownStatus: Breakdown;
   changeCouponStatus: Coupon;
   changeModuleStatus: ApplicationModule;
   changeOfferStatus: Offer;
+  changePackageStatus: Package;
   changePassword: Scalars['Boolean']['output'];
+  changePlanStatus: Plan;
   createBreakdown: Breakdown;
   createCoupon: Coupon;
   createMeeting: Meeting;
@@ -410,7 +432,9 @@ export type Mutation = {
   createNotes: Array<Notes>;
   createOffer: Offer;
   createOrganization: Organization;
+  createPackage: Package;
   createPermission: Permissions;
+  createPlan: Plan;
   createProject: Project;
   createRole: Role;
   createUser: User;
@@ -425,7 +449,9 @@ export type Mutation = {
   deleteNotes: Scalars['Boolean']['output'];
   deleteOffer: Scalars['Boolean']['output'];
   deleteOrganization: Scalars['Boolean']['output'];
+  deletePackage: Scalars['Boolean']['output'];
   deletePermission: Scalars['Boolean']['output'];
+  deletePlan: Scalars['Boolean']['output'];
   deleteProject: Scalars['Boolean']['output'];
   deleteRole: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
@@ -438,6 +464,8 @@ export type Mutation = {
   hardDeleteModule: Scalars['Boolean']['output'];
   hardDeleteOffer: Scalars['Boolean']['output'];
   hardDeleteOrganization: Scalars['Boolean']['output'];
+  hardDeletePackage: Scalars['Boolean']['output'];
+  hardDeletePlan: Scalars['Boolean']['output'];
   hardDeleteProject: Scalars['Boolean']['output'];
   hardDeleteUser: Scalars['Boolean']['output'];
   login: LoginRes;
@@ -449,6 +477,8 @@ export type Mutation = {
   restoreModule: Scalars['Boolean']['output'];
   restoreOffer: Scalars['Boolean']['output'];
   restoreOrganization: Scalars['Boolean']['output'];
+  restorePackage: Scalars['Boolean']['output'];
+  restorePlan: Scalars['Boolean']['output'];
   restoreProject: Scalars['Boolean']['output'];
   restoreUser: Scalars['Boolean']['output'];
   sendRegistrationOtp: OtpRes;
@@ -462,7 +492,9 @@ export type Mutation = {
   updateNotes: Notes;
   updateOffer: Offer;
   updateOrganization: Organization;
+  updatePackage: Package;
   updatePermission: Permissions;
+  updatePlan: Plan;
   updateProfile: User;
   updateProject: Project;
   updateRole: Role;
@@ -473,6 +505,12 @@ export type Mutation = {
 
 export type MutationAddMediaToBreakdownArgs = {
   data: BreakdownMediaDto;
+};
+
+
+export type MutationAssignModuleToPkgArgs = {
+  moduleIds: Array<Scalars['Int']['input']>;
+  packageId: Scalars['Int']['input'];
 };
 
 
@@ -508,8 +546,18 @@ export type MutationChangeOfferStatusArgs = {
 };
 
 
+export type MutationChangePackageStatusArgs = {
+  updatePackageStatusInput: PackageStatusDto;
+};
+
+
 export type MutationChangePasswordArgs = {
   changePasswordData: ChangePasswordDto;
+};
+
+
+export type MutationChangePlanStatusArgs = {
+  updatePlanStatusInput: PlanStatusDto;
 };
 
 
@@ -563,8 +611,18 @@ export type MutationCreateOrganizationArgs = {
 };
 
 
+export type MutationCreatePackageArgs = {
+  createPackageInput: CreatePackageDto;
+};
+
+
 export type MutationCreatePermissionArgs = {
   data: CreatePermissionDto;
+};
+
+
+export type MutationCreatePlanArgs = {
+  createPlanInput: CreatePlanDto;
 };
 
 
@@ -638,8 +696,18 @@ export type MutationDeleteOrganizationArgs = {
 };
 
 
+export type MutationDeletePackageArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationDeletePermissionArgs = {
   id: Scalars['Float']['input'];
+};
+
+
+export type MutationDeletePlanArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -703,6 +771,16 @@ export type MutationHardDeleteOrganizationArgs = {
 };
 
 
+export type MutationHardDeletePackageArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationHardDeletePlanArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationHardDeleteProjectArgs = {
   id: Scalars['Int']['input'];
 };
@@ -750,6 +828,16 @@ export type MutationRestoreOfferArgs = {
 
 
 export type MutationRestoreOrganizationArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationRestorePackageArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationRestorePlanArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -819,8 +907,18 @@ export type MutationUpdateOrganizationArgs = {
 };
 
 
+export type MutationUpdatePackageArgs = {
+  updatePackageInput: UpdatePackageDto;
+};
+
+
 export type MutationUpdatePermissionArgs = {
   data: UpdatePermissionDto;
+};
+
+
+export type MutationUpdatePlanArgs = {
+  updatePlanInput: UpdatePlanDto;
 };
 
 
@@ -927,10 +1025,23 @@ export type Package = {
   description?: Maybe<Scalars['String']['output']>;
   discountedPrice: Scalars['Float']['output'];
   id: Scalars['ID']['output'];
+  modules: Array<ApplicationModule>;
   name: Scalars['String']['output'];
-  offerId: Scalars['ID']['output'];
+  offerId?: Maybe<Scalars['ID']['output']>;
   price: Scalars['Float']['output'];
   status: Scalars['String']['output'];
+};
+
+/** Package Status */
+export enum PackageStatus {
+  Active = 'active',
+  Expired = 'expired',
+  Inactive = 'inactive'
+}
+
+export type PackageStatusDto = {
+  id: Scalars['Float']['input'];
+  status: PackageStatus;
 };
 
 export type PaginatedApplicationModules = {
@@ -987,6 +1098,18 @@ export type PaginatedOrganizations = {
   meta: Meta;
 };
 
+export type PaginatedPackages = {
+  __typename?: 'PaginatedPackages';
+  data: Array<Package>;
+  meta: Meta;
+};
+
+export type PaginatedPlans = {
+  __typename?: 'PaginatedPlans';
+  data: Array<Plan>;
+  meta: Meta;
+};
+
 export type PaginatedProjects = {
   __typename?: 'PaginatedProjects';
   data: Array<Project>;
@@ -1036,8 +1159,21 @@ export type Plan = {
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   offerId: Scalars['ID']['output'];
+  package: Package;
   price: Scalars['Float']['output'];
   status: Scalars['String']['output'];
+};
+
+/** Plan Status */
+export enum PlanStatus {
+  Active = 'active',
+  Expired = 'expired',
+  Inactive = 'inactive'
+}
+
+export type PlanStatusDto = {
+  id: Scalars['Float']['input'];
+  status: PlanStatus;
 };
 
 export type Post = {
@@ -1078,8 +1214,10 @@ export type Query = {
   findModuleById: ApplicationModule;
   findOfferById: Offer;
   findOrganizationById: Organization;
+  findPackageById: Package;
   findPermissionById: Permissions;
   findPermissionsByUser: Array<Scalars['String']['output']>;
+  findPlanById: Plan;
   findRoleById: Role;
   findUserById: User;
   findVehicleById: Vehicle;
@@ -1100,6 +1238,8 @@ export type Query = {
   paginatedModules: PaginatedApplicationModules;
   paginatedOffers: PaginatedOffers;
   paginatedOrganization: PaginatedOrganizations;
+  paginatedPackages: PaginatedPackages;
+  paginatedPlans: PaginatedPlans;
   paginatedProjects: PaginatedProjects;
   paginatedRoles: PaginatedRoles;
   paginatedUsers: PaginatedUsers;
@@ -1111,6 +1251,8 @@ export type Query = {
   trashedCoupons: PaginatedCoupons;
   trashedModules: PaginatedApplicationModules;
   trashedOffers: PaginatedOffers;
+  trashedPackages: PaginatedPackages;
+  trashedPlans: PaginatedPlans;
   trashedUsers: PaginatedUsers;
 };
 
@@ -1145,6 +1287,11 @@ export type QueryFindOrganizationByIdArgs = {
 };
 
 
+export type QueryFindPackageByIdArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type QueryFindPermissionByIdArgs = {
   id: Scalars['Float']['input'];
 };
@@ -1152,6 +1299,11 @@ export type QueryFindPermissionByIdArgs = {
 
 export type QueryFindPermissionsByUserArgs = {
   id: Scalars['Float']['input'];
+};
+
+
+export type QueryFindPlanByIdArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -1255,6 +1407,16 @@ export type QueryPaginatedOrganizationArgs = {
 };
 
 
+export type QueryPaginatedPackagesArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedPlansArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
 export type QueryPaginatedProjectsArgs = {
   ListInputDTO: ListInputDto;
 };
@@ -1296,6 +1458,16 @@ export type QueryTrashedModulesArgs = {
 
 
 export type QueryTrashedOffersArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryTrashedPackagesArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryTrashedPlansArgs = {
   ListInputDTO: ListInputDto;
 };
 
@@ -1440,7 +1612,6 @@ export type UpdateNotesDto = {
 
 export type UpdateOfferDto = {
   cashbackAmount: Scalars['Float']['input'];
-  couponCode: Scalars['String']['input'];
   description: Scalars['String']['input'];
   discountType: DiscountType;
   discountValue: Scalars['Float']['input'];
@@ -1450,6 +1621,7 @@ export type UpdateOfferDto = {
   minOrderAmount: Scalars['Float']['input'];
   offerType: OfferTypeStatus;
   startDate: Scalars['String']['input'];
+  title: Scalars['String']['input'];
   usageLimit: Scalars['Float']['input'];
 };
 
@@ -1459,12 +1631,33 @@ export type UpdateOrganizationDto = {
   name: Scalars['String']['input'];
 };
 
+export type UpdatePackageDto = {
+  description: Scalars['String']['input'];
+  discountedPrice: Scalars['Float']['input'];
+  id: Scalars['Float']['input'];
+  name: Scalars['String']['input'];
+  offerId: Scalars['Float']['input'];
+  price: Scalars['Float']['input'];
+};
+
 export type UpdatePermissionDto = {
   action?: InputMaybe<Scalars['String']['input']>;
   appName?: InputMaybe<AppName>;
   description?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['Float']['input'];
   module?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdatePlanDto = {
+  couponId: Scalars['Float']['input'];
+  description: Scalars['String']['input'];
+  discountedPrice: Scalars['Float']['input'];
+  duration: Scalars['Float']['input'];
+  id: Scalars['Float']['input'];
+  name: Scalars['String']['input'];
+  offerId: Scalars['Float']['input'];
+  packageId: Scalars['Float']['input'];
+  price: Scalars['Float']['input'];
 };
 
 export type UpdateProjectDto = {
@@ -1610,6 +1803,20 @@ export type CreateOrganizationMutationVariables = Exact<{
 
 export type CreateOrganizationMutation = { __typename?: 'Mutation', createOrganization: { __typename?: 'Organization', id: string, name: string, description?: string | null, status: string } };
 
+export type EnableOrganizationStatusMutationVariables = Exact<{
+  data: OrganizationStatusDto;
+}>;
+
+
+export type EnableOrganizationStatusMutation = { __typename?: 'Mutation', enableOrganizationStatus: { __typename?: 'Organization', id: string, name: string, description?: string | null, status: string } };
+
+export type UpdateOrganizationMutationVariables = Exact<{
+  updateOrganizationInput: UpdateOrganizationDto;
+}>;
+
+
+export type UpdateOrganizationMutation = { __typename?: 'Mutation', updateOrganization: { __typename?: 'Organization', id: string, name: string, description?: string | null, status: string } };
+
 export type PaginatedOrganizationQueryVariables = Exact<{
   listInputDto: ListInputDto;
 }>;
@@ -1629,6 +1836,13 @@ export type PaginatedProjectsQueryVariables = Exact<{
 
 export type PaginatedProjectsQuery = { __typename?: 'Query', paginatedProjects: { __typename?: 'PaginatedProjects', data: Array<{ __typename?: 'Project', id: string, name: string, description?: string | null, status: string, organizationId: number }> } };
 
+export type PaginatedUsersQueryVariables = Exact<{
+  listInputDto: ListInputDto;
+}>;
+
+
+export type PaginatedUsersQuery = { __typename?: 'Query', paginatedUsers: { __typename?: 'PaginatedUsers', meta: { __typename?: 'Meta', totalItems: number, totalPages: number, currentPage: number, limit: number }, data: Array<{ __typename?: 'User', id: string, name: string, username?: string | null, mobileNo?: number | null, email: string, status: string, avatar?: string | null, parentId?: number | null, userType: UserType }> } };
+
 
 export const RequestOtpDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RequestOtp"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"otpRequestData"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OtpRequestDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"requestOtp"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"otpRequestData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"otpRequestData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"otpGeneratedSuccessfully"}},{"kind":"Field","name":{"kind":"Name","value":"otp"}}]}}]}}]} as unknown as DocumentNode<RequestOtpMutation, RequestOtpMutationVariables>;
 export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"loginData"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ValidateDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"loginData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"loginData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"accessToken"}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
@@ -1636,6 +1850,9 @@ export const DeleteOrganizationDocument = {"kind":"Document","definitions":[{"ki
 export const RegisterDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Register"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"registerData"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RegisterDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"register"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"registerData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"registerData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"mobileNo"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}}]}}]}}]} as unknown as DocumentNode<RegisterMutation, RegisterMutationVariables>;
 export const CreateMeetingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMeeting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"data"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateMeetingDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createMeeting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"Variable","name":{"kind":"Name","value":"data"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"meetingReference"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"createdByUserId"}},{"kind":"Field","name":{"kind":"Name","value":"meetingVenueId"}},{"kind":"Field","name":{"kind":"Name","value":"meetingTypeId"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"organizationId"}},{"kind":"Field","name":{"kind":"Name","value":"parentMeetingId"}},{"kind":"Field","name":{"kind":"Name","value":"startTime"}},{"kind":"Field","name":{"kind":"Name","value":"endTime"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"meetingDate"}},{"kind":"Field","name":{"kind":"Name","value":"meetingAgenda"}},{"kind":"Field","name":{"kind":"Name","value":"meetingUrl"}},{"kind":"Field","name":{"kind":"Name","value":"attendees"}},{"kind":"Field","name":{"kind":"Name","value":"uploadDoc"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]}}]} as unknown as DocumentNode<CreateMeetingMutation, CreateMeetingMutationVariables>;
 export const CreateOrganizationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateOrganization"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"createOrganizationInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateOrganizationDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createOrganization"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"createOrganizationInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"createOrganizationInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<CreateOrganizationMutation, CreateOrganizationMutationVariables>;
+export const EnableOrganizationStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"EnableOrganizationStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"data"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OrganizationStatusDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"enableOrganizationStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"Variable","name":{"kind":"Name","value":"data"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<EnableOrganizationStatusMutation, EnableOrganizationStatusMutationVariables>;
+export const UpdateOrganizationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOrganization"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updateOrganizationInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateOrganizationDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateOrganization"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updateOrganizationInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updateOrganizationInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>;
 export const PaginatedOrganizationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaginatedOrganization"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paginatedOrganization"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"meta"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}}]}},{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]}}]} as unknown as DocumentNode<PaginatedOrganizationQuery, PaginatedOrganizationQueryVariables>;
 export const ModulesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Modules"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"permissionGroup"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"modules"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"groups"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"action"}},{"kind":"Field","name":{"kind":"Name","value":"appName"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"groupName"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"module"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<ModulesQuery, ModulesQueryVariables>;
 export const PaginatedProjectsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaginatedProjects"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paginatedProjects"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"organizationId"}}]}}]}}]}}]} as unknown as DocumentNode<PaginatedProjectsQuery, PaginatedProjectsQueryVariables>;
+export const PaginatedUsersDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaginatedUsers"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paginatedUsers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"meta"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}}]}},{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"username"}},{"kind":"Field","name":{"kind":"Name","value":"mobileNo"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"parentId"}},{"kind":"Field","name":{"kind":"Name","value":"userType"}}]}}]}}]}}]} as unknown as DocumentNode<PaginatedUsersQuery, PaginatedUsersQueryVariables>;

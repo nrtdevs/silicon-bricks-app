@@ -66,4 +66,24 @@ query PaginatedOrganization($listInputDto: ListInputDTO!) {
   }
 }
 
-
+query PaginatedUsers($listInputDto: ListInputDTO!) {
+  paginatedUsers(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      username
+      mobileNo
+      email
+      status
+      avatar
+      parentId
+      userType
+    }
+  }
+}
