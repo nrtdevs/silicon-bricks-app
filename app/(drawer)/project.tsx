@@ -71,11 +71,12 @@ const Project = () => {
   const [deletePopupVisible, setDeletePopupVisible] = useState(false);
   const showDialogue = () => setVisible(true);
   const [editVisible, setEditVisible] = useState(false);
-  const [getProjects, { data, refetch }] = useLazyQuery(GetAllProjects);
+  const [getProjects, { data, refetch,loading:listLoading }] = useLazyQuery(GetAllProjects);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
   const datax = data?.paginatedProjects?.data;
-  const [createProject, { loading }] = useMutation(CREATE_PROJECT_MUTATION, {
+  
+  const [createProject, { loading:loadingCreate }] = useMutation(CREATE_PROJECT_MUTATION, {
     onCompleted: (data) => {
       reset()
       Alert.alert("success", "Project create successfully!");
@@ -118,7 +119,6 @@ const Project = () => {
     refetch(); // Refresh Project List
   };
 
-
   const handleEdit = async (formData: any) => {
     if (!selectedProjectId) {
       console.error("No project selected for update");
@@ -143,7 +143,6 @@ const Project = () => {
     }
   };
 
-
   useEffect(() => {
     getProjects({
       variables: {
@@ -153,13 +152,13 @@ const Project = () => {
         },
       },
     });
-  }, [getProjects])
+  }, [])
 
   const [deleteProject] = useMutation(DELETE_PROJECT, {
     onCompleted: () => {
       console.log("Project deleted successfully");
       setDeletePopupVisible(false);
-      // Refresh the list after deletion 
+      refetch();
     },
     onError: (error) => {
       console.error("Error deleting project:", error);
@@ -185,6 +184,8 @@ const Project = () => {
       }
     }
   };
+
+  if(listLoading) return <ActivityIndicator size={'large'} style={{flex:1,justifyContent:'center',alignItems:'center'}} />
   return (
     <CustomHeader>
       <View style={styles.container}>
@@ -279,9 +280,9 @@ const Project = () => {
                 <TouchableOpacity
                   onPress={handleSubmit(onSubmit)}
                   style={styles.buttonContainerSave}
-                  disabled={loading}
+                  disabled={loadingCreate}
                 >
-                  {loading ? (
+                  {loadingCreate ? (
                     <ActivityIndicator color="white" />
                   ) : (
                     <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>

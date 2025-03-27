@@ -59,4 +59,6 @@ export const labels = {
   privacyPolicy:"Privacy Policy",
   version:"Version",
 
+  projectName : "Project Name",
+  description : "Description"
 };
