@@ -58,4 +58,5 @@ export const labels = {
   termsOfService:"Terms of Service",
   privacyPolicy:"Privacy Policy",
   version:"Version",
+
 };
