@@ -8,13 +8,13 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { CreateOrganizationDocument, DeleteOrganizationDocument, EnableOrganizationStatusDocument, PaginatedOrganizationDocument, UpdateOrganizationDocument } from "@/graphql/generated";
+import { CreateOrganizationDocument, DeleteOrganizationDocument, EnableOrganizationStatusDocument, PaginatedOrganizationDocument, PaginatedUsersDocument, UpdateOrganizationDocument } from "@/graphql/generated";
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import { ScrollView } from "react-native";
-import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -46,9 +46,56 @@ const organization = () => {
   });
 
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [organizationData, { error, data, loading, refetch }] = useLazyQuery(
-    PaginatedOrganizationDocument
+  const [userData, { error, data, loading, refetch }] = useLazyQuery(
+    PaginatedUsersDocument
   );
+
+  // const [createOrganization, createOrganizationState] = useMutation(CreateOrganizationDocument, {
+  //   onCompleted: (data) => {
+  //     reset()
+  //     refetch();
+  //     setModalVisible(false);
+  //     Alert.alert("success", "Project create successfully!");
+  //   },
+  //   onError: (error) => {
+  //     Alert.alert("Error", error.message);
+  //   }
+  // });
+
+  // const [updateOrganization, updateOrganizationState] = useMutation(UpdateOrganizationDocument, {
+  //   onCompleted: (data) => {
+  //     reset()
+  //     refetch();
+  //     setEditModal(false);
+  //     setModalVisible(false);
+  //     Alert.alert("success", "Project updated successfully!");
+  //   },
+  //   onError: (error) => {
+  //     Alert.alert("Error", error.message);
+  //   }
+  // });
+
+  // const [deleteOrganization, deleteOrganizationState] = useMutation(DeleteOrganizationDocument, {
+  //   onCompleted: (data) => {
+  //     refetch();
+  //     Alert.alert("success", "Project deleted successfully!");
+  //   },
+  //   onError: (error) => {
+  //     Alert.alert("Error", error.message);
+  //   }
+  // });
+
+  // const [updateOrganizationStatus, updateOrganizationStatusState] = useMutation(EnableOrganizationStatusDocument, {
+  //   onCompleted: (data) => {
+  //     refetch();
+  //     setStatusModalVisible(false);
+  //     Alert.alert("success", "Status updated successfully!");
+  //   },
+  //   onError: (error) => {
+  //     Alert.alert("Error", error.message);
+  //   }
+  // });
+
   const [isModalVisible, setModalVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const [editModal, setEditModal] = useState<boolean>(false);
@@ -60,61 +107,16 @@ const organization = () => {
   }>(defaultValue);
   const [selected, setSelected] = useState<any>([]);
 
-  const [createOrganization, createOrganizationState] = useMutation(CreateOrganizationDocument, {
-    onCompleted: (data) => {
-      reset()
-      refetch();
-      setModalVisible(false);
-      Alert.alert("success", "Project create successfully!");
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    }
-  });
-
-  const [updateOrganization, updateOrganizationState] = useMutation(UpdateOrganizationDocument, {
-    onCompleted: (data) => {
-      reset()
-      refetch();
-      setEditModal(false);
-      setModalVisible(false);
-      Alert.alert("success", "Project updated successfully!");
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    }
-  });
-
-  const [deleteOrganization, deleteOrganizationState] = useMutation(DeleteOrganizationDocument, {
-    onCompleted: (data) => {
-      refetch();
-      Alert.alert("success", "Project deleted successfully!");
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    }
-  });
-
-  const [updateOrganizationStatus, updateOrganizationStatusState] = useMutation(EnableOrganizationStatusDocument, {
-    onCompleted: (data) => {
-      refetch();
-      setStatusModalVisible(false);
-      Alert.alert("success", "Status updated successfully!");
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    }
-  });
-
   // const setCurrentOrganizationData() => {
   //   setValue("name", currentOrganization?.name)
   //   setValue("description", currentOrganization?.description)
   // }
 
-  useEffect(() => {
-    setValue("name", currentOrganization?.name)
-    setValue("description", currentOrganization?.description)
-  }, [currentOrganization])
+
+  // useEffect(() => {
+  //   setValue("name", currentOrganization?.name)
+  //   setValue("description", currentOrganization?.description)
+  // }, [currentOrganization])
 
   // const 
   const pickerData = [
@@ -126,12 +128,17 @@ const organization = () => {
 
 
   useEffect(() => {
-    organizationData({
+    userData({
       variables: {
-        listInputDto: {},
+        listInputDto: {
+          limit: 10,
+          page: 1
+        }
       },
     });
   }, []);
+
+  console.log(data?.paginatedUsers?.data);
 
   const onSubmit = (data: any) => {
     let param = {
@@ -139,47 +146,41 @@ const organization = () => {
       ...data
     }
     console.log(param);
-    editModal ?
-      updateOrganization({
-        variables: {
-          updateOrganizationInput: param,
-        },
-      })
-      : createOrganization({
-        variables: {
-          createOrganizationInput: {
-            ...data
-          },
-        },
-      });
+    // editModal ?
+    //   updateOrganization({
+    //     variables: {
+    //       updateOrganizationInput: param,
+    //     },
+    //   })
+    //   : createOrganization({
+    //     variables: {
+    //       createOrganizationInput: {
+    //         ...data
+    //       },
+    //     },
+    //   });
 
   };
 
-  // updateOrganizationStatus({
-  //   data: {
-  //     id: null,
-  //     status: null
-  //   }
-  // }) 
   console.log(watch("topic"));
 
 
-  useEffect(() => {
-    if (watch("topic")) {
-      updateOrganizationStatus({
-        variables: {
-          data: {
-            id: Number(currentOrganization?.id),
-            status: watch("topic")?.value
-          }
-        },
-      });
-    }
-  }, [watch("topic")])
+  // useEffect(() => {
+  //   if (watch("topic")) {
+  //     updateOrganizationStatus({
+  //       variables: {
+  //         data: {
+  //           id: Number(currentOrganization?.id),
+  //           status: watch("topic")?.value
+  //         }
+  //       },
+  //     });
+  //   }
+  // }, [watch("topic")])
 
-  if (loading) {
-    return <Loader />
-  }
+  // if (loading) {
+  //   return <Loader />
+  // }
 
   return (
     <CustomHeader>
@@ -221,7 +222,7 @@ const organization = () => {
         }
         <View style={styles.organizationParentContainer}>
           <FlatList
-            data={data?.paginatedOrganization?.data}
+            data={data?.paginatedUsers?.data}
             renderItem={({ item, index }: any) => (
               <View
                 key={index}
@@ -230,6 +231,20 @@ const organization = () => {
                   { backgroundColor: Colors[theme].cartBg },
                 ]}
               >
+                <ThemedText
+                  style={[
+                    styles.status,
+                    {
+                      // color:
+                      //   item.status == "active" ? Colors?.green : "#6d6d1b",
+                      backgroundColor:
+                        theme == "dark" ? Colors?.white : "#e6e2e2",
+                    },
+                  ]}
+                >
+                  {item?.status}
+                </ThemedText>
+
                 <View style={styles.organizationHeader}>
                   <ThemedText type="subtitle">{item?.name}</ThemedText>
                   <View style={styles.organizationInfo}>
@@ -238,24 +253,36 @@ const organization = () => {
                       size={ms(20)}
                       color={Colors[theme].text}
                       onPress={() => {
-                        setCurrentOrganization({
-                          name: item?.name,
-                          description: item?.description,
-                          id: item?.id,
-                        });
+                        // setCurrentOrganization({
+                        //   name: item?.name,
+                        //   description: item?.description,
+                        //   id: item?.id,
+                        // });
                         setStatusModalVisible(true);
                       }}
                     />
+
+                    <AntDesign name="eyeo" size={ms(20)}
+                      color={Colors[theme].text}
+                      onPress={() => {
+                        // setCurrentOrganization({
+                        //   name: item?.name,
+                        //   description: item?.description,
+                        //   id: item?.id,
+                        // });
+                        setStatusModalVisible(true);
+                      }} />
+
                     <Feather
                       name="edit"
                       size={ms(20)}
                       color={Colors[theme].text}
                       onPress={() => {
-                        setCurrentOrganization({
-                          name: item?.name,
-                          description: item?.description,
-                          id: item?.id,
-                        });
+                        // setCurrentOrganization({
+                        //   name: item?.name,
+                        //   description: item?.description,
+                        //   id: item?.id,
+                        // });
                         // setCurrentOrganizationData();
                         setModalVisible(true);
                         setEditModal(true);
@@ -272,11 +299,11 @@ const organization = () => {
                           [
                             {
                               text: "Yes", onPress: () => {
-                                deleteOrganization({
-                                  variables: {
-                                    deleteOrganizationId: Number(item?.id),
-                                  }
-                                });
+                                // deleteOrganization({
+                                //   variables: {
+                                //     deleteOrganizationId: Number(item?.id),
+                                //   }
+                                // });
                               }
                             },
                             { text: "No", onPress: () => { } },
@@ -287,22 +314,15 @@ const organization = () => {
                     />
                   </View>
                 </View>
-                <ThemedText
-                  style={[
-                    styles.status,
-                    {
-                      color:
-                        item.status == "active" ? Colors?.green : "#6d6d1b",
-                      backgroundColor:
-                        theme == "dark" ? Colors?.white : "#e6e2e2",
-                    },
-                  ]}
-                >
-                  {item?.status}
-                </ThemedText>
-                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                  {item?.description}
-                </ThemedText>
+
+                <View style={styles.userInfo}>
+                  <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                    {item?.email}
+                  </ThemedText>
+                  <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                    {item?.mobileNo}
+                  </ThemedText>
+                </View>
               </View>
             )}
           />
@@ -360,6 +380,7 @@ const organization = () => {
               name={"name"}
               inputStyle={[{ lineHeight: ms(20) }]}
               label={"Name"}
+              // placeholder={editModal ? "Test Organization" : "Enter Module"}
               onFocus={() => setIsFocused("name")}
               rules={{
                 required: editModal ? "Text organization is required" : "Module name is required"
@@ -372,8 +393,9 @@ const organization = () => {
               control={control}
               name={"description"}
               label={"Description"}
+              // placeholder={editModal ? "Test organization description" : "Enter description"}
               labelStyle={styles.label}
-              onFocus={() => setIsFocused("description")}
+              onFocus={() => setIsFocused(editModal ? "testDescription" : "description")}
               rules={{
                 required: editModal ? "Test organization description is required" : "Description is required",
               }}
@@ -382,45 +404,10 @@ const organization = () => {
 
           <CustomButton
             title="Submit"
-            isLoading={createOrganizationState.loading || updateOrganizationState.loading}
             onPress={() => {
               handleSubmit(onSubmit)();
             }}
             style={{ backgroundColor: Colors[theme].cartBg, marginTop: vs(10) }}
-          />
-        </View>
-      </Modal>
-
-      <Modal
-        isVisible={isStatusModalVisible}
-        onBackdropPress={() => {
-          setStatusModalVisible(false);
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: Colors?.white,
-            height: 380,
-            width: s(300),
-            borderRadius: 10,
-            alignSelf: "center",
-            padding: 10,
-          }}
-        >
-          <CustomValidation
-            data={pickerData}
-            type="picker"
-            hideStar
-            control={control}
-            name="topic"
-            placeholder="Topic"
-            inputStyle={{ height: vs(50) }}
-            rules={{
-              required: {
-                value: true,
-                message: "Select a topic",
-              },
-            }}
           />
         </View>
       </Modal>
@@ -434,17 +421,20 @@ const styles = ScaledSheet.create({
   container: {
     flexGrow: 1,
   },
-  contentContainer: {
-    flex: 1,
-    padding: "12@ms",
-  },
   selectedContainer: {
-
+    width: "100%",
+    position: "absolute",
+    top: '60@vs',
+    alignSelf: "center",
   },
   searchedResult: {
     marginBottom: "12@ms",
     borderRadius: "10@ms",
     padding: "8@ms",
+  },
+  contentContainer: {
+    flex: 1,
+    padding: "12@ms",
   },
   searchContainer: {
     width: "100%",
@@ -470,7 +460,7 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
   },
   organizationInfo: {
-    width: "30%",
+    width: "35%",
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -487,4 +477,9 @@ const styles = ScaledSheet.create({
     marginBottom: "12@ms",
     fontWeight: 400,
   },
+  userInfo: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  }
 });

@@ -51,13 +51,14 @@ const SignUp = () => {
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [1, 1],
+      aspect: [1, 2],
       quality: 1
     })
     if (!result.canceled) {
       setImage(result.assets[0].uri)
     }
   }
+
   const handleSignup = () => {
     if (!validationInput()) return
     console.log('Sign up successful')
@@ -94,12 +95,12 @@ const SignUp = () => {
             alignContent: 'center'
           }}
         >
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.takeButton}
             onPress={handleImagePickerPress}
           >
             <Text style={{ color: 'white', fontSize: 14 }}>Take A photo</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <TextInput
           placeholder="Enter Name"

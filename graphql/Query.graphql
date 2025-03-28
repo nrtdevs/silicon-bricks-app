@@ -87,3 +87,21 @@ query PaginatedUsers($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+query PaginatedRoles($listInputDto: ListInputDTO!) {
+  paginatedRoles(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      description
+      roleType
+      permissionCount
+    }
+  }
+}

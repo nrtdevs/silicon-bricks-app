@@ -44,11 +44,9 @@ mutation CreateMeeting($data: CreateMeetingDto!) {
     id
     meetingReference
     projectId
-    createdByUserId
     meetingVenueId
     meetingTypeId
     title
-    organizationId
     parentMeetingId
     startTime
     endTime
@@ -95,3 +93,18 @@ mutation UpdateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
   }
 }
 
+mutation CreateUser($data: CreateUserDto!) {
+  createUser(data: $data) {
+    avatar
+    createdAt
+    deletedAt
+    email
+    id
+    mobileNo
+    name
+    status
+    username
+    userType
+    updatedAt
+  }
+}
