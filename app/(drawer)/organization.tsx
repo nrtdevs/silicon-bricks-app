@@ -105,12 +105,12 @@ const organization = () => {
     description: string;
     id: string;
   }>(defaultValue);
+  const [selected, setSelected] = useState<any>([]);
 
   // const setCurrentOrganizationData() => {
   //   setValue("name", currentOrganization?.name)
   //   setValue("description", currentOrganization?.description)
   // }
-
 
   useEffect(() => {
     setValue("name", currentOrganization?.name)
@@ -191,6 +191,11 @@ const organization = () => {
               searchQuery={searchQuery}
               onChangeText={(text) => {
                 setSearchQuery(text);
+                // setSelected(
+                //   dummyData.filter((item) =>
+                //     item.language.toLowerCase().includes(text.toLowerCase())
+                //   )
+                // );
               }}
               placeholder={labels?.searchTeam}
               loading={loading}
@@ -198,6 +203,11 @@ const organization = () => {
                 setSearchQuery("");
               }}
             />
+            {
+              selected && <View style={styles.selectedContainer}>
+                <ThemedText>lkjlkj</ThemedText>
+              </View>
+            }
           </View>
           <Pressable
             style={styles.buttonContainer}
@@ -426,6 +436,9 @@ const styles = ScaledSheet.create({
   contentContainer: {
     flex: 1,
     padding: "12@ms",
+  },
+  selectedContainer: {
+
   },
   searchContainer: {
     width: "100%",

@@ -105,6 +105,7 @@ const organization = () => {
     description: string;
     id: string;
   }>(defaultValue);
+  const [selected, setSelected] = useState<any>([]);
 
   // const setCurrentOrganizationData() => {
   //   setValue("name", currentOrganization?.name)
@@ -177,9 +178,9 @@ const organization = () => {
   //   }
   // }, [watch("topic")])
 
-  if (loading) {
-    return <Loader />
-  }
+  // if (loading) {
+  //   return <Loader />
+  // }
 
   return (
     <CustomHeader>
@@ -190,6 +191,11 @@ const organization = () => {
               searchQuery={searchQuery}
               onChangeText={(text) => {
                 setSearchQuery(text);
+                // setSelected(
+                //   dummyData.filter((item) =>
+                //     item.language.toLowerCase().includes(text.toLowerCase())
+                //   )
+                // );
               }}
               placeholder={labels?.searchTeam}
               loading={loading}
@@ -205,6 +211,15 @@ const organization = () => {
             <Feather name="plus-square" size={24} color={Colors[theme].text} />
           </Pressable>
         </View>
+        {
+          selected && <View style={styles.selectedContainer}>
+            {
+              selected.map(() => (<View style={[styles.searchedResult, { backgroundColor: Colors[theme].cartBg }]}>
+                <ThemedText>lkjlkj</ThemedText>
+              </View>))
+            }
+          </View>
+        }
         <View style={styles.organizationParentContainer}>
           <FlatList
             data={data?.paginatedUsers?.data}
@@ -405,6 +420,17 @@ export default organization;
 const styles = ScaledSheet.create({
   container: {
     flexGrow: 1,
+  },
+  selectedContainer: {
+    width: "100%",
+    position: "absolute",
+    top: '60@vs',
+    alignSelf: "center",
+  },
+  searchedResult: {
+    marginBottom: "12@ms",
+    borderRadius: "10@ms",
+    padding: "8@ms",
   },
   contentContainer: {
     flex: 1,
