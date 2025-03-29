@@ -71,12 +71,12 @@ const Project = () => {
   const [deletePopupVisible, setDeletePopupVisible] = useState(false);
   const showDialogue = () => setVisible(true);
   const [editVisible, setEditVisible] = useState(false);
-  const [getProjects, { data, refetch,loading:listLoading }] = useLazyQuery(GetAllProjects);
+  const [getProjects, { data, refetch, loading: listLoading }] = useLazyQuery(GetAllProjects);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
   const datax = data?.paginatedProjects?.data;
-  
-  const [createProject, { loading:loadingCreate }] = useMutation(CREATE_PROJECT_MUTATION, {
+
+  const [createProject, { loading: loadingCreate }] = useMutation(CREATE_PROJECT_MUTATION, {
     onCompleted: (data) => {
       reset()
       Alert.alert("success", "Project create successfully!");
@@ -178,14 +178,14 @@ const Project = () => {
   const handleDelete = async () => {
     if (selectedProjectId !== null) {
       try {
-        await deleteProject({ variables: { deleteProjectId: Number(selectedProjectId)} });
+        await deleteProject({ variables: { deleteProjectId: Number(selectedProjectId) } });
       } catch (error) {
         console.error("Error:", error);
       }
     }
   };
 
-  if(listLoading) return <ActivityIndicator size={'large'} style={{flex:1,justifyContent:'center',alignItems:'center'}} />
+  if (listLoading) return <ActivityIndicator size={'large'} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />
   return (
     <CustomHeader>
       <View style={styles.container}>
@@ -224,7 +224,7 @@ const Project = () => {
                   </TouchableOpacity>
                   <View style={{ width: 10 }}></View>
                   <TouchableOpacity
-                   onPress={() => showDeleteDialogue(item.id)}
+                    onPress={() => showDeleteDialogue(item.id)}
                   >
                     <MaterialCommunityIcons
                       name="delete-empty"
@@ -275,8 +275,6 @@ const Project = () => {
                 />
               </Dialog.Content>
               <Dialog.Actions>
-
-
                 <TouchableOpacity
                   onPress={handleSubmit(onSubmit)}
                   style={styles.buttonContainerSave}
