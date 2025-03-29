@@ -37,30 +37,6 @@ mutation Register($registerData: RegisterDto!) {
   }
 }
 
-#CREATE ORGANIZATION
-
-mutation CreateMeeting($data: CreateMeetingDto!) {
-  createMeeting(data: $data) {
-    id
-    meetingReference
-    projectId
-    meetingVenueId
-    meetingTypeId
-    title
-    parentMeetingId
-    startTime
-    endTime
-    status
-    meetingDate
-    meetingAgenda
-    meetingUrl
-    attendees
-    uploadDoc
-    createdAt
-    updatedAt
-    deletedAt
-  }
-}
 
 mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
   createOrganization(createOrganizationInput: $createOrganizationInput) {
@@ -106,5 +82,23 @@ mutation CreateUser($data: CreateUserDto!) {
     username
     userType
     updatedAt
+  }
+}
+
+mutation UpdateProfile($data: UpdateUserDto!) {
+  updateProfile(data: $data) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
+    userType
+    createdAt
+    updatedAt
+    deletedAt
   }
 }

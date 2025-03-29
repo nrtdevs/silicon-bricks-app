@@ -105,3 +105,21 @@ query PaginatedRoles($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+query FindUserById($findUserByIdId: Float!) {
+  findUserById(id: $findUserByIdId) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
+    userType
+    createdAt
+    updatedAt
+    deletedAt
+  }
+}

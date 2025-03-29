@@ -62,13 +62,11 @@ const UserScreen = () => {
   });
   const [image, setImage] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [userData, { error, data, loading, refetch }] = useLazyQuery(
-    PaginatedUsersDocument
-  );
   const [isModalVisible, setModalVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const [editModal, setEditModal] = useState<boolean>(false);
-  const [isStatusModalVisible, setStatusModalVisible] = useState(false);
+  const [isInfoModalVisible, setInfoModalVisible] = useState(false);
+  const [isHierarchyModalVisible, setHierarchyModalVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState<{
     name: string;
     email: string;
@@ -76,6 +74,10 @@ const UserScreen = () => {
     role: string;
   }>(defaultValue);
   const [selected, setSelected] = useState<any>([]);
+
+  const [userData, { error, data, loading, refetch }] = useLazyQuery(
+    PaginatedUsersDocument
+  );
   const [createUser, createUserState] = useMutation(CreateUserDocument, {
     onCompleted: (data) => {
       reset();
@@ -84,22 +86,24 @@ const UserScreen = () => {
       Alert.alert("success", "Project create successfully!");
     },
     onError: (error) => {
-      Alert.alert("Error555", error.message);
+      console.log("Error", error.message);
+      Alert.alert("Error", error.message);
     },
   });
 
-  // const handleImagePickerPress = async () => {
-  //   let result = await ImagePicker.launchImageLibraryAsync({
-  //     mediaTypes: ['images'],
-  //     allowsEditing: true,
-  //     aspect: [1, 1],
-  //     quality: 1
-  //   })
-  //   if (!result.canceled) {
-  //     setImage(result.assets[0].uri)
-  //   }
-  // }
-  // console.log('image',image);
+  const handleImagePickerPress = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct media type
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri)
+    }
+    console.log('image', image)
+  };
 
   const [
     getUserRoles,
@@ -108,7 +112,6 @@ const UserScreen = () => {
   useEffect(() => {
     getUserRoles();
   }, []);
-  console.log("roleData", roleData);
 
   const [
     organizationData,
@@ -118,6 +121,7 @@ const UserScreen = () => {
       loading: OrganizationLoading,
     },
   ] = useLazyQuery(PaginatedOrganizationDocument);
+
   // const [updateOrganization, updateOrganizationState] = useMutation(UpdateOrganizationDocument, {
   //   onCompleted: (data) => {
   //     reset()
@@ -185,6 +189,15 @@ const UserScreen = () => {
 
   const onSubmit = (data: any) => {
     // console.log("000", data);
+    const params = {
+      email: data?.email,
+      mobileNo: Number(data?.phoneNo),
+      name: data?.name,
+      organizationId: Number(data?.Organization?.id),
+      roleId: Number(data?.role?.id),
+    }
+    console.log(params);
+
     // let param = {
     //   id: Number(currentOrganization?.id),
     //   ...data
@@ -199,37 +212,12 @@ const UserScreen = () => {
       {}
       : createUser({
         variables: {
-          data: {
-            email: data?.email,
-            mobileNo: Number(data?.phoneNo),
-            name: data?.name,
-            organizationId: 1,
-            roleId: Number(data?.role?.id),
-          },
+          data: params,
         },
       });
   };
 
-  // useEffect(() => {
-  //   if (watch("topic")) {
-  //     updateOrganizationStatus({
-  //       variables: {
-  //         data: {
-  //           id: Number(currentOrganization?.id),
-  //           status: watch("topic")?.value
-  //         }
-  //       },
-  //     });
-  //   }
-  // }, [watch("topic")])
-
-  // if (loading) {
-  //   return <Loader />
-  // }
-
-  // console.log("000", data?.paginatedUsers?.data);
-
-  if(OrganizationLoading){
+  if (OrganizationLoading) {
     return <Loader />
   }
 
@@ -283,8 +271,6 @@ const UserScreen = () => {
           <FlatList
             data={data?.paginatedUsers?.data}
             renderItem={({ item, index }: any) => {
-
-
               return (
                 <View
                   key={index}
@@ -315,12 +301,7 @@ const UserScreen = () => {
                         size={ms(20)}
                         color={Colors[theme].text}
                         onPress={() => {
-                          // setCurrentOrganization({
-                          //   name: item?.name,
-                          //   description: item?.description,
-                          //   id: item?.id,
-                          // });
-                          setStatusModalVisible(true);
+                          setHierarchyModalVisible(true);
                         }}
                       />
 
@@ -329,12 +310,13 @@ const UserScreen = () => {
                         size={ms(20)}
                         color={Colors[theme].text}
                         onPress={() => {
-                          // setCurrentOrganization({
-                          //   name: item?.name,
-                          //   description: item?.description,
-                          //   id: item?.id,
-                          // });
-                          setStatusModalVisible(true);
+                          setCurrentUser({
+                            name: item?.name,
+                            email: item?.email,
+                            phoneNo: item?.mobileNo.toString(),
+                            role: item?.name,
+                          });
+                          setInfoModalVisible(true);
                         }}
                       />
 
@@ -347,7 +329,7 @@ const UserScreen = () => {
                           // setValue("email", item?.email)
                           // setValue("phoneNo", item?.mobileNo.toString())
                           // setValue("role", )
-                          // console.log("item",item);
+                          console.log("item", item);
 
                           setCurrentUser({
                             name: item?.name,
@@ -401,6 +383,7 @@ const UserScreen = () => {
         </View>
       </ThemedView>
 
+      {/* Edit modal */}
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={() => {
@@ -410,22 +393,22 @@ const UserScreen = () => {
           setModalVisible(false);
         }}
       >
-        <View
-          style={{
-            backgroundColor: Colors[theme].background,
-            height: vs(650),
+        <ScrollView
+          contentContainerStyle={{
+            backgroundColor: Colors[theme].cartBg,
+            height: vs(640),
             width: '100%',
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
-            justifyContent: "center",
+            justifyContent: "flex-start",
           }}
         >
           <View
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              padding: 10,
+              paddingHorizontal: 10,
             }}
           >
             <ThemedText type="subtitle">
@@ -444,9 +427,9 @@ const UserScreen = () => {
           </View>
 
           <View style={{ padding: 10 }}>
-            {/* <Pressable onPress={() => handleImagePickerPress()} style={styles.imageContainer}>
+            <Pressable onPress={handleImagePickerPress} style={styles.imageContainer}>
               {image && <Image source={{ uri: image }} style={styles.image} />}
-            </Pressable> */}
+            </Pressable>
             <CustomValidation
               type="input"
               control={control}
@@ -540,27 +523,105 @@ const UserScreen = () => {
           <CustomButton
             title="Submit"
             onPress={handleSubmit(onSubmit)}
-            style={{ backgroundColor: Colors[theme].cartBg, marginTop: vs(10) }}
+            style={{ backgroundColor: Colors[theme].background, marginTop: vs(10) }}
           />
-        </View>
+        </ScrollView>
       </Modal>
 
+      {/* user info modal */}
       <Modal
-        isVisible={isStatusModalVisible}
+        isVisible={isInfoModalVisible}
         onBackdropPress={() => {
-          setStatusModalVisible(false);
+          setInfoModalVisible(false);
+          setCurrentUser(defaultValue);
         }}
       >
         <View
           style={{
-            backgroundColor: Colors?.white,
-            height: 380,
+            backgroundColor: Colors[theme].cartBg,
+            height: vs(380),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
           }}
-        ></View>
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: ms(10),
+            }}
+          >
+            <ThemedText type="subtitle">
+              User
+            </ThemedText>
+            <Pressable
+              onPress={() => {
+                setCurrentUser(defaultValue);
+                setInfoModalVisible(false);
+              }}
+            >
+              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+            </Pressable>
+          </View>
+          <View style={{ gap: vs(10), padding: ms(10) }}>
+            <View >
+              <ThemedText type="subtitle">Name</ThemedText>
+              <ThemedText type="default">{currentUser?.name}</ThemedText>
+            </View>
+            <View >
+              <ThemedText type="subtitle">Email</ThemedText>
+              <ThemedText type="default">{currentUser?.email}</ThemedText>
+            </View>
+            <View >
+              <ThemedText type="subtitle">Phone No</ThemedText>
+              <ThemedText type="default">{currentUser?.phoneNo}</ThemedText>
+            </View>
+            <View >
+              <ThemedText type="subtitle">Role</ThemedText>
+              <ThemedText type="default">{currentUser?.role}</ThemedText>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Hierarchy modal */}
+      <Modal
+        isVisible={isHierarchyModalVisible}
+        onBackdropPress={() => {
+          setHierarchyModalVisible(false);
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: Colors[theme].cartBg,
+            height: vs(380),
+            width: s(300),
+            borderRadius: 10,
+            alignSelf: "center",
+            padding: 10,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: ms(10),
+            }}
+          >
+            <ThemedText type="subtitle">
+              Hierarchy
+            </ThemedText>
+            <Pressable
+              onPress={() => {
+                setHierarchyModalVisible(false);
+              }}
+            >
+              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+            </Pressable>
+          </View>
+        </View>
       </Modal>
     </CustomHeader>
   );
@@ -633,14 +694,18 @@ const styles = ScaledSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  image: {
-    width: 200,
-    height: 200,
-  },
   imageContainer: {
-    width: "100%",
+    width: ms(50),
+    height: ms(50),
+    borderRadius: ms(50),
     marginBottom: "12@ms",
-    backgroundColor: Colors.red,
+    backgroundColor: Colors.gray,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: 40,
     height: 40,
+    resizeMode: "cover", 
   },
 });

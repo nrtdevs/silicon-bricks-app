@@ -1,4 +1,4 @@
-import { Pressable, View, ScrollView, Alert, Button, Text } from "react-native";
+import { Pressable, View, ScrollView, Alert, Button, Text, Image } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { Switch } from "@rneui/themed";
 import CustomHeader from "@/components/CustomHeader";
@@ -8,6 +8,7 @@ import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import { labels } from "@/constants/Labels";
 import {
   AntDesign,
+  Entypo,
   Feather,
   FontAwesome,
   Ionicons,
@@ -16,35 +17,100 @@ import {
 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import asyncKeys from "@/constants/asyncKeys";
 import alertMsg from "@/constants/alertMsg";
 import Loader from "@/components/ui/Loader";
 import { NativeModules } from "react-native";
-import GradientText from "@/components/ui/GradientText";
 import CustomSwitch from "@/components/ui/CustomSwitch";
 import Toggle from "react-native-toggle-element";
+import * as SecureStore from "expo-secure-store";
+import { ThemedView } from "@/components/ThemedView";
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { FindUserByIdDocument, UpdateProfileDocument } from "@/graphql/generated";
+import Modal from "react-native-modal";
+import CustomValidation from "@/components/CustomValidation";
+import { useForm } from "react-hook-form";
+import CustomButton from "@/components/CustomButton";
+import * as ImagePicker from "expo-image-picker";
 
 
 const { NetworkManager } = NativeModules;
 
 const SettingScreen = () => {
-  //global hooks
   const { theme, setTheme } = useTheme();
-
-  // local states
+  const [userId, setUserId] = useState<number>(0);
+  const [image, setImage] = useState<string>("");
   const [toggleValue, setToggleValue] = useState<any>(false);
+  const [isModalVisible, setModalVisible] = useState<boolean>(false)
+  const { control, setValue, handleSubmit, watch } = useForm<{ name: string, email: string, phoneNo: string }>({
+    name: "",
+    email: "",
+    phoneNo: ""
+  });
+  const [userData, { data, error, loading, refetch }] = useLazyQuery<any>(FindUserByIdDocument)
+  // const [updateUser, updateUserState] = useMutation(UpdateProfileDocument, {
+  //   onCompleted: () => {
+  //     refetch();
+  //     setModalVisible(false);
+  //     Alert.alert("success", "User updated successfully!");
+  //   },
+  //   onError: () => {
+  //     console.log("0009", JSON.stringify(updateUserState))
+  //     // Alert.alert("Error", updateUserState);
+  //   }
+  // })
+
+  const [updateUser, updateUserState] = useMutation(UpdateProfileDocument, {
+    onCompleted: (data) => {
+      refetch();
+      setModalVisible(false);
+    },
+    onError: (error) => {
+      Alert.alert("Error9", error.message);
+    }
+  });
 
   useEffect(() => {
     setToggleValue(theme === "light" ? true : false);
   }, [theme]);
 
+  // useEffect(() => {
+  //   getUserData();
+  // }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      getUserData();
+
+    }, [])
+  );
+
+  // const isFocused = useIsFocused();
+
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     getUserData()
+  //   }
+  // }, [isFocused]);
+
+
+  const getUserData = async () => {
+    const id = await SecureStore.getItemAsync("userId");
+    setUserId(Number(id));
+    userData({
+      variables: {
+        findUserByIdId: Number(id)
+      }
+    })
+  };
+
   const rightIcon = () => {
     return (
       <CustomSwitch
         thumbColor={Colors.white}
-        onValueChange={() => {
-        }}
+        onValueChange={() => { }}
         value={false}
         style={styles.switchStyle}
       />
@@ -95,6 +161,7 @@ const SettingScreen = () => {
       </View>
     );
   };
+
   const firstData = [
     {
       id: 1,
@@ -102,6 +169,10 @@ const SettingScreen = () => {
       iconLib: AntDesign,
       iconName: "profile",
       onTouchAction: () => {
+        setValue("name", data?.findUserById?.name);
+        setValue("email", data?.findUserById?.email);
+        setValue("phoneNo", (data?.findUserById?.mobileNo as number).toString());
+        setModalVisible(true);
       },
     },
     {
@@ -109,16 +180,14 @@ const SettingScreen = () => {
       title: labels.notification,
       iconLib: Ionicons,
       iconName: "notifications-outline",
-      onTouchAction: () => {
-      },
+      onTouchAction: () => { },
     },
     {
       id: 3,
       title: labels.language,
       iconLib: FontAwesome,
       iconName: "language",
-      onTouchAction: () => {
-      },
+      onTouchAction: () => { },
     },
     {
       id: 4,
@@ -133,16 +202,14 @@ const SettingScreen = () => {
       title: labels.support,
       iconLib: FontAwesome,
       iconName: "support",
-      onTouchAction: () => {
-      },
+      onTouchAction: () => { },
     },
     {
       id: 6,
       title: labels.help,
       iconLib: Feather,
       iconName: "help-circle",
-      onTouchAction: () => {
-      },
+      onTouchAction: () => { },
     },
     {
       id: 7,
@@ -164,11 +231,46 @@ const SettingScreen = () => {
       },
       {
         text: labels.logout,
-        onPress: async () => {
-        },
+        onPress: async () => { },
       },
     ]);
   };
+
+  const onSubmit = () => {
+    const params = {
+      name: watch("name"),
+      mobileNo: Number(watch("phoneNo")),
+      id: userId,
+      email: watch("email"),
+    }
+    try {
+      updateUser(
+        {
+          variables: {
+            data: params
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Error updating user:", error);
+    }
+  }
+
+  const handleImagePickerPress = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct media type
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri)
+    }
+  };
+
+  console.log("image", image);
+
 
   return (
     <CustomHeader
@@ -194,45 +296,144 @@ const SettingScreen = () => {
         }}
         showsVerticalScrollIndicator={false}
       >
-        {firstData.map((item: any, i: number) => {
-          return (
-            <Pressable
-              key={i}
-              onPress={item?.onTouchAction}
-              style={[
-                styles.container,
-                { backgroundColor: Colors[theme].cartBg },
-              ]}
+        <ThemedView>
+          <View style={styles.userInfo}>
+            <View
+              style={{
+                height: 80,
+                width: 80,
+                borderRadius: "100%",
+                backgroundColor: "#808080",
+              }}
+            ></View>
+            <View>
+              <ThemedText style={styles.userName}>{data?.findUserById?.name}</ThemedText>
+              <ThemedText style={styles.userEmail}>{data?.findUserById?.email}</ThemedText>
+            </View>
+          </View>
+          {firstData.map((item: any, i: number) => {
+            return (
+              <Pressable
+                key={i}
+                onPress={item?.onTouchAction}
+                style={[
+                  styles.container,
+                  { backgroundColor: Colors[theme].cartBg },
+                ]}
+              >
+                {item.image ? (
+                  item.image
+                ) : item.iconLib ? (
+                  <item.iconLib
+                    name={item.iconName}
+                    size={ms(22)}
+                    color={Colors[theme].text}
+                  />
+                ) : null}
+
+                <View style={{ width: "80%" }}>
+                  <ThemedText type="default">{item.title}</ThemedText>
+                  {item.subtitle && (
+                    <ThemedText
+                      type="default"
+                      style={{
+                        fontSize: ms(12),
+                        lineHeight: ms(17),
+                      }}
+                    >
+                      {item.subtitle}
+                    </ThemedText>
+                  )}
+                </View>
+
+                {item.rightIcon && item.rightIcon}
+              </Pressable>
+            );
+          })}
+        </ThemedView>
+
+        {/* user info modal */}
+        <Modal
+          isVisible={isModalVisible}
+          onBackdropPress={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: Colors[theme].cartBg,
+              height: vs(530),
+              width: s(300),
+              borderRadius: 10,
+              alignSelf: "center",
+              padding: 10,
+              justifyContent: "center",
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                padding: 10,
+              }}
             >
-              {item.image ? (
-                item.image
-              ) : item.iconLib ? (
-                <item.iconLib
-                  name={item.iconName}
-                  size={ms(22)}
-                  color={Colors[theme].text}
-                />
-              ) : null}
+              <ThemedText type="subtitle">
+                Update Profile
+              </ThemedText>
+              <Pressable
+                onPress={() => {
+                  setModalVisible(false);
+                }}
+              >
+                <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+              </Pressable>
+            </View>
 
-              <View style={{ width: "80%" }}>
-                <ThemedText type="default">{item.title}</ThemedText>
-                {item.subtitle && (
-                  <ThemedText
-                    type="default"
-                    style={{
-                      fontSize: ms(12),
-                      lineHeight: ms(17),
-                    }}
-                  >
-                    {item.subtitle}
-                  </ThemedText>
-                )}
-              </View>
+            <View style={{ padding: 10 }}>
+              <Pressable onPress={handleImagePickerPress} style={styles.imageContainer}>
+                {image && <Image source={{ uri: image }} style={styles.image} />}
+              </Pressable>
+              <CustomValidation
+                type="input"
+                control={control}
+                labelStyle={styles.label}
+                name={"name"}
+                label={"Name"}
+                rules={{
+                  required: "Name is required"
+                }}
+                autoCapitalize="none"
+              />
 
-              {item.rightIcon && item.rightIcon}
-            </Pressable>
-          );
-        })}
+              <CustomValidation
+                type="input"
+                control={control}
+                name={"email"}
+                label={"Email"}
+                labelStyle={styles.label}
+                rules={{
+                  required: "Email is required",
+                }}
+              />
+              <CustomValidation
+                type="input"
+                control={control}
+                name={"phoneNo"}
+                label={"Phone No"}
+                labelStyle={styles.label}
+                rules={{
+                  required: "Phone no is required",
+                }}
+              />
+            </View>
+
+            <CustomButton
+              title="Submit"
+              onPress={handleSubmit(onSubmit)}
+              style={{ marginTop: vs(10), backgroundColor: Colors[theme].background }}
+            />
+          </View>
+        </Modal>
       </ScrollView>
     </CustomHeader>
   );
@@ -263,5 +464,36 @@ const styles = ScaledSheet.create({
   switchStyle: {
     position: "absolute",
     right: "10@s",
+  },
+  userInfo: {
+    marginVertical: vs(15),
+    flexDirection: "row",
+    alignItems: "center",
+    gap: ms(15),
+    width: "100%",
+  },
+  userName: {},
+  userEmail: {
+    color: 'gray'
+  },
+  label: {
+    color: Colors.grayText,
+    fontSize: "14@ms",
+    marginBottom: "12@ms",
+    fontWeight: 400,
+  },
+  imageContainer: {
+    width: ms(50),
+    height: ms(50),
+    borderRadius: ms(50),
+    marginBottom: "12@ms",
+    backgroundColor: Colors.gray,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: 40,
+    height: 40,
+    resizeMode: "cover", // Ensures the image covers the container
   },
 });

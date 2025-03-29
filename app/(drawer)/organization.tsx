@@ -32,7 +32,16 @@ const defaultValue = {
   id: "",
 }
 
+// const 
+const pickerData = [
+  { label: "Active", value: "active" },
+  { label: "Inactive", value: "inactive" },
+  { label: "Blocked", value: "blocked" },
+  { label: "Pending", value: "pending" },
+];
+
 const organization = () => {
+
   const { theme } = useTheme();
   const {
     control,
@@ -41,10 +50,9 @@ const organization = () => {
     reset,
     watch,
     setValue
-  } = useForm<{ name: string, description: string, topic: any }>({
+  } = useForm<{ name: string, description: string, status: any }>({
     defaultValues: {},
   });
-
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [organizationData, { error, data, loading, refetch }] = useLazyQuery(
     PaginatedOrganizationDocument
@@ -116,15 +124,6 @@ const organization = () => {
     setValue("description", currentOrganization?.description)
   }, [currentOrganization])
 
-  // const 
-  const pickerData = [
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inactive" },
-    { label: "Blocked", value: "blocked" },
-    { label: "Pending", value: "pending" },
-  ];
-
-
   useEffect(() => {
     organizationData({
       variables: {
@@ -132,6 +131,19 @@ const organization = () => {
       },
     });
   }, []);
+
+  useEffect(() => {
+    if (watch("status")) {
+      updateOrganizationStatus({
+        variables: {
+          data: {
+            id: Number(currentOrganization?.id),
+            status: watch("status")?.value
+          }
+        },
+      });
+    }
+  }, [watch("status")])
 
   const onSubmit = (data: any) => {
     let param = {
@@ -154,28 +166,6 @@ const organization = () => {
       });
 
   };
-
-  // updateOrganizationStatus({
-  //   data: {
-  //     id: null,
-  //     status: null
-  //   }
-  // }) 
-  console.log(watch("topic"));
-
-
-  useEffect(() => {
-    if (watch("topic")) {
-      updateOrganizationStatus({
-        variables: {
-          data: {
-            id: Number(currentOrganization?.id),
-            status: watch("topic")?.value
-          }
-        },
-      });
-    }
-  }, [watch("topic")])
 
   if (loading) {
     return <Loader />
@@ -320,8 +310,8 @@ const organization = () => {
       >
         <View
           style={{
-            backgroundColor: Colors[theme].background,
-            height: vs(500),
+            backgroundColor: Colors[theme].cartBg,
+            height: vs(400),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
@@ -386,7 +376,7 @@ const organization = () => {
             onPress={() => {
               handleSubmit(onSubmit)();
             }}
-            style={{ backgroundColor: Colors[theme].cartBg, marginTop: vs(10) }}
+            style={{ backgroundColor: Colors[theme].background, marginTop: vs(10) }}
           />
         </View>
       </Modal>
@@ -399,7 +389,7 @@ const organization = () => {
       >
         <View
           style={{
-            backgroundColor: Colors?.white,
+            backgroundColor: Colors[theme].cartBg,
             height: 380,
             width: s(300),
             borderRadius: 10,
@@ -412,13 +402,13 @@ const organization = () => {
             type="picker"
             hideStar
             control={control}
-            name="topic"
-            placeholder="Topic"
+            name="status"
+            placeholder="Select Status"
             inputStyle={{ height: vs(50) }}
             rules={{
               required: {
                 value: true,
-                message: "Select a topic",
+                message: "Select status",
               },
             }}
           />

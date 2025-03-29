@@ -128,14 +128,14 @@ const organization = () => {
 
 
   useEffect(() => {
-    userData({
-      variables: {
-        listInputDto: {
-          limit: 10,
-          page: 1
-        }
-      },
-    });
+    // userData({
+    //   variables: {
+    //     listInputDto: {
+    //       limit: 10,
+    //       page: 1
+    //     }
+    //   },
+    // });
   }, []);
 
   console.log(data?.paginatedUsers?.data);
@@ -153,9 +153,9 @@ const organization = () => {
     //     },
     //   })
     //   : createOrganization({
-    //     variables: {
-    //       createOrganizationInput: {
-    //         ...data
+        // variables: {
+        //   createOrganizationInput: {
+        //     ...data
     //       },
     //     },
     //   });
@@ -181,6 +181,19 @@ const organization = () => {
   // if (loading) {
   //   return <Loader />
   // }
+
+  // const handleImagePickerPress = async () => {
+  //   let result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ['images'],
+  //     allowsEditing: true,
+  //     aspect: [1, 1],
+  //     quality: 1
+  //   })
+  //   if (!result.canceled) {
+  //     setImage(result.assets[0].uri)
+  //   }
+  // }
+  // console.log('image',image);
 
   return (
     <CustomHeader>
