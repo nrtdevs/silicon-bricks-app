@@ -2,6 +2,7 @@ import {
   Alert,
   FlatList,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -24,7 +25,7 @@ import { set, useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
-
+import NoDataFound from "@/components/NoDataFound";
 
 const defaultValue = {
   name: "",
@@ -67,7 +68,8 @@ const organization = () => {
     id: string;
   }>(defaultValue);
   const [selected, setSelected] = useState<any>([]);
-
+  const [page, setPage] = useState<number>(1);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [createOrganization, createOrganizationState] = useMutation(CreateOrganizationDocument, {
     onCompleted: (data) => {
       reset()
@@ -125,11 +127,7 @@ const organization = () => {
   }, [currentOrganization])
 
   useEffect(() => {
-    organizationData({
-      variables: {
-        listInputDto: {},
-      },
-    });
+    fetchOrganization();
   }, []);
 
   useEffect(() => {
@@ -165,6 +163,111 @@ const organization = () => {
         },
       });
 
+  };
+
+  const renderItem = ({ item, index }: any) => {
+    return (
+      <View
+        key={index}
+        style={[
+          styles.organizationContainer,
+          { backgroundColor: Colors[theme].cartBg },
+        ]}
+      >
+        <View style={styles.organizationHeader}>
+          <ThemedText type="subtitle" style={{flex:1}}>{item?.name}</ThemedText>
+          <View style={styles.organizationInfo}>
+            <MaterialIcons
+              name="attractions"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                setCurrentOrganization({
+                  name: item?.name,
+                  description: item?.description,
+                  id: item?.id,
+                });
+                setStatusModalVisible(true);
+              }}
+            />
+            <Feather
+              name="edit"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                setCurrentOrganization({
+                  name: item?.name,
+                  description: item?.description,
+                  id: item?.id,
+                });
+                // setCurrentOrganizationData();
+                setModalVisible(true);
+                setEditModal(true);
+              }}
+            />
+            <MaterialIcons
+              name="delete-outline"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                Alert.alert(
+                  "Delete",
+                  "Are you sure you want to delete?",
+                  [
+                    {
+                      text: "Yes", onPress: () => {
+                        deleteOrganization({
+                          variables: {
+                            deleteOrganizationId: Number(item?.id),
+                          }
+                        });
+                      }
+                    },
+                    { text: "No", onPress: () => { } },
+                  ]
+                );
+
+              }}
+            />
+          </View>
+        </View>
+        <ThemedText
+          style={[
+            styles.status,
+            {
+              color:
+                item.status == "active" ? Colors?.green : "#6d6d1b",
+              backgroundColor:
+                theme == "dark" ? Colors?.white : "#e6e2e2",
+            },
+          ]}
+        >
+          {item?.status}
+        </ThemedText>
+        <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+          {item?.description}
+        </ThemedText>
+      </View>
+    )
+  }
+
+  // Fetch Organization
+  const fetchOrganization = async (isRefreshing = false) => {
+    if (isRefreshing) {
+      setPage(1);
+      setRefreshing(true);
+    }
+    // Params for API
+    const params = {
+      per_page_record: 10,
+      page: isRefreshing ? 1 : page,
+    };
+
+    await organizationData({
+      variables: {
+        listInputDto: {},
+      },
+    });;
   };
 
   if (loading) {
@@ -212,93 +315,31 @@ const organization = () => {
         <View style={styles.organizationParentContainer}>
           <FlatList
             data={data?.paginatedOrganization?.data}
-            renderItem={({ item, index }: any) => (
-              <View
-                key={index}
-                style={[
-                  styles.organizationContainer,
-                  { backgroundColor: Colors[theme].cartBg },
-                ]}
-              >
-                <View style={styles.organizationHeader}>
-                  <ThemedText type="subtitle">{item?.name}</ThemedText>
-                  <View style={styles.organizationInfo}>
-                    <MaterialIcons
-                      name="attractions"
-                      size={ms(20)}
-                      color={Colors[theme].text}
-                      onPress={() => {
-                        setCurrentOrganization({
-                          name: item?.name,
-                          description: item?.description,
-                          id: item?.id,
-                        });
-                        setStatusModalVisible(true);
-                      }}
-                    />
-                    <Feather
-                      name="edit"
-                      size={ms(20)}
-                      color={Colors[theme].text}
-                      onPress={() => {
-                        setCurrentOrganization({
-                          name: item?.name,
-                          description: item?.description,
-                          id: item?.id,
-                        });
-                        // setCurrentOrganizationData();
-                        setModalVisible(true);
-                        setEditModal(true);
-                      }}
-                    />
-                    <MaterialIcons
-                      name="delete-outline"
-                      size={ms(20)}
-                      color={Colors[theme].text}
-                      onPress={() => {
-                        Alert.alert(
-                          "Delete",
-                          "Are you sure you want to delete?",
-                          [
-                            {
-                              text: "Yes", onPress: () => {
-                                deleteOrganization({
-                                  variables: {
-                                    deleteOrganizationId: Number(item?.id),
-                                  }
-                                });
-                              }
-                            },
-                            { text: "No", onPress: () => { } },
-                          ]
-                        );
-
-                      }}
-                    />
-                  </View>
-                </View>
-                <ThemedText
-                  style={[
-                    styles.status,
-                    {
-                      color:
-                        item.status == "active" ? Colors?.green : "#6d6d1b",
-                      backgroundColor:
-                        theme == "dark" ? Colors?.white : "#e6e2e2",
-                    },
-                  ]}
-                >
-                  {item?.status}
-                </ThemedText>
-                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                  {item?.description}
-                </ThemedText>
-              </View>
-            )}
+            renderItem={({ item, index }: any) => renderItem({ item, index })}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => fetchOrganization(true)}
+              />
+            }
+            contentContainerStyle={{ paddingBottom: vs(40) }}
+            ListEmptyComponent={!loading ? <NoDataFound /> : null}
+          // ListFooterComponent={
+          //   hasMore ? (
+          //     <ActivityIndicator size="small" color={Colors.primary} />
+          //   ) : null
+          // }
+          // onEndReached={() => {
+          //   if (hasMore && !isLoading) {
+          //     fetchNotification();
+          //   }
+          // }}
+          // onEndReachedThreshold={0.5}
           />
         </View>
       </ThemedView>
 
+      {/* create and edit modal */}
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={() => {
@@ -381,6 +422,7 @@ const organization = () => {
         </View>
       </Modal>
 
+        {/* status modal */}
       <Modal
         isVisible={isStatusModalVisible}
         onBackdropPress={() => {

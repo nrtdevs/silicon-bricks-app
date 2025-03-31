@@ -374,7 +374,7 @@ const CustomValidation = (props: TextInputProps) => {
                     style={[
                       styles.labelStyle,
                       props.labelStyle,
-                      { color: Colors[theme].text }
+                      props.labelStyle ? {} : { color: Colors[theme].text }
                     ]}
                   >
                     {props.label}

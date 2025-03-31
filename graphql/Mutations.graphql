@@ -47,10 +47,6 @@ mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
   }
 }
 
-mutation DeleteOrganization($deleteOrganizationId: Int!) {
-  deleteOrganization(id: $deleteOrganizationId)
-}
-
 mutation EnableOrganizationStatus($data: OrganizationStatusDto!) {
   enableOrganizationStatus(data: $data) {
     id
@@ -100,5 +96,51 @@ mutation UpdateProfile($data: UpdateUserDto!) {
     createdAt
     updatedAt
     deletedAt
+  }
+}
+
+mutation CreateModule($createModuleInput: CreateModuleDto!) {
+  createModule(createModuleInput: $createModuleInput) {
+    id
+    name
+    description
+    status
+  }
+}
+
+mutation UpdateModule($updateModuleInput: UpdateModuleDto!) {
+  updateModule(updateModuleInput: $updateModuleInput) {
+    id
+    name
+    description
+    status
+  }
+}
+
+mutation ChangeModuleStatus($updateModuleStatusInput: ModuleStatusDto!) {
+  changeModuleStatus(updateModuleStatusInput: $updateModuleStatusInput) {
+    id
+    name
+    status
+    description
+  }
+}
+
+mutation DeleteModule($deleteModuleId: Int!) {
+  deleteModule(id: $deleteModuleId)
+}
+
+mutation CreateCoupon($createCouponInput: CreateCouponDto!) {
+  createCoupon(createCouponInput: $createCouponInput) {
+    id
+    couponCode
+    description
+    discountType
+    maxDiscountAmount
+    minOrderAmount
+    usageLimit
+    status
+    startDate
+    endDate
   }
 }

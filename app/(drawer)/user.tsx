@@ -135,15 +135,15 @@ const UserScreen = () => {
   //   }
   // });
 
-  // const [deleteOrganization, deleteOrganizationState] = useMutation(DeleteOrganizationDocument, {
-  //   onCompleted: (data) => {
-  //     refetch();
-  //     Alert.alert("success", "Project deleted successfully!");
-  //   },
-  //   onError: (error) => {
-  //     Alert.alert("Error", error.message);
-  //   }
-  // });
+  const [deleteOrganization, deleteOrganizationState] = useMutation(DeleteOrganizationDocument, {
+    onCompleted: (data) => {
+      refetch();
+      Alert.alert("success", "Project deleted successfully!");
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    }
+  });
 
   // const [updateOrganizationStatus, updateOrganizationStatusState] = useMutation(EnableOrganizationStatusDocument, {
   //   onCompleted: (data) => {
@@ -346,6 +346,11 @@ const UserScreen = () => {
                         size={ms(20)}
                         color={Colors[theme].text}
                         onPress={() => {
+                          console.log("item", item);
+                          const params = {
+                            deleteOrganizationId: Number(item?.id),
+                          }
+
                           Alert.alert(
                             "Delete",
                             "Are you sure you want to delete?",
@@ -353,11 +358,9 @@ const UserScreen = () => {
                               {
                                 text: "Yes",
                                 onPress: () => {
-                                  // deleteOrganization({
-                                  //   variables: {
-                                  //     deleteOrganizationId: Number(item?.id),
-                                  //   }
-                                  // });
+                                  deleteOrganization({
+                                    variables: params
+                                  });
                                 },
                               },
                               { text: "No", onPress: () => { } },
@@ -379,6 +382,7 @@ const UserScreen = () => {
                 </View>
               )
             }}
+            contentContainerStyle={{ paddingBottom: vs(40) }}
           />
         </View>
       </ThemedView>
@@ -539,7 +543,7 @@ const UserScreen = () => {
         <View
           style={{
             backgroundColor: Colors[theme].cartBg,
-            height: vs(380),
+            height: vs(300),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
@@ -565,6 +569,7 @@ const UserScreen = () => {
               <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
             </Pressable>
           </View>
+          <View style={{ borderWidth: 1, borderColor: Colors[theme].text, borderStyle: "dashed" }} />
           <View style={{ gap: vs(10), padding: ms(10) }}>
             <View >
               <ThemedText type="subtitle">Name</ThemedText>
@@ -706,6 +711,6 @@ const styles = ScaledSheet.create({
   image: {
     width: 40,
     height: 40,
-    resizeMode: "cover", 
+    resizeMode: "cover",
   },
 });

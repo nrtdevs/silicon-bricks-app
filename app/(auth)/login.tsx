@@ -38,7 +38,6 @@ export default function LoginScreen() {
       password: "Password@123",
     },
   });
-
   const onSubmit = async (data: any) => {
     try {
       const RequestOtp = await createRequestOpt({

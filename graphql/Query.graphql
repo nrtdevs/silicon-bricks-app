@@ -123,3 +123,43 @@ query FindUserById($findUserByIdId: Float!) {
     deletedAt
   }
 }
+
+query PaginatedModules($listInputDto: ListInputDTO!) {
+  paginatedModules(ListInputDTO: $listInputDto) {
+    data {
+      id
+      name
+      description
+      status
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}
+
+query PaginatedCoupons($listInputDto: ListInputDTO!) {
+  paginatedCoupons(ListInputDTO: $listInputDto) {
+    data {
+      id
+      couponCode
+      description
+      discountType
+      maxDiscountAmount
+      minOrderAmount
+      usageLimit
+      status
+      startDate
+      endDate
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}
