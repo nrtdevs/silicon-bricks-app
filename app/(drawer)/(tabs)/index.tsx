@@ -9,10 +9,11 @@ import React from "react";
 import { Entypo } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 import { Colors } from "@/constants/Colors";
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useNavigation, DrawerActions } from "@react-navigation/native";
 import CustomHeader from "@/components/CustomHeader";
+import { ThemedText } from "@/components/ThemedText";
+import { ScaledSheet } from "react-native-size-matters";
 
 const index = () => {
   const navigation = useNavigation();
@@ -42,4 +43,36 @@ const index = () => {
   );
 };
 
+const styles = ScaledSheet.create({
+  appBar: {
+    fontSize: "18@ms",
+    fontWeight: "500",
+    color: "black"
+  },
+  cardTitle: {
+    fontSize: "16@ms",
+    color: "white",
+    fontWeight: '500'
+  },
+  cardHeading: {
+    fontSize: "22@ms",
+    color: 'white',
+    fontWeight: "bold"
+  },
+  cardSub: {
+    fontSize: "14@ms",
+    color: "white",
+    fontWeight: "400"
+  },
+  cardStyle: {
+    marginHorizontal: 20,
+    marginVertical: 5,
+  },
+  card: {
+    marginHorizontal: 10,
+    marginVertical: 10,
+    borderRadius: 10,
+    padding: 5,
+  },
+});
 export default index;

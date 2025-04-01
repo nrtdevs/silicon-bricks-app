@@ -20,7 +20,7 @@ const CustomHeader = ({
         styles.container,
         {
           backgroundColor: Colors[theme].background,
-          paddingTop: insets.top + vs(10)
+          paddingTop: insets.top + vs(0)
         }
       ]}
     >

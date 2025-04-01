@@ -87,45 +87,44 @@ const Index = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between', // Space elements evenly
-    alignItems: 'center', // Center elements horizontally
-    backgroundColor: '#f8f9fa', // Light gray background
-    padding: 20
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    backgroundColor: '#f8f9fa',
   },
   header: {
     width: '100%',
     padding: 15,
-    backgroundColor: '#3B82F6', // Blue background for header
+    backgroundColor: '#3B82F6', 
 
     marginBottom: 20
   },
   headerText: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#fff', // White text for header
+    color: '#fff', 
     textAlign: 'center'
   },
   content: {
     flex: 1,
-    justifyContent: 'center', // Vertically center content
-    alignItems: 'center', // Horizontally center content
+    justifyContent: 'center', 
+    alignItems: 'center',
     marginBottom: 20
   },
   mainText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333', // Dark text for main message
+    color: '#333',
     marginBottom: 20
   },
   footer: {
     width: '100%',
     padding: 15,
-    backgroundColor: '#3B82F6', // Blue background for footer
+    backgroundColor: '#3B82F6', 
     borderRadius: 10
   },
   footerText: {
     fontSize: 16,
-    color: '#fff', // White text for footer link
+    color: '#fff', 
     textAlign: 'center'
   }
 })

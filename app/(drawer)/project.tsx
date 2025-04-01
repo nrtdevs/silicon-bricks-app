@@ -275,8 +275,6 @@ const Project = () => {
                 />
               </Dialog.Content>
               <Dialog.Actions>
-
-
                 <TouchableOpacity
                   onPress={handleSubmit(onSubmit)}
                   style={styles.buttonContainerSave}
