@@ -86,15 +86,6 @@ import { z } from "zod";
 import { ms, ScaledSheet } from 'react-native-size-matters';
 import { labels } from '@/constants/Labels';
 
-interface PermissionData {
-  id: string;
-  appName: string;
-  groupName: string;
-  module: string;
-  action: string;
-  slug: string;
-  description: string;
-};
 
 const RoleModule = gql`
   query AllPermissions {
@@ -116,9 +107,24 @@ const Delete_Permission = gql`
 }
 `;
 
+const Update_Permission = gql`
+ mutation UpdatePermission($data: UpdatePermissionDto!) {
+  updatePermission(data: $data) {
+    id
+    appName
+    groupName
+    module
+    action
+    slug
+    description
+  }
+}
+`;
+
 const Permissions = () => {
   const [visible, setVisible] = useState(false);
   const showDialogue = () => setVisible(true);
+  const [updatePermission] = useMutation(Update_Permission);
   const [deletePopupVisible, setDeletePopupVisible] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const schema = z.object({
@@ -172,7 +178,7 @@ const Permissions = () => {
   }
 
   const permissions = data?.allPermissions || [];
-  const [deleteProject] = useMutation(Delete_Permission, {
+ const [deleteProject] = useMutation(Delete_Permission, {
     onCompleted: () => {
       console.log("Project deleted successfully");
       setDeletePopupVisible(false);
@@ -184,7 +190,6 @@ const Permissions = () => {
   });
   const handleDelete = async () => {
     console.log(selectedProjectId);
-
     if (selectedProjectId !== null) {
       try {
         await deleteProject({ variables: { deletePermissionId: Number(selectedProjectId) } });
@@ -193,7 +198,30 @@ const Permissions = () => {
       }
     }
   };
+  const handleEdit = async (formData: any) => {
+    if (!selectedProjectId) {
+      console.error("No project selected for update");
+      return;
+    }
+    try {
+      const { data } = await updatePermission({
+        variables: {
+          data: {
+            id: Number(selectedProjectId),
+            appName: formData.name,
+            description: formData.description,
+            module: "",
+            action : ""
+          },
+        },
+      });
 
+      console.log("Project Updated:", data);
+      hideDialogue();
+    } catch (error) {
+      console.error("Error updating project:", error);
+    }
+  };
   return (
     <CustomHeader>
       <View style={styles.container}>
@@ -265,7 +293,7 @@ const Permissions = () => {
               </Dialog.Content>
               <Dialog.Actions>
                 <TouchableOpacity
-                  // onPress={handleSubmit(onSubmit)}
+                  onPress={handleSubmit(handleEdit)}
                   style={styles.buttonContainerSave}
                 >
                   <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
@@ -292,22 +320,22 @@ const Permissions = () => {
               </Dialog.Content>
               <Dialog.Actions>
                 <TouchableOpacity
-                  onPress={handleDelete}
-                  style={styles.buttonContainerSave}
+                onPress={handleDelete}
+                style={styles.buttonContainerSave}
                 >
-                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={hideDeleteDialogue}
-                  style={styles.buttonContainerClose}
-                >
-                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
-                </TouchableOpacity>
-              </Dialog.Actions>
-            </Dialog>
-          </ThemeProvider>
-        </Portal>
-      </View>
+                <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={hideDeleteDialogue}
+                style={styles.buttonContainerClose}
+              >
+                <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
+              </TouchableOpacity>
+            </Dialog.Actions>
+          </Dialog>
+        </ThemeProvider>
+      </Portal>
+    </View>
     </CustomHeader >
   )
 }

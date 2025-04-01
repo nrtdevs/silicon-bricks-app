@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet} from "react-native";
 import React from "react";
 import { Redirect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -16,10 +16,12 @@ const Index = () => {
     getToken();
   }, []);
   return token ? (
-    <Redirect href="/(auth)/login" />
+    // <Redirect href="/(auth)/login" />
+    <Redirect href="/(drawer)/(tabs)/promotions"/>
     // <Redirect href="/(drawer)/(tabs)" />
   ) : (
-    <Redirect href="/(auth)/login" />
+    // <Redirect href="/(auth)/login" />
+    <Redirect href="/(drawer)/(tabs)/promotions"/>
     // <Redirect href="/(drawer)/(tabs)" />
     // <Redirect href="/(drawer)/organization" />
   );
