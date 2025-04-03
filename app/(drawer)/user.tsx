@@ -142,9 +142,11 @@ const UserScreen = () => {
     }
   });
 
+  //test
+
   const userTypeData = [
     { label: "admin", value: "admin" },
-    { label: "adminEmployee", value: "adminEmployee" },
+    { label: "adminEmployee", value: "adminEmployee" }, 
     { label: "organization", value: "organization" },
     { label: "organizationEmployee", value: "organizationEmployee" },
   ];
