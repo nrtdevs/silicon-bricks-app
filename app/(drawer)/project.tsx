@@ -1,5 +1,5 @@
 import { View, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from '@expo/vector-icons';
 import { gql, useMutation } from "@apollo/client";
@@ -16,6 +16,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import CustomValidation from '@/components/CustomValidation';
 import { labels } from '@/constants/Labels';
 import { ms, ScaledSheet } from 'react-native-size-matters';
+import { ThemedView } from '@/components/ThemedView';
 
 interface ProjectData {
   id: number;
@@ -188,7 +189,7 @@ const Project = () => {
   if (listLoading) return <ActivityIndicator size={'large'} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />
   return (
     <CustomHeader>
-      <View style={styles.container}>
+      <ThemedView style={styles.container}>
         <View style={styles.scrollContainer}>
           <FlatList
             data={datax}
@@ -333,13 +334,13 @@ const Project = () => {
                   onPress={handleSubmit(handleEdit)}
                   style={styles.buttonContainerSave}
                 >
-                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
+                  <ThemedText style={{color: 'white', fontSize: 14, fontWeight: "normal"}}>Save</ThemedText>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={hideEditDialogue}
                   style={styles.buttonContainerClose}
                 >
-                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
+                  <ThemedText style={{color: 'black', fontSize: 14, fontWeight: "normal"}}>Close</ThemedText>
                 </TouchableOpacity>
               </Dialog.Actions>
             </Dialog>
@@ -372,7 +373,7 @@ const Project = () => {
             </Dialog>
           </ThemeProvider>
         </Portal>
-      </View>
+      </ThemedView>
     </CustomHeader>
   );
 };
