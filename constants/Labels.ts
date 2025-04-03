@@ -63,4 +63,5 @@ export const labels = {
   offerPromotions : "Offer & Promotions",
   module : "Module",
   coupons : "Coupons",
+  subscriptions : "Subscriptions",
 };

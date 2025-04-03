@@ -172,3 +172,32 @@ query PaginatedCoupons($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+query PaginatedSubscriptions($listInputDto: ListInputDTO!) {
+  paginatedSubscriptions(ListInputDTO: $listInputDto) {
+    data {
+      id
+      name
+      price
+      duration
+      status
+      plans {
+        id
+        name
+        description
+        price
+        duration
+        discountedPrice
+        status
+        couponId
+        offerId
+      }
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import CustomHeader from "@/components/CustomHeader";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
@@ -26,35 +26,37 @@ const LoginCodeScreen = () => {
     console.log(code);
   };
 
+
   const onSubmit = async () => {
     try {
       const otpValue = Number(otp);
-      console.log(otpValue);
-      console.log(typeof otpValue);
-      const response = await verifyOtp({
-        variables: {
-          loginData: {
-            email: String(params.email),
-            password: String(params.password),
-            otp: otpValue,
-
+      if (params?.otp == otp) {
+        console.log(otpValue);
+        const response = await verifyOtp({
+          variables: {
+            loginData: {
+              email: String(params.email),
+              password: String(params.password),
+              otp: otpValue,
+            },
           },
-        },
-      });
+        });
 
-      console.log("res", response);
-
-      // Log the accessToken if it exists
-      const accessToken: any = response?.data?.login?.accessToken;
-      if (accessToken) {
-        // Save the accessToken to SecureStore
-        await SecureStore.setItemAsync("accessToken", accessToken);
-        await SecureStore.setItemAsync("userId", response?.data?.login?.user?.id as string);
-        // Retrieve the token from SecureStore
-        const token = await SecureStore.getItemAsync("accessToken");
-        router.replace("/(drawer)/(tabs)");
-      } else {
-        console.log("Failed to retrieve accessToken");
+        // Log the accessToken if it exists
+        const accessToken: any = response?.data?.login?.accessToken;
+        if (accessToken) {
+          // Save the accessToken to SecureStore
+          await SecureStore.setItemAsync("accessToken", accessToken);
+          await SecureStore.setItemAsync("userId", response?.data?.login?.user?.id as string);
+          // Retrieve the token from SecureStore
+          const token = await SecureStore.getItemAsync("accessToken");
+          router.replace("/(drawer)/(tabs)");
+        } else {
+          console.log("Failed to retrieve accessToken");
+        }
+      }else{
+        console.log("otp not match");
+        Alert.alert("Otp not match");
       }
     } catch (error) {
       console.error("error", error);
@@ -99,7 +101,7 @@ const LoginCodeScreen = () => {
 
         <CustomButton
           titleStyle={{ color: Colors?.white }}
-          isLoading={false}
+          isLoading={verifyState?.loading}
           title={labels?.confirm}
           isGradient
           onPress={onSubmit}
