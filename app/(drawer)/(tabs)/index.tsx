@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React from "react";
-import { Entypo,  MaterialCommunityIcons } from "@expo/vector-icons";
+import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
@@ -67,181 +67,42 @@ const index = () => {
             </TouchableOpacity>
             <Text style={styles.appBar}>Dashboard</Text>
           </View>
-
-          <LinearGradient
-            colors={["#0a54c9", "#5087de"]}
-            style={styles.card}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}>
-            <View style={styles.cardStyle}>
-              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-                <ThemedText style={styles.cardTitle}>User</ThemedText>
-                <View style={{ flexDirection: 'row', borderColor: "white", borderRadius: 5, borderWidth: 0.5, paddingHorizontal: 6, paddingVertical: 2 }}>
-                  <MaterialCommunityIcons
-                    name="arrow-top-right"
-                    size={20}
-                    color="white"
-                  />
-                  <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
-                </View>
-              </View>
+          <View style={styles.cardStyle}>
+            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+              <ThemedText style={styles.cardTitle}>User</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.userCount}</ThemedText>
-              <View style={{ flexDirection: 'row' }}>
-                <ThemedText style={styles.cardSub}>Trending up this month </ThemedText>
-                <MaterialCommunityIcons
-                  name="arrow-top-right"
-                  size={20}
-                  color="white"
-                />
-              </View>
             </View>
-          </LinearGradient>
-
-          <LinearGradient
-            colors={[ "#AA6097","#E06557"]}
-            style={styles.card}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}>
-            <View style={styles.cardStyle}>
-              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-                <ThemedText style={styles.cardTitle}>Role</ThemedText>
-                <View style={{ flexDirection: 'row', borderColor: "white", borderRadius: 5, borderWidth: 0.5, paddingHorizontal: 6, paddingVertical: 2 }}>
-                  <MaterialCommunityIcons
-                    name="arrow-bottom-right"
-                    size={20}
-                    color="white"
-                  />
-                  <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
-                </View>
-              </View>
+          </View>
+          <View style={styles.cardStyle}>
+            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+              <ThemedText style={styles.cardTitle}>Role</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.roleCount}</ThemedText>
-              <View style={{ flexDirection: 'row' }}>
-                <ThemedText style={styles.cardSub}>Down 20% this period </ThemedText>
-                <MaterialCommunityIcons
-                  name="arrow-bottom-right"
-                  size={20}
-                  color="white"
-                />
-              </View>
             </View>
-          </LinearGradient>
-
-          <LinearGradient
-            colors={["#0a54c9", "#5087de"]}
-            style={styles.card}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}>
-            <View style={styles.cardStyle}>
-              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-                <ThemedText style={styles.cardTitle}>Projects</ThemedText>
-                <View style={{ flexDirection: 'row', borderColor: "white", borderRadius: 5, borderWidth: 0.5, paddingHorizontal: 6, paddingVertical: 2 }}>
-                  <MaterialCommunityIcons
-                    name="arrow-top-right"
-                    size={20}
-                    color="white"
-                  />
-                  <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
-                </View>
-              </View>
+          </View>
+          <View style={styles.cardStyle}>
+            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+              <ThemedText style={styles.cardTitle}>Projects</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.projectCount}</ThemedText>
-              <View style={{ flexDirection: 'row' }}>
-                <ThemedText style={styles.cardSub}>Strong user retention </ThemedText>
-                <MaterialCommunityIcons
-                  name="arrow-top-right"
-                  size={20}
-                  color="white"
-                />
-              </View>
             </View>
-          </LinearGradient>
-
-          <LinearGradient
-            colors={["#AA6097","#E06557"]}
-            style={styles.card}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}>
-            <View style={styles.cardStyle}>
-              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-                <ThemedText style={styles.cardTitle}>Permission</ThemedText>
-                <View style={{ flexDirection: 'row', borderColor: "white", borderRadius: 5, borderWidth: 0.5, paddingHorizontal: 6, paddingVertical: 2 }}>
-                  <MaterialCommunityIcons
-                    name="arrow-top-right"
-                    size={20}
-                    color="white"
-                  />
-                  <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
-                </View>
-              </View>
+          </View>
+          <View style={styles.cardStyle}>
+            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+              <ThemedText style={styles.cardTitle}>Permission</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.permissionCount}</ThemedText>
-              <View style={{ flexDirection: 'row' }}>
-                <ThemedText style={styles.cardSub}>Strong user retention </ThemedText>
-                <MaterialCommunityIcons
-                  name="arrow-top-right"
-                  size={20}
-                  color="white"
-                />
-              </View>
             </View>
-          </LinearGradient>
-
-          <LinearGradient
-            colors={["#0a54c9", "#5087de"]}
-            style={styles.card}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}>
-            <View style={styles.cardStyle}>
-              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-                <ThemedText style={styles.cardTitle}>Organization</ThemedText>
-                <View style={{ flexDirection: 'row', borderColor: "white", borderRadius: 5, borderWidth: 0.5, paddingHorizontal: 6, paddingVertical: 2 }}>
-                  <MaterialCommunityIcons
-                    name="arrow-top-right"
-                    size={20}
-                    color="white"
-                  />
-                  <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
-                </View>
-              </View>
+          </View>
+          <View style={styles.cardStyle}>
+            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+              <ThemedText style={styles.cardTitle}>Organization</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.organizationCount}</ThemedText>
-              <View style={{ flexDirection: 'row' }}>
-                <ThemedText style={styles.cardSub}>Strong user retention </ThemedText>
-                <MaterialCommunityIcons
-                  name="arrow-top-right"
-                  size={20}
-                  color="white"
-                />
-              </View>
             </View>
-          </LinearGradient>
-
-          <LinearGradient
-            colors={["#AA6097","#E06557"]}
-            style={styles.card}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}>
-            <View style={styles.cardStyle}>
-              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-                <ThemedText style={styles.cardTitle}>Assigned Permission</ThemedText>
-                <View style={{ flexDirection: 'row', borderColor: "white", borderRadius: 5, borderWidth: 0.5, paddingHorizontal: 6, paddingVertical: 2 }}>
-                  <MaterialCommunityIcons
-                    name="arrow-top-right"
-                    size={20}
-                    color="white"
-                  />
-                  <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
-                </View>
-              </View>
+          </View>
+          <View style={styles.cardStyle}>
+            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+              <ThemedText style={styles.cardTitle}>Assigned Permission</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.assignedPermissionCount}</ThemedText>
-              <View style={{ flexDirection: 'row' }}>
-                <ThemedText style={styles.cardSub}>Strong user retention </ThemedText>
-                <MaterialCommunityIcons
-                  name="arrow-top-right"
-                  size={20}
-                  color="white"
-                />
-              </View>
             </View>
-          </LinearGradient>
-
+          </View>
         </ScrollView>
       </ThemedView>
     </CustomHeader>
@@ -254,24 +115,27 @@ const styles = ScaledSheet.create({
     fontWeight: "500",
     color: "black"
   },
+  cardStyle: {
+    backgroundColor: "#C9C9C9",
+    borderRadius: 8,
+    padding: 15,
+    marginHorizontal: 15,
+    marginVertical: 5
+  },
   cardTitle: {
     fontSize: "16@ms",
-    color: "white",
+    color: "black",
     fontWeight: '500'
   },
   cardHeading: {
     fontSize: "22@ms",
-    color: 'white',
+    color: 'black',
     fontWeight: "bold"
   },
   cardSub: {
     fontSize: "14@ms",
     color: "white",
     fontWeight: "400"
-  },
-  cardStyle: {
-    marginHorizontal: 20,
-    marginVertical: 5,
   },
   card: {
     marginHorizontal: 10,

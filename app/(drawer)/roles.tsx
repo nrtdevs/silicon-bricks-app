@@ -71,7 +71,7 @@ import React, { useEffect, useState } from 'react'
 import { LinearGradient } from "expo-linear-gradient";
 import { useLazyQuery } from '@apollo/client'
 import { FlatList } from 'react-native-gesture-handler'
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons'
+import { Feather, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import { Colors } from 'react-native/Libraries/NewAppScreen'
 import { useScrollToTop } from '@react-navigation/native'
 import { gql, useMutation } from "@apollo/client";
@@ -122,10 +122,43 @@ const Update_Permission = gql`
 `;
 
 const Permissions = () => {
+
+  /// delete role state --
+  const [deletePopupVisible, setDeletePopupVisible] = useState(false);
+  const showDeleteDialogue = (id: number) => {
+    setSelectedProjectId(id);
+    setDeletePopupVisible(true);
+  };
+  const hideDeleteDialogue = () => {
+    setDeletePopupVisible(false);
+    setSelectedProjectId(null);
+  };
+  const [deleteProject] = useMutation(Delete_Permission, {
+    onCompleted: () => {
+      console.log("Project deleted successfully");
+      setDeletePopupVisible(false);
+      //refetch();
+    },
+    onError: (error) => {
+      console.error("Error deleting project:", error);
+    },
+  });
+  const handleDelete = async () => {
+    console.log(selectedProjectId);
+    if (selectedProjectId !== null) {
+      try {
+        await deleteProject({ variables: { deletePermissionId: Number(selectedProjectId) } });
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+  };
+
+
   const [visible, setVisible] = useState(false);
   const showDialogue = () => setVisible(true);
   const [updatePermission] = useMutation(Update_Permission);
-  const [deletePopupVisible, setDeletePopupVisible] = useState(false);
+
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const schema = z.object({
     name: z.string().min(4, { message: "Name is required" }),
@@ -135,14 +168,7 @@ const Permissions = () => {
   const { control, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
   });
-  const showDeleteDialogue = (id: number) => {
-    setSelectedProjectId(id);
-    setDeletePopupVisible(true);
-  };
-  const hideDeleteDialogue = () => {
-    setDeletePopupVisible(false);
-    setSelectedProjectId(null);
-  };
+
   useEffect(() => {
     getAllPermissions();
   }, []);
@@ -178,26 +204,7 @@ const Permissions = () => {
   }
 
   const permissions = data?.allPermissions || [];
- const [deleteProject] = useMutation(Delete_Permission, {
-    onCompleted: () => {
-      console.log("Project deleted successfully");
-      setDeletePopupVisible(false);
-      //refetch();
-    },
-    onError: (error) => {
-      console.error("Error deleting project:", error);
-    },
-  });
-  const handleDelete = async () => {
-    console.log(selectedProjectId);
-    if (selectedProjectId !== null) {
-      try {
-        await deleteProject({ variables: { deletePermissionId: Number(selectedProjectId) } });
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    }
-  };
+
   const handleEdit = async (formData: any) => {
     if (!selectedProjectId) {
       console.error("No project selected for update");
@@ -211,7 +218,7 @@ const Permissions = () => {
             appName: formData.name,
             description: formData.description,
             module: "",
-            action : ""
+            action: ""
           },
         },
       });
@@ -229,35 +236,30 @@ const Permissions = () => {
           data={permissions}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <LinearGradient
-              colors={["#0a54c9", "#5087de"]}
-              style={styles.card}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}>
-              <View>
+            <View style={{ backgroundColor: "#C9C9C9", margin: "10", borderRadius: 8, padding: 10 }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                 <ThemedText style={styles.name}>{item.appName}</ThemedText>
-                <ThemedText style={styles.cardDot}>{item.groupName}</ThemedText>
-              </View>
-              <View>
-                <TouchableOpacity
+                <Feather
+                  name="edit"
+                  size={ms(22)}
+                  color="black"
                   onPress={showDialogue}
-                >
-                  <Feather name="edit" size={24} color="white" />
-                </TouchableOpacity>
+                />
+              </View>
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <ThemedText style={styles.cardDot}>{item.groupName}</ThemedText>
+
                 <View style={{ height: 5, width: 5 }}>
                 </View>
-                <TouchableOpacity
-                  onPress={() => showDeleteDialogue(item.id)}
-                >
-                  <MaterialCommunityIcons
-                    name="delete-empty"
-                    size={24}
-                    color="red"
+              
+                <MaterialIcons
+                    name="delete-outline"
+                    size={ms(24)}
+                    color="black"
+                    onPress={() => showDeleteDialogue(item.id)}
                   />
-                </TouchableOpacity>
               </View>
-
-            </LinearGradient>
+            </View>
           )}
         />
         <Portal>
@@ -320,22 +322,22 @@ const Permissions = () => {
               </Dialog.Content>
               <Dialog.Actions>
                 <TouchableOpacity
-                onPress={handleDelete}
-                style={styles.buttonContainerSave}
+                  onPress={handleDelete}
+                  style={styles.buttonContainerSave}
                 >
-                <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={hideDeleteDialogue}
-                style={styles.buttonContainerClose}
-              >
-                <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
-              </TouchableOpacity>
-            </Dialog.Actions>
-          </Dialog>
-        </ThemeProvider>
-      </Portal>
-    </View>
+                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={hideDeleteDialogue}
+                  style={styles.buttonContainerClose}
+                >
+                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
+                </TouchableOpacity>
+              </Dialog.Actions>
+            </Dialog>
+          </ThemeProvider>
+        </Portal>
+      </View>
     </CustomHeader >
   )
 }
@@ -411,12 +413,12 @@ const styles = ScaledSheet.create({
   name: {
     fontSize: 18,
     width: 110,
-    color: "white",
+    color: "black",
     fontWeight: "500",
   },
   cardDot: {
     fontSize: 16,
-    color: "white",
+    color: "black",
     fontWeight: "normal",
   },
   label: {

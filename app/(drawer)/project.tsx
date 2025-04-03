@@ -1,7 +1,7 @@
 import { View, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react';
 import { LinearGradient } from "expo-linear-gradient";
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { gql, useMutation } from "@apollo/client";
 import { useLazyQuery } from '@apollo/client';
 import { Dialog, Portal, } from "react-native-paper";
@@ -195,12 +195,7 @@ const Project = () => {
             data={datax}
             keyExtractor={(item: ProjectData) => item.id.toString()}
             renderItem={({ item }) => (
-              <LinearGradient
-                colors={["#0a54c9", "#5087de"]}
-                style={styles.card}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
+              <View style={{backgroundColor: "#C9C9C9", margin: "15", borderRadius: 8, padding: 10}}>
                 <View style={{ flexDirection: "row" }}>
                   <ThemedText style={styles.cardTitle}>Name</ThemedText>
                   <ThemedText style={styles.cardDot}>:</ThemedText>
@@ -209,7 +204,7 @@ const Project = () => {
                 <View style={{ flexDirection: "row" }}>
                   <ThemedText style={styles.cardTitle}>Status</ThemedText>
                   <ThemedText style={styles.cardDot}>:</ThemedText>
-                  <ThemedText style={styles.cardDot}>{item.status}</ThemedText>
+                  <ThemedText style={{ color: "green", fontWeight: 'normal', fontSize: 18, paddingHorizontal: 10 }}>{item.status}</ThemedText>
                 </View>
                 <View style={{ flexDirection: "row" }}>
                   <ThemedText style={styles.cardTitle}>Description</ThemedText>
@@ -219,29 +214,29 @@ const Project = () => {
                 <View style={{ flexDirection: "row" }}>
                   <ThemedText style={styles.cardTitle}>Action</ThemedText>
                   <ThemedText style={styles.cardDot}>: </ThemedText>
-                  <TouchableOpacity
-                    onPress={() => showEditDialogue(item)}>
-                    <Feather name="edit" color="white" size={24} />
-                  </TouchableOpacity>
-                  <View style={{ width: 10 }}></View>
-                  <TouchableOpacity
+                  <Feather
+                    name="edit"
+                    size={ms(22)}
+                    color="black"
+                    onPress={() => showEditDialogue(item)}
+                  />
+                  <View style={{ width: 5 }}></View>
+                  <MaterialIcons
+                    name="delete-outline"
+                    size={ms(24)}
+                    color="black"
                     onPress={() => showDeleteDialogue(item.id)}
-                  >
-                    <MaterialCommunityIcons
-                      name="delete-empty"
-                      size={26}
-                      color="red"
-                    />
-                  </TouchableOpacity>
+                  />
+
                 </View>
-              </LinearGradient>
+              </View>
             )}
           />
 
         </View>
         <TouchableOpacity style={styles.fab}
           onPress={showDialogue}>
-          <Feather name="plus" color="white" size={24}></Feather>
+          <Feather name="plus" color="black" size={24}></Feather>
         </TouchableOpacity>
 
         <Portal>
@@ -334,13 +329,13 @@ const Project = () => {
                   onPress={handleSubmit(handleEdit)}
                   style={styles.buttonContainerSave}
                 >
-                  <ThemedText style={{color: 'white', fontSize: 14, fontWeight: "normal"}}>Save</ThemedText>
+                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={hideEditDialogue}
                   style={styles.buttonContainerClose}
                 >
-                  <ThemedText style={{color: 'black', fontSize: 14, fontWeight: "normal"}}>Close</ThemedText>
+                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
                 </TouchableOpacity>
               </Dialog.Actions>
             </Dialog>
@@ -418,15 +413,15 @@ const styles = ScaledSheet.create({
     alignSelf: "flex-start",
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: "18@ms",
     width: 110,
-    color: "white",
+    color: "black",
     fontWeight: "500",
   },
   cardDot: {
-    fontSize: 18,
+    fontSize: "18@ms",
     paddingHorizontal: 10,
-    color: "white",
+    color: "black",
     fontWeight: "normal",
   },
   fab: {
@@ -436,7 +431,7 @@ const styles = ScaledSheet.create({
     width: 50,
     height: 50,
     borderRadius: 35,
-    backgroundColor: "#0a54c9",
+    backgroundColor: "#C9C9C9",
     alignItems: "center",
     justifyContent: "center",
     elevation: 3,
