@@ -16,12 +16,12 @@ const Index = () => {
     getToken();
   }, []);
   return token ? (
-    // <Redirect href="/(auth)/login" />
-    <Redirect href="/(drawer)/(tabs)/promotions"/>
+    <Redirect href="/(auth)/login" />
+    // <Redirect href="/(drawer)/(tabs)/promotions"/>
     // <Redirect href="/(drawer)/(tabs)" />
   ) : (
-    // <Redirect href="/(auth)/login" />
-    <Redirect href="/(drawer)/(tabs)/promotions"/>
+    <Redirect href="/(auth)/login" />
+    // <Redirect href="/(drawer)/(tabs)/promotions"/>
     // <Redirect href="/(drawer)/(tabs)" />
     // <Redirect href="/(drawer)/organization" />
   );
