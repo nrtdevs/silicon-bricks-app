@@ -12,6 +12,8 @@ import React, { useEffect, useState } from 'react'
 import { router } from 'expo-router';
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { Colors } from '@/constants/Colors';
+import AddPromotion from '@/components/addPromotions';              
+import EditPromotion from '@/components/EditPromotion';
 
 const GetAllPromotion = gql`
   query PaginatedOffers($listInputDto: ListInputDTO!) {
@@ -44,6 +46,7 @@ const Promotions = () => {
     /// Delete promotions state --
     const [selectedPromptionId, setSelectedPromotionId] = useState<number | null>(null);
     const [deleteVisible, setDeleteVisible] = React.useState(false);
+    const [editScreen, setEditScreen] = useState<boolean>(false)
     const hideDeleteDialogue = () => { setDeleteVisible(false) };
     const showDeleteDialogue = (id: number) => {
         setSelectedPromotionId(id);
@@ -92,7 +95,7 @@ const Promotions = () => {
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <View
-                            style={{ backgroundColor: "#C9C9C9", margin: "15", borderRadius: 8, padding: 10 }}>
+                            style={{ backgroundColor: "#C9C9C9", margin: 15, borderRadius: 8, padding: 10 }}>
                             <View style={{ flexDirection: "row" }}>
                                 <ThemedText style={styles.cardTitle}>Title</ThemedText>
                                 <ThemedText style={styles.cardDot}>:</ThemedText>
@@ -127,7 +130,7 @@ const Promotions = () => {
                                     color="black"
                                     onPress={() => {
                                         router.push({
-                                            pathname: "/editPromotion",
+                                            pathname: "/(subComponents)/addPromotions",
                                             params: { id: 1, title: "poprpro" },
                                         })
                                     }}
@@ -146,7 +149,7 @@ const Promotions = () => {
                 />
                 <Pressable
                     style={styles.fab}
-                    onPress={() => router.push("/addPromotions")}
+                    onPress={() => <AddPromotion />}
                 >
                     <Feather name="plus" color="black" size={24}></Feather>
                 </Pressable>

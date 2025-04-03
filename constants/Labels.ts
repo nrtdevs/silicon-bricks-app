@@ -64,4 +64,5 @@ export const labels = {
   module : "Module",
   coupons : "Coupons",
   subscriptions : "Subscriptions",
+  plans:"Plans",
 };

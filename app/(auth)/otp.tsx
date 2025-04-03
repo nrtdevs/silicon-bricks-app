@@ -30,6 +30,7 @@ const LoginCodeScreen = () => {
   const onSubmit = async () => {
     try {
       const otpValue = Number(otp);
+      
       if (params?.otp == otp) {
         console.log(otpValue);
         const response = await verifyOtp({

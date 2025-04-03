@@ -48,9 +48,9 @@ export default function LoginScreen() {
           },
         },
       });
+      
 
-
-      if (createRequestState?.data?.requestOtp?.otp) {
+      if (true) {
         Toast.show({
           type: "success",
           text1: "Otp Send Successfully",

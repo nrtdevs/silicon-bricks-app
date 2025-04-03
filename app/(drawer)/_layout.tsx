@@ -45,7 +45,14 @@ const CustomDrawerContent = (props: any) => {
         icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
         label={labels?.offerPromotions}
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-        onPress={() => router.push('/project')}
+        onPress={() => router.push('/promotions')}
+      />
+
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
+        label={labels?.plans}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/plans')}
       />
 
       <DrawerItem

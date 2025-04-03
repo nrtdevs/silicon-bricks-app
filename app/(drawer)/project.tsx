@@ -195,7 +195,7 @@ const Project = () => {
             data={datax}
             keyExtractor={(item: ProjectData) => item.id.toString()}
             renderItem={({ item }) => (
-              <View style={{backgroundColor: "#C9C9C9", margin: "15", borderRadius: 8, padding: 10}}>
+              <View style={{backgroundColor: "#C9C9C9", margin: 15, borderRadius: 8, padding: 10}}>
                 <View style={{ flexDirection: "row" }}>
                   <ThemedText style={styles.cardTitle}>Name</ThemedText>
                   <ThemedText style={styles.cardDot}>:</ThemedText>

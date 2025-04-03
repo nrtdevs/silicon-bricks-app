@@ -2,15 +2,23 @@ import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import CustomValidation from "@/components/CustomValidation";
 import { ThemedView } from "@/components/ThemedView";
-import { labels } from "@/constants/Labels";
 import { useForm } from "react-hook-form";
-import { ms, ScaledSheet } from "react-native-size-matters";
+import { ms, ScaledSheet, vs } from 'react-native-size-matters';
 
-
-interface EditPromotionData {
-    email: string;
-    password: string;
-    confirmPassword: string;
+interface AddPromotionData {
+    title: string;
+    discount_value: string;
+    option: string;
+    max_discount_amount: string;
+    dicuunt_value : string;
+    cashback_amount : string;
+    min_order_amount : string;
+    usage_limit : string;
+    discription : string;
+    start_date : string;
+    end_date : string;
+    status : string;
+    offer_type : string;
 }
 const pickerData = [
     { label: "Percentage", value: "percentage" },
@@ -21,8 +29,8 @@ const dicountType = [
     { label: "Discount", value: "discount" },
     { label: "Buy One Get One", value: "buy_one_get_one" }
 ];
-const EditPromotion = () => {
-    const { control, handleSubmit, formState: { } } = useForm<EditPromotionData>({ mode: "onBlur" });
+const AddPromotion = () => {
+    const { control, handleSubmit, formState: { } } = useForm<AddPromotionData>({ mode: "onBlur" });
     return (
         <CustomHeader>
             <ThemedView style={styles.container}>
@@ -73,7 +81,6 @@ const EditPromotion = () => {
                     placeholder={`Enter usage limit`}
                     label={`Usage Limit`}
                 ></CustomValidation>
-
                 <CustomValidation
                     data={pickerData}
                     type="picker"
@@ -107,14 +114,14 @@ const EditPromotion = () => {
 
                 {/* <CustomButton
                     title={labels.login}
-                    onPress={ }
+                    onPress={}
                     isGradient
                 /> */}
 
             </ThemedView>
         </CustomHeader>
     );
-};
+}
 const styles = ScaledSheet.create({
     container: {
         flexGrow: 1,
@@ -122,4 +129,4 @@ const styles = ScaledSheet.create({
         marginHorizontal: ms(20),
     },
 });
-export default EditPromotion;
+export default AddPromotion;
