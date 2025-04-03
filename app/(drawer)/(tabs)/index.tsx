@@ -1,12 +1,11 @@
 import {
   View,
   Text,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
 import React from "react";
-import { Entypo, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Entypo,  MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
@@ -15,8 +14,37 @@ import { ScaledSheet } from 'react-native-size-matters';
 import CustomHeader from "@/components/CustomHeader";
 import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
+import { useQuery, gql } from "@apollo/client";
 
+const DASHBOARD_COUNT_QUERY = gql`
+  query DashboardCount($filters: ReportFilters!) {
+    dashboardCount(filters: $filters) {
+      userCount
+      roleCount
+      permissionCount
+      assignedPermissionCount
+      projectCount
+      organizationCount
+      couponCount
+      offerCount
+      moduleCount
+      packageCount
+      planCount
+      subscriptionCount
+      packageModuleCount
+      subscriptionPlanCount
+    }
+  }
+`;
 const index = () => {
+
+  const { loading, error, data } = useQuery(DASHBOARD_COUNT_QUERY, {
+    variables: { filters: {} },
+  });
+
+  if (loading) return <ThemedText>Loading...</ThemedText>;
+  if (error) return <ThemedText>Error: {error.message}</ThemedText>;
+  const userCount = data?.dashboardCount || 0;
   const navigation = useNavigation();
   const { theme } = useTheme();
   return (
@@ -57,7 +85,7 @@ const index = () => {
                   <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
                 </View>
               </View>
-              <ThemedText style={styles.cardHeading}>101</ThemedText>
+              <ThemedText style={styles.cardHeading}>{userCount.userCount}</ThemedText>
               <View style={{ flexDirection: 'row' }}>
                 <ThemedText style={styles.cardSub}>Trending up this month </ThemedText>
                 <MaterialCommunityIcons
@@ -86,7 +114,7 @@ const index = () => {
                   <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
                 </View>
               </View>
-              <ThemedText style={styles.cardHeading}>101</ThemedText>
+              <ThemedText style={styles.cardHeading}>{userCount.roleCount}</ThemedText>
               <View style={{ flexDirection: 'row' }}>
                 <ThemedText style={styles.cardSub}>Down 20% this period </ThemedText>
                 <MaterialCommunityIcons
@@ -115,7 +143,7 @@ const index = () => {
                   <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
                 </View>
               </View>
-              <ThemedText style={styles.cardHeading}>101</ThemedText>
+              <ThemedText style={styles.cardHeading}>{userCount.projectCount}</ThemedText>
               <View style={{ flexDirection: 'row' }}>
                 <ThemedText style={styles.cardSub}>Strong user retention </ThemedText>
                 <MaterialCommunityIcons
@@ -144,7 +172,7 @@ const index = () => {
                   <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
                 </View>
               </View>
-              <ThemedText style={styles.cardHeading}>101</ThemedText>
+              <ThemedText style={styles.cardHeading}>{userCount.permissionCount}</ThemedText>
               <View style={{ flexDirection: 'row' }}>
                 <ThemedText style={styles.cardSub}>Strong user retention </ThemedText>
                 <MaterialCommunityIcons
@@ -173,7 +201,7 @@ const index = () => {
                   <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
                 </View>
               </View>
-              <ThemedText style={styles.cardHeading}>101</ThemedText>
+              <ThemedText style={styles.cardHeading}>{userCount.organizationCount}</ThemedText>
               <View style={{ flexDirection: 'row' }}>
                 <ThemedText style={styles.cardSub}>Strong user retention </ThemedText>
                 <MaterialCommunityIcons
@@ -202,7 +230,7 @@ const index = () => {
                   <ThemedText style={{color :"white",fontSize : 16,fontWeight : "500"}}> 123</ThemedText>
                 </View>
               </View>
-              <ThemedText style={styles.cardHeading}>101</ThemedText>
+              <ThemedText style={styles.cardHeading}>{userCount.assignedPermissionCount}</ThemedText>
               <View style={{ flexDirection: 'row' }}>
                 <ThemedText style={styles.cardSub}>Strong user retention </ThemedText>
                 <MaterialCommunityIcons

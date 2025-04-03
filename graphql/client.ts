@@ -38,7 +38,7 @@ import * as SecureStore from 'expo-secure-store'
 
 // Define the HTTP link
 const httpLink = createHttpLink({
-  uri: 'http://192.168.1.34:5001/graphql'
+  uri: 'http://192.168.1.58:5001/graphql'
 })
 
 // Define the Authentication Link (Fixing Async Issue)
