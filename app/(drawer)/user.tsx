@@ -18,6 +18,8 @@ import {
   PaginatedRolesDocument,
   PaginatedUsersDocument,
   UpdateOrganizationDocument,
+  UpdateUserDocument,
+  UserType,
 } from "@/graphql/generated";
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
@@ -35,12 +37,15 @@ import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 
 const defaultValue = {
   name: "",
   email: "",
   phoneNo: "",
-  role: "",
+  roles: [],
+  usertype: "",
+  id: "",
 };
 
 const UserScreen = () => {
@@ -56,7 +61,8 @@ const UserScreen = () => {
     name: string;
     email: string;
     phoneNo: string;
-    role: string;
+    roles: any[];
+    usertype: any;
   }>({
     defaultValues: {},
   });
@@ -71,11 +77,12 @@ const UserScreen = () => {
     name: string;
     email: string;
     phoneNo: string;
-    role: string;
+    roles: any[];
+    usertype: any;
+    id: string;
   }>(defaultValue);
   const [selected, setSelected] = useState<any>([]);
-
-  const [userData, { error, data, loading, refetch }] = useLazyQuery(
+  const [userData, { error, data, loading, refetch }] = useLazyQuery<any>(
     PaginatedUsersDocument
   );
   const [createUser, createUserState] = useMutation(CreateUserDocument, {
@@ -90,20 +97,6 @@ const UserScreen = () => {
       Alert.alert("Error", error.message);
     },
   });
-
-  const handleImagePickerPress = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct media type
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri)
-    }
-    console.log('image', image)
-  };
 
   const [
     getUserRoles,
@@ -122,28 +115,31 @@ const UserScreen = () => {
     },
   ] = useLazyQuery(PaginatedOrganizationDocument);
 
-  // const [updateOrganization, updateOrganizationState] = useMutation(UpdateOrganizationDocument, {
-  //   onCompleted: (data) => {
-  //     reset()
-  //     refetch();
-  //     setEditModal(false);
-  //     setModalVisible(false);
-  //     Alert.alert("success", "Project updated successfully!");
-  //   },
-  //   onError: (error) => {
-  //     Alert.alert("Error", error.message);
-  //   }
-  // });
-
-  const [deleteOrganization, deleteOrganizationState] = useMutation(DeleteOrganizationDocument, {
+  const [updateUser, updateUserState] = useMutation(UpdateUserDocument, {
     onCompleted: (data) => {
+      reset()
       refetch();
-      Alert.alert("success", "Project deleted successfully!");
+      setEditModal(false);
+      setModalVisible(false);
+      Alert.alert("success", "Project updated successfully!");
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
     }
   });
+
+  const [deleteOrganization, deleteOrganizationState] = useMutation(
+    DeleteOrganizationDocument,
+    {
+      onCompleted: (data) => {
+        refetch();
+        Alert.alert("success", "Project deleted successfully!");
+      },
+      onError: (error) => {
+        Alert.alert("Error", error.message);
+      },
+    }
+  );
 
   // const [updateOrganizationStatus, updateOrganizationStatusState] = useMutation(EnableOrganizationStatusDocument, {
   //   onCompleted: (data) => {
@@ -154,14 +150,23 @@ const UserScreen = () => {
   //   onError: (error) => {
   //     Alert.alert("Error", error.message);
   //   }
-  // }); 
+  // });
 
+  const userTypeData = [
+    { label: "admin", value: "admin" },
+    { label: "adminEmployee", value: "adminEmployee" },
+    { label: "organization", value: "organization" },
+    { label: "organizationEmployee", value: "organizationEmployee" },
+  ];
 
   useEffect(() => {
-    setValue("name", currentUser?.name)
-    setValue("email", currentUser?.email)
-    setValue("phoneNo", currentUser?.phoneNo)
-  }, [currentUser])
+    setValue("name", currentUser?.name);
+    setValue("email", currentUser?.email);
+    setValue("phoneNo", currentUser?.phoneNo);
+    setValue("roles", currentUser?.roles);
+    setValue("usertype", currentUser?.usertype);
+  }, [currentUser]);
+
 
   useEffect(() => {
     userData({
@@ -189,27 +194,32 @@ const UserScreen = () => {
 
   const onSubmit = (data: any) => {
     // console.log("000", data);
+    let roles = watch("roles");
+
+   roles = Array.isArray(roles) ? roles : [];
+
+   const roleIds = roles.map(Number); 
+
     const params = {
       email: data?.email,
       mobileNo: Number(data?.phoneNo),
       name: data?.name,
-      organizationId: Number(data?.Organization?.id),
-      roleId: Number(data?.role?.id),
-    }
-    console.log(params);
+      roleIds: roleIds,
+      userType: watch("usertype")?.label as UserType,
+      avatar: image, 
+    };
 
-    // let param = {
-    //   id: Number(currentOrganization?.id),
-    //   ...data
-    // }
-    // console.log(param);
+    let updateParams = {
+      id: Number(currentUser?.id),
+      ...params,
+    }
+    console.log('09876',updateParams);
     editModal
-      ? // updateOrganization({
-      //   variables: {
-      //     updateOrganizationInput: param,
-      //   },
-      // })
-      {}
+      ? updateUser({
+        variables: {
+          data: updateParams, 
+        },
+      })
       : createUser({
         variables: {
           data: params,
@@ -217,9 +227,209 @@ const UserScreen = () => {
       });
   };
 
-  if (OrganizationLoading) {
-    return <Loader />
+  const renderItem = (item, index) => {
+    let rolesId = item.roles.map((item) => {
+      return item.id
+    })
+    // console.log(rolesId);
+    return (
+      <View
+        key={index}
+        style={[
+          styles.organizationContainer,
+          { backgroundColor: Colors[theme].cartBg },
+        ]}
+      >
+        <ThemedText
+          style={[
+            styles.status,
+            {
+              // color:
+              //   item.status == "active" ? Colors?.green : "#6d6d1b",
+              backgroundColor:
+                theme == "dark" ? Colors?.white : "#e6e2e2",
+            },
+          ]}
+        >
+          {item?.status}
+        </ThemedText>
+
+        <View style={styles.organizationHeader}>
+          <ThemedText type="subtitle">{item?.name}</ThemedText>
+          <View style={styles.organizationInfo}>
+            <MaterialIcons
+              name="attractions"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                setHierarchyModalVisible(true);
+              }}
+            />
+
+            <AntDesign
+              name="eyeo"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                setCurrentUser({
+                  name: item?.name,
+                  email: item?.email,
+                  phoneNo: item.mobileNo.toString(),
+                  roles: rolesId,
+                  usertype: item?.userType,
+                  id: item?.id,
+                });
+                setInfoModalVisible(true);
+              }}
+            />
+
+            <Feather
+              name="edit"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                setCurrentUser({
+                  name: item?.name,
+                  email: item?.email,
+                  phoneNo: item?.mobileNo.toString(),
+                  roles: rolesId,
+                  usertype: item?.userType,
+                  id: item?.id,
+                });
+                setEditModal(true);
+                setModalVisible(true);
+              }}
+            />
+            <MaterialIcons
+              name="delete-outline"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                console.log("item", item);
+                const params = {
+                  deleteOrganizationId: Number(item?.id),
+                };
+
+                Alert.alert(
+                  "Delete",
+                  "Are you sure you want to delete?",
+                  [
+                    {
+                      text: "Yes",
+                      onPress: () => {
+                        deleteOrganization({
+                          variables: params,
+                        });
+                      },
+                    },
+                    { text: "No", onPress: () => { } },
+                  ]
+                );
+              }}
+            />
+          </View>
+        </View>
+
+        <View style={styles.userInfo}>
+          <ThemedText
+            style={{ fontSize: ms(14), lineHeight: ms(18) }}
+          >
+            {item?.email}
+          </ThemedText>
+          <ThemedText
+            style={{ fontSize: ms(14), lineHeight: ms(18) }}
+          >
+            {item?.mobileNo}
+          </ThemedText>
+        </View>
+      </View>
+    );
   }
+
+  const handleImagePickerPress = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets?.length > 0) {
+      const uri = result.assets[0].uri;
+      uploadImage(uri);
+    }
+  };
+
+  const uploadImage = async (uri: string) => {
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      if (!fileInfo.exists) {
+        console.error("File does not exist:", uri);
+        return;
+      }
+
+      const fileExtension = uri.split(".").pop() || "jpg"; // Default to jpg if no extension
+      const mimeType = `image/${fileExtension}`;
+
+      const formData = new FormData();
+
+      // Correct way to append a file in React Native
+      formData.append("file", {
+        uri: uri,
+        name: `upload.${fileExtension}`,
+        type: mimeType,
+      } as any); // Type assertion to avoid TypeScript error
+
+      const uploadResponse = await fetch("http://192.168.1.3:5001/api/files/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+
+      const responseData = await uploadResponse.json();
+      console.log("Upload successful:", responseData?.files[0]);
+      setImage(responseData?.files[0]);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+  };
+
+
+  if (OrganizationLoading) {
+    return <Loader />;
+  }
+
+  console.log("image", image);
+
+
+  // const uploadImage = async (uri: string) => {
+  //   try {
+  //     const response = await fetch(uri);
+  //     const blob = await response.blob();
+
+  //     const formData = new FormData();
+  //     formData.append("file", {
+  //       uri,
+  //       type: "image/jpeg",
+  //       name: "image.jpg",
+  //     } as any);
+
+  //     const uploadResponse = await fetch("http://192.168.1.3:5001/api/files/upload", {
+  //       method: "POST",
+  //       body: formData,
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //       },
+  //     });
+
+  //     const responseData = await uploadResponse.json();
+  //     console.log("Upload successful:", responseData);
+  //   } catch (error) {
+  //     console.error("Upload failed:", error);
+  //   }
+  // };
 
   return (
     <CustomHeader>
@@ -246,7 +456,7 @@ const UserScreen = () => {
           <Pressable
             style={styles.buttonContainer}
             onPress={() => {
-              setModalVisible(true)
+              setModalVisible(true);
               // setCurrentOrganization(defaultValue);
             }}
           >
@@ -271,123 +481,14 @@ const UserScreen = () => {
           <FlatList
             data={data?.paginatedUsers?.data}
             renderItem={({ item, index }: any) => {
-              return (
-                <View
-                  key={index}
-                  style={[
-                    styles.organizationContainer,
-                    { backgroundColor: Colors[theme].cartBg },
-                  ]}
-                >
-                  <ThemedText
-                    style={[
-                      styles.status,
-                      {
-                        // color:
-                        //   item.status == "active" ? Colors?.green : "#6d6d1b",
-                        backgroundColor:
-                          theme == "dark" ? Colors?.white : "#e6e2e2",
-                      },
-                    ]}
-                  >
-                    {item?.status}
-                  </ThemedText>
-
-                  <View style={styles.organizationHeader}>
-                    <ThemedText type="subtitle">{item?.name}</ThemedText>
-                    <View style={styles.organizationInfo}>
-                      <MaterialIcons
-                        name="attractions"
-                        size={ms(20)}
-                        color={Colors[theme].text}
-                        onPress={() => {
-                          setHierarchyModalVisible(true);
-                        }}
-                      />
-
-                      <AntDesign
-                        name="eyeo"
-                        size={ms(20)}
-                        color={Colors[theme].text}
-                        onPress={() => {
-                          setCurrentUser({
-                            name: item?.name,
-                            email: item?.email,
-                            phoneNo: item?.mobileNo.toString(),
-                            role: item?.name,
-                          });
-                          setInfoModalVisible(true);
-                        }}
-                      />
-
-                      <Feather
-                        name="edit"
-                        size={ms(20)}
-                        color={Colors[theme].text}
-                        onPress={() => {
-                          // setValue("name", item?.name)
-                          // setValue("email", item?.email)
-                          // setValue("phoneNo", item?.mobileNo.toString())
-                          // setValue("role", )
-                          console.log("item", item);
-
-                          setCurrentUser({
-                            name: item?.name,
-                            email: item?.email,
-                            phoneNo: item?.mobileNo.toString(),
-                            role: item?.name,
-                          });
-                          setEditModal(true);
-                          setModalVisible(true);
-                        }}
-                      />
-                      <MaterialIcons
-                        name="delete-outline"
-                        size={ms(20)}
-                        color={Colors[theme].text}
-                        onPress={() => {
-                          console.log("item", item);
-                          const params = {
-                            deleteOrganizationId: Number(item?.id),
-                          }
-
-                          Alert.alert(
-                            "Delete",
-                            "Are you sure you want to delete?",
-                            [
-                              {
-                                text: "Yes",
-                                onPress: () => {
-                                  deleteOrganization({
-                                    variables: params
-                                  });
-                                },
-                              },
-                              { text: "No", onPress: () => { } },
-                            ]
-                          );
-                        }}
-                      />
-                    </View>
-                  </View>
-
-                  <View style={styles.userInfo}>
-                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                      {item?.email}
-                    </ThemedText>
-                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                      {item?.mobileNo}
-                    </ThemedText>
-                  </View>
-                </View>
-              )
+              return renderItem(item, index);
             }}
             contentContainerStyle={{ paddingBottom: vs(40) }}
           />
         </View>
       </ThemedView>
 
-      {/* Edit modal */}
+      {/* Create Edit modal */}
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={() => {
@@ -400,11 +501,12 @@ const UserScreen = () => {
         <ScrollView
           contentContainerStyle={{
             backgroundColor: Colors[theme].cartBg,
-            height: vs(640),
-            width: '100%',
+            // height: vs(640),
+            width: "100%",
             borderRadius: 10,
             alignSelf: "center",
-            padding: 10,
+            paddingHorizontal: 10,
+            paddingVertical: 20,
             justifyContent: "flex-start",
           }}
         >
@@ -431,7 +533,10 @@ const UserScreen = () => {
           </View>
 
           <View style={{ padding: 10 }}>
-            <Pressable onPress={handleImagePickerPress} style={styles.imageContainer}>
+            <Pressable
+              onPress={handleImagePickerPress}
+              style={styles.imageContainer}
+            >
               {image && <Image source={{ uri: image }} style={styles.image} />}
             </Pressable>
             <CustomValidation
@@ -489,11 +594,11 @@ const UserScreen = () => {
               data={roleData?.paginatedRoles?.data}
               type="picker"
               hideStar
-              isSearch
               keyToCompareData="id"
               keyToShowData="name"
               control={control}
-              name="role"
+              name="roles"
+              multiSelect
               placeholder="Select role name"
               inputStyle={{ height: vs(50) }}
               rules={{
@@ -505,20 +610,19 @@ const UserScreen = () => {
             />
 
             <CustomValidation
-              data={organizationInfo?.paginatedOrganization?.data}
-              isSearch
+              data={userTypeData}
               type="picker"
               hideStar
               control={control}
-              name="Organization"
-              keyToCompareData="id"
-              keyToShowData="name"
-              placeholder="Select organization name"
+              keyToCompareData="value"
+              keyToShowData="label"
+              name="usertype"
+              placeholder="Select UserType"
               inputStyle={{ height: vs(50) }}
               rules={{
                 required: {
                   value: true,
-                  message: "Select a Organization",
+                  message: "Select a User Type",
                 },
               }}
             />
@@ -527,7 +631,10 @@ const UserScreen = () => {
           <CustomButton
             title="Submit"
             onPress={handleSubmit(onSubmit)}
-            style={{ backgroundColor: Colors[theme].background, marginTop: vs(10) }}
+            style={{
+              backgroundColor: Colors[theme].background,
+              marginTop: vs(10),
+            }}
           />
         </ScrollView>
       </Modal>
@@ -557,9 +664,7 @@ const UserScreen = () => {
               padding: ms(10),
             }}
           >
-            <ThemedText type="subtitle">
-              User
-            </ThemedText>
+            <ThemedText type="subtitle">User</ThemedText>
             <Pressable
               onPress={() => {
                 setCurrentUser(defaultValue);
@@ -569,23 +674,29 @@ const UserScreen = () => {
               <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
             </Pressable>
           </View>
-          <View style={{ borderWidth: 1, borderColor: Colors[theme].text, borderStyle: "dashed" }} />
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: Colors[theme].text,
+              borderStyle: "dashed",
+            }}
+          />
           <View style={{ gap: vs(10), padding: ms(10) }}>
-            <View >
+            <View>
               <ThemedText type="subtitle">Name</ThemedText>
               <ThemedText type="default">{currentUser?.name}</ThemedText>
             </View>
-            <View >
+            <View>
               <ThemedText type="subtitle">Email</ThemedText>
               <ThemedText type="default">{currentUser?.email}</ThemedText>
             </View>
-            <View >
+            <View>
               <ThemedText type="subtitle">Phone No</ThemedText>
               <ThemedText type="default">{currentUser?.phoneNo}</ThemedText>
             </View>
-            <View >
-              <ThemedText type="subtitle">Role</ThemedText>
-              <ThemedText type="default">{currentUser?.role}</ThemedText>
+            <View>
+              <ThemedText type="subtitle">User Type</ThemedText>
+              <ThemedText type="default">{currentUser?.usertype}</ThemedText>
             </View>
           </View>
         </View>
@@ -615,9 +726,7 @@ const UserScreen = () => {
               padding: ms(10),
             }}
           >
-            <ThemedText type="subtitle">
-              Hierarchy
-            </ThemedText>
+            <ThemedText type="subtitle">Hierarchy</ThemedText>
             <Pressable
               onPress={() => {
                 setHierarchyModalVisible(false);

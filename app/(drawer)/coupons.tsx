@@ -30,6 +30,7 @@ import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
+import DateTimePickerModal from "@/components/DateTimePickerModal";
 
 
 const defaultValue = {
@@ -42,7 +43,7 @@ const pickerData = [
     { label: "Fixed", value: "Fixed" },
 ];
 
-const organization = () => {
+const CouponScreen = () => {
     const { theme } = useTheme();
     const [isModalVisible, setModalVisible] = useState(false);
     const [isFocused, setIsFocused] = useState("");
@@ -84,10 +85,16 @@ const organization = () => {
     const [couponData, { error, data, loading, refetch }] = useLazyQuery(
         PaginatedCouponsDocument
     );
-    console.log("000d", data?.paginatedCoupons?.data);
+
     const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
         getDateTimePickerProps(false)
-      );
+    );
+
+    const [dateModal, setDateModal] = useState({
+        start: false,
+        end: false,
+    });
+
 
     const [createCoupon, createCouponState] = useMutation(CreateCouponDocument, {
         onCompleted: (data) => {
@@ -305,6 +312,7 @@ const organization = () => {
         );
     };
 
+
     // if (loading) {
     //   return <Loader />
     // }
@@ -514,9 +522,9 @@ const organization = () => {
                                 });
                                 setDateTimePickerProps(getDateTimePickerProps(true));
                             }}
-                            containerStyle={{ width: "95%" }}
                             pointerEvents="none"
                         />
+
                         <CustomValidation
                             type="input"
                             control={control}
@@ -534,7 +542,6 @@ const organization = () => {
                                 });
                                 setDateTimePickerProps(getDateTimePickerProps(true));
                             }}
-                            containerStyle={{ width: "95%", marginLeft: s(5) }}
                             pointerEvents="none"
                         />
 
@@ -578,11 +585,26 @@ const organization = () => {
                     </View>
                 </ScrollView>
             </Modal>
+
+            {/* date time picker modal */}
+            <DateTimePickerModal
+                dateTimePickerProps={dateTimePickerProps}
+                setDateTimePickerProps={setDateTimePickerProps}
+                onDateTimeSelection={(event: any, selectedDate: any) => {
+                    if (event.type != "dismissed") {
+                        setValue(
+                            dateModal.start ? "start_date" : "end_date",
+                            selectedDate
+                        );
+                    }
+                    setDateTimePickerProps(getDateTimePickerProps(false));
+                }}
+            />
         </CustomHeader>
     );
 };
 
-export default organization;
+export default CouponScreen;
 
 const styles = ScaledSheet.create({
     container: {

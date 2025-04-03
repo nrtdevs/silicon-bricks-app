@@ -37,7 +37,6 @@ mutation Register($registerData: RegisterDto!) {
   }
 }
 
-
 mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
   createOrganization(createOrganizationInput: $createOrganizationInput) {
     id
@@ -67,17 +66,35 @@ mutation UpdateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
 
 mutation CreateUser($data: CreateUserDto!) {
   createUser(data: $data) {
-    avatar
-    createdAt
-    deletedAt
-    email
     id
-    mobileNo
     name
-    status
     username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
     userType
+    createdAt
     updatedAt
+    deletedAt
+    roles {
+      id
+      permissionCount
+      roleType
+      name
+      status
+      permissions {
+        id
+        appName
+        groupName
+        module
+        action
+        slug
+        description
+      }
+    }
   }
 }
 
@@ -142,5 +159,31 @@ mutation CreateCoupon($createCouponInput: CreateCouponDto!) {
     status
     startDate
     endDate
+  }
+}
+
+
+mutation UpdateUser($data: UpdateUserDto!) {
+  updateUser(data: $data) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
+    userType
+    createdAt
+    updatedAt
+    deletedAt
+    roles {
+      id
+      name
+      description
+      roleType
+      status
+    }
   }
 }

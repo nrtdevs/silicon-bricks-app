@@ -75,15 +75,24 @@ query PaginatedUsers($listInputDto: ListInputDTO!) {
       limit
     }
     data {
-      id
-      name
-      username
-      mobileNo
-      email
-      status
       avatar
+      email
+      deletedAt
+      createdAt
+      id
+      mobileNo
+      name
+      organizationId
       parentId
+      roles {
+        id
+        name
+        roleType
+      }
+      status
       userType
+      username
+      updatedAt
     }
   }
 }
