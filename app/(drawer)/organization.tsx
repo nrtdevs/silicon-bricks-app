@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { CreateOrganizationDocument, DeleteOrganizationDocument, EnableOrganizationStatusDocument, PaginatedOrganizationDocument, UpdateOrganizationDocument } from "@/graphql/generated";
 import CustomHeader from "@/components/CustomHeader";
@@ -26,6 +26,7 @@ import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
+import debounce from "lodash.debounce";
 
 const defaultValue = {
   name: "",
@@ -175,7 +176,7 @@ const organization = () => {
         ]}
       >
         <View style={styles.organizationHeader}>
-          <ThemedText type="subtitle" style={{flex:1}}>{item?.name}</ThemedText>
+          <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
           <View style={styles.organizationInfo}>
             <MaterialIcons
               name="attractions"
@@ -251,13 +252,12 @@ const organization = () => {
     )
   }
 
-  // Fetch Organization
   const fetchOrganization = async (isRefreshing = false) => {
     if (isRefreshing) {
       setPage(1);
       setRefreshing(true);
     }
-    // Params for API
+
     const params = {
       per_page_record: 10,
       page: isRefreshing ? 1 : page,
@@ -270,9 +270,20 @@ const organization = () => {
     });;
   };
 
-  if (loading) {
-    return <Loader />
-  }
+  const debouncedSearch = useCallback(
+    debounce((text) => {
+      organizationData({
+        variables: {
+          listInputDto: {
+            limit: 10,
+            page: 1,
+            search: text,
+          },
+        },
+      });
+    }, 500),
+    [searchQuery]
+  );
 
   return (
     <CustomHeader>
@@ -283,11 +294,7 @@ const organization = () => {
               searchQuery={searchQuery}
               onChangeText={(text) => {
                 setSearchQuery(text);
-                // setSelected(
-                //   dummyData.filter((item) =>
-                //     item.language.toLowerCase().includes(text.toLowerCase())
-                //   )
-                // );
+                debouncedSearch(text);
               }}
               placeholder={labels?.searchTeam}
               loading={loading}
@@ -316,6 +323,7 @@ const organization = () => {
           <FlatList
             data={data?.paginatedOrganization?.data}
             renderItem={({ item, index }: any) => renderItem({ item, index })}
+            showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -422,7 +430,7 @@ const organization = () => {
         </View>
       </Modal>
 
-        {/* status modal */}
+      {/* status modal */}
       <Modal
         isVisible={isStatusModalVisible}
         onBackdropPress={() => {

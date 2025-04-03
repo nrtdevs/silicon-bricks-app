@@ -28,6 +28,13 @@ const CustomDrawerContent = (props: any) => {
       />
 
       <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="subscriptions" size={ms(24)} color={Colors[theme].text} />}
+        label={labels?.subscriptions}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/subscriptions')}
+      />
+
+      <DrawerItem
         icon={({ color, size }) => <Octicons name="project" size={ms(24)} color={Colors[theme].text} />}
         label={labels?.project}
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}

@@ -7,12 +7,13 @@ import {
   Text,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import {
   CreateOrganizationDocument,
   CreateUserDocument,
   DeleteOrganizationDocument,
+  DeleteUserDocument,
   EnableOrganizationStatusDocument,
   PaginatedOrganizationDocument,
   PaginatedRolesDocument,
@@ -38,10 +39,11 @@ import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
+import debounce from "lodash.debounce";
 
 const defaultValue = {
   name: "",
-  email: "",
+  email: "", 
   phoneNo: "",
   roles: [],
   usertype: "",
@@ -81,6 +83,8 @@ const UserScreen = () => {
     usertype: any;
     id: string;
   }>(defaultValue);
+  console.log("currentUser", currentUser);
+
   const [selected, setSelected] = useState<any>([]);
   const [userData, { error, data, loading, refetch }] = useLazyQuery<any>(
     PaginatedUsersDocument
@@ -128,29 +132,15 @@ const UserScreen = () => {
     }
   });
 
-  const [deleteOrganization, deleteOrganizationState] = useMutation(
-    DeleteOrganizationDocument,
-    {
-      onCompleted: (data) => {
-        refetch();
-        Alert.alert("success", "Project deleted successfully!");
-      },
-      onError: (error) => {
-        Alert.alert("Error", error.message);
-      },
+  const [deleteUser, deleteUserState] = useMutation(DeleteUserDocument, {
+    onCompleted: (data) => {
+      refetch();
+      Alert.alert("success", "user deleted successfully!");
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
     }
-  );
-
-  // const [updateOrganizationStatus, updateOrganizationStatusState] = useMutation(EnableOrganizationStatusDocument, {
-  //   onCompleted: (data) => {
-  //     refetch();
-  //     setStatusModalVisible(false);
-  //     Alert.alert("success", "Status updated successfully!");
-  //   },
-  //   onError: (error) => {
-  //     Alert.alert("Error", error.message);
-  //   }
-  // });
+  });
 
   const userTypeData = [
     { label: "admin", value: "admin" },
@@ -194,11 +184,11 @@ const UserScreen = () => {
 
   const onSubmit = (data: any) => {
     // console.log("000", data);
-    let roles = watch("roles");
+    // let roles = watch("roles");
 
-   roles = Array.isArray(roles) ? roles : [];
+    // roles = Array.isArray(roles) ? roles : [];
 
-   const roleIds = roles.map(Number); 
+    const roleIds = data.roles.map(Number);
 
     const params = {
       email: data?.email,
@@ -206,18 +196,17 @@ const UserScreen = () => {
       name: data?.name,
       roleIds: roleIds,
       userType: watch("usertype")?.label as UserType,
-      avatar: image, 
+      avatar: image,
     };
 
     let updateParams = {
       id: Number(currentUser?.id),
       ...params,
     }
-    console.log('09876',updateParams);
     editModal
       ? updateUser({
         variables: {
-          data: updateParams, 
+          data: updateParams,
         },
       })
       : createUser({
@@ -231,7 +220,6 @@ const UserScreen = () => {
     let rolesId = item.roles.map((item) => {
       return item.id
     })
-    // console.log(rolesId);
     return (
       <View
         key={index}
@@ -305,10 +293,6 @@ const UserScreen = () => {
               size={ms(20)}
               color={Colors[theme].text}
               onPress={() => {
-                console.log("item", item);
-                const params = {
-                  deleteOrganizationId: Number(item?.id),
-                };
 
                 Alert.alert(
                   "Delete",
@@ -317,8 +301,11 @@ const UserScreen = () => {
                     {
                       text: "Yes",
                       onPress: () => {
-                        deleteOrganization({
-                          variables: params,
+                        deleteUser({
+                          variables: {
+                            deleteUserId: Number(item?.id),
+                          }
+
                         });
                       },
                     },
@@ -380,7 +367,7 @@ const UserScreen = () => {
         type: mimeType,
       } as any); // Type assertion to avoid TypeScript error
 
-      const uploadResponse = await fetch("http://192.168.1.3:5001/api/files/upload", {
+      const uploadResponse = await fetch("http://192.168.1.58:5001/api/files/upload", {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -398,10 +385,23 @@ const UserScreen = () => {
 
 
   if (OrganizationLoading) {
-    return <Loader />;
+    return <Loader />; 
   }
 
-  console.log("image", image);
+  const debouncedSearch = useCallback(
+    debounce((text) => {
+      userData({
+        variables: {
+          listInputDto: {
+            limit: 10,
+            page: 1,
+            search: text,
+          },
+        },
+      });
+    }, 500),
+    []
+  );
 
 
   // const uploadImage = async (uri: string) => {
@@ -440,11 +440,7 @@ const UserScreen = () => {
               searchQuery={searchQuery}
               onChangeText={(text) => {
                 setSearchQuery(text);
-                // setSelected(
-                //   dummyData.filter((item) =>
-                //     item.language.toLowerCase().includes(text.toLowerCase())
-                //   )
-                // );
+                debouncedSearch(text);
               }}
               placeholder={labels?.searchTeam}
               loading={loading}
@@ -484,6 +480,7 @@ const UserScreen = () => {
               return renderItem(item, index);
             }}
             contentContainerStyle={{ paddingBottom: vs(40) }}
+            showsVerticalScrollIndicator={false}
           />
         </View>
       </ThemedView>

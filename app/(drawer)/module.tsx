@@ -7,7 +7,7 @@ import {
     Text,
     View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
     ChangeModuleStatusDocument,
@@ -33,6 +33,7 @@ import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
+import debounce from "lodash.debounce";
 
 const defaultValue = {
     name: "",
@@ -103,7 +104,7 @@ const organization = () => {
     const [deleteModule, deleteModuleState] = useMutation(DeleteModuleDocument, {
         onCompleted: (data) => {
             refetch();
-            Alert.alert("success", "Project deleted successfully!");
+            Alert.alert("success", "Module deleted successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -291,6 +292,21 @@ const organization = () => {
         </View>
     </View>)
 
+    const debouncedSearch = useCallback(
+        debounce((text) => {
+            moduleData({
+                variables: {
+                    listInputDto: {
+                        limit: 10,
+                        page: 1,
+                        search: text,
+                    },
+                },
+            })
+        }, 500),
+        []
+    );
+
     if (loading) {
         return <Loader />
     }
@@ -304,11 +320,7 @@ const organization = () => {
                             searchQuery={searchQuery}
                             onChangeText={(text) => {
                                 setSearchQuery(text);
-                                // setSelected(
-                                //   dummyData.filter((item) =>
-                                //     item.language.toLowerCase().includes(text.toLowerCase())
-                                //   )
-                                // );
+                                debouncedSearch(text);
                             }}
                             placeholder={labels?.searchTeam}
                             loading={loading}
@@ -344,6 +356,7 @@ const organization = () => {
                     <FlatList
                         data={data?.paginatedModules?.data}
                         contentContainerStyle={{ paddingBottom: vs(40) }}
+                        showsVerticalScrollIndicator={false}
                         renderItem={({ item, index }: any) => renderItem(item, index)
                         }
                         // refreshControl={
@@ -353,17 +366,17 @@ const organization = () => {
                         //     />
                         // }
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
-                        // ListFooterComponent={
-                        //     hasMore ? (
-                        //         <ActivityIndicator size="small" color={Colors.primary} />
-                        //     ) : null
-                        // }
-                        // onEndReached={() => {
-                        //     if (hasMore && !isLoading) {
-                        //         fetchNotification();
-                        //     }
-                        // }}
-                        // onEndReachedThreshold={0.5}
+                    // ListFooterComponent={
+                    //     hasMore ? (
+                    //         <ActivityIndicator size="small" color={Colors.primary} />
+                    //     ) : null
+                    // }
+                    // onEndReached={() => {
+                    //     if (hasMore && !isLoading) {
+                    //         fetchNotification();
+                    //     }
+                    // }}
+                    // onEndReachedThreshold={0.5}
                     />
                 </View>
             </ThemedView>

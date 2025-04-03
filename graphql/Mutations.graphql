@@ -7,6 +7,7 @@ mutation RequestOtp($otpRequestData: OtpRequestDto!) {
   requestOtp(otpRequestData: $otpRequestData) {
     otpGeneratedSuccessfully
     otp
+    message
   }
 }
 
@@ -186,4 +187,8 @@ mutation UpdateUser($data: UpdateUserDto!) {
       status
     }
   }
+}
+
+mutation DeleteUser($deleteUserId: Float!) {
+  deleteUser(id: $deleteUserId)
 }

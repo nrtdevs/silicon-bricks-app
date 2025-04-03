@@ -24,7 +24,7 @@ interface LoginFormData {
 }
 
 export default function LoginScreen() {
-  const [createRequestOpt, { error }] = useMutation(RequestOtpDocument);
+  const [createRequestOpt, createRequestState] = useMutation(RequestOtpDocument);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const { theme } = useTheme();
@@ -40,7 +40,7 @@ export default function LoginScreen() {
   });
   const onSubmit = async (data: any) => {
     try {
-      const RequestOtp = await createRequestOpt({
+      createRequestOpt({
         variables: {
           otpRequestData: {
             email: data.email,
@@ -48,18 +48,24 @@ export default function LoginScreen() {
           },
         },
       });
-      console.log(RequestOtp, "RequestOtp");
-      Toast.show({
-        type: "success",
-        text1: "Otp Send Successfully",
-      });
-      router.push({
-        pathname: "/otp",
-        params: {
-          email: data.email,
-          password: data.password,
-        },
-      });
+
+
+      if (createRequestState?.data?.requestOtp?.otp) {
+        Toast.show({
+          type: "success",
+          text1: "Otp Send Successfully",
+        });
+        router.push({
+          pathname: "/otp",
+          params: {
+            email: data.email,
+            password: data.password,
+            otp: createRequestState?.data?.requestOtp?.otp,
+          },
+        });
+      } else {
+        console.log("Otp Not Send");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -167,6 +173,7 @@ export default function LoginScreen() {
             {/* Login Button */}
             <CustomButton
               title={labels.login}
+              isLoading={createRequestState?.loading}
               onPress={handleSubmit(onSubmit)}
               isGradient
             />
