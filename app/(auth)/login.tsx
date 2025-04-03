@@ -38,10 +38,7 @@ export default function LoginScreen() {
       password: "Password@123",
     },
   });
-
   const onSubmit = async (data: any) => {
-    console.log(data);
-    // router.push({pathname : "/(drawer)/roles"});
     try {
       const RequestOtp = await createRequestOpt({
         variables: {
@@ -179,7 +176,7 @@ export default function LoginScreen() {
               <CustomButton
                 style={{ width: "48%", alignSelf: "center" }}
                 title={labels.google}
-                onPress={() => {}}
+                onPress={() => { }}
               />
             </View>
 

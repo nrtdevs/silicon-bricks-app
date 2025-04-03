@@ -19,15 +19,6 @@ mutation Login($loginData: ValidateDto!) {
   }
 }
 
-mutation CreateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
-  updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
-    status
-    name
-    id
-    description
-  }
-}
-
 mutation DeleteOrganization($deleteOrganizationId: Int!) {
   deleteOrganization(id: $deleteOrganizationId)
 }
@@ -46,29 +37,153 @@ mutation Register($registerData: RegisterDto!) {
   }
 }
 
-#CREATE ORGANIZATION
-
-mutation CreateMeeting($data: CreateMeetingDto!) {
-  createMeeting(data: $data) {
+mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
+  createOrganization(createOrganizationInput: $createOrganizationInput) {
     id
-    meetingReference
-    projectId
-    createdByUserId
-    meetingVenueId
-    meetingTypeId
-    title
-    organizationId
-    parentMeetingId
-    startTime
-    endTime
+    name
+    description
     status
-    meetingDate
-    meetingAgenda
-    meetingUrl
-    attendees
-    uploadDoc
+  }
+}
+
+mutation EnableOrganizationStatus($data: OrganizationStatusDto!) {
+  enableOrganizationStatus(data: $data) {
+    id
+    name
+    description
+    status
+  }
+}
+
+mutation UpdateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
+  updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
+    id
+    name
+    description
+    status
+  }
+}
+
+mutation CreateUser($data: CreateUserDto!) {
+  createUser(data: $data) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
+    userType
     createdAt
     updatedAt
     deletedAt
+    roles {
+      id
+      permissionCount
+      roleType
+      name
+      status
+      permissions {
+        id
+        appName
+        groupName
+        module
+        action
+        slug
+        description
+      }
+    }
+  }
+}
+
+mutation UpdateProfile($data: UpdateUserDto!) {
+  updateProfile(data: $data) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
+    userType
+    createdAt
+    updatedAt
+    deletedAt
+  }
+}
+
+mutation CreateModule($createModuleInput: CreateModuleDto!) {
+  createModule(createModuleInput: $createModuleInput) {
+    id
+    name
+    description
+    status
+  }
+}
+
+mutation UpdateModule($updateModuleInput: UpdateModuleDto!) {
+  updateModule(updateModuleInput: $updateModuleInput) {
+    id
+    name
+    description
+    status
+  }
+}
+
+mutation ChangeModuleStatus($updateModuleStatusInput: ModuleStatusDto!) {
+  changeModuleStatus(updateModuleStatusInput: $updateModuleStatusInput) {
+    id
+    name
+    status
+    description
+  }
+}
+
+mutation DeleteModule($deleteModuleId: Int!) {
+  deleteModule(id: $deleteModuleId)
+}
+
+mutation CreateCoupon($createCouponInput: CreateCouponDto!) {
+  createCoupon(createCouponInput: $createCouponInput) {
+    id
+    couponCode
+    description
+    discountType
+    maxDiscountAmount
+    minOrderAmount
+    usageLimit
+    status
+    startDate
+    endDate
+  }
+}
+
+
+mutation UpdateUser($data: UpdateUserDto!) {
+  updateUser(data: $data) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
+    userType
+    createdAt
+    updatedAt
+    deletedAt
+    roles {
+      id
+      name
+      description
+      roleType
+      status
+    }
   }
 }

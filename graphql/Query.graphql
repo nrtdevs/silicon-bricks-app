@@ -65,3 +65,110 @@ query PaginatedOrganization($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+query PaginatedUsers($listInputDto: ListInputDTO!) {
+  paginatedUsers(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      avatar
+      email
+      deletedAt
+      createdAt
+      id
+      mobileNo
+      name
+      organizationId
+      parentId
+      roles {
+        id
+        name
+        roleType
+      }
+      status
+      userType
+      username
+      updatedAt
+    }
+  }
+}
+
+query PaginatedRoles($listInputDto: ListInputDTO!) {
+  paginatedRoles(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      description
+      roleType
+      permissionCount
+    }
+  }
+}
+
+query FindUserById($findUserByIdId: Float!) {
+  findUserById(id: $findUserByIdId) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
+    userType
+    createdAt
+    updatedAt
+    deletedAt
+  }
+}
+
+query PaginatedModules($listInputDto: ListInputDTO!) {
+  paginatedModules(ListInputDTO: $listInputDto) {
+    data {
+      id
+      name
+      description
+      status
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}
+
+query PaginatedCoupons($listInputDto: ListInputDTO!) {
+  paginatedCoupons(ListInputDTO: $listInputDto) {
+    data {
+      id
+      couponCode
+      description
+      discountType
+      maxDiscountAmount
+      minOrderAmount
+      usageLimit
+      status
+      startDate
+      endDate
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}

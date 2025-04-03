@@ -35,6 +35,27 @@ const CustomDrawerContent = (props: any) => {
       />
 
       <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
+        label={labels?.offerPromotions}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/project')}
+      />
+
+      <DrawerItem
+        icon={({ color, size }) => <MaterialCommunityIcons name="view-module-outline" size={ms(24)} color={Colors[theme].text} />}
+        label={labels?.module}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/module')}
+      />
+
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
+        label={labels?.coupons}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/coupons')}
+      />
+
+      <DrawerItem
         icon={({ color, size }) => <Feather name="user" size={ms(24)} color={Colors[theme].text} />}
         label={labels?.user}
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
@@ -59,7 +80,7 @@ const Layout = () => {
       screenOptions={{
         headerShown: false,
         drawerStyle: {
-          backgroundColor: Colors[theme].cartBg ,
+          backgroundColor: Colors[theme].cartBg,
         },
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />} />

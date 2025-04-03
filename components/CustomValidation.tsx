@@ -359,6 +359,7 @@ const CustomValidation = (props: TextInputProps) => {
                 />
               </Pressable>
             )}
+
             {/* dropdown validation  */}
             {props?.type === 'picker' && (
               <View
@@ -373,7 +374,7 @@ const CustomValidation = (props: TextInputProps) => {
                     style={[
                       styles.labelStyle,
                       props.labelStyle,
-                      { color: Colors[theme].text }
+                      props.labelStyle ? {} : { color: Colors[theme].text }
                     ]}
                   >
                     {props.label}
@@ -456,6 +457,8 @@ const CustomValidation = (props: TextInputProps) => {
                       setIsFocused(false)
                     }}
                     itemContainerStyle={props.itemContainerStyle}
+                    key={props.keyToCompareData}
+
                   />
                 ) : (
                   <MultiSelect
@@ -465,6 +468,7 @@ const CustomValidation = (props: TextInputProps) => {
                       errStyle,
                       props.inputStyle,
                       {
+                        backgroundColor: Colors[theme].cartBg,
                         shadowColor: Colors[theme].cartBg
                       }
                     ]}
@@ -515,14 +519,9 @@ const CustomValidation = (props: TextInputProps) => {
                     }
                     searchPlaceholder={props.searchPlaceholder ?? 'Search'}
                     containerStyle={{
-                      backgroundColor: props.disabled
-                        ? Colors.gray
-                        : Colors.white,
-                      borderColor: error
-                        ? Colors.red
-                        : props.disabled
-                          ? Colors.gray
-                          : Colors.primary
+                      backgroundColor: Colors[theme].cartBg,
+                      borderRadius: ms(8),
+                      marginTop: vs(5)
                     }}
                     showsVerticalScrollIndicator={false}
                     value={value ?? []}
