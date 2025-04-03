@@ -1,7 +1,7 @@
-import { ms, ScaledSheet } from 'react-native-size-matters';
+import { ms, ScaledSheet, vs } from 'react-native-size-matters';
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedText } from "@/components/ThemedText";
-import { Pressable, View } from 'react-native';
+import { FlatList, Pressable, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ThemedView } from '@/components/ThemedView';
 import { Feather } from '@expo/vector-icons';
@@ -9,167 +9,154 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Portal, Dialog } from 'react-native-paper';
 import { ThemeProvider } from '@/context/ThemeContext';
 import React, { useEffect, useState } from 'react'
-import CustomValidation from '@/components/CustomValidation';
-import { useForm } from 'react-hook-form';
-import { labels } from '@/constants/Labels';
+import { router } from 'expo-router';
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
 
-
-interface AddPromotionData {
-    email: string;
-    password: string;
-    confirmPassword: string;
+const GetAllPromotion = gql`
+  query PaginatedOffers($listInputDto: ListInputDTO!) {
+  paginatedOffers(ListInputDTO: $listInputDto) {
+    data {
+      id
+      title
+      description
+      offerType
+      discountType
+      discountValue
+      maxDiscountAmount
+      cashbackAmount
+      minOrderAmount
+      usageLimit
+      status
+      startDate
+      endDate
+    } 
+  }
 }
-
+`;
+const DELETE_PROMOTION = gql`
+  mutation DeleteOffer($deleteOfferId: Int!) {
+  deleteOffer(id: $deleteOfferId)
+}
+`;
 const Promotions = () => {
-    /// Add promotion state --
-    const [visible, setVisible] = React.useState(false);
-    const hideAddDialogue = () => { setVisible(false) };
-    const showAddDilogue = () => setVisible(true);
-    const { control, handleSubmit, formState: {}} = useForm<AddPromotionData>({ mode: "onBlur" });
 
     /// Delete promotions state --
+    const [selectedPromptionId, setSelectedPromotionId] = useState<number | null>(null);
     const [deleteVisible, setDeleteVisible] = React.useState(false);
     const hideDeleteDialogue = () => { setDeleteVisible(false) };
-    const showDeleteDialogue = () => setDeleteVisible(true);
+    const showDeleteDialogue = (id: number) => {
+        setSelectedPromotionId(id);
+        setDeleteVisible(true)
+    };
+    const [deleteProject] = useMutation(DELETE_PROMOTION, {
+        onCompleted: () => {
+            console.log("Project deleted successfully");
+            setDeleteVisible(false);
+        },
+        onError: (error) => {
+            console.error("Error deleting project:", error);
+        },
+    });
+    const handleDelete = async () => {
+        if (selectedPromptionId !== null) {
+            try {
+                await deleteProject({ variables: { deleteProjectId: Number(setSelectedPromotionId) } });
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+    };
 
-    /// Edit promotions state --
-    const [editVisible, setEditVisible] = React.useState(false);
-    const hideEditDialogue = () => { setEditVisible(false) };
-    const showEditDialogue = () => setEditVisible(true);
+    /// get All promotions --
+
+    const [getAllPromotion, { data, loading, error }] = useLazyQuery(GetAllPromotion);
+    useEffect(() => {
+        console.log("Get All Promotions", data);
+        getAllPromotion({
+            variables: {
+                listInputDto: {
+                    page: 1,
+                    limit: 10,
+                },
+            },
+        });
+    }, []);
+    const promotions = data?.paginatedOffers.data || [];
 
     return (
         <CustomHeader>
             <ThemedView style={styles.container}>
-                <View>
-                    <LinearGradient
-                        colors={["#0a54c9", "#5087de"]}
-                        style={styles.card}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                    >
-                        <View style={{ flexDirection: "row" }}>
-                            <ThemedText style={styles.cardTitle}>Title</ThemedText>
-                            <ThemedText style={styles.cardDot}>:</ThemedText>
-                            <ThemedText style={styles.cardDot}>title  of poprpro</ThemedText>
-                        </View>
-                        <View style={{ flexDirection: "row" }}>
-                            <ThemedText style={styles.cardTitle}>Offer Type</ThemedText>
-                            <ThemedText style={styles.cardDot}>:</ThemedText>
-                            <ThemedText style={styles.cardDot}>poprpro</ThemedText>
-                        </View>
-                        <View style={{ flexDirection: "row" }}>
-                            <ThemedText style={styles.cardTitle}>Discount</ThemedText>
-                            <ThemedText style={styles.cardDot}>:</ThemedText>
-                            <ThemedText style={styles.cardDot}>poprpro</ThemedText>
-                        </View>
-                        <View style={{ flexDirection: "row" }}>
-                            <ThemedText style={styles.cardTitle}>Usage Limit</ThemedText>
-                            <ThemedText style={styles.cardDot}>:</ThemedText>
-                            <ThemedText style={styles.cardDot}>poprpro</ThemedText>
-                        </View>
-                        <View style={{ flexDirection: "row" }}>
-                            <ThemedText style={styles.cardTitle}>Status</ThemedText>
-                            <ThemedText style={styles.cardDot}>:</ThemedText>
-                            <ThemedText style={styles.cardDot}>poprpro</ThemedText>
-                        </View>
-                        <View style={{ flexDirection: "row" }}>
-                            <ThemedText style={styles.cardTitle}>Action</ThemedText>
-                            <ThemedText style={styles.cardDot}>: </ThemedText>
-                            <Pressable
-                                onPress={() => showEditDialogue()}
+                <FlatList
+                    data={promotions}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View>
+                            <LinearGradient
+                                colors={["#0a54c9", "#5087de"]}
+                                style={styles.card}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
                             >
-                                <Feather name="edit" color="white" size={24} />
-                            </Pressable>
-                            <View style={{ width: 10 }}></View>
-                            <Pressable
-                                onPress={() => showDeleteDialogue()}
-                            >
-                                <MaterialCommunityIcons
-                                    name="delete-empty"
-                                    size={26}
-                                    color="red"
-                                />
-                            </Pressable>
+                                <View style={{ flexDirection: "row" }}>
+                                    <ThemedText style={styles.cardTitle}>Title</ThemedText>
+                                    <ThemedText style={styles.cardDot}>:</ThemedText>
+                                    <ThemedText style={styles.cardDot}>{item.title}</ThemedText>
+                                </View>
+                                <View style={{ flexDirection: "row" }}>
+                                    <ThemedText style={styles.cardTitle}>Offer Type</ThemedText>
+                                    <ThemedText style={styles.cardDot}>:</ThemedText>
+                                    <ThemedText style={styles.cardDot}>{item.offerType}</ThemedText>
+                                </View>
+                                <View style={{ flexDirection: "row" }}>
+                                    <ThemedText style={styles.cardTitle}>Discount</ThemedText>
+                                    <ThemedText style={styles.cardDot}>:</ThemedText>
+                                    <ThemedText style={styles.cardDot}>{item.discountValue}</ThemedText>
+                                </View>
+                                <View style={{ flexDirection: "row" }}>
+                                    <ThemedText style={styles.cardTitle}>Usage Limit</ThemedText>
+                                    <ThemedText style={styles.cardDot}>:</ThemedText>
+                                    <ThemedText style={styles.cardDot}>{item.usageLimit}</ThemedText>
+                                </View>
+                                <View style={{ flexDirection: "row" }}>
+                                    <ThemedText style={styles.cardTitle}>Status</ThemedText>
+                                    <ThemedText style={styles.cardDot}>:</ThemedText>
+                                    <ThemedText style={styles.cardDot}>{item.status}</ThemedText>
+                                </View>
+                                <View style={{ flexDirection: "row" }}>
+                                    <ThemedText style={styles.cardTitle}>Action</ThemedText>
+                                    <ThemedText style={styles.cardDot}>: </ThemedText>
+                                    <Pressable
+                                        onPress={() => {
+                                            router.push({
+                                                pathname: "/editPromotion",
+                                                params: { id: 1, title: "poprpro" },
+                                            })
+                                        }}
+                                    >
+                                        <Feather name="edit" color="white" size={24} />
+                                    </Pressable>
+                                    <View style={{ width: 10 }}></View>
+                                    <Pressable
+                                        onPress={() => showDeleteDialogue(item.id)}
+                                    >
+                                        <MaterialCommunityIcons
+                                            name="delete-empty"
+                                            size={26}
+                                            color="red"
+                                        />
+                                    </Pressable>
+                                </View>
+                            </LinearGradient>
                         </View>
-                    </LinearGradient>
-                </View>
+                    )}
+                />
 
-                <Pressable style={styles.fab} onPress={showAddDilogue}>
+                <Pressable
+                    style={styles.fab}
+                    onPress={() => router.push("/addPromotions")}
+                >
                     <Feather name="plus" color="white" size={24}></Feather>
                 </Pressable>
-
-                <Portal>
-                    <ThemeProvider>
-                        <Dialog visible={visible} onDismiss={hideAddDialogue}>
-                            <Dialog.Content>
-                                <CustomValidation
-                                    control={control}
-                                    name='title'
-                                    type='input'
-                                    placeholder={`Enter title`}
-                                    label={`Title`}
-                                >
-                                </CustomValidation>
-                                <CustomValidation
-                                    control={control}
-                                    name='max_discount_amount'
-                                    type='input'
-                                    placeholder={`Enter max discount amount`}
-                                    label={`Max Discount Amount`}
-                                >
-                                </CustomValidation>
-                                <CustomValidation
-                                    control={control}
-                                    name='discount_value'
-                                    type='input'
-                                    placeholder={`Enter discount value`}
-                                    label={`Discount Value`}
-                                >
-                                </CustomValidation>
-                                <CustomValidation
-                                    control={control}
-                                    name='cashback_amount'
-                                    type='input'
-                                    placeholder={`Enter cashback amount`}
-                                    label={`Cashback Amount`}
-                                >
-                                </CustomValidation>
-                                <CustomValidation
-                                    control={control}
-                                    name='min_order_amount'
-                                    type='input'
-                                    placeholder={`Enter min order amount`}
-                                    label={`Min Order Amount`}
-                                >
-                                </CustomValidation>
-                                <CustomValidation
-                                    control={control}
-                                    name='usage_limit'
-                                    type='input'
-                                    placeholder={`Enter usage limit`}
-                                    label={`Usage Limit`}
-                                >
-                                </CustomValidation>
-                            </Dialog.Content>
-                            <Dialog.Actions>
-                                <Pressable
-                                    //   onPress={handleSubmit(onSubmit)}
-                                    style={styles.buttonContainerSave}
-                                //   disabled={loadingCreate}
-                                >
-                                    <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
-
-                                </Pressable>
-                                <Pressable
-                                    onPress={hideAddDialogue}
-                                    style={styles.buttonContainerClose}
-                                >
-                                    <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
-                                </Pressable>
-                            </Dialog.Actions>
-                        </Dialog>
-                    </ThemeProvider>
-                </Portal>
 
                 <Portal>
                     <ThemeProvider>
@@ -181,7 +168,7 @@ const Promotions = () => {
                             </Dialog.Content>
                             <Dialog.Actions>
                                 <Pressable
-                                    //   onPress={handleDelete}
+                                    onPress={handleDelete}
                                     style={styles.buttonContainerSave}
                                 >
                                     <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
@@ -196,38 +183,6 @@ const Promotions = () => {
                         </Dialog>
                     </ThemeProvider>
                 </Portal>
-
-                <Portal>
-                    <ThemeProvider>
-                        <Dialog visible={editVisible} onDismiss={hideEditDialogue}>
-                            <Dialog.Content>
-                                <CustomValidation
-                                    control={control}
-                                    name='title'
-                                    type='input'
-                                    placeholder={`Enter title`}
-                                    label={`Title`}
-                                >
-                                </CustomValidation>
-                            </Dialog.Content>
-                            <Dialog.Actions>
-                                <Pressable
-                                    //   onPress={handleSubmit(onSubmit)}
-                                    style={styles.buttonContainerSave}
-                                >
-                                    <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
-
-                                </Pressable>
-                                <Pressable
-                                    onPress={hideEditDialogue}
-                                    style={styles.buttonContainerClose}
-                                >
-                                    <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
-                                </Pressable>
-                            </Dialog.Actions>
-                        </Dialog>
-                    </ThemeProvider>
-                </Portal>
             </ThemedView>
         </CustomHeader>
     );
@@ -236,7 +191,7 @@ export default Promotions;
 
 const styles = ScaledSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
         backgroundColor: "white",
     },
     card: {
