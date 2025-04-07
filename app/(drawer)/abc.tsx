@@ -105,7 +105,6 @@ const organization = () => {
     description: string;
     id: string;
   }>(defaultValue);
-  const [selected, setSelected] = useState<any>([]);
 
   // const setCurrentOrganizationData() => {
   //   setValue("name", currentOrganization?.name)
@@ -224,15 +223,6 @@ const organization = () => {
             <Feather name="plus-square" size={24} color={Colors[theme].text} />
           </Pressable>
         </View>
-        {
-          selected && <View style={styles.selectedContainer}>
-            {
-              selected.map(() => (<View style={[styles.searchedResult, { backgroundColor: Colors[theme].cartBg }]}>
-                <ThemedText>lkjlkj</ThemedText>
-              </View>))
-            }
-          </View>
-        }
         <View style={styles.organizationParentContainer}>
           <FlatList
             data={data?.paginatedUsers?.data}

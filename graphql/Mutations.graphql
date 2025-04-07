@@ -163,7 +163,6 @@ mutation CreateCoupon($createCouponInput: CreateCouponDto!) {
   }
 }
 
-
 mutation UpdateUser($data: UpdateUserDto!) {
   updateUser(data: $data) {
     id
@@ -191,4 +190,56 @@ mutation UpdateUser($data: UpdateUserDto!) {
 
 mutation DeleteUser($deleteUserId: Float!) {
   deleteUser(id: $deleteUserId)
+}
+
+mutation ChangeUserStatus($data: UserStatusDto!) {
+  changeUserStatus(data: $data) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
+    userType
+    createdAt
+    updatedAt
+    deletedAt
+  }
+}
+
+mutation UpdateCoupon($updateCouponInput: UpdateCouponDto!) {
+  updateCoupon(updateCouponInput: $updateCouponInput) {
+    id
+    couponCode
+    description
+    discountType
+    maxDiscountAmount
+    minOrderAmount
+    usageLimit
+    status
+    startDate
+    endDate
+  }
+}
+
+mutation ChangeCouponStatus($updateCouponStatusInput: CouponStatusDto!) {
+  changeCouponStatus(updateCouponStatusInput: $updateCouponStatusInput) {
+    id
+    couponCode
+    description
+    discountType
+    maxDiscountAmount
+    minOrderAmount
+    usageLimit
+    status
+    startDate
+    endDate
+  }
+}
+
+mutation DeleteCoupon($deleteCouponId: Int!) {
+  deleteCoupon(id: $deleteCouponId)
 }

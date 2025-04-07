@@ -458,7 +458,6 @@ const CustomValidation = (props: TextInputProps) => {
                     }}
                     itemContainerStyle={props.itemContainerStyle}
                     key={props.keyToCompareData}
-
                   />
                 ) : (
                   <MultiSelect

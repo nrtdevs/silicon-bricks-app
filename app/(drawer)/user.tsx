@@ -10,6 +10,7 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import {
+  ChangeUserStatusDocument,
   CreateOrganizationDocument,
   CreateUserDocument,
   DeleteOrganizationDocument,
@@ -43,12 +44,19 @@ import debounce from "lodash.debounce";
 
 const defaultValue = {
   name: "",
-  email: "", 
+  email: "",
   phoneNo: "",
   roles: [],
   usertype: "",
   id: "",
 };
+
+const pickerData = [
+  { label: "Active", value: "active" },
+  { label: "Inactive", value: "inactive" },
+  { label: "Blocked", value: "blocked" },
+  { label: "Pending", value: "pending" },
+];
 
 const UserScreen = () => {
   const { theme } = useTheme();
@@ -65,6 +73,7 @@ const UserScreen = () => {
     phoneNo: string;
     roles: any[];
     usertype: any;
+    status: any;
   }>({
     defaultValues: {},
   });
@@ -75,6 +84,7 @@ const UserScreen = () => {
   const [editModal, setEditModal] = useState<boolean>(false);
   const [isInfoModalVisible, setInfoModalVisible] = useState(false);
   const [isHierarchyModalVisible, setHierarchyModalVisible] = useState(false);
+  const [isStatusModalVisible, setStatusModalVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState<{
     name: string;
     email: string;
@@ -85,10 +95,10 @@ const UserScreen = () => {
   }>(defaultValue);
   console.log("currentUser", currentUser);
 
-  const [selected, setSelected] = useState<any>([]);
   const [userData, { error, data, loading, refetch }] = useLazyQuery<any>(
     PaginatedUsersDocument
   );
+
   const [createUser, createUserState] = useMutation(CreateUserDocument, {
     onCompleted: (data) => {
       reset();
@@ -102,13 +112,24 @@ const UserScreen = () => {
     },
   });
 
+  const [updateUserStatus, updateUserStatusState] = useMutation(ChangeUserStatusDocument, {
+    onCompleted: (data) => {
+      reset();
+      refetch();
+      setStatusModalVisible(false);
+      Alert.alert("success", "Project create successfully!");
+    },
+    onError: (error) => {
+      setStatusModalVisible(false);
+      console.log("Error", error.message);
+      Alert.alert("Error", error.message);
+    },
+  });
+
   const [
     getUserRoles,
     { data: roleData, loading: roleLoading, error: roleError },
   ] = useLazyQuery(PaginatedRolesDocument);
-  useEffect(() => {
-    getUserRoles();
-  }, []);
 
   const [
     organizationData,
@@ -146,7 +167,7 @@ const UserScreen = () => {
 
   const userTypeData = [
     { label: "admin", value: "admin" },
-    { label: "adminEmployee", value: "adminEmployee" }, 
+    { label: "adminEmployee", value: "adminEmployee" },
     { label: "organization", value: "organization" },
     { label: "organizationEmployee", value: "organizationEmployee" },
   ];
@@ -184,11 +205,22 @@ const UserScreen = () => {
     });
   }, []);
 
-  const onSubmit = (data: any) => {
-    // console.log("000", data);
-    // let roles = watch("roles");
+  useEffect(() => {
+    const params = {
+      id: Number(currentUser?.id),
+      status: watch("status")?.value
+    }
+    console.log("params", params);
+    if (watch("status")) {
+      updateUserStatus({
+        variables: {
+          data: params
+        },
+      });
+    }
+  }, [watch("status")])
 
-    // roles = Array.isArray(roles) ? roles : [];
+  const onSubmit = (data: any) => {
 
     const roleIds = data.roles.map(Number);
 
@@ -252,7 +284,15 @@ const UserScreen = () => {
               size={ms(20)}
               color={Colors[theme].text}
               onPress={() => {
-                setHierarchyModalVisible(true);
+                setCurrentUser({
+                  name: item?.name,
+                  email: item?.email,
+                  phoneNo: item.mobileNo.toString(),
+                  roles: rolesId,
+                  usertype: item?.userType,
+                  id: item?.id,
+                });
+                setStatusModalVisible(true);
               }}
             />
 
@@ -362,12 +402,17 @@ const UserScreen = () => {
 
       const formData = new FormData();
 
-      // Correct way to append a file in React Native
       formData.append("file", {
-        uri: uri,
+        uri,
         name: `upload.${fileExtension}`,
         type: mimeType,
-      } as any); // Type assertion to avoid TypeScript error
+      } as unknown as Blob);
+
+      // formData.append("file", {
+      //   uri: uri,
+      //   name: `upload.${fileExtension}`,
+      //   type: mimeType,
+      // } as any); 
 
       const uploadResponse = await fetch("http://192.168.1.58:5001/api/files/upload", {
         method: "POST",
@@ -376,7 +421,10 @@ const UserScreen = () => {
         },
         body: formData,
       });
-
+      if (!uploadResponse.ok) {
+        const err = await uploadResponse.text();
+        throw new Error(`Upload failed: ${err}`);
+      }
       const responseData = await uploadResponse.json();
       console.log("Upload successful:", responseData?.files[0]);
       setImage(responseData?.files[0]);
@@ -387,7 +435,7 @@ const UserScreen = () => {
 
 
   if (OrganizationLoading) {
-    return <Loader />; 
+    return <Loader />;
   }
 
   const debouncedSearch = useCallback(
@@ -461,20 +509,6 @@ const UserScreen = () => {
             <Feather name="plus-square" size={24} color={Colors[theme].text} />
           </Pressable>
         </View>
-        {selected && (
-          <View style={styles.selectedContainer}>
-            {selected.map(() => (
-              <View
-                style={[
-                  styles.searchedResult,
-                  { backgroundColor: Colors[theme].cartBg },
-                ]}
-              >
-                <ThemedText>lkjlkj</ThemedText>
-              </View>
-            ))}
-          </View>
-        )}
         <View style={styles.organizationParentContainer}>
           <FlatList
             data={data?.paginatedUsers?.data}
@@ -487,7 +521,7 @@ const UserScreen = () => {
         </View>
       </ThemedView>
 
-      {/* Create Edit modal */}
+      {/* Create and Edit modal */}
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={() => {
@@ -701,39 +735,38 @@ const UserScreen = () => {
         </View>
       </Modal>
 
-      {/* Hierarchy modal */}
+      {/* status modal */}
       <Modal
-        isVisible={isHierarchyModalVisible}
+        isVisible={isStatusModalVisible}
         onBackdropPress={() => {
-          setHierarchyModalVisible(false);
+          setStatusModalVisible(false);
         }}
       >
         <View
           style={{
             backgroundColor: Colors[theme].cartBg,
-            height: vs(380),
+            height: 380,
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
           }}
         >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              padding: ms(10),
+          <CustomValidation
+            data={pickerData}
+            type="picker"
+            hideStar
+            control={control}
+            name="status"
+            placeholder="Select Status"
+            inputStyle={{ height: vs(50) }}
+            rules={{
+              required: {
+                value: true,
+                message: "Select status",
+              },
             }}
-          >
-            <ThemedText type="subtitle">Hierarchy</ThemedText>
-            <Pressable
-              onPress={() => {
-                setHierarchyModalVisible(false);
-              }}
-            >
-              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
-            </Pressable>
-          </View>
+          />
         </View>
       </Modal>
     </CustomHeader>

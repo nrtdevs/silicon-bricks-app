@@ -30,6 +30,7 @@ const LoginCodeScreen = () => {
   const onSubmit = async () => {
     try {
       const otpValue = Number(otp);
+
       if (params?.otp == otp) {
         console.log(otpValue);
         const response = await verifyOtp({
@@ -54,7 +55,7 @@ const LoginCodeScreen = () => {
         } else {
           console.log("Failed to retrieve accessToken");
         }
-      }else{
+      } else {
         console.log("otp not match");
         Alert.alert("Otp not match");
       }
