@@ -47,7 +47,7 @@ const pickerData = [
     { label: "Pending", value: "pending" },
 ];
 
-const organization = () => {
+const ModuleScreen = () => {
     const { theme } = useTheme();
     const [isModalVisible, setModalVisible] = useState(false);
     const [isFocused, setIsFocused] = useState("");
@@ -182,24 +182,27 @@ const organization = () => {
     };
 
     const onSubmit = (data: any) => {
-        let param = {
-            id: Number(currentModule?.id),
-            ...data,
-        };
-        console.log("999", param);
-        editModal
-            ? updateModule({
-                variables: {
-                    updateModuleInput: param,
-                },
-            })
-            : createModule({
-                variables: {
-                    createModuleInput: {
-                        ...data,
+        try {
+            let param = {
+                id: Number(currentModule?.id),
+                ...data,
+            };
+            editModal
+                ? updateModule({
+                    variables: {
+                        updateModuleInput: param,
                     },
-                },
-            });
+                })
+                : createModule({
+                    variables: {
+                        createModuleInput: {
+                            ...data,
+                        },
+                    },
+                });
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const renderItem = (item, index) => (<View
@@ -490,7 +493,7 @@ const organization = () => {
     );
 };
 
-export default organization;
+export default ModuleScreen;
 
 const styles = ScaledSheet.create({
     container: {

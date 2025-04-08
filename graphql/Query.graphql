@@ -201,3 +201,55 @@ query PaginatedSubscriptions($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+query PaginatedOffers($listInputDto: ListInputDTO!) {
+  paginatedOffers(ListInputDTO: $listInputDto) {
+    data {
+      id
+      title
+      description
+      offerType
+      discountType
+      discountValue
+      maxDiscountAmount
+      cashbackAmount
+      minOrderAmount
+      usageLimit
+      status
+      startDate
+      endDate
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}
+
+query DropdownOffers($listInputDto: ListInputDTO!) {
+  dropdownOffers(ListInputDTO: $listInputDto) {
+    data {
+      id
+      title
+      description
+      offerType
+      discountType
+      discountValue
+      maxDiscountAmount
+      cashbackAmount
+      minOrderAmount
+      usageLimit
+      status
+      startDate
+      endDate
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}

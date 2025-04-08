@@ -39,7 +39,7 @@ const defaultValue = {
   id: "",
 };
 
-const organization = () => {
+const SubscriptionScreen = () => {
   const { theme } = useTheme();
   const {
     control,
@@ -163,7 +163,7 @@ const organization = () => {
     //   });
   };
 
-  console.log(watch("topic"));
+  // console.log(watch("topic"));
 
   // useEffect(() => {
   //   if (watch("topic")) {
@@ -436,7 +436,7 @@ const organization = () => {
   );
 };
 
-export default organization;
+export default SubscriptionScreen;
 
 const styles = ScaledSheet.create({
   container: {

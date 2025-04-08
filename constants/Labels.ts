@@ -64,4 +64,6 @@ export const labels = {
   module : "Module",
   coupons : "Coupons",
   subscriptions : "Subscriptions",
+  searchOrganization:"Search Organization",
+  packages : "Packages",
 };

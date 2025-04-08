@@ -143,25 +143,27 @@ const organization = () => {
   }, [watch("status")])
 
   const onSubmit = (data: any) => {
-    let param = {
-      id: Number(currentOrganization?.id),
-      ...data
-    }
-    console.log(param);
-    editModal ?
-      updateOrganization({
-        variables: {
-          updateOrganizationInput: param,
-        },
-      })
-      : createOrganization({
-        variables: {
-          createOrganizationInput: {
-            ...data
+    try {
+      let param = {
+        id: Number(currentOrganization?.id),
+        ...data
+      }
+      editModal ?
+        updateOrganization({
+          variables: {
+            updateOrganizationInput: param,
           },
-        },
-      });
-
+        })
+        : createOrganization({
+          variables: {
+            createOrganizationInput: {
+              ...data
+            },
+          },
+        });
+    } catch (error) {
+      console.log('onSubmit error', error);
+    }
   };
 
   const renderItem = ({ item, index }: any) => {
@@ -294,7 +296,7 @@ const organization = () => {
                 setSearchQuery(text);
                 debouncedSearch(text);
               }}
-              placeholder={labels?.searchTeam}
+              placeholder={labels?.searchOrganization}
               loading={loading}
               onClear={() => {
                 setSearchQuery("");
@@ -313,12 +315,12 @@ const organization = () => {
             data={data?.paginatedOrganization?.data}
             renderItem={({ item, index }: any) => renderItem({ item, index })}
             showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={() => fetchOrganization(true)}
-              />
-            }
+            // refreshControl={
+            //   <RefreshControl
+            //     refreshing={refreshing}
+            //     onRefresh={() => fetchOrganization(true)}
+            //   />
+            // }
             contentContainerStyle={{ paddingBottom: vs(40) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
           // ListFooterComponent={

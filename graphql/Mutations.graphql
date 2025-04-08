@@ -243,3 +243,89 @@ mutation ChangeCouponStatus($updateCouponStatusInput: CouponStatusDto!) {
 mutation DeleteCoupon($deleteCouponId: Int!) {
   deleteCoupon(id: $deleteCouponId)
 }
+
+query PaginatedPackages($listInputDto: ListInputDTO!) {
+  paginatedPackages(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      description
+      price
+      discountedPrice
+      status
+      modules {
+        id
+        name
+        description
+        status
+      }
+      offer {
+        id
+        title
+        description
+        offerType
+        discountType
+        discountValue
+        maxDiscountAmount
+        cashbackAmount
+        minOrderAmount
+        usageLimit
+        status
+        startDate
+        endDate
+      }
+      offerId
+    }
+  }
+}
+
+mutation UpdatePackage($updatePackageInput: UpdatePackageDto!) {
+  updatePackage(updatePackageInput: $updatePackageInput) {
+    id
+    name
+    description
+    price
+    discountedPrice
+    status
+    modules {
+      id
+      name
+      description
+      status
+    }
+    offer {
+      id
+      title
+      description
+      offerType
+      discountType
+      discountValue
+      maxDiscountAmount
+      cashbackAmount
+      minOrderAmount
+      usageLimit
+      status
+      startDate
+      endDate
+    }
+    offerId
+  }
+}
+
+mutation CreatePackage($createPackageInput: CreatePackageDto!) {
+  createPackage(createPackageInput: $createPackageInput) {
+    id
+    name
+    description
+    price
+    discountedPrice
+    status
+    offerId
+  }
+}

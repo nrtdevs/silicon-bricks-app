@@ -221,33 +221,36 @@ const UserScreen = () => {
   }, [watch("status")])
 
   const onSubmit = (data: any) => {
+    try {
+      const roleIds = data.roles.map(Number);
 
-    const roleIds = data.roles.map(Number);
+      const params = {
+        email: data?.email,
+        mobileNo: Number(data?.phoneNo),
+        name: data?.name,
+        roleIds: roleIds,
+        userType: watch("usertype")?.label as UserType,
+        avatar: image,
+      };
 
-    const params = {
-      email: data?.email,
-      mobileNo: Number(data?.phoneNo),
-      name: data?.name,
-      roleIds: roleIds,
-      userType: watch("usertype")?.label as UserType,
-      avatar: image,
-    };
-
-    let updateParams = {
-      id: Number(currentUser?.id),
-      ...params,
+      let updateParams = {
+        id: Number(currentUser?.id),
+        ...params,
+      }
+      editModal
+        ? updateUser({
+          variables: {
+            data: updateParams,
+          },
+        })
+        : createUser({
+          variables: {
+            data: params,
+          },
+        });
+    } catch (error) {
+      console.log("onSubmit error", error);
     }
-    editModal
-      ? updateUser({
-        variables: {
-          data: updateParams,
-        },
-      })
-      : createUser({
-        variables: {
-          data: params,
-        },
-      });
   };
 
   const renderItem = (item, index) => {

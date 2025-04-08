@@ -7,7 +7,7 @@ import {
     Text,
     View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
     ChangeCouponStatusDocument,
@@ -36,7 +36,7 @@ import NoDataFound from "@/components/NoDataFound";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import DateTimePickerModal from "@/components/DateTimePickerModal";
 import { formatTimeForAPI } from "@/utils/formatDateTime";
-
+import debounce from "lodash.debounce";
 
 const defaultValue = {
     couponCode: "",
@@ -144,13 +144,13 @@ const CouponScreen = () => {
     });
 
     const [deleteCoupon, deleteCouponState] = useMutation(DeleteCouponDocument, {
-      onCompleted: (data) => {
-        refetch();
-        Alert.alert("success", "Coupon deleted successfully!");
-      },
-      onError: (error) => {
-        Alert.alert("Error", error.message);
-      }
+        onCompleted: (data) => {
+            refetch();
+            Alert.alert("success", "Coupon deleted successfully!");
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
     });
 
     const [updateCouponStatus, updateCouponStatusState] = useMutation(ChangeCouponStatusDocument, {
@@ -163,16 +163,6 @@ const CouponScreen = () => {
             Alert.alert("Error", error.message);
         }
     });
-
-    // const setCurrentOrganizationData() => {
-    //   setValue("name", currentOrganization?.name)
-    //   setValue("description", currentOrganization?.description)
-    // }
-
-    // useEffect(() => {
-    //   setValue("name", currentOrganization?.name)
-    //   setValue("description", currentOrganization?.description)
-    // }, [currentOrganization])
 
     useEffect(() => {
         fetchCoupons();
@@ -200,27 +190,8 @@ const CouponScreen = () => {
         setValue("maxDiscountAmount", currentCoupon?.maxDiscountAmount?.toString() || "");
         setValue("minOrderAmount", currentCoupon?.minOrderAmount?.toString() || "");
         setValue("start_date", String(formatTimeForAPI(currentCoupon?.start_date || "", "yyyy-mm-dd")));
-        // setValue("start_date", 
-        //     currentCoupon?.end_date instanceof Date
-        //       ? currentCoupon?.end_date.toISOString().split("T")[0]  // "yyyy-mm-dd"
-        //       : ""
-        //   );
         setValue("end_date", String(formatTimeForAPI(currentCoupon?.end_date || "", "yyyy-mm-dd")));
-        setValue("status", currentCoupon?.status || "");
     }, [currentCoupon]);
-
-    // const handleImagePickerPress = async () => {
-    //   let result = await ImagePicker.launchImageLibraryAsync({
-    //     mediaTypes: ['images'],
-    //     allowsEditing: true,
-    //     aspect: [1, 1],
-    //     quality: 1
-    //   })
-    //   if (!result.canceled) {
-    //     setImage(result.assets[0].uri)
-    //   }
-    // }
-    // console.log('image',image);
 
     const fetchCoupons = async (isRefreshing = false) => {
         if (isRefreshing) {
@@ -242,43 +213,37 @@ const CouponScreen = () => {
             },
         });
     };
-    const onSubmit = (data: any) => {
-        let params = {
-            couponCode: data?.couponCode,
-            description: data?.description,
-            discountType: data?.discountType?.toUpperCase(),
-            maxDiscountAmount: Number(data?.maxDiscountAmount),
-            minOrderAmount: Number(data?.minOrderAmount),
-            startDate: data?.start_date,
-            endDate: data?.end_date,
-            usageLimit: Number(data?.usageLimit),
-        };
-        //     "couponCode": null,
-        // "description": null,
-        // "discountType": null,
-        // "endDate": null,
-        // "id": null,
-        // "maxDiscountAmount": null,
-        // "minOrderAmount": null,
-        // "startDate": null,
-        // "usageLimit": null
-        let params2 = {
-            id: Number(currentCoupon?.id),
-            ...params,
-        };
 
-        console.log('09090000', params);
-        editModal ?
-            updateCoupon({
-                variables: {
-                    updateCouponInput: params2,
-                },
-            })
-            : createCoupon({
-                variables: {
-                    createCouponInput: params,
-                },
-            });
+    const onSubmit = (data: any) => {
+        try {
+            let params = {
+                couponCode: data?.couponCode,
+                description: data?.description,
+                discountType: data?.discountType?.value,
+                maxDiscountAmount: Number(data?.maxDiscountAmount),
+                minOrderAmount: Number(data?.minOrderAmount),
+                startDate: data?.start_date,
+                endDate: data?.end_date,
+                usageLimit: Number(data?.usageLimit),
+            };
+            let params2 = {
+                id: Number(currentCoupon?.id),
+                ...params,
+            };
+            editModal ?
+                updateCoupon({
+                    variables: {
+                        updateCouponInput: params2,
+                    },
+                })
+                : createCoupon({
+                    variables: {
+                        createCouponInput: params,
+                    },
+                });
+        } catch (error) {
+            console.log('error in onSubmit', error);
+        }
     };
 
     const renderItem = (item, index) => {
@@ -326,16 +291,6 @@ const CouponScreen = () => {
                             size={ms(20)}
                             color={Colors[theme].text}
                             onPress={() => {
-                                // couponCode: any;
-                                // discountType: string;
-                                // usageLimit: number;
-                                // description: string;
-                                // maxDiscountAmount: number;
-                                // minOrderAmount: number;
-                                // start_date: any;
-                                // end_date: any;
-                                // status: any;
-                                // id: string
                                 setCurrentCoupon({
                                     couponCode: item?.couponCode,
                                     discountType: item?.discountType,
@@ -374,9 +329,9 @@ const CouponScreen = () => {
                                                 id: item?.id,
                                             });
                                             deleteCoupon({
-                                              variables: {
-                                                deleteCouponId: Number(item?.id),
-                                              }
+                                                variables: {
+                                                    deleteCouponId: Number(item?.id),
+                                                }
                                             });
                                         },
                                     },
@@ -409,7 +364,21 @@ const CouponScreen = () => {
         );
     };
 
-    // 2025-04-16T10:35:00.000Z
+    const debouncedSearch = useCallback(
+        debounce((text) => {
+            couponData({
+                variables: {
+                    listInputDto: {
+                        limit: 10,
+                        page: 1,
+                        search: text,
+                    },
+                },
+            });
+        }, 500),
+        [searchQuery]
+    );
+
 
     // if (loading) {
     //   return <Loader />
@@ -424,13 +393,9 @@ const CouponScreen = () => {
                             searchQuery={searchQuery}
                             onChangeText={(text) => {
                                 setSearchQuery(text);
-                                // setSelected(
-                                //   dummyData.filter((item) =>
-                                //     item.language.toLowerCase().includes(text.toLowerCase())
-                                //   )
-                                // );
+                                debouncedSearch(text);
                             }}
-                            placeholder={labels?.searchTeam}
+                            placeholder={labels?.searchOrganization}
                             loading={loading}
                             onClear={() => {
                                 setSearchQuery("");
@@ -457,6 +422,10 @@ const CouponScreen = () => {
                         //     />
                         // }
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{
+                            paddingBottom: 50,
+                        }}
                     // ListFooterComponent={
                     //     hasMore ? (
                     //         <ActivityIndicator size="small" color={Colors.primary} />

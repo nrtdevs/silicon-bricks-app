@@ -70,6 +70,13 @@ const CustomDrawerContent = (props: any) => {
       />
 
       <DrawerItem
+        icon={({ color, size }) => <Feather name="package" size={ms(24)} color={Colors[theme].text} />}
+        label={labels?.packages}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/user')}
+      />
+
+      <DrawerItem
         icon={({ color, size }) => <Ionicons name="people-outline" size={ms(24)} color={Colors[theme].text} />}
         label={labels?.RolesPermission}
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
