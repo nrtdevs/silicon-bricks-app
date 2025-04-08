@@ -83,6 +83,13 @@ const CustomDrawerContent = (props: any) => {
         onPress={() => router.push('/roles')}
       />
 
+      <DrawerItem
+        icon={({ color, size }) => <Ionicons name="people-outline" size={ms(24)} color={Colors[theme].text} />}
+        label={labels?.permission}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/permission')}
+      />
+
     </DrawerContentScrollView>
   )
 }

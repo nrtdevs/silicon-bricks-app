@@ -236,7 +236,7 @@ const Permissions = () => {
           data={permissions}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={{ backgroundColor: "#C9C9C9", margin: "10", borderRadius: 8, padding: 10 }}>
+            <View style={{ backgroundColor: "#C9C9C9", margin: 10, borderRadius: 8, padding: 10 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                 <ThemedText style={styles.name}>{item.appName}</ThemedText>
                 <Feather
