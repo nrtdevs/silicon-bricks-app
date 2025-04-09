@@ -17,7 +17,7 @@ import * as SecureStore from "expo-secure-store";
 
 const LoginCodeScreen = () => {
   const { theme } = useTheme();
-  const [otp, setOtp] = useState("123456");;
+  const [otp, setOtp] = useState("123456");
   const params = useLocalSearchParams();
   const [verifyOtp, verifyState] = useMutation(LoginDocument);
 
@@ -30,7 +30,6 @@ const LoginCodeScreen = () => {
   const onSubmit = async () => {
     try {
       const otpValue = Number(otp);
-
       if (params?.otp == otp) {
         console.log(otpValue);
         const response = await verifyOtp({

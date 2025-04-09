@@ -47,7 +47,7 @@ export const labels = {
   logout:"Logout",
   project:"Project",
   user:"user",
-  RolesPermission:"Roles & Permission",
+  RolesPermission:"Roles",
   enterCode:"Enter Code",
   enterCodeMsg:"Enter the code we sent to your email",
   errorMessage:"Invalid OTP",
@@ -66,4 +66,7 @@ export const labels = {
   subscriptions : "Subscriptions",
   searchOrganization:"Search Organization",
   packages : "Packages",
+  plans:"Plans",
+  createPlans : "Create Plans",
+  permission : "Permission"
 };
