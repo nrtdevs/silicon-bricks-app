@@ -37,16 +37,16 @@ const DASHBOARD_COUNT_QUERY = gql`
   }
 `;
 const index = () => {
-
+  const navigation = useNavigation();
+  const { theme } = useTheme();
   const { loading, error, data } = useQuery(DASHBOARD_COUNT_QUERY, {
     variables: { filters: {} },
   });
 
   if (loading) return <ThemedText>Loading...</ThemedText>;
   if (error) return <ThemedText>Error: {error.message}</ThemedText>;
-  const userCount = data?.dashboardCount || 0;
-  const navigation = useNavigation();
-  const { theme } = useTheme();
+  const userCount = data?.dashboardCount || {};
+  
   return (
     <CustomHeader>
       <ThemedView style={{ paddingTop: 0 }}>
@@ -67,37 +67,37 @@ const index = () => {
             </TouchableOpacity>
             <Text style={styles.appBar}>Dashboard</Text>
           </View>
-          <View style={styles.cardStyle}>
+          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>User</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.userCount}</ThemedText>
             </View>
           </View>
-          <View style={styles.cardStyle}>
+          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Role</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.roleCount}</ThemedText>
             </View>
           </View>
-          <View style={styles.cardStyle}>
+          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Projects</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.projectCount}</ThemedText>
             </View>
           </View>
-          <View style={styles.cardStyle}>
+          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Permission</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.permissionCount}</ThemedText>
             </View>
           </View>
-          <View style={styles.cardStyle}>
+          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Organization</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.organizationCount}</ThemedText>
             </View>
           </View>
-          <View style={styles.cardStyle}>
+          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Assigned Permission</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.assignedPermissionCount}</ThemedText>

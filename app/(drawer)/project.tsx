@@ -1,28 +1,35 @@
-import { View, TouchableOpacity, FlatList, Alert, ActivityIndicator } from 'react-native'
+import { View, TouchableOpacity, FlatList, Alert, ActivityIndicator, Pressable } from 'react-native'
 import React, { useEffect, useState } from 'react';
-import { LinearGradient } from "expo-linear-gradient";
-import { Feather, MaterialIcons } from '@expo/vector-icons';
+import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons';
 import { gql, useMutation } from "@apollo/client";
 import { useLazyQuery } from '@apollo/client';
 import { Dialog, Portal, } from "react-native-paper";
 import { useForm } from "react-hook-form";
 import { Colors } from '@/constants/Colors';
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemeProvider } from '@/context/ThemeContext';
+import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import CustomValidation from '@/components/CustomValidation';
 import { labels } from '@/constants/Labels';
-import { ms, ScaledSheet } from 'react-native-size-matters';
+import { ms, s, ScaledSheet, vs } from 'react-native-size-matters';
 import { ThemedView } from '@/components/ThemedView';
+import CustomSearchBar from '@/components/CustomSearchBar';
+import NoDataFound from '@/components/NoDataFound';
+import Modal from 'react-native-modal';
+import CustomButton from '@/components/CustomButton';
 
 interface ProjectData {
   id: number;
   name: string;
   description: string;
   status: string;
+}
+const defaultValue = {
+  name: "",
+  module: "",
+  description: "",
+  id: "",
 }
 const GetAllProjects = gql`
   query PaginatedProjects($listInputDto: ListInputDTO!) {
@@ -67,15 +74,25 @@ const UPDATE_PROJECT = gql`
 `;
 
 const Project = () => {
+  const { theme } = useTheme();
+
+  /// serach state 
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  /// Add and Edit state
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [currentPermission, setCurrentPermission] = useState<{
+    name: string;
+    description: string;
+    id: string;
+  }>(defaultValue);
+
   const [updateProject] = useMutation(UPDATE_PROJECT);
   const [visible, setVisible] = useState(false);
-  const [deletePopupVisible, setDeletePopupVisible] = useState(false);
   const showDialogue = () => setVisible(true);
   const [editVisible, setEditVisible] = useState(false);
   const [getProjects, { data, refetch, loading: listLoading }] = useLazyQuery(GetAllProjects);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
-
-  const datax = data?.paginatedProjects?.data;
 
   const [createProject, { loading: loadingCreate }] = useMutation(CREATE_PROJECT_MUTATION, {
     onCompleted: (data) => {
@@ -87,14 +104,13 @@ const Project = () => {
       Alert.alert("Error", error.message);
     }
   });
-  type fromDataType = {
-    name: string;
-    description: string;
-  }
-  const onSubmit = (fromData: fromDataType) => {
+  
+  const onSubmit = (data) => {
+    console.log(data);
+
     createProject({
       variables: {
-        createProjectInput: { ...fromData, organizationId: 1 }
+        createProjectInput: { ...data, organizationId: 1 }
       }
     })
   }
@@ -103,13 +119,8 @@ const Project = () => {
     setVisible(false);
     refetch();
   };
-  const schema = z.object({
-    name: z.string().min(4, { message: "Name is required" }),
-    description: z.string().min(4, { message: "Description is required" }),
-  });
-  const { control, handleSubmit, reset, formState: { errors } } = useForm({
-    resolver: zodResolver(schema),
-  });
+
+  const { control, handleSubmit, reset, formState: { errors } } = useForm();
   const showEditDialogue = (project: any) => {
     setSelectedProjectId(project.id);
     reset({ name: project.name, description: project.description });
@@ -155,65 +166,90 @@ const Project = () => {
     });
   }, [])
 
-  const [deleteProject] = useMutation(DELETE_PROJECT, {
-    onCompleted: () => {
-      console.log("Project deleted successfully");
-      setDeletePopupVisible(false);
+
+  /// delete project 
+  const [deletePermission, deleteOrganizationState] = useMutation(DELETE_PROJECT, {
+    onCompleted: (data) => {
       refetch();
+      Alert.alert("success", "Permission deleted successfully!");
     },
     onError: (error) => {
-      console.error("Error deleting project:", error);
-    },
-  });
-
-  const showDeleteDialogue = (id: number) => {
-    setSelectedProjectId(id);
-    setDeletePopupVisible(true);
-  };
-
-  const hideDeleteDialogue = () => {
-    setDeletePopupVisible(false);
-    setSelectedProjectId(null);
-  };
-
-  const handleDelete = async () => {
-    if (selectedProjectId !== null) {
-      try {
-        await deleteProject({ variables: { deleteProjectId: Number(selectedProjectId) } });
-      } catch (error) {
-        console.error("Error:", error);
-      }
+      Alert.alert("Error", error.message);
     }
-  };
-
-  if (listLoading) return <ActivityIndicator size={'large'} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} />
+  });
   return (
     <CustomHeader>
-      <ThemedView style={styles.container}>
-        <View style={styles.scrollContainer}>
-          <FlatList
-            data={datax}
-            keyExtractor={(item: ProjectData) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={{backgroundColor: "#C9C9C9", margin: 15, borderRadius: 8, padding: 10}}>
-                <View style={{ flexDirection: "row" }}>
-                  <ThemedText style={styles.cardTitle}>Name</ThemedText>
-                  <ThemedText style={styles.cardDot}>:</ThemedText>
-                  <ThemedText style={styles.cardDot}>{item.name}</ThemedText>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <ThemedText style={styles.cardTitle}>Status</ThemedText>
-                  <ThemedText style={styles.cardDot}>:</ThemedText>
-                  <ThemedText style={{ color: "green", fontWeight: 'normal', fontSize: 18, paddingHorizontal: 10 }}>{item.status}</ThemedText>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <ThemedText style={styles.cardTitle}>Description</ThemedText>
-                  <ThemedText style={styles.cardDot}>:</ThemedText>
+      <ThemedView style={styles.contentContainer}>
+        <View>
+          <View style={styles.searchContainer}>
+            <View style={{ width: "90%" }}>
+              <CustomSearchBar
+                searchQuery={searchQuery}
+                placeholder="Search Project"
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                }}
+              />
+            </View>
+            <Pressable
+              style={styles.buttonContainer}
+              onPress={() => { setCurrentPermission(defaultValue), setModalVisible(true), showDialogue() }}
+            >
+              <Feather name="plus-square" size={24} color={Colors[theme].text} />
+            </Pressable>
+          </View>
+
+          <View style={styles.scrollContainer}>
+            <FlatList
+              data={data?.paginatedProjects?.data}
+              keyExtractor={(item: ProjectData) => item.id.toString()}
+              renderItem={({ item }) => (
+                <View style={[
+                  styles.organizationContainer,
+                  { backgroundColor: Colors[theme].cartBg },
+                ]}>
+                  <View style={styles.organizationHeader}>
+                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
+                    <View style={styles.organizationInfo}>
+                      <Feather
+                        name="edit"
+                        size={ms(20)}
+                        color={Colors[theme].text}
+                        onPress={() => { setModalVisible(true), setCurrentPermission(defaultValue) }}
+                      />
+                      <View style={{ width: 5 }}></View>
+                      <MaterialIcons
+                        name="delete-outline"
+                        size={ms(22)}
+                        color={Colors[theme].text}
+                        onPress={() => {
+                          Alert.alert(
+                            "Delete",
+                            "Are you sure you want to delete?",
+                            [
+                              {
+                                text: "Yes", onPress: () => {
+                                  deletePermission({
+                                    variables: {
+                                      deleteProjectId: Number(item?.id),
+                                    }
+                                  });
+                                }
+                              },
+                              { text: "No", onPress: () => { } },
+                            ]
+                          );
+
+                        }}
+                      />
+                    </View>
+                  </View>
+                  <View style={{ width: 100, backgroundColor: item.status == "active" ? "#EAFFF1" : "#FFF8DD", borderColor: item.status == "active" ? "#17C76D" : "#F8B700", borderWidth: 0.5, borderRadius: 5 }}>
+                    <ThemedText style={{ color: item.status == "active" ? "#17C76D" : "#F8B700", fontWeight: 'normal', fontSize: 18, paddingHorizontal: 10 }}>{item.status}</ThemedText>
+                  </View>
+
                   <ThemedText style={styles.cardDot}>{item.description}</ThemedText>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <ThemedText style={styles.cardTitle}>Action</ThemedText>
-                  <ThemedText style={styles.cardDot}>: </ThemedText>
+
                   <Feather
                     name="edit"
                     size={ms(22)}
@@ -221,25 +257,20 @@ const Project = () => {
                     onPress={() => showEditDialogue(item)}
                   />
                   <View style={{ width: 5 }}></View>
-                  <MaterialIcons
-                    name="delete-outline"
-                    size={ms(24)}
-                    color="black"
-                    onPress={() => showDeleteDialogue(item.id)}
-                  />
-
                 </View>
-              </View>
-            )}
-          />
+              )}
+              ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+            />
+          </View>
 
+
+          {/* <TouchableOpacity style={styles.fab}
+            onPress={showDialogue}>
+            <Feather name="plus" color="black" size={24}></Feather>
+          </TouchableOpacity> */}
         </View>
-        <TouchableOpacity style={styles.fab}
-          onPress={showDialogue}>
-          <Feather name="plus" color="black" size={24}></Feather>
-        </TouchableOpacity>
 
-        <Portal>
+        {/* <Portal>
           <ThemeProvider>
             <Dialog visible={visible} onDismiss={hideDialogue}>
               <Dialog.Content>
@@ -291,7 +322,7 @@ const Project = () => {
               </Dialog.Actions>
             </Dialog>
           </ThemeProvider>
-        </Portal>
+        </Portal> */}
 
         <Portal>
           <ThemeProvider>
@@ -342,33 +373,82 @@ const Project = () => {
           </ThemeProvider>
         </Portal>
 
-        <Portal>
-          <ThemeProvider>
-            <Dialog visible={deletePopupVisible} onDismiss={hideDeleteDialogue}>
-              <Dialog.Title style={styles.dialogueTitle}>Delete Project</Dialog.Title>
-              <Dialog.Content>
-                <ThemedText style={styles.label}>
-                  Do You Want To Really Delete The Project
-                </ThemedText>
-              </Dialog.Content>
-              <Dialog.Actions>
-                <TouchableOpacity
-                  onPress={handleDelete}
-                  style={styles.buttonContainerSave}
-                >
-                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={hideDeleteDialogue}
-                  style={styles.buttonContainerClose}
-                >
-                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
-                </TouchableOpacity>
-              </Dialog.Actions>
-            </Dialog>
-          </ThemeProvider>
-        </Portal>
       </ThemedView>
+
+
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={() => {
+          // reset();
+          // setCurrentOrganization(defaultValue);
+          // setEditModal(false);
+          // setModalVisible(false);
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: Colors[theme].cartBg,
+            height: vs(330),
+            width: s(300),
+            borderRadius: 10,
+            alignSelf: "center",
+            padding: 10,
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 10,
+            }}
+          >
+            <ThemedText type="subtitle">Create Project
+            </ThemedText>
+            <Pressable
+              onPress={() => {
+                setModalVisible(false);
+              }}
+            >
+              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+            </Pressable>
+          </View>
+
+          <View style={{ padding: 10 }}>
+            <CustomValidation
+              type="input"
+              control={control}
+              labelStyle={styles.label}
+              name={"project_name"}
+              inputStyle={[{ lineHeight: ms(20) }]}
+              label={`${labels.projectName}`}
+              // onFocus={() => setIsFocused("name")}
+              rules={{
+                required: labels.projectName,
+              }}
+              autoCapitalize="none"
+            />
+            <CustomValidation
+              type="input"
+              control={control}
+              name={"description"}
+              label={`${labels.description}`}
+              labelStyle={styles.label}
+              //onFocus={() => setIsFocused("description")}
+              rules={{
+                required: labels.description,
+              }}
+            />
+          </View>
+          <CustomButton
+            title="Submit"
+            // isLoading={createOrganizationState.loading}
+            onPress={handleSubmit(onSubmit)}
+            style={{ backgroundColor: Colors[theme].background }}
+          />
+        </View>
+      </Modal>
+
     </CustomHeader>
   );
 };
@@ -376,9 +456,35 @@ const Project = () => {
 export default Project;
 
 const styles = ScaledSheet.create({
-  container: {
+  contentContainer: {
     flex: 1,
-    backgroundColor: "white",
+    padding: "12@ms",
+  },
+  organizationContainer: {
+    width: "100%",
+    padding: "12@ms",
+    borderRadius: "8@ms",
+    marginBottom: "16@ms",
+    gap: "8@ms",
+  },
+  organizationInfo: {
+    flexDirection: "row",
+  },
+  organizationHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  searchContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "12@ms",
+  },
+  buttonContainer: {},
+  organizationParentContainer: {
+    marginTop: "12@ms",
   },
   deleteButton: {
     backgroundColor: "#ee0b0b",
@@ -396,7 +502,7 @@ const styles = ScaledSheet.create({
     backgroundColor: "#F1F4FF",
   },
   scrollContainer: {
-    paddingBottom: 100,
+    marginTop: "12@ms",
   },
   card: {
     marginHorizontal: 10,
@@ -420,7 +526,6 @@ const styles = ScaledSheet.create({
   },
   cardDot: {
     fontSize: "18@ms",
-    paddingHorizontal: 10,
     color: "black",
     fontWeight: "normal",
   },

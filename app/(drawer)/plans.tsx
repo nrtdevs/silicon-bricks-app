@@ -2,7 +2,7 @@ import CustomHeader from "@/components/CustomHeader";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
-import { View, Pressable, FlatList, RefreshControl, ScrollView } from "react-native";
+import { View, Pressable, FlatList, RefreshControl, ScrollView,Alert } from "react-native";
 import { ScaledSheet, ms, s, vs } from "react-native-size-matters";
 import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import React, { useEffect, useState, useMemo } from "react";
@@ -14,6 +14,8 @@ import { Portal, Dialog } from 'react-native-paper';
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { labels } from "@/constants/Labels";
 import CustomButton from "@/components/CustomButton";
+import CustomSearchBar from "@/components/CustomSearchBar";
+import { Colors } from "@/constants/Colors";
 
 
 
@@ -87,6 +89,10 @@ const Plans = () => {
     );
 
     const { theme } = useTheme();
+
+    /// serach state 
+    const [searchQuery, setSearchQuery] = useState<string>("");
+
     // Fetch Plans
     const fetchPlans = async (isRefreshing = false) => {
         if (isRefreshing) {
@@ -127,32 +133,6 @@ const Plans = () => {
         id: string;
     }>(defaultValue);
 
-    /// Delete Modal
-    const [deleteVisible, setDeleteVisible] = React.useState(false);
-    const hideDeleteDialogue = () => { setDeleteVisible(false) };
-    const [selectedPromptionId, setSelectedPromotionId] = useState<number | null>(null);
-    const showDeleteDialogue = (id: number) => {
-        setSelectedPromotionId(id);
-        setDeleteVisible(true)
-    };
-    const handleDelete = async () => {
-        if (selectedPromptionId !== null) {
-            try {
-                await deleteProject({ variables: { deletePlanId: Number(setSelectedPromotionId) } });
-            } catch (error) {
-                console.error("Error:", error);
-            }
-        }
-    };
-    const [deleteProject] = useMutation(DELETE_PLAN, {
-        onCompleted: () => {
-            console.log("Project deleted successfully");
-            setDeleteVisible(false);
-        },
-        onError: (error) => {
-            console.error("Error deleting project:", error);
-        },
-    });
     /// Add And Edit Plans
     const [isModalVisible, setModalVisible] = useState(false);
     const [editModal, setEditModal] = useState<boolean>(false);
@@ -211,22 +191,95 @@ const Plans = () => {
             value: item.id,
         })))
     }, [couponData]);
+    /// delete Roles 
+        const [deleteRoles, deleteOrganizationState] = useMutation(DELETE_PLAN, {
+            onCompleted: (data) => {
+                refetch();
+                Alert.alert("success", "Permission deleted successfully!");
+            },
+            onError: (error) => {
+                Alert.alert("Error", error.message);
+            }
+        });
     return (
         <CustomHeader>
-            <ThemedText
-                style={{ fontSize: 22, fontWeight: "700", justifyContent: "center", alignSelf: "center", marginVertical: 10 }}
-            >Apps & Plans</ThemedText>
-            <ThemedView style={styles.container}>
+            <ThemedView style={styles.contentContainer}>
+                <View style={styles.searchContainer}>
+                    <View style={{ width: "90%" }}>
+                        <CustomSearchBar
+                            searchQuery={searchQuery}
+                            placeholder="Search Roles"
+                            onChangeText={(text) => {
+                                setSearchQuery(text);
+                            }}
+                        />
+                    </View>
+                    <Pressable
+                        onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
+                    >
+                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
+                    </Pressable>
+                </View>
                 <FlatList
                     data={data?.paginatedPlans?.data}
                     renderItem={({ item }: any) =>
-                    (
-                        <View style={styles.cardStyle}>
-                            <View style={{ flexDirection: "row" }}>
-                                <ThemedText style={styles.cardTitle}>Name</ThemedText>
-                                <ThemedText style={styles.cardDot}>:</ThemedText>
-                                <ThemedText style={styles.cardDot}>{item.name}</ThemedText>
+                        <View
+                            style={[
+                                styles.organizationContainer,
+                                { backgroundColor: Colors[theme].cartBg },
+                            ]}
+                        >
+                            <View style={styles.organizationHeader}>
+                                <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
+                                <View style={styles.organizationInfo}>
+                                    <Feather
+                                        name="edit"
+                                        size={ms(20)}
+                                        color={Colors[theme].text}
+                                        onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
+                                    />
+                                    <View style={{ width: 5 }}></View>
+                                    <MaterialIcons
+                                        name="delete-outline"
+                                        size={ms(22)}
+                                        color={Colors[theme].text}
+                                        onPress={() => {
+                                            Alert.alert(
+                                                "Delete",
+                                                "Are you sure you want to delete?",
+                                                [
+                                                    {
+                                                        text: "Yes", onPress: () => {
+                                                            deleteRoles({
+                                                                variables: {
+                                                                    deletePlanId: Number(item?.id),
+                                                                }
+                                                            });
+                                                        }
+                                                    },
+                                                    { text: "No", onPress: () => { } },
+                                                ]
+                                            );
+
+                                        }}
+                                    />
+                                    <View style={{ width: 5 }}></View>
+                                    <MaterialIcons
+                                    name="attractions"
+                                    size={ms(22)}
+                                    color="black"
+                                    onPress={() => {
+                                        setCurrentOrganization({
+                                            name: item?.name,
+                                            description: item?.description,
+                                            id: item?.id,
+                                        });
+                                        setStatusModalVisible(true);
+                                    }}
+                                />
+                                </View>
                             </View>
+                            
                             <View style={{ flexDirection: "row" }}>
                                 <ThemedText style={styles.cardTitle}>Price</ThemedText>
                                 <ThemedText style={styles.cardDot}>:</ThemedText>
@@ -246,39 +299,9 @@ const Plans = () => {
                                 </View>
 
                             </View>
-                            <View style={{ flexDirection: "row" }}>
-                                <ThemedText style={styles.cardTitle}>Action</ThemedText>
-                                <ThemedText style={styles.cardDot}>: </ThemedText>
-                                <Feather
-                                    onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
-                                    name="edit"
-                                    size={ms(22)}
-                                    color="blue"
-                                />
-                                <View style={{ width: 5 }}></View>
-                                <MaterialIcons
-                                    onPress={() => showDeleteDialogue(item.id)}
-                                    name="delete-outline"
-                                    size={ms(24)}
-                                    color="red"
-                                />
-                                <View style={{ width: 5 }}></View>
-                                <MaterialIcons
-                                    name="attractions"
-                                    size={ms(22)}
-                                    color="black"
-                                    onPress={() => {
-                                        setCurrentOrganization({
-                                            name: item?.name,
-                                            description: item?.description,
-                                            id: item?.id,
-                                        });
-                                        setStatusModalVisible(true);
-                                    }}
-                                />
-                            </View>
+                            
                         </View>
-                    )}
+                    }
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
@@ -288,12 +311,8 @@ const Plans = () => {
                     contentContainerStyle={{ paddingBottom: vs(40) }}
                     ListEmptyComponent={!loading ? <NoDataFound /> : null}
                 />
+
             </ThemedView>
-            <Pressable style={styles.fab}
-                onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
-            >
-                <Feather name="plus" color="blue" size={24}></Feather>
-            </Pressable>
 
             {/* Status change modal */}
             <Modal
@@ -329,33 +348,6 @@ const Plans = () => {
                     />
                 </View>
             </Modal>
-
-            {/* Delete modal */}
-            <Portal>
-                <ThemeProvider>
-                    <Dialog visible={deleteVisible} onDismiss={hideDeleteDialogue}>
-                        <Dialog.Content>
-                            <ThemedText style={styles.label}>
-                                Do You Want To Really Delete The Project
-                            </ThemedText>
-                        </Dialog.Content>
-                        <Dialog.Actions>
-                            <Pressable
-                                onPress={handleDelete}
-                                style={styles.buttonContainerSave}
-                            >
-                                <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
-                            </Pressable>
-                            <Pressable
-                                onPress={hideDeleteDialogue}
-                                style={styles.buttonContainerClose}
-                            >
-                                <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
-                            </Pressable>
-                        </Dialog.Actions>
-                    </Dialog>
-                </ThemeProvider>
-            </Portal>
 
             {/* Add and Edit Plans modal */}
             <Modal
@@ -545,31 +537,26 @@ const Plans = () => {
     );
 };
 const styles = ScaledSheet.create({
-    container: {
-        flexGrow: 1,
-    },
-    fab: {
-        position: "absolute",
-        bottom: 20,
-        right: 20,
-        width: 50,
-        height: 50,
-        borderRadius: 35,
-        backgroundColor: "#faf7f7",
+    searchContainer: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-between",
         alignItems: "center",
-        justifyContent: "center",
-        elevation: 3,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
+        marginBottom: "12@ms",
     },
-    cardStyle: {
-        backgroundColor: "#faf7f7",
+    contentContainer: {
+        flex: 1,
+        padding: "12@ms",
+    },
+    organizationContainer: {
+        width: "100%",
+        padding: "12@ms",
         borderRadius: "8@ms",
-        padding: "10@ms",
-        marginHorizontal: "10@ms",
-        marginVertical: "5@ms"
+        marginBottom: "16@ms",
+        gap: "8@ms",
+    },
+    organizationInfo: {
+        flexDirection: "row",
     },
     cardTitle: {
         fontSize: "18@ms",
@@ -582,6 +569,11 @@ const styles = ScaledSheet.create({
         paddingHorizontal: "10@ms",
         color: "black",
         fontWeight: "normal",
+    },
+    organizationHeader: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-between",
     },
     label: {
         fontSize: "16@ms",

@@ -1,102 +1,43 @@
-// // import { StyleSheet, Text, View } from "react-native";
-// // import React, { useEffect } from "react";
-// // import { useLazyQuery } from "@apollo/client";
-// // import { GetAllOrganisations, GetAllPermissions } from "@/graphql/Query";
-// // import { ScrollView } from "react-native-gesture-handler";
-
-// // const Permissions = () => {
-// //   const [getAllPermissions, { data, loading, refetch, error }] =
-// //     useLazyQuery(GetAllPermissions);
-
-// //   useEffect(() => {
-// //     getAllPermissions();
-// //   }, [getAllPermissions]);
-
-// //   console.log(
-// //     data?.permissionGroup?.modules[0]?.groups[0]?.permissions[0]?.appName
-// //   );
-
-// //   const appNameData = data?.permissionGroup?.modules?.flatMap((module: any) =>
-// //     module.groups?.flatMap((group: any) =>
-// //       group.permissions?.map((permission: any) => permission.appName)
-// //     )
-// //   );
-
-// //   const module = data?.permissionGroup?.modules?.flatMap((module: any) =>
-// //     module.groups?.flatMap((group: any) =>
-// //       group.permissions?.map((permission: any) => permission.module)
-// //     )
-// //   );
-// //   const groupName = data?.permissionGroup?.modules?.flatMap((module: any) =>
-// //     module.groups?.flatMap((group: any) =>
-// //       group.permissions?.map((permission: any) => permission.groupName)
-// //     )
-// //   );
-// //   // .forEach((appName: any) => console.log(appName));
-
-// //   // const descriptionData = data?.permissionGroup?.modules?.flatMap(
-// //   //   (module: any) =>
-// //   //     module.groups?.flatMap((group: any) =>
-// //   //       group.permissions?.map((permission: any) => permission.description)
-// //   //     )
-// //   // );
-// //   return (
-// //     <ScrollView>
-// //       <View>
-// //         {appNameData?.map((appName: any, index: number) => (
-// //           <Text key={index}>{appName}</Text>
-// //         ))}
-// //         {module?.map((description: any, index: number) => (
-// //           <Text key={index}>{description}</Text>
-// //         ))}
-// //         {groupName?.map((description: any, index: number) => (
-// //           <Text key={index}>{description}</Text>
-// //         ))}
-// //       </View>
-// //     </ScrollView>
-// //   );
-// // };
-
-// // export default Permissions;
-
-// // const styles = StyleSheet.create({});
 import {
-  StyleSheet,
-  Text,
   View,
-  ScrollView,
-  TouchableOpacity
+  TouchableOpacity,
+  Alert
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from "expo-linear-gradient";
 import { useLazyQuery } from '@apollo/client'
 import { FlatList } from 'react-native-gesture-handler'
-import { Feather, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
-import { Colors } from 'react-native/Libraries/NewAppScreen'
+import { Feather, MaterialIcons, } from '@expo/vector-icons'
 import { useScrollToTop } from '@react-navigation/native'
 import { gql, useMutation } from "@apollo/client";
 import CustomHeader from '@/components/CustomHeader'
 import { ThemedText } from '@/components/ThemedText'
 import CustomValidation from '@/components/CustomValidation';
 import { Dialog, Portal, } from "react-native-paper";
-import { ThemeProvider } from '@/context/ThemeContext';
+import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from "zod";
 import { ms, ScaledSheet } from 'react-native-size-matters';
 import { labels } from '@/constants/Labels';
+import { ThemedView } from '@/components/ThemedView';
+import CustomSearchBar from '@/components/CustomSearchBar';
+import { Pressable } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
 
 const RoleModule = gql`
-  query AllPermissions {
-  allPermissions {
-    id
-    appName
-    groupName
-    module
-    action
-    slug
-    description
+  query PaginatedRoles($listInputDto: ListInputDTO!) {
+  paginatedRoles(ListInputDTO: $listInputDto) {
+    data {
+      id
+      name
+      description
+      roleType
+      status
+      permissionCount
+      
+    }
   }
 }
 `;
@@ -122,6 +63,34 @@ const Update_Permission = gql`
 `;
 
 const Permissions = () => {
+  const { theme } = useTheme();
+  /// fetch Roles data
+  const [page, setPage] = useState<number>(1);
+  const [rolesData, { error: errorData, data: dataD, loading: errorLoading, refetch }] = useLazyQuery(
+    RoleModule
+  );
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const fetchRoles = async (isRefreshing = false) => {
+    if (isRefreshing) {
+      setPage(1);
+      setRefreshing(true);
+    }
+    const params = {
+      per_page_record: 10,
+      page: isRefreshing ? 1 : page,
+    };
+
+    await rolesData({
+      variables: {
+        listInputDto: {},
+      },
+    });;
+  };
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+  /// serach state 
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   /// delete role state --
   const [deletePopupVisible, setDeletePopupVisible] = useState(false);
@@ -164,46 +133,15 @@ const Permissions = () => {
     name: z.string().min(4, { message: "Name is required" }),
     description: z.string().min(4, { message: "Description is required" }),
   });
-  const [getAllPermissions, { data, loading, error }] = useLazyQuery(RoleModule);
+
   const { control, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
   });
 
-  useEffect(() => {
-    getAllPermissions();
-  }, []);
   const hideDialogue = () => {
     setVisible(false);
   };
-  useEffect(() => {
-    if (error) {
-      console.error("GraphQL Error:", error);
-    }
-  }, [error]);
 
-  useEffect(() => {
-    if (data) {
-      // console.log("Fetched Data:", data);
-    }
-  }, [data]);
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Error loading permissions!</Text>
-      </View>
-    );
-  }
-
-  const permissions = data?.allPermissions || [];
 
   const handleEdit = async (formData: any) => {
     if (!selectedProjectId) {
@@ -231,113 +169,157 @@ const Permissions = () => {
   };
   return (
     <CustomHeader>
-      <View style={styles.container}>
-        <FlatList
-          data={permissions}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={{ backgroundColor: "#C9C9C9", margin: 10, borderRadius: 8, padding: 10 }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <ThemedText style={styles.name}>{item.appName}</ThemedText>
-                <Feather
-                  name="edit"
-                  size={ms(22)}
-                  color="black"
-                  onPress={showDialogue}
-                />
-              </View>
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <ThemedText style={styles.cardDot}>{item.groupName}</ThemedText>
+      <ThemedView style={styles.contentContainer}>
+        <View style={styles.searchContainer}>
+          <View style={{ width: "90%" }}>
+            <CustomSearchBar
+              searchQuery={searchQuery}
+              placeholder="Search Permissions"
+              onChangeText={(text) => {
+                setSearchQuery(text);
+              }}
+            />
+          </View>
+          <Pressable
 
-                <View style={{ height: 5, width: 5 }}>
-                </View>
-              
-                <MaterialIcons
-                    name="delete-outline"
-                    size={ms(24)}
+          // onPress={() => { setModalVisible(true), setCurrentPermission(defaultValue) }}
+          >
+            <Feather name="plus-square" size={24} color={Colors[theme].text} />
+          </Pressable>
+        </View>
+        <View style={styles.organizationParentContainer}>
+          <FlatList
+            data={dataD?.paginatedRoles?.data}
+            renderItem={({ item, index }: any) =>
+              <View
+                key={index}
+                style={[
+                  styles.organizationContainer,
+                  { backgroundColor: Colors[theme].cartBg },
+                ]}
+              >
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  <ThemedText style={styles.name}>{item.name}</ThemedText>
+                  <View style={styles.organizationInfo}>
+                  <Feather
+                    name="edit"
+                    size={ms(20)}
                     color="black"
-                    onPress={() => showDeleteDialogue(item.id)}
+                    onPress={showDialogue}
                   />
-              </View>
-            </View>
-          )}
-        />
-        <Portal>
-          <ThemeProvider>
-            <Dialog visible={visible} onDismiss={hideDialogue}>
-              <Dialog.Content>
-                <CustomValidation
-                  type="input"
-                  control={control}
-                  labelStyle={styles.label}
-                  name="name"
-                  inputStyle={[{ lineHeight: ms(20) }]}
-                  label={`${labels.projectName}`}
-                  placeholder={`${labels.projectName}`}
-                  // onFocus={() => setIsFocused("email")}
-                  rules={{
-                    required: labels.projectName,
-                  }}
-                />
-                <CustomValidation
-                  type="input"
-                  control={control}
-                  labelStyle={styles.label}
-                  name="description"
-                  inputStyle={[{ lineHeight: ms(20) }]}
-                  label={`${labels.description}`}
-                  placeholder={`${labels.description}`}
-                  // onFocus={() => setIsFocused("email")}
-                  rules={{
-                    required: labels.description,
-                  }}
-                />
-              </Dialog.Content>
-              <Dialog.Actions>
-                <TouchableOpacity
-                  onPress={handleSubmit(handleEdit)}
-                  style={styles.buttonContainerSave}
-                >
-                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={hideDialogue}
-                  style={styles.buttonContainerClose}
-                >
-                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
-                </TouchableOpacity>
-              </Dialog.Actions>
-            </Dialog>
-          </ThemeProvider>
-        </Portal>
+                  <View style={{ width: 5 }}></View>
+                  <MaterialIcons
+                    name="delete-outline"
+                    size={ms(22)}
+                    color={Colors[theme].text}
+                    onPress={() => {
+                      Alert.alert(
+                        "Delete",
+                        "Are you sure you want to delete?",
+                        [
+                          {
+                            text: "Yes", onPress: () => {
+                              // deleteRoles({
+                              //   variables: {
+                              //     deletePlanId: Number(item?.id),
+                              //   }
+                              // });
+                            }
+                          },
+                          { text: "No", onPress: () => { } },
+                        ]
+                      );
 
-        <Portal>
-          <ThemeProvider>
-            <Dialog visible={deletePopupVisible} onDismiss={hideDeleteDialogue}>
-              <Dialog.Title style={styles.dialogueTitle}>Delete Project</Dialog.Title>
-              <Dialog.Content>
-                <ThemedText style={styles.label}>
-                  Do You Want To Really Delete The Project
+                    }}
+                  />
+                  </View>
+                  
+                </View>
+                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                  {item?.description}
                 </ThemedText>
-              </Dialog.Content>
-              <Dialog.Actions>
-                <TouchableOpacity
-                  onPress={handleDelete}
-                  style={styles.buttonContainerSave}
-                >
-                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={hideDeleteDialogue}
-                  style={styles.buttonContainerClose}
-                >
-                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
-                </TouchableOpacity>
-              </Dialog.Actions>
-            </Dialog>
-          </ThemeProvider>
-        </Portal>
-      </View>
+              </View>}
+            showsVerticalScrollIndicator={false}
+
+          />
+        </View>
+      </ThemedView>
+
+      <Portal>
+        <ThemeProvider>
+          <Dialog visible={deletePopupVisible} onDismiss={hideDeleteDialogue}>
+            <Dialog.Title style={styles.dialogueTitle}>Delete Project</Dialog.Title>
+            <Dialog.Content>
+              <ThemedText style={styles.label}>
+                Do You Want To Really Delete The Project
+              </ThemedText>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <TouchableOpacity
+                onPress={handleDelete}
+                style={styles.buttonContainerSave}
+              >
+                <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={hideDeleteDialogue}
+                style={styles.buttonContainerClose}
+              >
+                <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
+              </TouchableOpacity>
+            </Dialog.Actions>
+          </Dialog>
+        </ThemeProvider>
+      </Portal>
+
+      <Portal>
+        <ThemeProvider>
+          <Dialog visible={visible} onDismiss={hideDialogue}>
+            <Dialog.Content>
+              <CustomValidation
+                type="input"
+                control={control}
+                labelStyle={styles.label}
+                name="name"
+                inputStyle={[{ lineHeight: ms(20) }]}
+                label={`${labels.projectName}`}
+                placeholder={`${labels.projectName}`}
+                // onFocus={() => setIsFocused("email")}
+                rules={{
+                  required: labels.projectName,
+                }}
+              />
+              <CustomValidation
+                type="input"
+                control={control}
+                labelStyle={styles.label}
+                name="description"
+                inputStyle={[{ lineHeight: ms(20) }]}
+                label={`${labels.description}`}
+                placeholder={`${labels.description}`}
+                // onFocus={() => setIsFocused("email")}
+                rules={{
+                  required: labels.description,
+                }}
+              />
+            </Dialog.Content>
+            <Dialog.Actions>
+              <TouchableOpacity
+                onPress={handleSubmit(handleEdit)}
+                style={styles.buttonContainerSave}
+              >
+                <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={hideDialogue}
+                style={styles.buttonContainerClose}
+              >
+                <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
+              </TouchableOpacity>
+            </Dialog.Actions>
+          </Dialog>
+        </ThemeProvider>
+      </Portal>
     </CustomHeader >
   )
 }
@@ -345,19 +327,38 @@ const Permissions = () => {
 export default Permissions
 
 const styles = ScaledSheet.create({
-  container: {
+  contentContainer: {
     flex: 1,
-    backgroundColor: Colors.backgroundColorPrimary
+    padding: "12@ms",
   },
   innerContainer: {
     paddingVertical: 10
   },
-
+  searchContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "12@ms",
+  },
+  organizationParentContainer: {
+    marginTop: "12@ms",
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
   },
+  organizationContainer: {
+    width: "100%",
+    padding: "12@ms",
+    borderRadius: "8@ms",
+    marginBottom: "16@ms",
+    gap: "8@ms",
+  },
+  organizationInfo: {
+    flexDirection: "row",
+},
   loadingText: {
     fontSize: 18,
     color: '#007BFF'

@@ -192,3 +192,13 @@ mutation UpdateUser($data: UpdateUserDto!) {
 mutation DeleteUser($deleteUserId: Float!) {
   deleteUser(id: $deleteUserId)
 }
+
+mutation CreatePermission($data: CreatePermissionDto!) {
+  createPermission(data: $data) {
+    id
+    appName
+    module
+    description
+    action
+  }
+}
