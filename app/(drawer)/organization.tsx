@@ -41,7 +41,7 @@ const pickerData = [
   { label: "Pending", value: "pending" },
 ];
 
-const organization = () => {
+const OrganizationScreen = () => {
 
   const { theme } = useTheme();
   const {
@@ -459,7 +459,7 @@ const organization = () => {
   );
 };
 
-export default organization;
+export default OrganizationScreen;
 
 const styles = ScaledSheet.create({
   container: {

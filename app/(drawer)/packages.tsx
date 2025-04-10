@@ -72,6 +72,9 @@ const PackageScreen = () => {
         PaginatedPackagesDocument
     );
 
+    console.log("data", data);
+    
+
     const [offerDataApi, { error: offerError, data: offerData, loading: offerLoading, refetch: offerRefetch }] = useLazyQuery(
         DropdownOffersDocument
     );
@@ -200,7 +203,9 @@ const PackageScreen = () => {
 
     const onSubmit = (data: any) => {
         try {
-            console.log("0009999", data);
+            // console.log("0009999", data);
+            // console.log("0009999", data?.module);
+            const moduleIds = data.module.map(Number);
             // "description": null,
             // "discountedPrice": null,
             // "moduleIds": null,
@@ -211,7 +216,7 @@ const PackageScreen = () => {
             let params = {
                 description: data?.description,
                 discountedPrice: Number(data?.discountedPrice),
-                moduleIds: null,
+                moduleIds: moduleIds,
                 name: data?.name,
                 offerId: Number(data?.offer?.id),
                 price: Number(data?.price)
@@ -220,19 +225,20 @@ const PackageScreen = () => {
             //     id: Number(currentCoupon?.id),
             //     ...params,
             // };
+            console.log("params", params);
 
-            // editModal ?
-            // updateCoupon({
-            //     variables: {
-            //         updateCouponInput: params2,
-            //     },
-            // })
-            // {}
-            // : createPackage({
-            //     variables: {
-            //         createPackageInput: params,
-            //     },
-            // });
+            editModal ?
+                // updateCoupon({
+                //     variables: {
+                //         updateCouponInput: params2,
+                //     },
+                // })
+                {}
+                : createPackage({
+                    variables: {
+                        createPackageInput: params,
+                    },
+                });
 
         } catch (error) {
             console.log('error in onSubmit', error);
@@ -251,8 +257,7 @@ const PackageScreen = () => {
                                 setSearchQuery(text);
                                 debouncedSearch(text);
                             }}
-                            placeholder={labels?.searchOrganization}
-                            loading={loading}
+                            placeholder={labels?.searchPackage}
                             onClear={() => {
                                 setSearchQuery("");
                             }}

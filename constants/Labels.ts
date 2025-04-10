@@ -68,5 +68,9 @@ export const labels = {
   packages : "Packages",
   plans:"Plans",
   createPlans : "Create Plans",
-  permission : "Permission"
+  permission : "Permission",
+  searchPackage:"Search Package",
+  searchModule:"Search Module",
+  searchCoupon:"Search Coupon",
+  searchUser:"Search User",
 };

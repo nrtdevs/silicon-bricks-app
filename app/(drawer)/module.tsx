@@ -324,7 +324,7 @@ const ModuleScreen = () => {
                                 setSearchQuery(text);
                                 debouncedSearch(text);
                             }}
-                            placeholder={labels?.searchTeam}
+                            placeholder={labels?.searchModule}
                             loading={loading}
                             onClear={() => {
                                 setSearchQuery("");

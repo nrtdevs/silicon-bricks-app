@@ -243,6 +243,7 @@ const SettingScreen = () => {
       id: userId,
       email: watch("email"),
     }
+
     try {
       updateUser(
         {

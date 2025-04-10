@@ -2005,6 +2005,7 @@ export type RegisterDto = {
   emailOTP: Scalars['Float']['input'];
   mobileNo?: InputMaybe<Scalars['Float']['input']>;
   name: Scalars['String']['input'];
+  organizationName: Scalars['String']['input'];
   password: Scalars['String']['input'];
   roleId?: InputMaybe<Scalars['Float']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;

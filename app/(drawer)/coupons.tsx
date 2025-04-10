@@ -395,7 +395,7 @@ const CouponScreen = () => {
                                 setSearchQuery(text);
                                 debouncedSearch(text);
                             }}
-                            placeholder={labels?.searchOrganization}
+                            placeholder={labels?.searchCoupon}
                             loading={loading}
                             onClear={() => {
                                 setSearchQuery("");

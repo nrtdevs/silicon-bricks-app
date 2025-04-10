@@ -182,7 +182,11 @@ const UserScreen = () => {
 
 
   useEffect(() => {
-    userData({
+    getInitialData();
+  }, []);
+
+  const getInitialData = async () => {
+    await userData({
       variables: {
         listInputDto: {
           limit: 10,
@@ -190,7 +194,7 @@ const UserScreen = () => {
         },
       },
     });
-    getUserRoles({
+    await getUserRoles({
       variables: {
         listInputDto: {
           limit: 10,
@@ -198,27 +202,39 @@ const UserScreen = () => {
         },
       },
     });
-    organizationData({
+    await organizationData({
       variables: {
         listInputDto: {},
       },
     });
-  }, []);
+  }
+
+  // useEffect(() => {
+  //   const params = {
+  //     id: Number(currentUser?.id),
+  //     status: watch("status")?.value
+  //   }
+  //   console.log("params", params);
+  //   if (watch("status")) {
+  //     updateUserStatus({
+  //       variables: {
+  //         data: params
+  //       },
+  //     });
+  //   }
+  // }, [watch("status")])
 
   useEffect(() => {
-    const params = {
-      id: Number(currentUser?.id),
-      status: watch("status")?.value
+    const status = watch("status");
+    if (status && currentUser?.id) {
+      const params = {
+        id: Number(currentUser.id),
+        status: status?.value,
+      };
+      updateUserStatus({ variables: { data: params } });
     }
-    console.log("params", params);
-    if (watch("status")) {
-      updateUserStatus({
-        variables: {
-          data: params
-        },
-      });
-    }
-  }, [watch("status")])
+  }, [watch("status")]);
+
 
   const onSubmit = (data: any) => {
     try {
@@ -237,6 +253,8 @@ const UserScreen = () => {
         id: Number(currentUser?.id),
         ...params,
       }
+      console.log("updateParams", updateParams);
+      
       editModal
         ? updateUser({
           variables: {
@@ -439,7 +457,7 @@ const UserScreen = () => {
 
   if (OrganizationLoading) {
     return <Loader />;
-  }
+  } 
 
   const debouncedSearch = useCallback(
     debounce((text) => {
@@ -495,7 +513,7 @@ const UserScreen = () => {
                 setSearchQuery(text);
                 debouncedSearch(text);
               }}
-              placeholder={labels?.searchTeam}
+              placeholder={labels?.searchUser}
               loading={loading}
               onClear={() => {
                 setSearchQuery("");
@@ -582,7 +600,6 @@ const UserScreen = () => {
               name={"name"}
               inputStyle={[{ lineHeight: ms(20) }]}
               label={"Name"}
-              onFocus={() => setIsFocused("name")}
               rules={{
                 required: "Name is required",
               }}
@@ -595,23 +612,10 @@ const UserScreen = () => {
               name={"email"}
               label={"Email"}
               labelStyle={styles.label}
-              onFocus={() => setIsFocused("email")}
               rules={{
                 required: "User email is required",
               }}
             />
-
-            {/* <CustomValidation
-              type="input"
-              control={control}
-              name={"phoneNo"}
-              label={"Email"}
-              labelStyle={styles.label}
-              onFocus={() => setIsFocused("phoneNo")}
-              rules={{
-                required: "User email is required",
-              }}
-            /> */}
 
             <CustomValidation
               type="input"
@@ -620,7 +624,6 @@ const UserScreen = () => {
               // keyboardType="phone-pad"
               label={"Phone No"}
               labelStyle={styles.label}
-              // onFocus={() => setIsFocused("phoneNo")}
               rules={{
                 required: "User phoneNo is required",
               }}

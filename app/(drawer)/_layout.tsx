@@ -80,7 +80,7 @@ const CustomDrawerContent = (props: any) => {
         icon={({ color, size }) => <Feather name="package" size={ms(24)} color={Colors[theme].text} />}
         label={labels?.packages}
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-        onPress={() => router.push('/user')}
+        onPress={() => router.push('/packages')}
       />
 
       <DrawerItem
