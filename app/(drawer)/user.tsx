@@ -93,7 +93,6 @@ const UserScreen = () => {
     usertype: any;
     id: string;
   }>(defaultValue);
-  console.log("currentUser", currentUser);
 
   const [userData, { error, data, loading, refetch }] = useLazyQuery<any>(
     PaginatedUsersDocument
@@ -104,7 +103,6 @@ const UserScreen = () => {
       reset();
       refetch();
       setModalVisible(false);
-      Alert.alert("success", "Project create successfully!");
     },
     onError: (error) => {
       console.log("Error", error.message);
@@ -117,7 +115,6 @@ const UserScreen = () => {
       reset();
       refetch();
       setStatusModalVisible(false);
-      Alert.alert("success", "Project create successfully!");
     },
     onError: (error) => {
       setStatusModalVisible(false);
@@ -146,7 +143,6 @@ const UserScreen = () => {
       refetch();
       setEditModal(false);
       setModalVisible(false);
-      Alert.alert("success", "Project updated successfully!");
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -156,7 +152,6 @@ const UserScreen = () => {
   const [deleteUser, deleteUserState] = useMutation(DeleteUserDocument, {
     onCompleted: (data) => {
       refetch();
-      Alert.alert("success", "user deleted successfully!");
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -237,15 +232,22 @@ const UserScreen = () => {
 
 
   const onSubmit = (data: any) => {
+    console.log('0909', data);
+
     try {
-      const roleIds = data.roles.map(Number);
+      const roleIds: number[] = [];
+      if (data?.roles && Array.isArray(data.roles)) {
+        for (let i = 0; i < data.roles.length; i++) {
+          roleIds.push(Number(data.roles[i]));
+        }
+      }
 
       const params = {
         email: data?.email,
         mobileNo: Number(data?.phoneNo),
-        name: data?.name,
+        name: data?.name, 
         roleIds: roleIds,
-        userType: watch("usertype")?.label as UserType,
+        userType: data?.usertype,
         avatar: image,
       };
 
@@ -254,7 +256,7 @@ const UserScreen = () => {
         ...params,
       }
       console.log("updateParams", updateParams);
-      
+
       editModal
         ? updateUser({
           variables: {
@@ -447,7 +449,7 @@ const UserScreen = () => {
         throw new Error(`Upload failed: ${err}`);
       }
       const responseData = await uploadResponse.json();
-      console.log("Upload successful:", responseData?.files[0]);
+      // console.log("Upload successful:", responseData?.files[0]);
       setImage(responseData?.files[0]);
     } catch (error) {
       console.error("Upload failed:", error);
@@ -457,7 +459,7 @@ const UserScreen = () => {
 
   if (OrganizationLoading) {
     return <Loader />;
-  } 
+  }
 
   const debouncedSearch = useCallback(
     debounce((text) => {

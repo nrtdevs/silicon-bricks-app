@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { View, TouchableOpacity, Pressable, ScrollView } from "react-native";
+import { View, TouchableOpacity, Pressable, ScrollView, Alert } from "react-native";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
 import { Colors } from "@/constants/Colors";
 import { router } from "expo-router";
@@ -24,7 +24,14 @@ interface LoginFormData {
 }
 
 export default function LoginScreen() {
-  const [createRequestOpt, createRequestState] = useMutation(RequestOtpDocument);
+  const [createRequestOpt, createRequestState] = useMutation(RequestOtpDocument, {
+    onCompleted: (data) => {
+      // Alert.alert("success", "login successfully!");
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  });
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const { theme } = useTheme();

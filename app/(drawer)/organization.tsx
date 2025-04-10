@@ -74,7 +74,6 @@ const OrganizationScreen = () => {
       reset()
       refetch();
       setModalVisible(false);
-      Alert.alert("success", "Project create successfully!");
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -83,11 +82,10 @@ const OrganizationScreen = () => {
 
   const [updateOrganization, updateOrganizationState] = useMutation(UpdateOrganizationDocument, {
     onCompleted: (data) => {
-      reset()
-      refetch();
+      refetch()
+      setCurrentOrganization(defaultValue);
       setEditModal(false);
       setModalVisible(false);
-      Alert.alert("success", "Project updated successfully!");
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -96,8 +94,10 @@ const OrganizationScreen = () => {
 
   const [deleteOrganization, deleteOrganizationState] = useMutation(DeleteOrganizationDocument, {
     onCompleted: (data) => {
-      refetch();
-      Alert.alert("success", "Project deleted successfully!");
+      refetch()
+      setCurrentOrganization(defaultValue);
+      setEditModal(false);
+      setModalVisible(false);
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -108,7 +108,6 @@ const OrganizationScreen = () => {
     onCompleted: (data) => {
       refetch();
       setStatusModalVisible(false);
-      Alert.alert("success", "Status updated successfully!");
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -134,7 +133,7 @@ const OrganizationScreen = () => {
       updateOrganizationStatus({
         variables: {
           data: {
-            id: Number(currentOrganization?.id),
+            ids: [Number(currentOrganization?.id)],
             status: watch("status")?.value
           }
         },
@@ -219,7 +218,7 @@ const OrganizationScreen = () => {
                       text: "Yes", onPress: () => {
                         deleteOrganization({
                           variables: {
-                            deleteOrganizationId: Number(item?.id),
+                            ids: [Number(item?.id)],
                           }
                         });
                       }
@@ -407,6 +406,7 @@ const OrganizationScreen = () => {
               rules={{
                 required: editModal ? "Test organization description is required" : "Description is required",
               }}
+              autoCapitalize="none"
             />
           </View>
 

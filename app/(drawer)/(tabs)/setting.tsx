@@ -226,12 +226,16 @@ const SettingScreen = () => {
     Alert.alert(labels.logout_title, labels.logout_msg, [
       {
         text: labels.cancel,
-        onPress: () => { },
+        onPress: () => {
+
+        },
         style: "cancel",
       },
       {
         text: labels.logout,
-        onPress: async () => { },
+        onPress: async () => {
+          router.dismissTo('/login');
+        },
       },
     ]);
   };

@@ -15,13 +15,22 @@ mutation Login($loginData: ValidateDto!) {
   login(loginData: $loginData) {
     user {
       id
+      name
+      username
+      mobileNo
+      email
+      status
+      avatar
+      parentId
+      organizationId
+      userType
     }
     accessToken
   }
 }
 
-mutation DeleteOrganization($deleteOrganizationId: Int!) {
-  deleteOrganization(id: $deleteOrganizationId)
+mutation DeleteOrganization($ids: [Int!]!) {
+  deleteOrganization(ids: $ids)
 }
 
 #register mutation
@@ -49,10 +58,16 @@ mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
 
 mutation EnableOrganizationStatus($data: OrganizationStatusDto!) {
   enableOrganizationStatus(data: $data) {
-    id
-    name
-    description
-    status
+    ... on Organization {
+      id
+      status
+    }
+    ... on OrganizationArray {
+      data {
+        id
+        status
+      }
+    }
   }
 }
 
@@ -227,21 +242,21 @@ mutation UpdateCoupon($updateCouponInput: UpdateCouponDto!) {
 
 mutation ChangeCouponStatus($updateCouponStatusInput: CouponStatusDto!) {
   changeCouponStatus(updateCouponStatusInput: $updateCouponStatusInput) {
-    id
-    couponCode
-    description
-    discountType
-    maxDiscountAmount
-    minOrderAmount
-    usageLimit
-    status
-    startDate
-    endDate
+    ... on Coupon {
+      id
+      status
+    }
+    ... on CouponArray {
+      data {
+        id
+        status
+      }
+    }
   }
 }
 
-mutation DeleteCoupon($deleteCouponId: Int!) {
-  deleteCoupon(id: $deleteCouponId)
+mutation DeleteCoupon($ids: [Int!]!) {
+  deleteCoupon(ids: $ids)
 }
 
 query PaginatedPackages($listInputDto: ListInputDTO!) {
@@ -285,39 +300,6 @@ query PaginatedPackages($listInputDto: ListInputDTO!) {
   }
 }
 
-mutation UpdatePackage($updatePackageInput: UpdatePackageDto!) {
-  updatePackage(updatePackageInput: $updatePackageInput) {
-    id
-    name
-    description
-    price
-    discountedPrice
-    status
-    modules {
-      id
-      name
-      description
-      status
-    }
-    offer {
-      id
-      title
-      description
-      offerType
-      discountType
-      discountValue
-      maxDiscountAmount
-      cashbackAmount
-      minOrderAmount
-      usageLimit
-      status
-      startDate
-      endDate
-    }
-    offerId
-  }
-}
-
 mutation CreatePackage($createPackageInput: CreatePackageDto!) {
   createPackage(createPackageInput: $createPackageInput) {
     id
@@ -328,4 +310,20 @@ mutation CreatePackage($createPackageInput: CreatePackageDto!) {
     status
     offerId
   }
+}
+
+mutation UpdatePackage($updatePackageInput: UpdatePackageDto!) {
+  updatePackage(updatePackageInput: $updatePackageInput) {
+    id
+    name
+    description
+    price
+    discountedPrice
+    status
+    offerId
+  }
+}
+
+mutation DeletePackage($ids: [Int!]!) {
+  deletePackage(ids: $ids)
 }

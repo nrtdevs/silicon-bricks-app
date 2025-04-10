@@ -81,7 +81,6 @@ const ModuleScreen = () => {
             reset();
             refetch();
             setModalVisible(false);
-            Alert.alert("success", "Module create successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -93,7 +92,6 @@ const ModuleScreen = () => {
             reset()
             refetch();
             setStatusModalVisible(false);
-            Alert.alert("success", "Module updated successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -103,7 +101,6 @@ const ModuleScreen = () => {
     const [deleteModule, deleteModuleState] = useMutation(DeleteModuleDocument, {
         onCompleted: (data) => {
             refetch();
-            Alert.alert("success", "Module deleted successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -115,7 +112,6 @@ const ModuleScreen = () => {
             refetch();
             setModalVisible(false);
             setCurrentModule(defaultValue);
-            Alert.alert("success", "Status updated successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);

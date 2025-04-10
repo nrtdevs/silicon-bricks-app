@@ -19,7 +19,14 @@ const LoginCodeScreen = () => {
   const { theme } = useTheme();
   const [otp, setOtp] = useState("123456");
   const params = useLocalSearchParams();
-  const [verifyOtp, verifyState] = useMutation(LoginDocument);
+  const [verifyOtp, verifyState] = useMutation(LoginDocument, {
+    onCompleted: (data) => {
+      // Alert.alert("success", "login successfully!");
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  });
 
   const handleOtpFilled = (code: string) => {
     setOtp(code);
@@ -48,6 +55,7 @@ const LoginCodeScreen = () => {
           // Save the accessToken to SecureStore
           await SecureStore.setItemAsync("accessToken", accessToken);
           await SecureStore.setItemAsync("userId", response?.data?.login?.user?.id as string);
+          await SecureStore.setItemAsync("userType", response?.data?.login?.user?.userType as string);
           // Retrieve the token from SecureStore
           const token = await SecureStore.getItemAsync("accessToken");
           router.replace("/(drawer)/(tabs)");

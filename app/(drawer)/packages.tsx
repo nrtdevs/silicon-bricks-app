@@ -12,6 +12,7 @@ import {
     CreateOrganizationDocument,
     CreatePackageDocument,
     DeleteOrganizationDocument,
+    DeletePackageDocument,
     DropdownOffersDocument,
     EnableOrganizationStatusDocument,
     PaginatedModulesDocument,
@@ -42,8 +43,12 @@ import NoDataFound from "@/components/NoDataFound";
 
 const defaultValue = {
     name: "",
+    discountedPrice: "",
     description: "",
     id: "",
+    price: "",
+    offer: "",
+    moduleIds: [],
 };
 
 const PackageScreen = () => {
@@ -58,11 +63,11 @@ const PackageScreen = () => {
     } = useForm<{
         name: string;
         description: string;
-        topic: any;
+        status: string;
         price: string;
         discountedPrice: string;
         offer: any;
-        module: string;
+        module: any;
     }>({
         defaultValues: {},
     });
@@ -72,9 +77,6 @@ const PackageScreen = () => {
         PaginatedPackagesDocument
     );
 
-    console.log("data", data);
-    
-
     const [offerDataApi, { error: offerError, data: offerData, loading: offerLoading, refetch: offerRefetch }] = useLazyQuery(
         DropdownOffersDocument
     );
@@ -83,9 +85,20 @@ const PackageScreen = () => {
         PaginatedModulesDocument
     );
 
-    // console.log("offerData", offerData?.dropdownOffers?.data[1]);
-    // PERCENTAGE
-    // FIXED_AMOUNT
+    const [deletePackage, deletePackageState] = useMutation(
+        DeletePackageDocument,
+        {
+            onCompleted: (data) => {
+                reset();
+                refetch();
+                setEditModal(false);
+                setModalVisible(false);
+            },
+            onError: (error) => {
+                Alert.alert("Error", error.message);
+            },
+        }
+    );
 
     const [updatePackage, updatePackageState] = useMutation(
         UpdatePackageDocument,
@@ -95,7 +108,6 @@ const PackageScreen = () => {
                 refetch();
                 setEditModal(false);
                 setModalVisible(false);
-                Alert.alert("success", "Project updated successfully!");
             },
             onError: (error) => {
                 Alert.alert("Error", error.message);
@@ -111,7 +123,6 @@ const PackageScreen = () => {
                 refetch();
                 setEditModal(false);
                 setModalVisible(false);
-                Alert.alert("success", "Project updated successfully!");
             },
             onError: (error) => {
                 Alert.alert("Error", error.message);
@@ -124,10 +135,14 @@ const PackageScreen = () => {
     const [editModal, setEditModal] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
     const [discountedPrice, setDiscountedPrice] = useState<string>("");
-    const [currentOrganization, setCurrentOrganization] = useState<{
-        name: string;
-        description: string;
-        id: string;
+    const [currentPackage, setCurrentPackage] = useState<{
+        name: string,
+        discountedPrice: string,
+        description: string,
+        id: string,
+        price: string,
+        offer: any,
+        moduleIds: string[],
     }>(defaultValue);
 
     // const
@@ -136,6 +151,21 @@ const PackageScreen = () => {
         { label: "Inactive", value: "inactive" },
         { label: "Expired", value: "expired" },
     ];
+
+    useEffect(() => {
+        if (currentPackage) {
+            setValue("name", currentPackage?.name);
+            setValue("discountedPrice", currentPackage?.discountedPrice);
+            setValue("description", currentPackage?.description);
+            setValue("price", currentPackage?.price);
+            setValue("offer", currentPackage?.offer?.id);
+            setValue("module", currentPackage?.moduleIds);
+        }
+    }, [currentPackage]);
+
+    console.log(watch('offer'), "watch")
+    console.log('offer', currentPackage.offer);
+
 
     useEffect(() => {
         packagesData({
@@ -172,7 +202,7 @@ const PackageScreen = () => {
     }, [watch('price')]);
 
     useEffect(() => {
-        if (watch('offer')) {
+        if (watch('offer') && watch('price').length > 0) {
             let discount = 0;
             let amt = Number(watch('price'));
             if (watch('offer')?.discountType === 'PERCENTAGE') {
@@ -203,16 +233,7 @@ const PackageScreen = () => {
 
     const onSubmit = (data: any) => {
         try {
-            // console.log("0009999", data);
-            // console.log("0009999", data?.module);
             const moduleIds = data.module.map(Number);
-            // "description": null,
-            // "discountedPrice": null,
-            // "moduleIds": null,
-            // "name": null,
-            // "offerId": null,
-            // "price": null
-
             let params = {
                 description: data?.description,
                 discountedPrice: Number(data?.discountedPrice),
@@ -221,19 +242,17 @@ const PackageScreen = () => {
                 offerId: Number(data?.offer?.id),
                 price: Number(data?.price)
             };
-            // let params2 = {
-            //     id: Number(currentCoupon?.id),
-            //     ...params,
-            // };
-            console.log("params", params);
+            let params2 = {
+                id: Number(currentPackage?.id),
+                ...params,
+            };
 
             editModal ?
-                // updateCoupon({
-                //     variables: {
-                //         updateCouponInput: params2,
-                //     },
-                // })
-                {}
+                updatePackage({
+                    variables: {
+                        updatePackageInput: params2,
+                    },
+                })
                 : createPackage({
                     variables: {
                         createPackageInput: params,
@@ -245,6 +264,98 @@ const PackageScreen = () => {
         }
     };
 
+    const renderData = ({ item, index }: any) => {
+        let ids = item.modules.map((item: any) => item.id);
+        return <View
+            key={index}
+            style={[
+                styles.organizationContainer,
+                { backgroundColor: Colors[theme].cartBg },
+            ]}
+        >
+            <ThemedText
+                style={[
+                    styles.status,
+                    {
+                        // color:
+                        //   item.status == "active" ? Colors?.green : "#6d6d1b",
+                        backgroundColor:
+                            theme == "dark" ? Colors?.white : "#e6e2e2",
+                    },
+                ]}
+            >
+                {item?.status}
+            </ThemedText>
+
+            <View style={styles.organizationHeader}>
+                <ThemedText type="subtitle" style={{ flex: 1 }}>
+                    {item?.name}
+                </ThemedText>
+                <View style={styles.organizationInfo}>
+                    <MaterialIcons
+                        name="attractions"
+                        size={ms(20)}
+                        color={Colors[theme].text}
+                        onPress={() => {
+                            setStatusModalVisible(true);
+                        }}
+                    />
+
+                    <Feather
+                        name="edit"
+                        size={ms(20)}
+                        color={Colors[theme].text}
+                        onPress={() => {
+                            setCurrentPackage({
+                                name: item?.name,
+                                discountedPrice: String(item?.discountedPrice),
+                                description: item?.description,
+                                id: item?.id,
+                                price: String(item?.price),
+                                moduleIds: ids,
+                                offer: item?.offer,
+                            })
+                            setModalVisible(true);
+                            setEditModal(true);
+                        }}
+                    />
+                    <MaterialIcons
+                        name="delete-outline"
+                        size={ms(20)}
+                        color={Colors[theme].text}
+                        onPress={() => {
+                            Alert.alert(
+                                "Delete",
+                                "Are you sure you want to delete?",
+                                [
+                                    {
+                                        text: "Yes",
+                                        onPress: () => {
+                                            deletePackage({
+                                                variables: {
+                                                    ids: [Number(item?.id)],
+                                                }
+                                            });
+                                        },
+                                    },
+                                    { text: "No", onPress: () => { } },
+                                ]
+                            );
+                        }}
+                    />
+                </View>
+            </View>
+
+            <View style={styles.userInfo}>
+                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                    ${item?.price}
+                </ThemedText>
+                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                    ${item?.discountedPrice} (after discount)
+                </ThemedText>
+            </View>
+        </View>
+    }
 
     return (
         <CustomHeader>
@@ -266,7 +377,7 @@ const PackageScreen = () => {
                     <Pressable
                         style={styles.buttonContainer}
                         onPress={() => {
-                            setModalVisible(true), setCurrentOrganization(defaultValue);
+                            setModalVisible(true), setCurrentPackage(defaultValue);
                         }}
                     >
                         <Feather name="plus-square" size={24} color={Colors[theme].text} />
@@ -276,88 +387,7 @@ const PackageScreen = () => {
                 <View style={styles.organizationParentContainer}>
                     <FlatList
                         data={data?.paginatedPackages?.data}
-                        renderItem={({ item, index }: any) => (
-                            <View
-                                key={index}
-                                style={[
-                                    styles.organizationContainer,
-                                    { backgroundColor: Colors[theme].cartBg },
-                                ]}
-                            >
-                                <ThemedText
-                                    style={[
-                                        styles.status,
-                                        {
-                                            // color:
-                                            //   item.status == "active" ? Colors?.green : "#6d6d1b",
-                                            backgroundColor:
-                                                theme == "dark" ? Colors?.white : "#e6e2e2",
-                                        },
-                                    ]}
-                                >
-                                    {item?.status}
-                                </ThemedText>
-
-                                <View style={styles.organizationHeader}>
-                                    <ThemedText type="subtitle" style={{ flex: 1 }}>
-                                        {item?.name}
-                                    </ThemedText>
-                                    <View style={styles.organizationInfo}>
-                                        <MaterialIcons
-                                            name="attractions"
-                                            size={ms(20)}
-                                            color={Colors[theme].text}
-                                            onPress={() => {
-                                                setStatusModalVisible(true);
-                                            }}
-                                        />
-
-                                        <Feather
-                                            name="edit"
-                                            size={ms(20)}
-                                            color={Colors[theme].text}
-                                            onPress={() => {
-                                                setModalVisible(true);
-                                                setEditModal(true);
-                                            }}
-                                        />
-                                        <MaterialIcons
-                                            name="delete-outline"
-                                            size={ms(20)}
-                                            color={Colors[theme].text}
-                                            onPress={() => {
-                                                Alert.alert(
-                                                    "Delete",
-                                                    "Are you sure you want to delete?",
-                                                    [
-                                                        {
-                                                            text: "Yes",
-                                                            onPress: () => {
-                                                                // deleteOrganization({
-                                                                //   variables: {
-                                                                //     deleteOrganizationId: Number(item?.id),
-                                                                //   }
-                                                                // });
-                                                            },
-                                                        },
-                                                        { text: "No", onPress: () => { } },
-                                                    ]
-                                                );
-                                            }}
-                                        />
-                                    </View>
-                                </View>
-
-                                <View style={styles.userInfo}>
-                                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                                        ${item?.price}
-                                    </ThemedText>
-                                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                                        ${item?.discountedPrice} (after discount)
-                                    </ThemedText>
-                                </View>
-                            </View>
-                        )}
+                        renderItem={renderData}
                         showsVerticalScrollIndicator={false}
                         // refreshControl={
                         //     <RefreshControl
@@ -423,7 +453,6 @@ const PackageScreen = () => {
                             inputStyle={[{ lineHeight: ms(20) }]}
                             label={"Name"}
                             placeholder={"Enter Name"}
-                            onFocus={() => setIsFocused("name")}
                             rules={{
                                 required: "name is required",
                             }}
@@ -434,13 +463,14 @@ const PackageScreen = () => {
                             control={control}
                             name={"price"}
                             label={"Price"}
+                            rightIcon={null}
                             placeholder={"Enter Price"}
                             keyboardType="number-pad"
                             labelStyle={styles.label}
-                            onFocus={() => setIsFocused("price")}
                             rules={{
                                 required: "Price is required",
                             }}
+
                         />
 
                         <CustomValidation
@@ -452,6 +482,7 @@ const PackageScreen = () => {
                             label="Offer"
                             labelStyle={styles.label}
                             name="offer"
+                            rightIcon={null}
                             placeholder="Select offer"
                             inputStyle={{ height: vs(50) }}
                             rules={{
@@ -466,12 +497,11 @@ const PackageScreen = () => {
                             type="input"
                             control={control}
                             name={"discountedPrice"}
-                            editable={false}
+                            editable
                             keyboardType="number-pad"
                             label={"Discounted Price"}
                             placeholder={"Discounted Price"}
                             labelStyle={styles.label}
-                            onFocus={() => setIsFocused("discountedPrice")}
                             rules={{
                                 required: "Discounted price is required",
                             }}
@@ -514,9 +544,6 @@ const PackageScreen = () => {
                             containerStyle={{
                                 height: vs(100),
                             }}
-                            onFocus={() =>
-                                setIsFocused("description")
-                            }
                             rules={{
                                 required: editModal
                                     ? "Test organization description is required"
@@ -529,6 +556,7 @@ const PackageScreen = () => {
                             onPress={() => {
                                 handleSubmit(onSubmit)();
                             }}
+                            isLoading={updatePackageState.loading || createPackageState.loading}
                             style={{
                                 backgroundColor: Colors[theme].background,
                                 marginTop: vs(50),
@@ -536,6 +564,41 @@ const PackageScreen = () => {
                         />
                     </View>
                 </ScrollView>
+            </Modal>
+
+            {/* status modal */}
+            <Modal
+                isVisible={isStatusModalVisible}
+                onBackdropPress={() => {
+                    setStatusModalVisible(false);
+                }}
+            >
+                <View
+                    style={{
+                        backgroundColor: Colors[theme].cartBg,
+                        height: 380,
+                        width: s(300),
+                        borderRadius: 10,
+                        alignSelf: "center",
+                        padding: 10,
+                    }}
+                >
+                    <CustomValidation
+                        data={pickerData}
+                        type="picker"
+                        hideStar
+                        control={control}
+                        name="status"
+                        placeholder="Select Status"
+                        inputStyle={{ height: vs(50) }}
+                        rules={{
+                            required: {
+                                value: true,
+                                message: "Select status",
+                            },
+                        }}
+                    />
+                </View>
             </Modal>
         </CustomHeader>
     );

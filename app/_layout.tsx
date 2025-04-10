@@ -5,7 +5,6 @@ import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
 import 'react-native-reanimated'
-
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { ApolloProvider } from '@apollo/client/react/context/ApolloProvider'
 import client from '@/graphql/client'
@@ -26,6 +25,8 @@ export default function RootLayout() {
       SplashScreen.hideAsync()
     }
   }, [loaded])
+
+  
 
   if (!loaded) {
     return null

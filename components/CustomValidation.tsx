@@ -136,7 +136,7 @@ const CustomValidation = (props: TextInputProps) => {
       return <ActivityIndicator size="small" color={Colors.primary} />
     }
 
-    if (value && !props.disabled && !error && !props.multiSelect) {
+    if (value && !props.disabled && !error && !props.multiSelect && props.rightIcon) {
       return (
         <AntDesign
           name="close"
@@ -323,7 +323,7 @@ const CustomValidation = (props: TextInputProps) => {
                   rightIcon={
                     props.rightIcon
                       ? props.rightIcon
-                      : value && !props.disabled && !props.editable
+                      : value && !props.disabled && !props.editable && !props?.rightIcon ==null
                         ? {
                           type: 'AntDesign ',
                           name: 'close',
@@ -425,7 +425,7 @@ const CustomValidation = (props: TextInputProps) => {
                       props.onFocus?.()
                       setIsFocused(true)
                     }}
-                    renderRightIcon={() => dropIcon(value, error, onChange)}
+                    renderRightIcon={() =>dropIcon(value, error, onChange)}
                     search={props.isSearch ?? false}
                     // renderItem={renderItem}
                     searchField={
