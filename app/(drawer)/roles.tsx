@@ -3,7 +3,7 @@ import {
   TouchableOpacity,
   Alert
 } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { LinearGradient } from "expo-linear-gradient";
 import { useLazyQuery } from '@apollo/client'
 import { FlatList } from 'react-native-gesture-handler'
@@ -24,6 +24,8 @@ import { ThemedView } from '@/components/ThemedView';
 import CustomSearchBar from '@/components/CustomSearchBar';
 import { Pressable } from 'react-native';
 import { Colors } from '@/constants/Colors';
+import debounce from "lodash.debounce";
+
 
 
 const RoleModule = gql`
@@ -62,7 +64,7 @@ const Update_Permission = gql`
 }
 `;
 
-const Permissions = () => {
+const RolesScreen = () => {
   const { theme } = useTheme();
   /// fetch Roles data
   const [page, setPage] = useState<number>(1);
@@ -167,26 +169,51 @@ const Permissions = () => {
       console.error("Error updating project:", error);
     }
   };
+
+  const debouncedSearch = useCallback(
+    debounce((text) => {
+      // organizationData({
+      //     variables: {
+      //         listInputDto: {
+      //             limit: 10,
+      //             page: 1,
+      //             search: text,
+      //         },
+      //     },
+      // });
+    }, 500),
+    [searchQuery]
+  );
+
+
   return (
     <CustomHeader>
+
       <ThemedView style={styles.contentContainer}>
+
         <View style={styles.searchContainer}>
           <View style={{ width: "90%" }}>
             <CustomSearchBar
               searchQuery={searchQuery}
-              placeholder="Search Permissions"
               onChangeText={(text) => {
                 setSearchQuery(text);
+                debouncedSearch(text);
+              }}
+              placeholder={labels?.searchOrganization}
+              // loading={loading}
+              onClear={() => {
+                setSearchQuery("");
               }}
             />
           </View>
           <Pressable
-
-          // onPress={() => { setModalVisible(true), setCurrentPermission(defaultValue) }}
+            style={styles.buttonContainer}
+          // onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
           >
             <Feather name="plus-square" size={24} color={Colors[theme].text} />
           </Pressable>
         </View>
+        
         <View style={styles.organizationParentContainer}>
           <FlatList
             data={dataD?.paginatedRoles?.data}
@@ -201,39 +228,39 @@ const Permissions = () => {
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                   <ThemedText style={styles.name}>{item.name}</ThemedText>
                   <View style={styles.organizationInfo}>
-                  <Feather
-                    name="edit"
-                    size={ms(20)}
-                    color="black"
-                    onPress={showDialogue}
-                  />
-                  <View style={{ width: 5 }}></View>
-                  <MaterialIcons
-                    name="delete-outline"
-                    size={ms(22)}
-                    color={Colors[theme].text}
-                    onPress={() => {
-                      Alert.alert(
-                        "Delete",
-                        "Are you sure you want to delete?",
-                        [
-                          {
-                            text: "Yes", onPress: () => {
-                              // deleteRoles({
-                              //   variables: {
-                              //     deletePlanId: Number(item?.id),
-                              //   }
-                              // });
-                            }
-                          },
-                          { text: "No", onPress: () => { } },
-                        ]
-                      );
+                    <Feather
+                      name="edit"
+                      size={ms(20)}
+                      color="black"
+                      onPress={showDialogue}
+                    />
+                    <View style={{ width: 5 }}></View>
+                    <MaterialIcons
+                      name="delete-outline"
+                      size={ms(22)}
+                      color={Colors[theme].text}
+                      onPress={() => {
+                        Alert.alert(
+                          "Delete",
+                          "Are you sure you want to delete?",
+                          [
+                            {
+                              text: "Yes", onPress: () => {
+                                // deleteRoles({
+                                //   variables: {
+                                //     deletePlanId: Number(item?.id),
+                                //   }
+                                // });
+                              }
+                            },
+                            { text: "No", onPress: () => { } },
+                          ]
+                        );
 
-                    }}
-                  />
+                      }}
+                    />
                   </View>
-                  
+
                 </View>
                 <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
                   {item?.description}
@@ -323,7 +350,7 @@ const Permissions = () => {
   )
 }
 
-export default Permissions
+export default RolesScreen
 
 const styles = ScaledSheet.create({
   contentContainer: {
@@ -333,6 +360,7 @@ const styles = ScaledSheet.create({
   innerContainer: {
     paddingVertical: 10
   },
+  buttonContainer: {},
   searchContainer: {
     width: "100%",
     flexDirection: "row",
@@ -357,7 +385,7 @@ const styles = ScaledSheet.create({
   },
   organizationInfo: {
     flexDirection: "row",
-},
+  },
   loadingText: {
     fontSize: 18,
     color: '#007BFF'

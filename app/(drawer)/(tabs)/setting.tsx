@@ -234,6 +234,7 @@ const SettingScreen = () => {
       {
         text: labels.logout,
         onPress: async () => {
+          await SecureStore.deleteItemAsync("userId");
           router.dismissTo('/login');
         },
       },

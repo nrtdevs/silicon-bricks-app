@@ -152,15 +152,23 @@ mutation UpdateModule($updateModuleInput: UpdateModuleDto!) {
 
 mutation ChangeModuleStatus($updateModuleStatusInput: ModuleStatusDto!) {
   changeModuleStatus(updateModuleStatusInput: $updateModuleStatusInput) {
-    id
-    name
-    status
-    description
+    ... on ApplicationModule {
+      id
+      name
+      description
+      status
+    }
+    ... on ApplicationModuleArray {
+      data {
+        id
+        status
+      }
+    }
   }
 }
 
-mutation DeleteModule($deleteModuleId: Int!) {
-  deleteModule(id: $deleteModuleId)
+mutation DeleteModule($ids: [Int!]!) {
+  deleteModule(ids: $ids)
 }
 
 mutation CreateCoupon($createCouponInput: CreateCouponDto!) {
@@ -203,35 +211,22 @@ mutation UpdateUser($data: UpdateUserDto!) {
   }
 }
 
-mutation DeleteUser($deleteUserId: Float!) {
-  deleteUser(id: $deleteUserId)
-}
-
-mutation CreatePermission($data: CreatePermissionDto!) {
-  createPermission(data: $data) {
-    id
-    appName
-    module
-    description
-    action
-  }
+mutation DeleteUser($ids: [Int!]!) {
+  deleteUser(ids: $ids)
 }
 
 mutation ChangeUserStatus($data: UserStatusDto!) {
   changeUserStatus(data: $data) {
-    id
-    name
-    username
-    mobileNo
-    email
-    status
-    avatar
-    parentId
-    organizationId
-    userType
-    createdAt
-    updatedAt
-    deletedAt
+    ... on User {
+      id
+      status
+    }
+    ... on UserArray {
+      data {
+        id
+        status
+      }
+    }
   }
 }
 
@@ -337,3 +332,55 @@ mutation UpdatePackage($updatePackageInput: UpdatePackageDto!) {
 mutation DeletePackage($ids: [Int!]!) {
   deletePackage(ids: $ids)
 }
+mutation CreatePermission($data: CreatePermissionDto!) {
+  createPermission(data: $data) {
+    id
+    appName
+    module
+    description
+    action
+  }
+}
+
+mutation DeleteProject($ids: [Int!]!) {
+  deleteProject(ids: $ids)
+}
+
+mutation EnableProjectStatus($data: ProjectStatusDto!) {
+  enableProjectStatus(data: $data) {
+    ... on Project {
+      id
+      name
+      description
+      status
+      organizationId
+    }
+    ... on ProjectArray {
+      data {
+        id
+        status
+      }
+    }
+  }
+}
+
+mutation CreateProject($createProjectInput: CreateProjectDto!) {
+  createProject(createProjectInput: $createProjectInput) {
+    id
+    name
+    description
+    status
+    organizationId
+  }
+}
+
+mutation UpdateProject($updateProjectInput: UpdateProjectDto!) {
+  updateProject(updateProjectInput: $updateProjectInput) {
+    id
+    name
+    description
+    status
+    organizationId
+  }
+}
+

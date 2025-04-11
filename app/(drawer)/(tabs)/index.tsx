@@ -15,36 +15,17 @@ import CustomHeader from "@/components/CustomHeader";
 import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
 import { useQuery, gql } from "@apollo/client";
+import { DashboardCountDocument } from "@/graphql/generated";
 
-const DASHBOARD_COUNT_QUERY = gql`
-  query DashboardCount($filters: ReportFilters!) {
-    dashboardCount(filters: $filters) {
-      userCount
-      roleCount
-      permissionCount
-      assignedPermissionCount
-      projectCount
-      organizationCount
-      couponCount
-      offerCount
-      moduleCount
-      packageCount
-      planCount
-      subscriptionCount
-      packageModuleCount
-      subscriptionPlanCount
-    }
-  }
-`;
 const index = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const { loading, error, data } = useQuery(DASHBOARD_COUNT_QUERY, {
+  const { loading, error, data } = useQuery(DashboardCountDocument, {
     variables: { filters: {} },
   });
 
-  if (loading) return <ThemedText>Loading...</ThemedText>;
-  if (error) return <ThemedText>Error: {error.message}</ThemedText>;
+  // if (loading) return <ThemedText>Loading...</ThemedText>;
+  // if (error) return <ThemedText>Error: {error.message}</ThemedText>;
   const userCount = data?.dashboardCount || {};
   
   return (
@@ -117,19 +98,15 @@ const styles = ScaledSheet.create({
   },
   cardStyle: {
     backgroundColor: "#C9C9C9",
-    borderRadius: 8,
+    borderRadius: '12@ms',
     padding: 15,
     marginHorizontal: 15,
     marginVertical: 5
   },
   cardTitle: {
-    fontSize: "16@ms",
-    color: "black",
     fontWeight: '500'
   },
   cardHeading: {
-    fontSize: "22@ms",
-    color: 'black',
     fontWeight: "bold"
   },
   cardSub: {

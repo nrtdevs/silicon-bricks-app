@@ -1,0 +1,1221 @@
+export const PermissionConst = {
+    // Dashboard
+    'MasterApp:Dashboard:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Dashboard',
+        action: 'Read',
+        description: 'Anyone with this permission can read dashboard',
+    },
+    // User Permissions
+    'MasterApp:User:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'User',
+        action: 'Create',
+        description: 'Anyone with this permission can create user',
+    },
+    'MasterApp:User:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'User',
+        action: 'Read',
+        description: 'Anyone with this permission can read user',
+    },
+    'MasterApp:User:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'User',
+        action: 'Update',
+        description: 'Anyone with this permission can update user',
+    },
+    'MasterApp:User:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'User',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete user',
+    },
+    'MasterApp:User:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'User',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore user',
+    },
+    'MasterApp:User:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'User',
+        action: 'Action',
+        description: 'Anyone with this permission can change user status',
+    },
+
+
+    // Role Permissions
+    'MasterApp:Role:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Role',
+        action: 'Create',
+        description: 'Anyone with this permission can create role',
+    },
+    'MasterApp:Role:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Role',
+        action: 'Read',
+        description: 'Anyone with this permission can read role',
+    },
+    'MasterApp:Role:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Role',
+        action: 'Update',
+        description: 'Anyone with this permission can update role',
+    },
+    'MasterApp:Role:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Role',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete role',
+    },
+    'MasterApp:Role:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Role',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore role',
+    },
+    'MasterApp:Role:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Role',
+        action: 'Action',
+        description: 'Anyone with this permission can change role status',
+    },
+
+
+    // Organization Permissions
+    'MasterApp:Organization:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Organization',
+        action: 'Create',
+        description: 'Anyone with this permission can create organization',
+    },
+    'MasterApp:Organization:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Organization',
+        action: 'Read',
+        description: 'Anyone with this permission can read organization',
+    },
+    'MasterApp:Organization:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Organization',
+        action: 'Update',
+        description: 'Anyone with this permission can update organization',
+    },
+    'MasterApp:Organization:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Organization',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete organization',
+    },
+    'MasterApp:Organization:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Organization',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore organization',
+    },
+    'MasterApp:Organization:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Organization',
+        action: 'Action',
+        description: 'Anyone with this permission can change organization status',
+    },
+
+
+    // AppSetting Permissions
+    'MasterApp:AppSetting:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'AppSetting',
+        action: 'Create',
+        description: 'Anyone with this permission can create app setting',
+    },
+    'MasterApp:AppSetting:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'AppSetting',
+        action: 'Read',
+        description: 'Anyone with this permission can read app setting',
+    },
+    'MasterApp:AppSetting:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'AppSetting',
+        action: 'Update',
+        description: 'Anyone with this permission can update app setting',
+    },
+    'MasterApp:AppSetting:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'AppSetting',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete app setting',
+    },
+
+
+    // Project Permissions
+    'MasterApp:Project:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Project',
+        action: 'Create',
+        description: 'Anyone with this permission can create project',
+    },
+    'MasterApp:Project:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Project',
+        action: 'Read',
+        description: 'Anyone with this permission can read project',
+    },
+    'MasterApp:Project:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Project',
+        action: 'Update',
+        description: 'Anyone with this permission can update project',
+    },
+    'MasterApp:Project:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Project',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete project',
+    },
+    'MasterApp:Project:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Project',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore project',
+    },
+    'MasterApp:Project:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Project',
+        action: 'Action',
+        description: 'Anyone with this permission can change project status',
+    },
+
+
+    // Module Permissions
+    'MasterApp:Module:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Module',
+        action: 'Create',
+        description: 'Anyone with this permission can create module',
+    },
+    'MasterApp:Module:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Module',
+        action: 'Read',
+        description: 'Anyone with this permission can read module',
+    },
+    'MasterApp:Module:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Module',
+        action: 'Update',
+        description: 'Anyone with this permission can update module',
+    },
+    'MasterApp:Module:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Module',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete module',
+    },
+    'MasterApp:Module:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Module',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore module',
+    },
+    'MasterApp:Module:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Module',
+        action: 'Action',
+        description: 'Anyone with this permission can change module status',
+    },
+
+
+    // Coupon Permissions
+    'MasterApp:Coupon:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Coupon',
+        action: 'Create',
+        description: 'Anyone with this permission can create coupon',
+    },
+    'MasterApp:Coupon:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Coupon',
+        action: 'Read',
+        description: 'Anyone with this permission can read coupon',
+    },
+    'MasterApp:Coupon:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Coupon',
+        action: 'Update',
+        description: 'Anyone with this permission can update coupon',
+    },
+    'MasterApp:Coupon:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Coupon',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete coupon',
+    },
+    'MasterApp:Coupon:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Coupon',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore coupon',
+    },
+    'MasterApp:Coupon:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Coupon',
+        action: 'Action',
+        description: 'Anyone with this permission can change coupon status',
+    },
+
+
+    // Offer Permissions
+    'MasterApp:Offer:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Offer',
+        action: 'Create',
+        description: 'Anyone with this permission can create offer',
+    },
+    'MasterApp:Offer:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Offer',
+        action: 'Read',
+        description: 'Anyone with this permission can read offer',
+    },
+    'MasterApp:Offer:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Offer',
+        action: 'Update',
+        description: 'Anyone with this permission can update offer',
+    },
+    'MasterApp:Offer:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Offer',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete offer',
+    },
+    'MasterApp:Offer:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Offer',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore offer',
+    },
+    'MasterApp:Offer:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Offer',
+        action: 'Action',
+        description: 'Anyone with this permission can change offer status',
+    },
+
+
+    // Package Permissions
+    'MasterApp:Package:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Package',
+        action: 'Create',
+        description: 'Anyone with this permission can create package',
+    },
+    'MasterApp:Package:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Package',
+        action: 'Read',
+        description: 'Anyone with this permission can read package',
+    },
+    'MasterApp:Package:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Package',
+        action: 'Update',
+        description: 'Anyone with this permission can update package',
+    },
+    'MasterApp:Package:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Package',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete package',
+    },
+    'MasterApp:Package:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Package',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore package',
+    },
+    'MasterApp:Package:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Package',
+        action: 'Action',
+        description: 'Anyone with this permission can change package status',
+    },
+
+
+    // Plan Permissions
+    'MasterApp:Plan:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Plan',
+        action: 'Create',
+        description: 'Anyone with this permission can create plan',
+    },
+    'MasterApp:Plan:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Plan',
+        action: 'Read',
+        description: 'Anyone with this permission can read plan',
+    },
+    'MasterApp:Plan:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Plan',
+        action: 'Update',
+        description: 'Anyone with this permission can update plan',
+    },
+    'MasterApp:Plan:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Plan',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete plan',
+    },
+    'MasterApp:Plan:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Plan',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore plan',
+    },
+    'MasterApp:Plan:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Plan',
+        action: 'Action',
+        description: 'Anyone with this permission can change plan status',
+    },
+
+
+    // Subscription Permissions
+    'MasterApp:Subscription:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Subscription',
+        action: 'Create',
+        description: 'Anyone with this permission can create subscription',
+    },
+    'MasterApp:Subscription:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Subscription',
+        action: 'Read',
+        description: 'Anyone with this permission can read subscription',
+    },
+    'MasterApp:Subscription:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Subscription',
+        action: 'Update',
+        description: 'Anyone with this permission can update subscription',
+    },
+    'MasterApp:Subscription:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Subscription',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete subscription',
+    },
+    'MasterApp:Subscription:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Subscription',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore subscription',
+    },
+    'MasterApp:Subscription:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'Subscription',
+        action: 'Action',
+        description: 'Anyone with this permission can change subscription status',
+    },
+
+
+    // License Permissions
+    'MasterApp:License:Create': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'License',
+        action: 'Create',
+        description: 'Anyone with this permission can create license',
+    },
+    'MasterApp:License:Read': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'License',
+        action: 'Read',
+        description: 'Anyone with this permission can read license',
+    },
+    'MasterApp:License:Update': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'License',
+        action: 'Update',
+        description: 'Anyone with this permission can update license',
+    },
+    'MasterApp:License:Delete': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'License',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete license',
+    },
+    'MasterApp:License:Restore': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'License',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore license',
+    },
+    'MasterApp:License:Action': {
+        app: 'MasterApp',
+        group: 'Default',
+        module: 'License',
+        action: 'Action',
+        description: 'Anyone with this permission can change license status',
+    },
+
+
+    // TasK Hopers Application Permissions
+    'TaskHoper:Meeting:Create': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'Meeting',
+        action: 'Create',
+        description: 'Anyone with this permission can create meeting',
+    },
+    'TaskHoper:Meeting:Read': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'Meeting',
+        action: 'Read',
+        description: 'Anyone with this permission can read meeting',
+    },
+    'TaskHoper:Meeting:Update': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'Meeting',
+        action: 'Update',
+        description: 'Anyone with this permission can update meeting',
+    },
+    'TaskHoper:Meeting:Delete': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'Meeting',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete meeting',
+    },
+    'TaskHoper:Meeting:Restore': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'Meeting',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore meeting',
+    },
+    'TaskHoper:Meeting:Action': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'Meeting',
+        action: 'Action',
+        description: 'Anyone with this permission can change meeting status',
+    },
+    // Meeting Venue
+    'TaskHoper:MeetingVenue:Create': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingVenue',
+        action: 'Create',
+        description: 'Anyone with this permission can create meeting venue',
+    },
+    'TaskHoper:MeetingVenue:Read': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingVenue',
+        action: 'Read',
+        description: 'Anyone with this permission can read meeting venue',
+    },
+    'TaskHoper:MeetingVenue:Update': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingVenue',
+        action: 'Update',
+        description: 'Anyone with this permission can update meeting venue',
+    },
+    'TaskHoper:MeetingVenue:Delete': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingVenue',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete meeting venue',
+    },
+    'TaskHoper:MeetingVenue:Restore': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingVenue',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore meeting venue',
+    },
+    'TaskHoper:MeetingVenue:Action': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingVenue',
+        action: 'Action',
+        description: 'Anyone with this permission can change meeting venue status',
+    },
+    // Meeting Type
+    'TaskHoper:MeetingType:Create': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingType',
+        action: 'Create',
+        description: 'Anyone with this permission can create meeting type',
+    },
+    'TaskHoper:MeetingType:Read': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingType',
+        action: 'Read',
+        description: 'Anyone with this permission can read meeting type',
+    },
+    'TaskHoper:MeetingType:Update': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingType',
+        action: 'Update',
+        description: 'Anyone with this permission can update meeting type',
+    },
+    'TaskHoper:MeetingType:Delete': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingType',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete meeting type',
+    },
+    'TaskHoper:MeetingType:Restore': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingType',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore meeting type',
+    },
+    'TaskHoper:MeetingType:Action': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingType',
+        action: 'Action',
+        description: 'Anyone with this permission can change meeting type status',
+    },
+    // Meeting Task
+    'TaskHoper:MeetingTask:Create': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingTask',
+        action: 'Create',
+        description: 'Anyone with this permission can create meeting task',
+    },
+    'TaskHoper:MeetingTask:Read': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingTask',
+        action: 'Read',
+        description: 'Anyone with this permission can read meeting task',
+    },
+    'TaskHoper:MeetingTask:Update': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingTask',
+        action: 'Update',
+        description: 'Anyone with this permission can update meeting task',
+    },
+    'TaskHoper:MeetingTask:Delete': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingTask',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete meeting task',
+    },
+    'TaskHoper:MeetingTask:Restore': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingTask',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore meeting task',
+    },
+    'TaskHoper:MeetingTask:Action': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingTask',
+        action: 'Action',
+        description: 'Anyone with this permission can change meeting task status',
+    },
+    // Meeting Note
+    'TaskHoper:MeetingNote:Create': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNote',
+        action: 'Create',
+        description: 'Anyone with this permission can create meeting note',
+    },
+    'TaskHoper:MeetingNote:Read': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNote',
+        action: 'Read',
+        description: 'Anyone with this permission can read meeting note',
+    },
+    'TaskHoper:MeetingNote:Update': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNote',
+        action: 'Update',
+        description: 'Anyone with this permission can update meeting note',
+    },
+    'TaskHoper:MeetingNote:Delete': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNote',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete meeting note',
+    },
+    'TaskHoper:MeetingNote:Restore': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNote',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore meeting note',
+    },
+    'TaskHoper:MeetingNote:Action': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNote',
+        action: 'Action',
+        description: 'Anyone with this permission can change meeting note status',
+    },
+    // Meeting Note Pad
+    'TaskHoper:MeetingNotePad:Create': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNotePad',
+        action: 'Create',
+        description: 'Anyone with this permission can create meeting note pad',
+    },
+    'TaskHoper:MeetingNotePad:Read': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNotePad',
+        action: 'Read',
+        description: 'Anyone with this permission can read meeting note pad',
+    },
+    'TaskHoper:MeetingNotePad:Update': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNotePad',
+        action: 'Update',
+        description: 'Anyone with this permission can update meeting note pad',
+    },
+    'TaskHoper:MeetingNotePad:Delete': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNotePad',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete meeting note pad',
+    },
+    'TaskHoper:MeetingNotePad:Restore': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNotePad',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore meeting note pad',
+    },
+    'TaskHoper:MeetingNotePad:Action': {
+        app: 'TaskHoper',
+        group: 'Default',
+        module: 'MeetingNotePad',
+        action: 'Action',
+        description:
+            'Anyone with this permission can change meeting note pad status',
+    },
+
+
+    // Vehicle Management Permissions
+    // Vehicle Management Permissions
+    'VehicleApp:Vehicle:Create': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'Vehicle',
+        action: 'Create',
+        description: 'Anyone with this permission can create a vehicle',
+    },
+    'VehicleApp:Vehicle:Read': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'Vehicle',
+        action: 'Read',
+        description: 'Anyone with this permission can read vehicle details',
+    },
+    'VehicleApp:Vehicle:Update': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'Vehicle',
+        action: 'Update',
+        description: 'Anyone with this permission can update vehicle details',
+    },
+    'VehicleApp:Vehicle:Delete': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'Vehicle',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete a vehicle',
+    },
+    'VehicleApp:Vehicle:Restore': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'Vehicle',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore Vehicle note',
+    },
+    'VehicleApp:Vehicle:Action': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'Vehicle',
+        action: 'Action',
+        description: 'Anyone with this permission can change Vehicle note status',
+    },
+
+
+    // Vehicle Breakdown
+    'VehicleApp:VehicleBreakdown:Create': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleBreakdown',
+        action: 'Create',
+        description:
+            'Anyone with this permission can create a vehicle breakdown record',
+    },
+    'VehicleApp:VehicleBreakdown:Read': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleBreakdown',
+        action: 'Read',
+        description:
+            'Anyone with this permission can read vehicle breakdown details',
+    },
+    'VehicleApp:VehicleBreakdown:Update': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleBreakdown',
+        action: 'Update',
+        description:
+            'Anyone with this permission can update vehicle breakdown details',
+    },
+    'VehicleApp:VehicleBreakdown:Delete': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleBreakdown',
+        action: 'Delete',
+        description:
+            'Anyone with this permission can delete a vehicle breakdown record',
+    },
+    'VehicleApp:VehicleBreakdown:Restore': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleBreakdown',
+        action: 'Restore',
+        description:
+            'Anyone with this permission can restore vehicle breakdown record',
+    },
+    'VehicleApp:VehicleBreakdown:Action': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleBreakdown',
+        action: 'Action',
+        description:
+            'Anyone with this permission can change vehicle breakdown status',
+    },
+
+
+    // Vehicle Expense
+    'VehicleApp:VehicleExpense:Create': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleExpense',
+        action: 'Create',
+        description:
+            'Anyone with this permission can create a vehicle expense record',
+    },
+    'VehicleApp:VehicleExpense:Read': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleExpense',
+        action: 'Read',
+        description: 'Anyone with this permission can read vehicle expense details',
+    },
+    'VehicleApp:VehicleExpense:Update': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleExpense',
+        action: 'Update',
+        description:
+            'Anyone with this permission can update vehicle expense details',
+    },
+    'VehicleApp:VehicleExpense:Delete': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleExpense',
+        action: 'Delete',
+        description:
+            'Anyone with this permission can delete a vehicle expense record',
+    },
+    'VehicleApp:VehicleExpense:Restore': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleExpense',
+        action: 'Restore',
+        description:
+            'Anyone with this permission can restore vehicle expense record',
+    },
+    'VehicleApp:VehicleExpense:Action': {
+        app: 'VehicleApp',
+        group: 'Default',
+        module: 'VehicleExpense',
+        action: 'Action',
+        description:
+            'Anyone with this permission can change vehicle expense status',
+    },
+
+
+    // Material Management
+    // Warehouse permissions
+    'MaterialApp:Warehouse:Create': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Warehouse',
+        action: 'Create',
+        description: 'Anyone with this permission can create warehouse',
+    },
+    'MaterialApp:Warehouse:Read': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Warehouse',
+        action: 'Read',
+        description: 'Anyone with this permission can read warehouse',
+    },
+    'MaterialApp:Warehouse:Update': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Warehouse',
+        action: 'Update',
+        description: 'Anyone with this permission can update warehouse',
+    },
+    'MaterialApp:Warehouse:Delete': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Warehouse',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete warehouse',
+    },
+    'MaterialApp:Warehouse:Restore': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Warehouse',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore warehouse',
+    },
+    'MaterialApp:Warehouse:Action': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Warehouse',
+        action: 'Action',
+        description: 'Anyone with this permission can perform warehouse actions',
+    },
+    // Unit permissions
+    'MaterialApp:Unit:Create': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Unit',
+        action: 'Create',
+        description: 'Anyone with this permission can create unit',
+    },
+    'MaterialApp:Unit:Read': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Unit',
+        action: 'Read',
+        description: 'Anyone with this permission can read unit',
+    },
+    'MaterialApp:Unit:Update': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Unit',
+        action: 'Update',
+        description: 'Anyone with this permission can update unit',
+    },
+    'MaterialApp:Unit:Delete': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Unit',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete unit',
+    },
+    'MaterialApp:Unit:Restore': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Unit',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore unit',
+    },
+    'MaterialApp:Unit:Action': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Unit',
+        action: 'Action',
+        description: 'Anyone with this permission can perform unit actions',
+    },
+    // Category permissions
+    'MaterialApp:Category:Create': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Category',
+        action: 'Create',
+        description: 'Anyone with this permission can create category',
+    },
+    'MaterialApp:Category:Read': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Category',
+        action: 'Read',
+        description: 'Anyone with this permission can read category',
+    },
+    'MaterialApp:Category:Update': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Category',
+        action: 'Update',
+        description: 'Anyone with this permission can update category',
+    },
+    'MaterialApp:Category:Delete': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Category',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete category',
+    },
+    'MaterialApp:Category:Restore': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Category',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore category',
+    },
+    'MaterialApp:Category:Action': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Category',
+        action: 'Action',
+        description: 'Anyone with this permission can perform category actions',
+    },
+    // AppSetting
+    'MaterialApp:AppSetting:Read': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'AppSetting',
+        action: 'Read',
+        description: 'Anyone with this permission can read app setting',
+    },
+    'MaterialApp:AppSetting:Update': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'AppSetting',
+        action: 'Update',
+        description: 'Anyone with this permission can update app setting',
+    },
+    // Supplier permissions
+    'MaterialApp:Supplier:Create': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Supplier',
+        action: 'Create',
+        description: 'Anyone with this permission can create supplier',
+    },
+    'MaterialApp:Supplier:Read': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Supplier',
+        action: 'Read',
+        description: 'Anyone with this permission can read supplier',
+    },
+    'MaterialApp:Supplier:Update': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Supplier',
+        action: 'Update',
+        description: 'Anyone with this permission can update supplier',
+    },
+    'MaterialApp:Supplier:Delete': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Supplier',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete supplier',
+    },
+    'MaterialApp:Supplier:Restore': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Supplier',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore supplier',
+    },
+    'MaterialApp:Supplier:Action': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Supplier',
+        action: 'Action',
+        description: 'Anyone with this permission can perform supplier actions',
+    },
+    // Material permissions
+    'MaterialApp:Material:Create': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Material',
+        action: 'Create',
+        description: 'Anyone with this permission can create material',
+    },
+    'MaterialApp:Material:Read': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Material',
+        action: 'Read',
+        description: 'Anyone with this permission can read material',
+    },
+    'MaterialApp:Material:Update': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Material',
+        action: 'Update',
+        description: 'Anyone with this permission can update material',
+    },
+    'MaterialApp:Material:Delete': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Material',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete material',
+    },
+    'MaterialApp:Material:Restore': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Material',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore material',
+    },
+    'MaterialApp:Material:Action': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Material',
+        action: 'Action',
+        description: 'Anyone with this permission can perform material actions',
+    },
+    // Inventory permissions
+    'MaterialApp:Inventory:Create': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Inventory',
+        action: 'Create',
+        description: 'Anyone with this permission can create inventory',
+    },
+    'MaterialApp:Inventory:Read': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Inventory',
+        action: 'Read',
+        description: 'Anyone with this permission can read inventory',
+    },
+    'MaterialApp:Inventory:Update': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Inventory',
+        action: 'Update',
+        description: 'Anyone with this permission can update inventory',
+    },
+    'MaterialApp:Inventory:Delete': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Inventory',
+        action: 'Delete',
+        description: 'Anyone with this permission can delete inventory',
+    },
+    'MaterialApp:Inventory:Restore': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Inventory',
+        action: 'Restore',
+        description: 'Anyone with this permission can restore inventory',
+    },
+    'MaterialApp:Inventory:Action': {
+        app: 'MaterialApp',
+        group: 'Default',
+        module: 'Inventory',
+        action: 'Action',
+        description: 'Anyone with this permission can perform inventory actions',
+    },
+}
+
+
+export type PermissionKeys = keyof typeof PermissionConst

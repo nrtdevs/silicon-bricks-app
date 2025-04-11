@@ -10,6 +10,7 @@ import { ApolloProvider } from '@apollo/client/react/context/ApolloProvider'
 import client from '@/graphql/client'
 import { PaperProvider } from 'react-native-paper'
 import { ThemeProvider } from '@/context/ThemeContext'
+import { UserProvider } from '@/context/RoleContext'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -26,7 +27,7 @@ export default function RootLayout() {
     }
   }, [loaded])
 
-  
+
 
   if (!loaded) {
     return null
@@ -36,14 +37,17 @@ export default function RootLayout() {
     <PaperProvider>
       <ThemeProvider>
         <ApolloProvider client={client}>
-          <Stack
-            screenOptions={{ headerShown: false }}
-            initialRouteName="index"
-          >
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(drawer)" />
-            <Stack.Screen name="(auth)" />
-          </Stack>
+          <UserProvider>
+            <Stack
+              screenOptions={{ headerShown: false }}
+              initialRouteName="index"
+            >
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(drawer)" />
+              <Stack.Screen name="(auth)" />
+            </Stack>
+          </UserProvider>
+
         </ApolloProvider>
         <StatusBar style="auto" />
       </ThemeProvider>

@@ -21,7 +21,7 @@ const Index = () => {
     // <Redirect href="/(auth)/login" />
     // <Redirect href="/(drawer)/(tabs)" />
     // <Redirect href="/(drawer)/organization" />
-    <Redirect href="/(drawer)/user" />
+    <Redirect href="/(drawer)/project" />
   );
 };
 

@@ -1,5 +1,5 @@
 import { View, TouchableOpacity, FlatList, Alert, ActivityIndicator, Pressable } from 'react-native'
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons';
 import { gql, useMutation } from "@apollo/client";
 import { useLazyQuery } from '@apollo/client';
@@ -8,7 +8,7 @@ import { Colors } from '@/constants/Colors';
 import { z } from "zod";
 import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
-import {useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import CustomValidation from '@/components/CustomValidation';
 import { labels } from '@/constants/Labels';
 import { ms, s, ScaledSheet, vs } from 'react-native-size-matters';
@@ -17,6 +17,8 @@ import CustomSearchBar from '@/components/CustomSearchBar';
 import NoDataFound from '@/components/NoDataFound';
 import Modal from 'react-native-modal';
 import CustomButton from '@/components/CustomButton';
+import { CreateProjectDocument, DeleteProjectDocument, EnableProjectStatusDocument, PaginatedProjectsDocument, UpdateProjectDocument } from '@/graphql/generated';
+import debounce from "lodash.debounce";
 
 interface ProjectData {
   id: number;
@@ -29,57 +31,21 @@ const defaultValue = {
   description: "",
   id: "",
 }
-const GetAllProjects = gql`
-  query PaginatedProjects($listInputDto: ListInputDTO!) {
-    paginatedProjects(ListInputDTO: $listInputDto) {
-      data {
-        id
-        name
-        description
-        status
-        organizationId
-      }
-    }
-  }
-`;
-const CREATE_PROJECT_MUTATION = gql`
-  mutation CreateProject($createProjectInput: CreateProjectDto!) {
-    createProject(createProjectInput: $createProjectInput) {
-      id
-      name
-      description
-      status
-      organizationId
-    }
-  }
-`;
 
-const DELETE_PROJECT = gql`
-  mutation DeleteProject($deleteProjectId: Int!) {
-    deleteProject(id: $deleteProjectId)
-  }
-`;
-const UPDATE_PROJECT = gql`
-  mutation UpdateProject($updateProjectInput: UpdateProjectDto!) {
-    updateProject(updateProjectInput: $updateProjectInput) {
-      id
-      name
-      description
-      status
-      organizationId
-    }
-  }
-`;
+const pickerData = [
+  { label: "Active", value: "active" },
+  { label: "Inactive", value: "inactive" },
+  { label: "Blocked", value: "blocked" },
+  { label: "Pending", value: "pending" },
+];
 
 const Project = () => {
   const { theme } = useTheme();
-  const [getProjects, { data, refetch, loading: listLoading }] = useLazyQuery(GetAllProjects);
-
-
-  /// serach state 
+  const [visible, setVisible] = useState(false);
+  const showDialogue = () => setVisible(true);
+  const [editVisible, setEditVisible] = useState(false);
+  const [isStatusModalVisible, setStatusModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-
-  /// Add and Edit state
   const [isModalVisible, setModalVisible] = useState(false);
   const [currentProject, setCurrentProject] = useState<{
     project_name: string,
@@ -87,31 +53,49 @@ const Project = () => {
     id: string,
   }>(defaultValue);
 
-
-  const [updateProject] = useMutation(UPDATE_PROJECT, {
+  const [getProjects, { data, refetch, loading }] = useLazyQuery<any>(PaginatedProjectsDocument);
+  console.log('data', data?.paginatedProjects?.data);
+  
+  const [updateProject] = useMutation(UpdateProjectDocument, {
     onCompleted: (data) => {
       refetch();
       setEditVisible(false);
       setModalVisible(false);
       setCurrentProject(defaultValue)
-      Alert.alert("success", "Project create successfully!");
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
     }
   });
-  const [visible, setVisible] = useState(false);
-  const showDialogue = () => setVisible(true);
-  const [editVisible, setEditVisible] = useState(false);
 
-
-  const [createProject,] = useMutation(CREATE_PROJECT_MUTATION, {
+  const [createProject,] = useMutation(CreateProjectDocument, {
     onCompleted: (data) => {
       refetch();
       setEditVisible(false);
       setModalVisible(false);
       setCurrentProject(defaultValue)
-      Alert.alert("success", "Project create successfully!");
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    }
+  });
+
+  // 
+  const [updateProjectStatus,] = useMutation(EnableProjectStatusDocument, {
+    onCompleted: (data) => {
+      refetch();
+      setEditVisible(false);
+      setModalVisible(false);
+      setCurrentProject(defaultValue)
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    }
+  });
+
+  const [deleteProject, deleteOrganizationState] = useMutation(DeleteProjectDocument, {
+    onCompleted: (data) => {
+      refetch();
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -119,8 +103,6 @@ const Project = () => {
   });
 
   const onSubmit = (data) => {
-    console.log(data);
-
     const params = {
       name: data?.project_name,
       organizationId: 1,
@@ -143,7 +125,20 @@ const Project = () => {
       })
   }
 
-  const { control, handleSubmit, reset, formState: { errors }, setValue } = useForm();
+  const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm();
+
+  useEffect(() => {
+    if (watch("status")) {
+      updateProjectStatus({
+        variables: {
+          data: {
+            ids: [Number(currentProject?.id)],
+            status: watch("status")?.value
+          }
+        },
+      });
+    }
+  }, [watch("status")])
 
   useEffect(() => {
     getProjects({
@@ -161,17 +156,108 @@ const Project = () => {
     setValue('description', currentProject?.description)
   }, [currentProject])
 
+  const debouncedSearch = useCallback(
+    debounce((text) => {
+      getProjects({
+        variables: {
+          listInputDto: {
+            limit: 10,
+            page: 1,
+            search: text,
+          },
+        },
+      });
+    }, 500),
+    [searchQuery]
+  );
 
-  /// delete project 
-  const [deletePermission, deleteOrganizationState] = useMutation(DELETE_PROJECT, {
-    onCompleted: (data) => {
-      refetch();
-      Alert.alert("success", "Permission deleted successfully!");
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    }
-  });
+  const renderItem = ({ item, index }: any) => {
+    return (
+      <View
+        key={index}
+        style={[
+          styles.organizationContainer,
+          { backgroundColor: Colors[theme].cartBg },
+        ]}
+      >
+        <View style={styles.organizationHeader}>
+          <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
+          <View style={styles.organizationInfo}>
+            <MaterialIcons
+              name="attractions"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                setCurrentProject({
+                  id: String(item.id),
+                  project_name: item?.name,
+                  description: item?.description
+                })
+                setStatusModalVisible(true);
+              }}
+            />
+            <Feather
+              name="edit"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                setCurrentProject({
+                  id: String(item.id),
+                  project_name: item?.name,
+                  description: item?.description
+                })
+                setModalVisible(true), setEditVisible(true)
+              }}
+            />
+
+            <MaterialIcons
+              name="delete-outline"
+              size={ms(20)}
+              color={Colors[theme].text}
+              onPress={() => {
+                Alert.alert(
+                  "Delete",
+                  "Are you sure you want to delete?",
+                  [
+                    {
+                      text: "Yes", onPress: () => {
+                        deleteProject({
+                          variables: {
+                            ids: [Number(item?.id)],
+                          }
+                        });
+                      }
+                    },
+                    { text: "No", onPress: () => { } },
+                  ]
+                );
+
+              }}
+            />
+
+
+          </View>
+        </View>
+        <ThemedText
+          style={[
+            styles.status,
+            {
+              color:
+                item.status == "active" ? Colors?.green : "#6d6d1b",
+              backgroundColor:
+                theme == "dark" ? Colors?.white : "#e6e2e2",
+            },
+          ]}
+        >
+          {item?.status}
+        </ThemedText>
+        <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+          {item?.description}
+        </ThemedText>
+      </View>
+    )
+  }
+
   return (
     <CustomHeader>
       <ThemedView style={styles.contentContainer}>
@@ -180,9 +266,14 @@ const Project = () => {
             <View style={{ width: "90%" }}>
               <CustomSearchBar
                 searchQuery={searchQuery}
-                placeholder="Search Project"
                 onChangeText={(text) => {
                   setSearchQuery(text);
+                  debouncedSearch(text);
+                }}
+                placeholder={labels?.searchOrganization}
+                loading={loading}
+                onClear={() => {
+                  setSearchQuery("");
                 }}
               />
             </View>
@@ -198,66 +289,12 @@ const Project = () => {
             <FlatList
               data={data?.paginatedProjects?.data}
               keyExtractor={(item: ProjectData) => item.id.toString()}
-              renderItem={({ item }) => (
-                <View style={[
-                  styles.organizationContainer,
-                  { backgroundColor: Colors[theme].cartBg },
-                ]}>
-                  <View style={styles.organizationHeader}>
-                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
-                    <View style={styles.organizationInfo}>
-                      <Feather
-                        name="edit"
-                        size={ms(20)}
-                        color={Colors[theme].text}
-                        onPress={() => {
-                          setModalVisible(true), setEditVisible(true)
-                          setCurrentProject({
-                            id: String(item.id),
-                            project_name: item?.name,
-                            description: item?.description
-                          })
-                        }}
-                      />
-                      <View style={{ width: 5 }}></View>
-                      <MaterialIcons
-                        name="delete-outline"
-                        size={ms(22)}
-                        color={Colors[theme].text}
-                        onPress={() => {
-                          Alert.alert(
-                            "Delete",
-                            "Are you sure you want to delete?",
-                            [
-                              {
-                                text: "Yes", onPress: () => {
-                                  deletePermission({
-                                    variables: {
-                                      deleteProjectId: Number(item?.id),
-                                    }
-                                  });
-                                }
-                              },
-                              { text: "No", onPress: () => { } },
-                            ]
-                          );
-
-                        }}
-                      />
-                    </View>
-                  </View>
-                  <View style={{ width: 100, backgroundColor: item.status == "active" ? "#EAFFF1" : "#FFF8DD", borderColor: item.status == "active" ? "#17C76D" : "#F8B700", borderWidth: 0.5, borderRadius: 5 }}>
-                    <ThemedText style={{ color: item.status == "active" ? "#17C76D" : "#F8B700", fontWeight: 'normal', fontSize: 18, paddingHorizontal: 10 }}>{item.status}</ThemedText>
-                  </View>
-                  <ThemedText style={styles.cardDot}>{item.description}</ThemedText>
-                  <View style={{ width: 5 }}></View>
-                </View>
-              )}
-              ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+              renderItem={renderItem}
+              ListEmptyComponent={!loading ? <NoDataFound /> : null}
             />
           </View>
 
-          
+
         </View>
       </ThemedView>
 
@@ -269,71 +306,105 @@ const Project = () => {
           setModalVisible(false);
         }}
       >
+        <ThemedView>
+          <View
+            style={{
+              backgroundColor: Colors[theme].cartBg,
+              height: vs(330),
+              width: s(300),
+              borderRadius: 10,
+              alignSelf: "center",
+              padding: 10,
+              justifyContent: "center",
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                padding: 10,
+              }}
+            >
+              <ThemedText type="subtitle">Create Project
+              </ThemedText>
+              <Pressable
+                onPress={() => {
+                  setModalVisible(false);
+                }}
+              >
+                <Entypo name="cross" size={ms(20)} color={Colors[theme].text}
+                  onPress={() => {
+                    setEditVisible(false);
+                    setModalVisible(false);
+                    setCurrentProject(defaultValue)
+                  }}
+                />
+              </Pressable>
+            </View>
+
+            <View style={{ padding: 10 }}>
+              <CustomValidation
+                type="input"
+                control={control}
+                labelStyle={styles?.label}
+                name={"project_name"}
+                label={`${labels.projectName}`}
+                rules={{
+                  required: labels.projectName,
+                }}
+                autoCapitalize="none"
+              />
+              <CustomValidation
+                type="input"
+                control={control}
+                name={"description"}
+                label={`${labels.description}`}
+                labelStyle={styles.label}
+                rules={{
+                  required: labels.description,
+                }}
+              />
+            </View>
+            <CustomButton
+              title="Submit"
+              onPress={handleSubmit(onSubmit)}
+              style={{ backgroundColor: Colors[theme].background, marginTop: 20 }}
+            />
+          </View>
+        </ThemedView>
+      </Modal>
+
+      {/* status modal */}
+      <Modal
+        isVisible={isStatusModalVisible}
+        onBackdropPress={() => {
+          setStatusModalVisible(false);
+        }}
+      >
         <View
           style={{
             backgroundColor: Colors[theme].cartBg,
-            height: vs(330),
+            height: 380,
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
-            justifyContent: "center",
           }}
         >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              padding: 10,
+          <CustomValidation
+            data={pickerData}
+            type="picker"
+            hideStar
+            control={control}
+            name="status"
+            placeholder="Select Status"
+            inputStyle={{ height: vs(50) }}
+            rules={{
+              required: {
+                value: true,
+                message: "Select status",
+              },
             }}
-          >
-            <ThemedText type="subtitle">Create Project
-            </ThemedText>
-            <Pressable
-              onPress={() => {
-                setModalVisible(false);
-              }}
-            >
-              <Entypo name="cross" size={ms(20)} color={Colors[theme].text}
-                onPress={() => {
-                  setEditVisible(false);
-                  setModalVisible(false);
-                  setCurrentProject(defaultValue)
-                }}
-              />
-            </Pressable>
-          </View>
-
-          <View style={{ padding: 10 }}>
-            <CustomValidation
-              type="input"
-              control={control}
-              labelStyle={styles.label}
-              name={"project_name"}
-              inputStyle={[{ lineHeight: ms(20) }]}
-              label={`${labels.projectName}`}
-              // onFocus={() => setIsFocused("name")}
-              rules={{
-                required: labels.projectName,
-              }}
-              autoCapitalize="none"
-            />
-            <CustomValidation
-              type="input"
-              control={control}
-              name={"description"}
-              label={`${labels.description}`}
-              labelStyle={styles.label}
-              //onFocus={() => setIsFocused("description")}
-              rules={{
-                required: labels.description,
-              }}
-            />
-          </View>
-          <CustomButton
-            title="Submit"
-            onPress={handleSubmit(onSubmit)}
-            style={{ backgroundColor: Colors[theme].background }}
           />
         </View>
       </Modal>
@@ -358,6 +429,8 @@ const styles = ScaledSheet.create({
   },
   organizationInfo: {
     flexDirection: "row",
+    width: "30%",
+    justifyContent: "space-between",
   },
   organizationHeader: {
     width: "100%",
@@ -402,7 +475,6 @@ const styles = ScaledSheet.create({
   label: {
     fontSize: "16@ms",
     fontWeight: "normal",
-    color: "black",
     marginBottom: 5,
     textAlign: "left",
     alignSelf: "flex-start",
@@ -460,5 +532,12 @@ const styles = ScaledSheet.create({
     paddingVertical: 5,
     marginTop: 10,
     paddingHorizontal: 20,
+  },
+  status: {
+    color: "green",
+    borderRadius: "10@ms",
+    width: "60@ms",
+    textAlign: "center",
+    fontSize: "12@ms",
   },
 });

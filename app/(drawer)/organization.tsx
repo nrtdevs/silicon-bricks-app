@@ -27,6 +27,7 @@ import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
+import { useUserContext } from "@/context/RoleContext";
 
 const defaultValue = {
   name: "",
@@ -80,6 +81,20 @@ const OrganizationScreen = () => {
     }
   });
 
+  const { can, hasAny } = useUserContext();
+
+  const deletepermission = can('MasterApp:Organization:Delete')
+  const updatepermission = can('MasterApp:Organization:Update')
+  const createpermission = can('MasterApp:Organization:Create')
+
+  console.log('0000',updatepermission);
+  console.log('0000999',createpermission);
+  
+
+//   const ckeckall = hasAny(['MasterApp:Organization:Create', 'MasterApp:Organization:Update', 'MasterApp:Organization:Delete'])
+  
+//  console.log('9999',ckeckall);
+ 
   const [updateOrganization, updateOrganizationState] = useMutation(UpdateOrganizationDocument, {
     onCompleted: (data) => {
       refetch()
@@ -118,6 +133,8 @@ const OrganizationScreen = () => {
   //   setValue("name", currentOrganization?.name)
   //   setValue("description", currentOrganization?.description)
   // }
+
+
 
   useEffect(() => {
     setValue("name", currentOrganization?.name)
@@ -205,30 +222,33 @@ const OrganizationScreen = () => {
                 setEditModal(true);
               }}
             />
-            <MaterialIcons
-              name="delete-outline"
-              size={ms(20)}
-              color={Colors[theme].text}
-              onPress={() => {
-                Alert.alert(
-                  "Delete",
-                  "Are you sure you want to delete?",
-                  [
-                    {
-                      text: "Yes", onPress: () => {
-                        deleteOrganization({
-                          variables: {
-                            ids: [Number(item?.id)],
-                          }
-                        });
-                      }
-                    },
-                    { text: "No", onPress: () => { } },
-                  ]
-                );
+            {deletepermission && (
+              <MaterialIcons
+                name="delete-outline"
+                size={ms(20)}
+                color={Colors[theme].text}
+                onPress={() => {
+                  Alert.alert(
+                    "Delete",
+                    "Are you sure you want to delete?",
+                    [
+                      {
+                        text: "Yes", onPress: () => {
+                          deleteOrganization({
+                            variables: {
+                              ids: [Number(item?.id)],
+                            }
+                          });
+                        }
+                      },
+                      { text: "No", onPress: () => { } },
+                    ]
+                  );
 
-              }}
-            />
+                }}
+              />
+            )}
+
           </View>
         </View>
         <ThemedText

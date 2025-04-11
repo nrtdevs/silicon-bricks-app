@@ -35,18 +35,6 @@ query Modules {
   }
 }
 
-query PaginatedProjects($listInputDto: ListInputDTO!) {
-  paginatedProjects(ListInputDTO: $listInputDto) {
-    data {
-      id
-      name
-      description
-      status
-      organizationId
-    }
-  }
-}
-
 #organization list
 
 query PaginatedOrganization($listInputDto: ListInputDTO!) {
@@ -250,6 +238,72 @@ query DropdownOffers($listInputDto: ListInputDTO!) {
       totalPages
       currentPage
       limit
+    }
+  }
+}
+
+query DashboardCount($filters: ReportFilters!) {
+  dashboardCount(filters: $filters) {
+    userCount
+    roleCount
+    permissionCount
+    assignedPermissionCount
+    projectCount
+    organizationCount
+    couponCount
+    offerCount
+    moduleCount
+    packageCount
+    planCount
+    subscriptionCount
+    packageModuleCount
+    subscriptionPlanCount
+  }
+}
+
+query Query($findPermissionsByUserId: Float!) {
+  findPermissionsByUser(id: $findPermissionsByUserId)
+}
+
+query PaginatedProjects($listInputDto: ListInputDTO!) {
+  paginatedProjects(ListInputDTO: $listInputDto) {
+    data {
+      id
+      name
+      description
+      status
+      organizationId
+      organization {
+        id
+        name
+        status
+      }
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}
+
+query PaginatedOffers($listInputDto: ListInputDTO!) {
+  paginatedOffers(ListInputDTO: $listInputDto) {
+    data {
+      id
+      title
+      description
+      offerType
+      discountType
+      discountValue
+      maxDiscountAmount
+      cashbackAmount
+      minOrderAmount
+      usageLimit
+      status
+      startDate
+      endDate
     }
   }
 }
