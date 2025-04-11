@@ -240,7 +240,6 @@ const Permissions = () => {
                 </ThemedText>
               </View>}
             showsVerticalScrollIndicator={false}
-
           />
         </View>
       </ThemedView>

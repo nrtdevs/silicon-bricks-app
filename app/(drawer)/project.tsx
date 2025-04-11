@@ -3,13 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons';
 import { gql, useMutation } from "@apollo/client";
 import { useLazyQuery } from '@apollo/client';
-import { Dialog, Portal, } from "react-native-paper";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { Colors } from '@/constants/Colors';
 import { z } from "zod";
 import CustomHeader from '@/components/CustomHeader';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemeProvider, useTheme } from '@/context/ThemeContext';
+import {useTheme } from '@/context/ThemeContext';
 import CustomValidation from '@/components/CustomValidation';
 import { labels } from '@/constants/Labels';
 import { ms, s, ScaledSheet, vs } from 'react-native-size-matters';
@@ -26,8 +25,7 @@ interface ProjectData {
   status: string;
 }
 const defaultValue = {
-  name: "",
-  module: "",
+  project_name: "",
   description: "",
   id: "",
 }
@@ -75,85 +73,77 @@ const UPDATE_PROJECT = gql`
 
 const Project = () => {
   const { theme } = useTheme();
+  const [getProjects, { data, refetch, loading: listLoading }] = useLazyQuery(GetAllProjects);
+
 
   /// serach state 
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   /// Add and Edit state
   const [isModalVisible, setModalVisible] = useState(false);
-  const [currentPermission, setCurrentPermission] = useState<{
-    name: string;
-    description: string;
-    id: string;
+  const [currentProject, setCurrentProject] = useState<{
+    project_name: string,
+    description: string,
+    id: string,
   }>(defaultValue);
 
-  const [updateProject] = useMutation(UPDATE_PROJECT);
-  const [visible, setVisible] = useState(false);
-  const showDialogue = () => setVisible(true);
-  const [editVisible, setEditVisible] = useState(false);
-  const [getProjects, { data, refetch, loading: listLoading }] = useLazyQuery(GetAllProjects);
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
-  const [createProject, { loading: loadingCreate }] = useMutation(CREATE_PROJECT_MUTATION, {
+  const [updateProject] = useMutation(UPDATE_PROJECT, {
     onCompleted: (data) => {
-      reset()
+      refetch();
+      setEditVisible(false);
+      setModalVisible(false);
+      setCurrentProject(defaultValue)
       Alert.alert("success", "Project create successfully!");
-      hideDialogue();
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
     }
   });
-  
+  const [visible, setVisible] = useState(false);
+  const showDialogue = () => setVisible(true);
+  const [editVisible, setEditVisible] = useState(false);
+
+
+  const [createProject,] = useMutation(CREATE_PROJECT_MUTATION, {
+    onCompleted: (data) => {
+      refetch();
+      setEditVisible(false);
+      setModalVisible(false);
+      setCurrentProject(defaultValue)
+      Alert.alert("success", "Project create successfully!");
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    }
+  });
+
   const onSubmit = (data) => {
     console.log(data);
 
-    createProject({
-      variables: {
-        createProjectInput: { ...data, organizationId: 1 }
-      }
-    })
-  }
-
-  const hideDialogue = () => {
-    setVisible(false);
-    refetch();
-  };
-
-  const { control, handleSubmit, reset, formState: { errors } } = useForm();
-  const showEditDialogue = (project: any) => {
-    setSelectedProjectId(project.id);
-    reset({ name: project.name, description: project.description });
-    setEditVisible(true);
-  };
-  const hideEditDialogue = () => {
-    setEditVisible(false);
-    refetch(); // Refresh Project List
-  };
-
-  const handleEdit = async (formData: any) => {
-    if (!selectedProjectId) {
-      console.error("No project selected for update");
-      return;
+    const params = {
+      name: data?.project_name,
+      organizationId: 1,
+      description: data?.description
     }
-    try {
-      const { data } = await updateProject({
+
+    editVisible ?
+      updateProject({
         variables: {
           updateProjectInput: {
-            id: Number(selectedProjectId),
-            name: formData.name,
-            description: formData.description,
-            organizationId: 1,
+            id: Number(currentProject?.id),
+            ...params,
           },
         },
-      });
+      }) :
+      createProject({
+        variables: {
+          createProjectInput: { ...params }
+        }
+      })
+  }
 
-      console.log("Project Updated:", data);
-      hideEditDialogue();
-    } catch (error) {
-      console.error("Error updating project:", error);
-    }
-  };
+  const { control, handleSubmit, reset, formState: { errors }, setValue } = useForm();
 
   useEffect(() => {
     getProjects({
@@ -165,6 +155,11 @@ const Project = () => {
       },
     });
   }, [])
+
+  useEffect(() => {
+    setValue('project_name', currentProject?.project_name)
+    setValue('description', currentProject?.description)
+  }, [currentProject])
 
 
   /// delete project 
@@ -193,7 +188,7 @@ const Project = () => {
             </View>
             <Pressable
               style={styles.buttonContainer}
-              onPress={() => { setCurrentPermission(defaultValue), setModalVisible(true), showDialogue() }}
+              onPress={() => { setCurrentProject(defaultValue), setModalVisible(true), showDialogue() }}
             >
               <Feather name="plus-square" size={24} color={Colors[theme].text} />
             </Pressable>
@@ -215,7 +210,14 @@ const Project = () => {
                         name="edit"
                         size={ms(20)}
                         color={Colors[theme].text}
-                        onPress={() => { setModalVisible(true), setCurrentPermission(defaultValue) }}
+                        onPress={() => {
+                          setModalVisible(true), setEditVisible(true)
+                          setCurrentProject({
+                            id: String(item.id),
+                            project_name: item?.name,
+                            description: item?.description
+                          })
+                        }}
                       />
                       <View style={{ width: 5 }}></View>
                       <MaterialIcons
@@ -247,15 +249,7 @@ const Project = () => {
                   <View style={{ width: 100, backgroundColor: item.status == "active" ? "#EAFFF1" : "#FFF8DD", borderColor: item.status == "active" ? "#17C76D" : "#F8B700", borderWidth: 0.5, borderRadius: 5 }}>
                     <ThemedText style={{ color: item.status == "active" ? "#17C76D" : "#F8B700", fontWeight: 'normal', fontSize: 18, paddingHorizontal: 10 }}>{item.status}</ThemedText>
                   </View>
-
                   <ThemedText style={styles.cardDot}>{item.description}</ThemedText>
-
-                  <Feather
-                    name="edit"
-                    size={ms(22)}
-                    color="black"
-                    onPress={() => showEditDialogue(item)}
-                  />
                   <View style={{ width: 5 }}></View>
                 </View>
               )}
@@ -263,126 +257,16 @@ const Project = () => {
             />
           </View>
 
-
-          {/* <TouchableOpacity style={styles.fab}
-            onPress={showDialogue}>
-            <Feather name="plus" color="black" size={24}></Feather>
-          </TouchableOpacity> */}
+          
         </View>
-
-        {/* <Portal>
-          <ThemeProvider>
-            <Dialog visible={visible} onDismiss={hideDialogue}>
-              <Dialog.Content>
-                <CustomValidation
-                  type="input"
-                  control={control}
-                  labelStyle={styles.label}
-                  name="name"
-                  inputStyle={[{ lineHeight: ms(20) }]}
-                  label={`${labels.projectName}`}
-                  placeholder={`${labels.projectName}`}
-                  // onFocus={() => setIsFocused("email")}
-                  rules={{
-                    required: labels.projectName,
-                  }}
-                />
-                <CustomValidation
-                  type="input"
-                  control={control}
-                  labelStyle={styles.label}
-                  name="description"
-                  inputStyle={[{ lineHeight: ms(20) }]}
-                  label={`${labels.description}`}
-                  placeholder={`${labels.description}`}
-                  // onFocus={() => setIsFocused("email")}
-                  rules={{
-                    required: labels.description,
-                  }}
-                />
-              </Dialog.Content>
-              <Dialog.Actions>
-                <TouchableOpacity
-                  onPress={handleSubmit(onSubmit)}
-                  style={styles.buttonContainerSave}
-                  disabled={loadingCreate}
-                >
-                  {loadingCreate ? (
-                    <ActivityIndicator color="white" />
-                  ) : (
-                    <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
-                  )}
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={hideDialogue}
-                  style={styles.buttonContainerClose}
-                >
-                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
-                </TouchableOpacity>
-              </Dialog.Actions>
-            </Dialog>
-          </ThemeProvider>
-        </Portal> */}
-
-        <Portal>
-          <ThemeProvider>
-            <Dialog visible={editVisible} onDismiss={hideEditDialogue}>
-              <Dialog.Content>
-                <CustomValidation
-                  type="input"
-                  control={control}
-                  labelStyle={styles.label}
-                  name="name"
-                  inputStyle={[{ lineHeight: ms(20) }]}
-                  label={`${labels.projectName}`}
-                  placeholder={`${labels.projectName}`}
-                  // onFocus={() => setIsFocused("email")}
-                  rules={{
-                    required: labels.projectName,
-                  }}
-                />
-                <CustomValidation
-                  type="input"
-                  control={control}
-                  labelStyle={styles.label}
-                  name="description"
-                  inputStyle={[{ lineHeight: ms(20) }]}
-                  label={`${labels.description}`}
-                  placeholder={`${labels.description}`}
-                  // onFocus={() => setIsFocused("email")}
-                  rules={{
-                    required: labels.description,
-                  }}
-                />
-              </Dialog.Content>
-              <Dialog.Actions>
-                <TouchableOpacity
-                  onPress={handleSubmit(handleEdit)}
-                  style={styles.buttonContainerSave}
-                >
-                  <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={hideEditDialogue}
-                  style={styles.buttonContainerClose}
-                >
-                  <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
-                </TouchableOpacity>
-              </Dialog.Actions>
-            </Dialog>
-          </ThemeProvider>
-        </Portal>
-
       </ThemedView>
-
 
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={() => {
-          // reset();
-          // setCurrentOrganization(defaultValue);
-          // setEditModal(false);
-          // setModalVisible(false);
+          setCurrentProject(defaultValue)
+          setEditVisible(false);
+          setModalVisible(false);
         }}
       >
         <View
@@ -410,7 +294,13 @@ const Project = () => {
                 setModalVisible(false);
               }}
             >
-              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+              <Entypo name="cross" size={ms(20)} color={Colors[theme].text}
+                onPress={() => {
+                  setEditVisible(false);
+                  setModalVisible(false);
+                  setCurrentProject(defaultValue)
+                }}
+              />
             </Pressable>
           </View>
 
@@ -442,7 +332,6 @@ const Project = () => {
           </View>
           <CustomButton
             title="Submit"
-            // isLoading={createOrganizationState.loading}
             onPress={handleSubmit(onSubmit)}
             style={{ backgroundColor: Colors[theme].background }}
           />

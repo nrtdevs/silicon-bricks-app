@@ -19,9 +19,9 @@ import { CreatePermissionDocument } from "@/graphql/generated";
 
 const defaultValue = {
     appName: "",
-    module: "",
     description: "",
     id: "",
+    module: ""
 }
 
 const GetAllPermissionQuery = gql`
@@ -40,8 +40,6 @@ const GetAllPermissionQuery = gql`
 }
 `;
 
-
-
 const deletePermissionQuery = gql`
   mutation DeletePermission($deletePermissionId: Float!) {
   deletePermission(id: $deletePermissionId)
@@ -59,7 +57,7 @@ const PermissionScreen = () => {
     const [searchQuery, setSearchQuery] = useState<string>("");
     /// fetch permission data 
 
-    const [page, setPage] = useState<number>(1);
+
     const [permissionData, { error, data, loading, refetch }] = useLazyQuery(
         GetAllPermissionQuery
     );
@@ -83,7 +81,7 @@ const PermissionScreen = () => {
     useEffect(() => {
         fetchPermission();
     }, []);
-
+    const [page, setPage] = useState<number>(1);
     /// delete permission 
     const [deletePermission, deleteOrganizationState] = useMutation(deletePermissionQuery, {
         onCompleted: (data) => {
@@ -146,7 +144,19 @@ const PermissionScreen = () => {
         });
 
     };
+    const [currentPremission, setCurrentProject] = useState<{
+        appName: string,
+        description: string,
+        id: string,
+        module : string
+    }>(defaultValue);
 
+     useEffect(() => {
+        setValue('appName', currentPremission?.appName)
+        setValue('description', currentPremission?.description)
+        setValue('module', String(currentPremission?.module))
+      }, [currentPremission])
+    
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -170,57 +180,65 @@ const PermissionScreen = () => {
                 <View style={styles.organizationParentContainer}>
                     <FlatList
                         data={data?.paginatedPermissions?.data}
-                        renderItem={({ item, index }: any) => 
-                        <View
-                            key={index}
-                            style={[
-                                styles.organizationContainer,
-                                { backgroundColor: Colors[theme].cartBg },
-                            ]}
-                        >
-                            <View style={styles.organizationHeader}>
-                                <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.appName}</ThemedText>
-                                <View style={styles.organizationInfo}>
-                                    <Feather
-                                        name="edit"
-                                        size={ms(20)}
-                                        color={Colors[theme].text}
-                                        onPress={() => { setModalVisible(true), setCurrentPermission(defaultValue) }}
-                                    />
-                                    <View style={{ width: 5 }}></View>
-                                    <MaterialIcons
-                                        name="delete-outline"
-                                        size={ms(22)}
-                                        color={Colors[theme].text}
-                                        onPress={() => {
-                                            Alert.alert(
-                                                "Delete",
-                                                "Are you sure you want to delete?",
-                                                [
-                                                    {
-                                                        text: "Yes", onPress: () => {
-                                                            deletePermission({
-                                                                variables: {
-                                                                    deletePermissionId: Number(item?.id),
-                                                                }
-                                                            });
-                                                        }
-                                                    },
-                                                    { text: "No", onPress: () => { } },
-                                                ]
-                                            );
+                        renderItem={({ item, index }: any) =>
+                            <View
+                                key={index}
+                                style={[
+                                    styles.organizationContainer,
+                                    { backgroundColor: Colors[theme].cartBg },
+                                ]}
+                            >
+                                <View style={styles.organizationHeader}>
+                                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.appName}</ThemedText>
+                                    <View style={styles.organizationInfo}>
+                                        <Feather
+                                            name="edit"
+                                            size={ms(20)}
+                                            color={Colors[theme].text}
+                                            onPress={() => {
+                                                setModalVisible(true),
+                                                setCurrentPermission({
+                                                    appName : item.appName,
+                                                    description : item.description,
+                                                    id : String(item.id),
+                                                    module : item.module
+                                                })
+                                            }}
+                                        />
+                                        <View style={{ width: 5 }}></View>
+                                        <MaterialIcons
+                                            name="delete-outline"
+                                            size={ms(22)}
+                                            color={Colors[theme].text}
+                                            onPress={() => {
+                                                Alert.alert(
+                                                    "Delete",
+                                                    "Are you sure you want to delete?",
+                                                    [
+                                                        {
+                                                            text: "Yes", onPress: () => {
+                                                                deletePermission({
+                                                                    variables: {
+                                                                        deletePermissionId: Number(item?.id),
+                                                                    }
+                                                                });
+                                                            }
+                                                        },
+                                                        { text: "No", onPress: () => { } },
+                                                    ]
+                                                );
 
-                                        }}
-                                    />
+                                            }}
+                                        />
+                                    </View>
                                 </View>
-                            </View>
-                            <ThemedText style={{ color: "black", fontSize: 14 }}
-                            >{item?.module}
-                            </ThemedText>
-                            <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                                {item?.description}
-                            </ThemedText>
-                        </View>}
+                                <ThemedText style={{ color: "black", fontSize: 14 }}
+                                >{item?.module}
+                                </ThemedText>
+                                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                                    {item?.description}
+                                </ThemedText>
+                            </View>}
                         showsVerticalScrollIndicator={false}
                         refreshControl={
                             <RefreshControl
@@ -237,10 +255,9 @@ const PermissionScreen = () => {
             <Modal
                 isVisible={isModalVisible}
                 onBackdropPress={() => {
-                    // reset();
-                    // setCurrentOrganization(defaultValue);
-                    // setEditModal(false);
-                    // setModalVisible(false);
+                    setCurrentProject(defaultValue);
+                    setEditModal(false);
+                    setModalVisible(false);
                 }}
             >
                 <View
@@ -265,9 +282,7 @@ const PermissionScreen = () => {
                         </ThemedText>
                         <Pressable
                             onPress={() => {
-                                // reset();
                                 setEditModal(false);
-                                // setCurrentOrganization(defaultValue);
                                 setModalVisible(false);
                             }}
                         >
