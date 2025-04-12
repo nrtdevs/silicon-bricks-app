@@ -37,7 +37,7 @@ export default function RootLayout() {
     <PaperProvider>
       <ThemeProvider>
         <ApolloProvider client={client}>
-          <UserProvider>
+          
             <Stack
               screenOptions={{ headerShown: false }}
               initialRouteName="index"
@@ -46,7 +46,6 @@ export default function RootLayout() {
               <Stack.Screen name="(drawer)" />
               <Stack.Screen name="(auth)" />
             </Stack>
-          </UserProvider>
 
         </ApolloProvider>
         <StatusBar style="auto" />

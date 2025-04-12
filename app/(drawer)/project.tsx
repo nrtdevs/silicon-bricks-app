@@ -270,7 +270,7 @@ const Project = () => {
                   setSearchQuery(text);
                   debouncedSearch(text);
                 }}
-                placeholder={labels?.searchOrganization}
+                placeholder={labels?.searchProject}
                 loading={loading}
                 onClear={() => {
                   setSearchQuery("");

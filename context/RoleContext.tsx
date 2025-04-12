@@ -26,7 +26,7 @@
 //   const getUserId = async () => {
 //     const userId = await SecureStore.getItemAsync("userId");
 //     useEffect(() => {
-    
+
 //       getUserPermissionById({
 //         variables: {
 //           findPermissionsByUserId: Number(userId),
@@ -34,11 +34,11 @@
 //       });
 //     }, []);
 //   }
-  
-//   console.log('0909',getUserId());
-  
 
- 
+//   console.log('0909',getUserId());
+
+
+
 
 //   const value: UserContextType = {
 //     permissions: {} as PermissionKeys
@@ -83,8 +83,7 @@ interface UserProviderProps {
 export const UserProvider = ({ children }: UserProviderProps) => {
   const [permissions, setPermissions] = useState<PermissionKeys[]>([]);
   const [getUserPermissionById, { data, loading, error }] = useLazyQuery(QueryDocument);
-  console.log('00009999',data);
-  
+
   useEffect(() => {
     const fetchUserPermissions = async () => {
       const userId = await SecureStore.getItemAsync('userId');

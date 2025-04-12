@@ -148,15 +148,15 @@ const PermissionScreen = () => {
         appName: string,
         description: string,
         id: string,
-        module : string
+        module: string
     }>(defaultValue);
 
-     useEffect(() => {
+    useEffect(() => {
         setValue('appName', currentPremission?.appName)
         setValue('description', currentPremission?.description)
         setValue('module', String(currentPremission?.module))
-      }, [currentPremission])
-    
+    }, [currentPremission])
+
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -197,12 +197,12 @@ const PermissionScreen = () => {
                                             color={Colors[theme].text}
                                             onPress={() => {
                                                 setModalVisible(true),
-                                                setCurrentPermission({
-                                                    appName : item.appName,
-                                                    description : item.description,
-                                                    id : String(item.id),
-                                                    module : item.module
-                                                })
+                                                    setCurrentPermission({
+                                                        appName: item.appName,
+                                                        description: item.description,
+                                                        id: String(item.id),
+                                                        module: item.module
+                                                    })
                                             }}
                                         />
                                         <View style={{ width: 5 }}></View>
@@ -232,25 +232,39 @@ const PermissionScreen = () => {
                                         />
                                     </View>
                                 </View>
-                                <ThemedText style={{ color: "black", fontSize: 14 }}
-                                >{item?.module}
+                                <ThemedText
+                                    style={[
+                                        styles.status,
+                                        {
+                                            color:
+                                                item.status == "active" ? Colors?.green : "#6d6d1b",
+                                            backgroundColor:
+                                                theme == "dark" ? Colors?.white : "#e6e2e2",
+                                        },
+                                    ]}
+                                >
+                                    {item?.module}
                                 </ThemedText>
+                                {/* <ThemedText style={{ color: "black", fontSize: 14 }}
+                                >{item?.module}
+                                </ThemedText> */}
                                 <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
                                     {item?.description}
                                 </ThemedText>
                             </View>}
                         showsVerticalScrollIndicator={false}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={refreshing}
-                                onRefresh={() => fetchPermission(true)}
-                            />
-                        }
+                        // refreshControl={
+                        // <RefreshControl
+                        //     refreshing={refreshing}
+                        //     onRefresh={() => fetchPermission(true)}
+                        // />
+                        // }
                         contentContainerStyle={{ paddingBottom: vs(40) }}
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
                     />
                 </View>
             </ThemedView>
+
             {/* create and edit modal */}
             <Modal
                 isVisible={isModalVisible}
@@ -367,7 +381,7 @@ const styles = ScaledSheet.create({
     status: {
         color: "green",
         borderRadius: "10@ms",
-        width: "60@ms",
+        width: "90@ms",
         textAlign: "center",
         fontSize: "12@ms",
     },

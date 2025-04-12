@@ -238,7 +238,7 @@ const UserScreen = () => {
       const roleIds: number[] = [];
       if (data?.roles && Array.isArray(data.roles)) {
         for (let i = 0; i < data.roles.length; i++) {
-          roleIds.push(Number(data.roles[i]));
+          roleIds.push(Number(data.roles[i])); 
         }
       }
 
@@ -247,16 +247,16 @@ const UserScreen = () => {
         mobileNo: Number(data?.phoneNo),
         name: data?.name, 
         roleIds: roleIds,
-        userType: data?.usertype,
+        userType: data?.usertype, 
         avatar: image,
       };
 
-      let updateParams = {
+      let updateParams = { 
         id: Number(currentUser?.id),
         ...params,
       }
       console.log("updateParams", updateParams);
-
+ 
       editModal
         ? updateUser({
           variables: {

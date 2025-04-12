@@ -73,4 +73,7 @@ export const labels = {
   searchModule:"Search Module",
   searchCoupon:"Search Coupon",
   searchUser:"Search User",
+  searchOffer:"Search Offer",
+  searchProject:"Search Project",
+  searchPlan:"Search Plan",
 };

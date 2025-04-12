@@ -168,8 +168,8 @@ const CouponScreen = () => {
     }, []);
 
     useEffect(() => {
-        console.log('9999',currentCoupon?.id);
-        
+        console.log('9999', currentCoupon?.id);
+
         if (watch("status")) {
             updateCouponStatus({
                 variables: {
@@ -228,11 +228,13 @@ const CouponScreen = () => {
             if (endDate < startDate) {
                 console.log("End date should be greater than or equal to start date.");
                 Alert.alert("Error", "End date should be greater than or equal to start date.");
+                return;
             }
+
             let params = {
                 couponCode: data?.couponCode,
                 description: data?.description,
-                discountType: data?.discountType,
+                discountType: data?.discountType?.value,
                 maxDiscountAmount: Number(data?.maxDiscountAmount),
                 minOrderAmount: Number(data?.minOrderAmount),
                 startDate: data?.start_date,
@@ -476,6 +478,7 @@ const CouponScreen = () => {
                         alignSelf: "center",
                         padding: 10,
                     }}
+                    showsVerticalScrollIndicator={false}
                 >
                     <View
                         style={{
@@ -518,7 +521,7 @@ const CouponScreen = () => {
                         <CustomValidation
                             data={pickerData}
                             type="picker"
-                            hideStar
+                            hideStar={false}
                             control={control}
                             label="Discount Type"
                             labelStyle={styles.label}
@@ -577,6 +580,8 @@ const CouponScreen = () => {
                             control={control}
                             placeholder="Start Date"
                             name="start_date"
+                            label="Start Date"
+                            labelStyle={styles.label}
                             editable={true}
                             rightIcon={
                                 <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
@@ -589,14 +594,19 @@ const CouponScreen = () => {
                                 setDateTimePickerProps(getDateTimePickerProps(true));
                             }}
                             pointerEvents="none"
+                            rules={{
+                                required: "Start date is required",
+                            }}
                         />
 
                         <CustomValidation
                             type="input"
                             control={control}
-                            placeholder="End Date"
+                            placeholder="Start Date"
                             name="end_date"
-                            editable={false}
+                            label="End Date"
+                            labelStyle={styles.label}
+                            editable={true}
                             rightIcon={
                                 <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
                             }
@@ -608,7 +618,33 @@ const CouponScreen = () => {
                                 setDateTimePickerProps(getDateTimePickerProps(true));
                             }}
                             pointerEvents="none"
+                            rules={{
+                                required: "End date is required",
+                            }}
                         />
+
+                        {/* <CustomValidation
+                            type="input"
+                            control={control}
+                            placeholder="End Date"
+                            name="end_date"
+                            label="End Date"
+                            labelStyle={styles.label}
+                            rightIcon={
+                                <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
+                            }
+                            onPress={() => {
+                                setDateModal({
+                                    end: !dateModal.end,
+                                    start: false,
+                                });
+                                setDateTimePickerProps(getDateTimePickerProps(true));
+                            }}
+                            pointerEvents="none"
+                            rules={{
+                                required: "End date is required",
+                            }}
+                        /> */}
 
                         <CustomValidation
                             type="input"

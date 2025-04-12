@@ -49,7 +49,9 @@ const SettingScreen = () => {
     email: "",
     phoneNo: ""
   });
+
   const [userData, { data, error, loading, refetch }] = useLazyQuery<any>(FindUserByIdDocument)
+
   // const [updateUser, updateUserState] = useMutation(UpdateProfileDocument, {
   //   onCompleted: () => {
   //     refetch();
@@ -68,7 +70,7 @@ const SettingScreen = () => {
       setModalVisible(false);
     },
     onError: (error) => {
-      Alert.alert("Error9", error.message);
+      Alert.alert("Error", error.message);
     }
   });
 
@@ -105,6 +107,7 @@ const SettingScreen = () => {
       }
     })
   };
+  
 
   const rightIcon = () => {
     return (

@@ -384,3 +384,68 @@ mutation UpdateProject($updateProjectInput: UpdateProjectDto!) {
   }
 }
 
+mutation CreateOffer($createOfferInput: CreateOfferDto!) {
+  createOffer(createOfferInput: $createOfferInput) {
+    id
+    title
+    description 
+    offerType
+    discountType
+    discountValue
+    maxDiscountAmount
+    cashbackAmount
+    minOrderAmount
+    usageLimit
+    status
+    startDate
+    endDate
+  }
+}
+
+mutation UpdateOffer($updateOfferInput: UpdateOfferDto!) {
+  updateOffer(updateOfferInput: $updateOfferInput) {
+    id
+    title
+    description
+    offerType
+    discountType
+    discountValue
+    maxDiscountAmount
+    cashbackAmount
+    minOrderAmount
+    usageLimit
+    status
+    startDate
+    endDate
+  }
+}
+
+mutation ChangeOfferStatus($updateOfferStatusInput: OfferStatusDto!) {
+  changeOfferStatus(updateOfferStatusInput: $updateOfferStatusInput) {
+    ... on Offer {
+      id
+      title
+      description
+      offerType
+      discountType
+      discountValue
+      maxDiscountAmount
+      cashbackAmount
+      minOrderAmount
+      usageLimit
+      status
+      startDate
+      endDate
+    }
+    ... on OfferArray {
+      data {
+        id
+        status
+      }
+    }
+  }
+}
+
+mutation DeleteOffer($ids: [Int!]!) {
+  deleteOffer(ids: $ids)
+}

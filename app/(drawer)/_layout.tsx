@@ -8,6 +8,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { ms } from 'react-native-size-matters';
 import * as SecureStore from "expo-secure-store";
+import { UserProvider } from '@/context/RoleContext';
 
 const CustomDrawerContent = (props: any) => {
   const [userType, setUserType] = useState<string | null>();
@@ -17,8 +18,6 @@ const CustomDrawerContent = (props: any) => {
     const userType = await SecureStore.getItemAsync("userType");
     setUserType(userType);
   };
-
-  console.log('000', userType);
 
   useEffect(() => {
     getUserType();
@@ -159,14 +158,17 @@ const CustomDrawerContent = (props: any) => {
 const Layout = () => {
   const { theme } = useTheme();
   return (
-    <Drawer
-      screenOptions={{
-        headerShown: false,
-        drawerStyle: {
-          backgroundColor: Colors[theme].cartBg,
-        },
-      }}
-      drawerContent={(props) => <CustomDrawerContent {...props} />} />
+    <UserProvider>
+      <Drawer
+        screenOptions={{
+          headerShown: false,
+          drawerStyle: {
+            backgroundColor: Colors[theme].cartBg,
+          },
+        }}
+        drawerContent={(props) => <CustomDrawerContent {...props} />} />
+    </UserProvider>
+
   )
 }
 

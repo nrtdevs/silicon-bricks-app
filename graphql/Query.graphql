@@ -305,5 +305,42 @@ query PaginatedOffers($listInputDto: ListInputDTO!) {
       startDate
       endDate
     }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}
+
+query PaginatedPlans($listInputDto: ListInputDTO!) {
+  paginatedPlans(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      description
+      price
+      duration
+      discountedPrice
+      status
+      package {
+        id
+        name
+        description
+        price
+        discountedPrice
+        status
+        offerId
+      }
+      couponId
+      offerId
+    }
   }
 }

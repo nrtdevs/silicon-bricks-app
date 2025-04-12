@@ -87,14 +87,14 @@ const OrganizationScreen = () => {
   const updatepermission = can('MasterApp:Organization:Update')
   const createpermission = can('MasterApp:Organization:Create')
 
-  console.log('0000',updatepermission);
-  console.log('0000999',createpermission);
-  
+  console.log('0000', updatepermission);
+  console.log('0000999', createpermission);
 
-//   const ckeckall = hasAny(['MasterApp:Organization:Create', 'MasterApp:Organization:Update', 'MasterApp:Organization:Delete'])
-  
-//  console.log('9999',ckeckall);
- 
+
+  //   const ckeckall = hasAny(['MasterApp:Organization:Create', 'MasterApp:Organization:Update', 'MasterApp:Organization:Delete'])
+
+  //  console.log('9999',ckeckall);
+
   const [updateOrganization, updateOrganizationState] = useMutation(UpdateOrganizationDocument, {
     onCompleted: (data) => {
       refetch()
@@ -133,8 +133,6 @@ const OrganizationScreen = () => {
   //   setValue("name", currentOrganization?.name)
   //   setValue("description", currentOrganization?.description)
   // }
-
-
 
   useEffect(() => {
     setValue("name", currentOrganization?.name)

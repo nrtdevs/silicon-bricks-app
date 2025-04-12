@@ -213,7 +213,7 @@ const RolesScreen = () => {
             <Feather name="plus-square" size={24} color={Colors[theme].text} />
           </Pressable>
         </View>
-        
+
         <View style={styles.organizationParentContainer}>
           <FlatList
             data={dataD?.paginatedRoles?.data}

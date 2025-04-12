@@ -3057,6 +3057,18 @@
             "deprecationReason": null
           },
           {
+            "name": "designation",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "Designation",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "email",
             "description": null,
             "type": {
@@ -3099,6 +3111,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentId",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
@@ -3930,6 +3954,54 @@
       },
       {
         "kind": "ENUM",
+        "name": "Designation",
+        "description": "User Designation Hierarchy",
+        "isOneOf": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "CEO",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "CTO",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "EMPLOYEE",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "HR",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "MANAGER",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "TEAM_LEAD",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
         "name": "DiscountType",
         "description": "Discount type for coupon",
         "isOneOf": null,
@@ -4715,6 +4787,26 @@
             "deprecationReason": null
           },
           {
+            "name": "notes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Notes",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "parentMeetingId",
             "description": null,
             "args": [],
@@ -4765,6 +4857,26 @@
                 "kind": "SCALAR",
                 "name": "String",
                 "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "task",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "MeetingTask",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
@@ -7472,15 +7584,23 @@
             "description": null,
             "args": [
               {
-                "name": "id",
+                "name": "ids",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Float",
-                    "ofType": null
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "Int",
+                        "ofType": null
+                      }
+                    }
                   }
                 },
                 "defaultValue": null,
@@ -8483,15 +8603,23 @@
             "description": null,
             "args": [
               {
-                "name": "id",
+                "name": "ids",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Float",
-                    "ofType": null
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "Int",
+                        "ofType": null
+                      }
+                    }
                   }
                 },
                 "defaultValue": null,
@@ -9328,15 +9456,23 @@
             "description": null,
             "args": [
               {
-                "name": "id",
+                "name": "ids",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "Int",
+                        "ofType": null
+                      }
+                    }
                   }
                 },
                 "defaultValue": null,
@@ -19477,6 +19613,18 @@
             "deprecationReason": null
           },
           {
+            "name": "designation",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "Designation",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "email",
             "description": null,
             "type": {
@@ -19522,6 +19670,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parentId",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
               "ofType": null
             },
             "defaultValue": null,
@@ -19948,6 +20108,18 @@
             "deprecationReason": null
           },
           {
+            "name": "designation",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "Designation",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "email",
             "description": null,
             "args": [],
@@ -20020,6 +20192,18 @@
             "deprecationReason": null
           },
           {
+            "name": "parent",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "parentId",
             "description": null,
             "args": [],
@@ -20086,6 +20270,26 @@
                 "kind": "SCALAR",
                 "name": "String",
                 "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subordinates",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "User",
+                  "ofType": null
+                }
               }
             },
             "isDeprecated": false,
