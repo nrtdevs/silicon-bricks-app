@@ -15,52 +15,33 @@ import CustomValidation from "@/components/CustomValidation";
 import Modal from "react-native-modal";
 import CustomButton from "@/components/CustomButton";
 import { useForm } from "react-hook-form";
-import { CreatePermissionDocument } from "@/graphql/generated";
+import { CreatePermissionDocument, DeletePermissionDocument, PaginatedPermissionsDocument } from "@/graphql/generated";
 
 const defaultValue = {
     appName: "",
     description: "",
     id: "",
-    module: ""
+    module: "",
+    action: ""
 }
 
-const GetAllPermissionQuery = gql`
-  query PaginatedPermissions($listInputDto: ListInputDTO!) {
-  paginatedPermissions(ListInputDTO: $listInputDto) {
-    data {
-      id
-      appName
-      groupName
-      module
-      action
-      slug
-      description
-    }
-  }
-}
-`;
-
-const deletePermissionQuery = gql`
-  mutation DeletePermission($deletePermissionId: Float!) {
-  deletePermission(id: $deletePermissionId)
-}
-`;
 const pickerData = [
     { label: "Master App", value: "MasterApp" },
     { label: "Material Management", value: "MaterialManagement" },
     { label: "Task Management", value: "TaskManagement" },
     { label: "Vehicle Management", value: "VehicleManagement" },
 ];
+
 const PermissionScreen = () => {
     const { theme } = useTheme();
     /// serach state 
     const [searchQuery, setSearchQuery] = useState<string>("");
     /// fetch permission data 
 
-
     const [permissionData, { error, data, loading, refetch }] = useLazyQuery(
-        GetAllPermissionQuery
+        PaginatedPermissionsDocument
     );
+
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const fetchPermission = async (isRefreshing = false) => {
         if (isRefreshing) {
@@ -83,7 +64,7 @@ const PermissionScreen = () => {
     }, []);
     const [page, setPage] = useState<number>(1);
     /// delete permission 
-    const [deletePermission, deleteOrganizationState] = useMutation(deletePermissionQuery, {
+    const [deletePermission, deleteOrganizationState] = useMutation(DeletePermissionDocument, {
         onCompleted: (data) => {
             refetch();
             Alert.alert("success", "Permission deleted successfully!");
@@ -92,7 +73,7 @@ const PermissionScreen = () => {
             Alert.alert("Error", error.message);
         }
     });
-    /// Add and Edit state
+    // Add and Edit state
 
     const [createOrganization, createOrganizationState] = useMutation(CreatePermissionDocument, {
         onCompleted: (data) => {
@@ -116,7 +97,7 @@ const PermissionScreen = () => {
         reset,
         watch,
         setValue
-    } = useForm<{ appName: string, description: string, module: string }>({
+    } = useForm<{ appName: string, description: string, module: string, action: string }>({
         defaultValues: {},
     });
     const [currentPermission, setCurrentPermission] = useState<{
@@ -132,16 +113,16 @@ const PermissionScreen = () => {
             appName: data.appName.value,
             description: data.description,
             module: data.module,
-            action: "",
+            action: data.action,
         }
         console.log(param);
-        createOrganization({
-            variables: {
-                data: {
-                    ...data
-                },
-            },
-        });
+        // createOrganization({
+        //     variables: {
+        //         data: {
+        //             ...data
+        //         },
+        //     },
+        // });
 
     };
     const [currentPremission, setCurrentProject] = useState<{
@@ -156,6 +137,8 @@ const PermissionScreen = () => {
         setValue('description', currentPremission?.description)
         setValue('module', String(currentPremission?.module))
     }, [currentPremission])
+
+    console.log('00999', data?.paginatedPermissions?.data[0]);
 
     return (
         <CustomHeader>
@@ -277,7 +260,7 @@ const PermissionScreen = () => {
                 <View
                     style={{
                         backgroundColor: Colors[theme].cartBg,
-                        height: vs(420),
+                        height: vs(510),
                         width: s(300),
                         borderRadius: 10,
                         alignSelf: "center",
@@ -308,8 +291,9 @@ const PermissionScreen = () => {
                         <CustomValidation
                             data={pickerData}
                             type="picker"
-                            hideStar
+                            hideStar={false}
                             control={control}
+                            labelStyle={styles.label}
                             name="appName"
                             placeholder="Select App Name"
                             label={"App Name"}
@@ -339,6 +323,20 @@ const PermissionScreen = () => {
                         <CustomValidation
                             type="input"
                             control={control}
+                            labelStyle={styles.label}
+                            name={"action"}
+                            inputStyle={[{ lineHeight: ms(20) }]}
+                            label={"Action"}
+                            // onFocus={() => setIsFocused("name")}
+                            rules={{
+                                required: "Action name is required"
+                            }}
+                            autoCapitalize="none"
+                        />
+
+                        <CustomValidation
+                            type="input"
+                            control={control}
                             name={"description"}
                             label={"Description"}
                             labelStyle={styles.label}
@@ -355,7 +353,7 @@ const PermissionScreen = () => {
                         onPress={() => {
                             handleSubmit(onSubmit)();
                         }}
-                        style={{ backgroundColor: Colors[theme].background }}
+                        style={{ backgroundColor: Colors[theme].background, marginTop: vs(10) }}
                     />
                 </View>
             </Modal>

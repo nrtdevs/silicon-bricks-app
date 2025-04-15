@@ -25,8 +25,7 @@ import CustomSearchBar from '@/components/CustomSearchBar';
 import { Pressable } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import debounce from "lodash.debounce";
-
-
+import { PaginatedRolesDocument } from '@/graphql/generated';
 
 const RoleModule = gql`
   query PaginatedRoles($listInputDto: ListInputDTO!) {
@@ -68,8 +67,8 @@ const RolesScreen = () => {
   const { theme } = useTheme();
   /// fetch Roles data
   const [page, setPage] = useState<number>(1);
-  const [rolesData, { error: errorData, data: dataD, loading: errorLoading, refetch }] = useLazyQuery(
-    RoleModule
+  const [rolesData, { error, data, loading, refetch }] = useLazyQuery(
+    PaginatedRolesDocument
   );
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const fetchRoles = async (isRefreshing = false) => {
@@ -86,7 +85,7 @@ const RolesScreen = () => {
       variables: {
         listInputDto: {},
       },
-    });;
+    });
   };
   useEffect(() => {
     fetchRoles();
@@ -172,19 +171,19 @@ const RolesScreen = () => {
 
   const debouncedSearch = useCallback(
     debounce((text) => {
-      // organizationData({
-      //     variables: {
-      //         listInputDto: {
-      //             limit: 10,
-      //             page: 1,
-      //             search: text,
-      //         },
-      //     },
-      // });
+      rolesData({
+        variables: {
+          listInputDto: {
+            limit: 10,
+            page: 1,
+            search: text,
+          },
+        },
+      });
     }, 500),
     [searchQuery]
   );
-
+  
 
   return (
     <CustomHeader>
@@ -199,7 +198,7 @@ const RolesScreen = () => {
                 setSearchQuery(text);
                 debouncedSearch(text);
               }}
-              placeholder={labels?.searchOrganization}
+              placeholder={labels?.searchRole}
               // loading={loading}
               onClear={() => {
                 setSearchQuery("");
@@ -216,9 +215,9 @@ const RolesScreen = () => {
 
         <View style={styles.organizationParentContainer}>
           <FlatList
-            data={dataD?.paginatedRoles?.data}
-            renderItem={({ item, index }: any) =>
-              <View
+            data={data?.paginatedRoles?.data}
+            renderItem={({ item, index }: any) => {
+              return <View
                 key={index}
                 style={[
                   styles.organizationContainer,
@@ -226,13 +225,21 @@ const RolesScreen = () => {
                 ]}
               >
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                  <ThemedText style={styles.name}>{item.name}</ThemedText>
+                  <ThemedText type='subtitle' style={styles.name}>{item.name}</ThemedText>
                   <View style={styles.organizationInfo}>
                     <Feather
                       name="edit"
                       size={ms(20)}
-                      color="black"
-                      onPress={showDialogue}
+                      color={Colors[theme].text}
+                    // onPress={() => {
+                    //   setModalVisible(true),
+                    //     setCurrentPermission({
+                    //       appName: item.appName,
+                    //       description: item.description,
+                    //       id: String(item.id),
+                    //       module: item.module
+                    //     })
+                    // }}
                     />
                     <View style={{ width: 5 }}></View>
                     <MaterialIcons
@@ -246,9 +253,9 @@ const RolesScreen = () => {
                           [
                             {
                               text: "Yes", onPress: () => {
-                                // deleteRoles({
+                                // deletePermission({
                                 //   variables: {
-                                //     deletePlanId: Number(item?.id),
+                                //     deletePermissionId: Number(item?.id),
                                 //   }
                                 // });
                               }
@@ -262,10 +269,24 @@ const RolesScreen = () => {
                   </View>
 
                 </View>
-                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                  {item?.description}
+                <ThemedText
+                  style={[
+                    styles.permission,
+                    {
+                      // color:
+                      // item.status == "active" ? Colors?.green : "#6d6d1b",
+                      backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
+                    },
+                  ]}
+                >
+                  {item?.permissionCount} Permissions
                 </ThemedText>
-              </View>}
+                {item?.description && <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                  {item?.description}
+                </ThemedText>}
+              </View>
+            }
+            }
             showsVerticalScrollIndicator={false}
           />
         </View>
@@ -390,6 +411,13 @@ const styles = ScaledSheet.create({
     fontSize: 18,
     color: '#007BFF'
   },
+  permission: {
+    color: "green",
+    borderRadius: "10@ms",
+    width: "110@ms",
+    textAlign: "center",
+    fontSize: "12@ms",
+  },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -439,10 +467,7 @@ const styles = ScaledSheet.create({
     alignItems: 'center'
   },
   name: {
-    fontSize: 18,
-    width: 110,
-    color: "black",
-    fontWeight: "500",
+
   },
   cardDot: {
     fontSize: 16,

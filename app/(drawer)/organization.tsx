@@ -191,6 +191,7 @@ const OrganizationScreen = () => {
       console.log("onSubmit error", error);
     }
   };
+  
 
   const renderItem = ({ item, index }: any) => {
     return (
@@ -500,16 +501,19 @@ const OrganizationScreen = () => {
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
+
           }}
         >
           <View
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              paddingHorizontal: 10,
+              padding: 10,
             }}
           >
-            <ThemedText type="subtitle">{"Change Status"}</ThemedText>
+            <ThemedText type="subtitle">
+              {"Change Status"}
+            </ThemedText>
             <Pressable
               onPress={() => {
                 setStatusModalVisible(false);
@@ -525,7 +529,9 @@ const OrganizationScreen = () => {
             control={control}
             name="status"
             placeholder="Select Status"
-            inputStyle={{ height: vs(50) }}
+            inputStyle={{ height: vs(50), marginTop:0, paddingTop:0 }}
+            inputContainerStyle={{marginTop:0, paddingTop:0}}
+            containerStyle={{marginTop:0, paddingTop:0}}
             rules={{
               required: {
                 value: true,

@@ -458,7 +458,6 @@ const ModuleScreen = () => {
                     setStatusModalVisible(false);
                 }}
             >
-
                 <View
                     style={{
                         backgroundColor: Colors[theme].cartBg,
@@ -467,6 +466,7 @@ const ModuleScreen = () => {
                         borderRadius: 10,
                         alignSelf: "center",
                         padding: 10,
+
                     }}
                 >
                     <View
@@ -487,7 +487,6 @@ const ModuleScreen = () => {
                             <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
                         </Pressable>
                     </View>
-
                     <CustomValidation
                         data={pickerData}
                         type="picker"
@@ -495,7 +494,9 @@ const ModuleScreen = () => {
                         control={control}
                         name="status"
                         placeholder="Select Status"
-                        inputStyle={{ height: vs(50) }}
+                        inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
+                        inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
+                        containerStyle={{ marginTop: 0, paddingTop: 0 }}
                         rules={{
                             required: {
                                 value: true,

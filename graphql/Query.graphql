@@ -344,3 +344,57 @@ query PaginatedPlans($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+query PaginatedPermissions($listInputDto: ListInputDTO!) {
+  paginatedPermissions(ListInputDTO: $listInputDto) {
+    data {
+      id
+      appName
+      groupName
+      module
+      action
+      slug
+      description
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}
+
+query PaginatedRoles($listInputDto: ListInputDTO!) {
+  paginatedRoles(ListInputDTO: $listInputDto) {
+    data {
+      id
+      name
+      permissions {
+        id
+        appName
+        groupName
+        module
+        action
+        slug
+        description
+      }
+      description
+      roleType
+      status
+      permissionCount
+      organization {
+        id
+        name
+        status
+        description
+      }
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}

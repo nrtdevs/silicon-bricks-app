@@ -576,13 +576,32 @@ const PackageScreen = () => {
                 <View
                     style={{
                         backgroundColor: Colors[theme].cartBg,
-                        height: 380,
+                        height: vs(320),
                         width: s(300),
                         borderRadius: 10,
                         alignSelf: "center",
                         padding: 10,
+
                     }}
                 >
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            padding: 10,
+                        }}
+                    >
+                        <ThemedText type="subtitle">
+                            {"Change Status"}
+                        </ThemedText>
+                        <Pressable
+                            onPress={() => {
+                                setStatusModalVisible(false);
+                            }}
+                        >
+                            <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+                        </Pressable>
+                    </View>
                     <CustomValidation
                         data={pickerData}
                         type="picker"
@@ -590,7 +609,9 @@ const PackageScreen = () => {
                         control={control}
                         name="status"
                         placeholder="Select Status"
-                        inputStyle={{ height: vs(50) }}
+                        inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
+                        inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
+                        containerStyle={{ marginTop: 0, paddingTop: 0 }}
                         rules={{
                             required: {
                                 value: true,

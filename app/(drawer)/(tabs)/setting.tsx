@@ -241,7 +241,7 @@ const SettingScreen = () => {
       {
         text: labels.logout,
         onPress: async () => {
-          await SecureStore.deleteItemAsync("userId");
+          await SecureStore.deleteItemAsync("userData");
           router.dismissTo('/login');
         },
       },
@@ -271,7 +271,7 @@ const SettingScreen = () => {
 
   const handleImagePickerPress = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct media type
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,

@@ -332,15 +332,6 @@ mutation UpdatePackage($updatePackageInput: UpdatePackageDto!) {
 mutation DeletePackage($ids: [Int!]!) {
   deletePackage(ids: $ids)
 }
-mutation CreatePermission($data: CreatePermissionDto!) {
-  createPermission(data: $data) {
-    id
-    appName
-    module
-    description
-    action
-  }
-}
 
 mutation DeleteProject($ids: [Int!]!) {
   deleteProject(ids: $ids)
@@ -506,4 +497,20 @@ mutation ChangePlanStatus($updatePlanStatusInput: PlanStatusDto!) {
 
 mutation DeletePlan($ids: [Int!]!) {
   deletePlan(ids: $ids)
+}
+
+mutation DeletePermission($deletePermissionId: Float!) {
+  deletePermission(id: $deletePermissionId)
+}
+
+mutation CreatePermission($data: CreatePermissionDto!) {
+  createPermission(data: $data) {
+    id
+    appName
+    groupName
+    module
+    action
+    slug
+    description
+  }
 }

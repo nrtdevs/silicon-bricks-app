@@ -41,6 +41,7 @@ import Loader from "@/components/ui/Loader";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import debounce from "lodash.debounce";
+import { Env } from "@/constants/ApiEndpoints";
 
 const defaultValue = {
   name: "",
@@ -49,6 +50,7 @@ const defaultValue = {
   roles: [],
   usertype: "",
   id: "",
+  imagePath: ""
 };
 
 const pickerData = [
@@ -92,6 +94,7 @@ const UserScreen = () => {
     roles: any[];
     usertype: any;
     id: string;
+    imagePath: string;
   }>(defaultValue);
 
   const [userData, { error, data, loading, refetch }] = useLazyQuery<any>(
@@ -223,7 +226,7 @@ const UserScreen = () => {
     const status = watch("status");
     if (status && currentUser?.id) {
       const params = {
-        id: Number(currentUser.id),
+        ids: [Number(currentUser.id)],
         status: status?.value,
       };
       updateUserStatus({ variables: { data: params } });
@@ -233,30 +236,29 @@ const UserScreen = () => {
 
   const onSubmit = (data: any) => {
     console.log('0909', data);
-
     try {
       const roleIds: number[] = [];
       if (data?.roles && Array.isArray(data.roles)) {
         for (let i = 0; i < data.roles.length; i++) {
-          roleIds.push(Number(data.roles[i])); 
+          roleIds.push(Number(data.roles[i]));
         }
       }
 
       const params = {
         email: data?.email,
         mobileNo: Number(data?.phoneNo),
-        name: data?.name, 
+        name: data?.name,
         roleIds: roleIds,
-        userType: data?.usertype, 
+        userType: typeof data?.usertype == 'string' ? data?.usertype : data?.usertype?.value,
         avatar: image,
       };
 
-      let updateParams = { 
+      let updateParams = {
         id: Number(currentUser?.id),
         ...params,
       }
       console.log("updateParams", updateParams);
- 
+
       editModal
         ? updateUser({
           variables: {
@@ -314,6 +316,7 @@ const UserScreen = () => {
                   roles: rolesId,
                   usertype: item?.userType,
                   id: item?.id,
+                  imagePath: item?.avatar,
                 });
                 setStatusModalVisible(true);
               }}
@@ -331,6 +334,7 @@ const UserScreen = () => {
                   roles: rolesId,
                   usertype: item?.userType,
                   id: item?.id,
+                  imagePath: item?.avatar,
                 });
                 setInfoModalVisible(true);
               }}
@@ -348,6 +352,7 @@ const UserScreen = () => {
                   roles: rolesId,
                   usertype: item?.userType,
                   id: item?.id,
+                  imagePath: item?.avatar,
                 });
                 setEditModal(true);
                 setModalVisible(true);
@@ -368,7 +373,7 @@ const UserScreen = () => {
                       onPress: () => {
                         deleteUser({
                           variables: {
-                            deleteUserId: Number(item?.id),
+                            ids: [Number(item?.id)],
                           }
 
                         });
@@ -437,7 +442,7 @@ const UserScreen = () => {
       //   type: mimeType,
       // } as any); 
 
-      const uploadResponse = await fetch("http://192.168.1.58:5001/api/files/upload", {
+      const uploadResponse = await fetch("http://192.168.1.62:5001/api/files/upload", {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -476,33 +481,7 @@ const UserScreen = () => {
     []
   );
 
-
-  // const uploadImage = async (uri: string) => {
-  //   try {
-  //     const response = await fetch(uri);
-  //     const blob = await response.blob();
-
-  //     const formData = new FormData();
-  //     formData.append("file", {
-  //       uri,
-  //       type: "image/jpeg",
-  //       name: "image.jpg",
-  //     } as any);
-
-  //     const uploadResponse = await fetch("http://192.168.1.3:5001/api/files/upload", {
-  //       method: "POST",
-  //       body: formData,
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //       },
-  //     });
-
-  //     const responseData = await uploadResponse.json();
-  //     console.log("Upload successful:", responseData);
-  //   } catch (error) {
-  //     console.error("Upload failed:", error);
-  //   }
-  // };
+  console.log('09876', image);
 
   return (
     <CustomHeader>
@@ -535,6 +514,7 @@ const UserScreen = () => {
         <View style={styles.organizationParentContainer}>
           <FlatList
             data={data?.paginatedUsers?.data}
+            keyExtractor={(item, index) => index.toString()}
             renderItem={({ item, index }: any) => {
               return renderItem(item, index);
             }}
@@ -544,6 +524,7 @@ const UserScreen = () => {
         </View>
       </ThemedView>
 
+
       {/* Create and Edit modal */}
       <Modal
         isVisible={isModalVisible}
@@ -551,6 +532,7 @@ const UserScreen = () => {
           reset();
           setCurrentUser(defaultValue);
           setEditModal(false);
+          setImage("");
           setModalVisible(false);
         }}
       >
@@ -581,6 +563,7 @@ const UserScreen = () => {
                 reset();
                 setEditModal(false);
                 setCurrentUser(defaultValue);
+                setImage("");
                 setModalVisible(false);
               }}
             >
@@ -593,8 +576,24 @@ const UserScreen = () => {
               onPress={handleImagePickerPress}
               style={styles.imageContainer}
             >
-              {image && <Image source={{ uri: image }} style={styles.image} />}
+              {image.length > 0 || currentUser?.imagePath?.length > 0 ? (
+                <Image
+                  source={{
+                    uri: !editModal
+                      ? `${Env?.SERVER_URL}${image}`
+                      : `${Env?.SERVER_URL}${currentUser?.imagePath}`,
+                  }}
+                  style={styles.image}
+                />
+              ) : null} 
             </Pressable>
+
+            {/* <Pressable
+              onPress={handleImagePickerPress}
+              style={styles.imageContainer}
+            >
+              {image && <Image source={{ uri: currentUser?.imagePath.length > 0 ? `http://192.168.1.62:5001${currentUser?.imagePath}` : image }} style={styles.image} />}
+            </Pressable> */}
             <CustomValidation
               type="input"
               control={control}
@@ -753,13 +752,32 @@ const UserScreen = () => {
         <View
           style={{
             backgroundColor: Colors[theme].cartBg,
-            height: 380,
+            height: vs(320),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
+
           }}
         >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 10,
+            }}
+          >
+            <ThemedText type="subtitle">
+              {"Change Status"}
+            </ThemedText>
+            <Pressable
+              onPress={() => {
+                setStatusModalVisible(false);
+              }}
+            >
+              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+            </Pressable>
+          </View>
           <CustomValidation
             data={pickerData}
             type="picker"
@@ -767,7 +785,9 @@ const UserScreen = () => {
             control={control}
             name="status"
             placeholder="Select Status"
-            inputStyle={{ height: vs(50) }}
+            inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
+            inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
+            containerStyle={{ marginTop: 0, paddingTop: 0 }}
             rules={{
               required: {
                 value: true,
@@ -777,6 +797,8 @@ const UserScreen = () => {
           />
         </View>
       </Modal>
+
+
     </CustomHeader>
   );
 };
@@ -849,17 +871,21 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
   },
   imageContainer: {
-    width: ms(50),
-    height: ms(50),
-    borderRadius: ms(50),
-    marginBottom: "12@ms",
+    width: '70@ms',
+    height: '70@ms',
+    borderRadius: '70@ms',
+    marginBottom: '12@ms',
     backgroundColor: Colors.gray,
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#ccc",
   },
   image: {
-    width: 40,
-    height: 40,
-    resizeMode: "cover",
+    width: '100%',
+    height: '100%',
+    borderRadius: ms(50),
+    resizeMode: 'cover',
   },
 });
