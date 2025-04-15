@@ -86,11 +86,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   useEffect(() => {
     const fetchUserPermissions = async () => {
-      const userId = await SecureStore.getItemAsync('userId');
-      if (userId) {
+      const storedData = await SecureStore.getItemAsync("userData");
+      if (!storedData) return null;
+      let  parsedUserData = JSON.parse(storedData);
+      if (parsedUserData?.userId) {
         getUserPermissionById({
           variables: {
-            findPermissionsByUserId: Number(userId),
+            findPermissionsByUserId: Number(parsedUserData.userId),
           },
         });
       }

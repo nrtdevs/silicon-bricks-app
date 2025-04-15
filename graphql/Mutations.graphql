@@ -449,3 +449,61 @@ mutation ChangeOfferStatus($updateOfferStatusInput: OfferStatusDto!) {
 mutation DeleteOffer($ids: [Int!]!) {
   deleteOffer(ids: $ids)
 }
+
+mutation CreatePlan($createPlanInput: CreatePlanDto!) {
+  createPlan(createPlanInput: $createPlanInput) {
+    id
+    name
+    description
+    price
+    duration
+    discountedPrice
+    status
+    package {
+      id
+      name
+    }
+    couponId
+    offerId
+  }
+}
+
+mutation UpdatePlan($updatePlanInput: UpdatePlanDto!) {
+  updatePlan(updatePlanInput: $updatePlanInput) {
+    id
+    name
+    description
+    price
+    duration
+    discountedPrice
+    status
+    couponId
+    offerId
+  }
+}
+
+mutation ChangePlanStatus($updatePlanStatusInput: PlanStatusDto!) {
+  changePlanStatus(updatePlanStatusInput: $updatePlanStatusInput) {
+    ... on Plan {
+      id
+      name
+      description
+      price
+      duration
+      discountedPrice
+      status
+      couponId
+      offerId
+    }
+    ... on PlanArray {
+      data {
+        id
+        status
+      }
+    }
+  }
+}
+
+mutation DeletePlan($ids: [Int!]!) {
+  deletePlan(ids: $ids)
+}

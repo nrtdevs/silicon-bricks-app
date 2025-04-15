@@ -7,9 +7,11 @@ const Index = () => {
   const [token, setToken] = React.useState<string | null>(null);
 
   const getToken = async () => {
-    const token = await SecureStore.getItemAsync("accessToken");
-    setToken(token);
-    return token; // Make sure the key is "accessToken" if you're using that.
+    const storedData = await SecureStore.getItemAsync("userData");
+    if (!storedData) return null;
+    let parsedUserData = JSON.parse(storedData);
+    setToken(parsedUserData.accessToken);
+    return parsedUserData.accessToken;
   };
 
   React.useEffect(() => {
@@ -19,9 +21,9 @@ const Index = () => {
     <Redirect href="/(auth)/login" />
   ) : (
     // <Redirect href="/(auth)/login" />
-    <Redirect href="/(drawer)/(tabs)" />
-    // <Redirect href="/(drawer)/organization" />
-    // <Redirect href="/(drawer)/project" />
+    // <Redirect href="/(drawer)/(tabs)" />
+    <Redirect href="/(drawer)/organization" />
+    // <Redirect href="/(drawer)/plans" />
   );
 };
 

@@ -45,9 +45,12 @@ const SettingScreen = () => {
   const [toggleValue, setToggleValue] = useState<any>(false);
   const [isModalVisible, setModalVisible] = useState<boolean>(false)
   const { control, setValue, handleSubmit, watch } = useForm<{ name: string, email: string, phoneNo: string }>({
-    name: "",
-    email: "",
-    phoneNo: ""
+    defaultValues: {
+      name: "",
+      email: "",
+      phoneNo: ""
+    }
+
   });
 
   const [userData, { data, error, loading, refetch }] = useLazyQuery<any>(FindUserByIdDocument)
@@ -99,15 +102,16 @@ const SettingScreen = () => {
 
 
   const getUserData = async () => {
-    const id = await SecureStore.getItemAsync("userId");
-    setUserId(Number(id));
+    const storedData = await SecureStore.getItemAsync("userData");
+    if (!storedData) return null;
+    let parsedUserData = JSON.parse(storedData);
+    setUserId(Number(parsedUserData?.userId));
     userData({
       variables: {
-        findUserByIdId: Number(id)
+        findUserByIdId: Number(parsedUserData?.userId)
       }
-    })
+    });
   };
-  
 
   const rightIcon = () => {
     return (

@@ -923,20 +923,14 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
-    ChangeCouponStatusDocument,
-    ChangeOfferStatusDocument,
-    CreateCouponDocument,
-    CreateCouponMutation,
-    CreateOfferDocument,
-    DeleteCouponDocument,
-    DeleteOfferDocument,
+    ChangePlanStatusDocument,
+    CreatePlanDocument,
+    DeletePlanDocument,
     DropdownOffersDocument,
     PaginatedCouponsDocument,
-    PaginatedOffersDocument,
     PaginatedPackagesDocument,
     PaginatedPlansDocument,
-    UpdateCouponDocument,
-    UpdateOfferDocument,
+    UpdatePlanDocument,
 } from "@/graphql/generated";
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
@@ -954,12 +948,8 @@ import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
-import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
-import DateTimePickerModal from "@/components/DateTimePickerModal";
-import { formatTimeForAPI } from "@/utils/formatDateTime";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
-import { string } from "zod";
 
 const defaultValue = {
     name: "",
@@ -973,17 +963,6 @@ const defaultValue = {
     status: "",
     id: "",
 };
-
-const pickerData = [
-    { label: "Percentage", value: "PERCENTAGE" },
-    { label: "Fixed Amount", value: "FIXED_AMOUNT" },
-];
-
-const pickerOfferData = [
-    { label: "Buy One Get One", value: "BUY_ONE_GET_ONE" },
-    { label: "Discount", value: "DISCOUNT" },
-    { label: "CASHBACK", value: "CASHBACK" },
-];
 
 const statusData = [
     { label: "Active", value: "active" },
@@ -1000,7 +979,8 @@ const CouponScreen = () => {
     const [page, setPage] = useState<number>(1);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
-    const [currentOffer, setCurrentOffer] = useState<{
+    const [currentPlanId, setCurrentPlanId] = useState<string>("");
+    const [currentPlan, setCurrentPlan] = useState<{
         name: string;
         discountPrice: string;
         duration: string;
@@ -1021,20 +1001,15 @@ const CouponScreen = () => {
         watch,
         setValue,
     } = useForm<{
-        couponCode: any;
-        discountType: string;
-        usageLimit: string;
+        name: string;
+        discountPrice: string;
+        duration: string;
+        price: string;
+        offer: string;
+        package: string;
+        coupon: string;
         description: string;
-        maxDiscountAmount: string;
-        minOrderAmount: string;
-        start_date: string;
-        end_date: string;
         status: any;
-        title: string;
-        offerType: string;
-        couponValue: string;
-        discountValue: string;
-        cashbackAmount: string;
     }>({
         defaultValues: {},
     });
@@ -1042,23 +1017,10 @@ const CouponScreen = () => {
     const [searchQuery, setSearchQuery] = useState<string>("");
 
     const { can, hasAny } = useUserContext();
-    // const [offerData, { error, data, loading, refetch }] = useLazyQuery(
-    //     PaginatedOffersDocument
-    // );
 
     const [plansData, { error, data, loading, refetch }] = useLazyQuery(
         PaginatedPlansDocument
     );
-
-    const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
-        getDateTimePickerProps(false)
-    );
-
-    const [dateModal, setDateModal] = useState({
-        start: false,
-        end: false,
-    });
-    // DropdownOffersDocument
 
     const [dropdownOfferData, offerState] = useLazyQuery(
         DropdownOffersDocument
@@ -1072,12 +1034,7 @@ const CouponScreen = () => {
         PaginatedPackagesDocument
     );
 
-    // console.log('000099',offerState?.data?.dropdownOffers?.data); // title id
-    // console.log('00009112',couponData?.data?.paginatedCoupons?.data); // couponCode id
-    // console.log('000091109',packageData?.data?.paginatedPackages?.data); // title id
-
-
-    const [createOffer, createOfferState] = useMutation<any>(CreateOfferDocument, {
+    const [createPlan, createPlanState] = useMutation<any>(CreatePlanDocument, {
         onCompleted: (data) => {
             reset();
             refetch();
@@ -1088,7 +1045,7 @@ const CouponScreen = () => {
         },
     });
 
-    const [updateOffer, updateOfferState] = useMutation(UpdateOfferDocument, {
+    const [updatePlan, updatePlanState] = useMutation(UpdatePlanDocument, {
         onCompleted: (data) => {
             reset()
             refetch();
@@ -1100,7 +1057,7 @@ const CouponScreen = () => {
         }
     });
 
-    const [deleteOffer, deleteOfferState] = useMutation(DeleteOfferDocument, {
+    const [deletePlan, deletePlanState] = useMutation(DeletePlanDocument, {
         onCompleted: (data) => {
             refetch();
         },
@@ -1109,7 +1066,7 @@ const CouponScreen = () => {
         }
     });
 
-    const [updateOfferStatus, updateOfferStatusState] = useMutation(ChangeOfferStatusDocument, {
+    const [updatePlanStatus, updatePlanStatusState] = useMutation(ChangePlanStatusDocument, {
         onCompleted: (data) => {
             refetch();
             setStatusModalVisible(false);
@@ -1125,10 +1082,10 @@ const CouponScreen = () => {
 
     useEffect(() => {
         if (watch("status")) {
-            updateOfferStatus({
+            updatePlanStatus({
                 variables: {
-                    updateOfferStatusInput: {
-                        ids: [Number(currentOffer?.id)],
+                    updatePlanStatusInput: {
+                        ids: [Number(currentPlanId)],
                         status: watch("status")?.value
                     }
                 },
@@ -1137,20 +1094,15 @@ const CouponScreen = () => {
     }, [watch("status")])
 
     useEffect(() => {
-        // setValue("title", currentOffer?.title);
-        // setValue("offerType", currentOffer?.offerType);
-        // setValue("discountType", currentOffer?.discountType);
-        // setValue("discountValue", currentOffer?.discountValue.toString() || "");
-        // setValue("maxDiscountAmount", currentOffer?.maxDiscountAmount?.toString() || "");
-        // setValue("minOrderAmount", currentOffer?.minOrderAmount?.toString() || "");
-        // setValue("usageLimit", currentOffer?.usageLimit?.toString() || "");
-        // setValue("cashbackAmount", currentOffer?.cashbackAmount?.toString() || "");
-        // setValue("description", currentOffer?.description || "");
-        // setValue("start_date", formatTimeForAPI(currentOffer?.start_date, "yyyy-mm-dd") || "");
-        // setValue("end_date", formatTimeForAPI(currentOffer?.end_date, "yyyy-mm-dd") || "");
-        // setValue("status", currentOffer?.status || "");
-    }, [currentOffer]);
-
+        setValue("name", currentPlan?.name || "");
+        setValue("discountPrice", currentPlan?.discountPrice);
+        setValue("duration", currentPlan?.duration || "");
+        setValue("price", currentPlan?.price || "");
+        setValue("offer", currentPlan?.offer || "");
+        setValue("package", currentPlan?.package || "");
+        setValue("coupon", currentPlan?.coupon || "");
+        setValue("description", currentPlan?.description || "");
+    }, [currentPlan]);
 
     const fetchCoupons = async (isRefreshing = false) => {
         if (isRefreshing) {
@@ -1200,68 +1152,46 @@ const CouponScreen = () => {
         });
     }
 
-    const parseDate = (dateStr: string) => {
-        const [month, day, year] = dateStr.split('/');
-        return new Date(+year, +month - 1, +day);
-    };
-
     const onSubmit = (data: any) => {
         try {
 
-            let params3 = {
-                couponId: data?.coupon,
-                description: data?.description,
-                discountedPrice: data?.discountedPrice,
-                duration: data?.duration,
-                name: data?.name,
-                offerId: data?.offer,
-                packageId: data?.package,
-                price: data?.price,
-            }
             let params = {
-                cashbackAmount: Number(data?.cashbackAmount),
+                couponId: typeof data?.coupon == 'string' ? Number(data?.coupon) : Number(data?.coupon?.id),
                 description: data?.description,
-                discountType: typeof data?.discountType === 'string'
-                    ? data?.discountType
-                    : data?.discountType?.value,
-                discountValue: Number(data?.discountValue),
-                endDate: data?.end_date,
-                maxDiscountAmount: Number(data?.maxDiscountAmount),
-                minOrderAmount: Number(data?.minOrderAmount),
-                offerType: typeof data?.offerType === 'string'
-                    ? data?.offerType
-                    : data?.offerType?.value,
-                startDate: data?.start_date,
-                title: data?.title,
-                usageLimit: Number(data?.usageLimit),
-            };
+                discountedPrice: Number(data?.discountPrice),
+                duration: Number(data?.duration),
+                name: data?.name,
+                offerId: typeof data?.coupon == 'string' ? Number(data?.offer) : Number(data?.offer?.id),
+                packageId: typeof data?.coupon == 'string' ? Number(data?.package) : Number(data?.package?.id),
+                price: Number(data?.price),
+            }
+
             let params2 = {
-                id: Number(currentOffer?.id),
+                id: Number(currentPlan?.id),
                 ...params,
             };
 
+            console.log('params3', params2);
+
             editModal ?
-                updateOffer({
+                updatePlan({
                     variables: {
-                        updateOfferInput: params2,
+                        updatePlanInput: params2,
                     },
                 })
-                : createOffer({
+                : createPlan({
                     variables: {
-                        createOfferInput: params,
+                        createPlanInput: params,
                     },
                 });
-            // createPlan({
-            //     variables: {
-            //         createPlanInput: params,
-            //     },
-            // });
         } catch (error) {
             console.log('error in onSubmit', error);
         }
     };
 
     const renderItem = ({ item, index }: any) => {
+        // console.log('0987654321', item);
+
         return (
             <View
                 key={index}
@@ -1280,26 +1210,7 @@ const CouponScreen = () => {
                             size={ms(20)}
                             color={Colors[theme].text}
                             onPress={() => {
-                                // setCurrentOrganization({
-                                //   name: item?.name,
-                                //   description: item?.description,
-                                //   id: item?.id,
-                                // });
-                                // setCurrentOffer({
-                                //     title: item?.title,
-                                //     offerType: item?.offerType,
-                                //     discountType: item?.discountType,
-                                //     discountValue: item?.discountValue,
-                                //     maxDiscountAmount: item?.maxDiscountAmount,
-                                //     minOrderAmount: item?.minOrderAmount,
-                                //     usageLimit: item?.usageLimit,
-                                //     cashbackAmount: item?.cashbackAmount,
-                                //     description: item?.description,
-                                //     start_date: item?.startDate,
-                                //     end_date: item?.endDate,
-                                //     status: item?.status,
-                                //     id: item?.id,
-                                // });
+                                setCurrentPlanId(item?.id);
                                 setStatusModalVisible(true);
                             }}
                         />
@@ -1309,25 +1220,23 @@ const CouponScreen = () => {
                             size={ms(20)}
                             color={Colors[theme].text}
                             onPress={() => {
-                                // setCurrentOffer({
-                                //     title: item?.title,
-                                //     offerType: item?.offerType,
-                                //     discountType: item?.discountType,
-                                //     discountValue: item?.discountValue,
-                                //     maxDiscountAmount: item?.maxDiscountAmount,
-                                //     minOrderAmount: item?.minOrderAmount,
-                                //     usageLimit: item?.usageLimit,
-                                //     cashbackAmount: item?.cashbackAmount,
-                                //     description: item?.description,
-                                //     start_date: item?.startDate,
-                                //     end_date: item?.endDate,
-                                //     status: item?.status,
-                                //     id: item?.id,
-                                // });
+                                setCurrentPlan({
+                                    name: item?.name,
+                                    discountPrice: String(item?.discountedPrice),
+                                    duration: String(item?.duration),
+                                    price: String(item?.price),
+                                    offer: item?.offerId,
+                                    package: item?.package?.id,
+                                    coupon: item?.couponId,
+                                    description: item?.description,
+                                    status: item?.status,
+                                    id: item?.id,
+                                });
                                 setModalVisible(true);
                                 setEditModal(true);
                             }}
                         />
+                        
                         <MaterialIcons
                             name="delete-outline"
                             size={ms(20)}
@@ -1337,22 +1246,7 @@ const CouponScreen = () => {
                                     {
                                         text: "Yes",
                                         onPress: () => {
-                                            // setCurrentOffer({
-                                            //     title: item?.title,
-                                            //     offerType: item?.offerType,
-                                            //     discountType: item?.discountType,
-                                            //     discountValue: item?.discountValue,
-                                            //     maxDiscountAmount: item?.maxDiscountAmount,
-                                            //     minOrderAmount: item?.minOrderAmount,
-                                            //     usageLimit: item?.usageLimit,
-                                            //     cashbackAmount: item?.cashbackAmount,
-                                            //     description: item?.description,
-                                            //     start_date: item?.startDate,
-                                            //     end_date: item?.endDate,
-                                            //     status: item?.status,
-                                            //     id: item?.id,
-                                            // });
-                                            deleteOffer({
+                                            deletePlan({
                                                 variables: {
                                                     ids: [Number(item?.id)],
                                                 }
@@ -1414,6 +1308,7 @@ const CouponScreen = () => {
 
     return (
         <CustomHeader>
+
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
                     <View style={{ width: "90%" }}>
@@ -1435,7 +1330,7 @@ const CouponScreen = () => {
                         onPress={() => {
                             fetchDropdownData(),
                                 setModalVisible(true),
-                                setCurrentOffer(defaultValue);
+                                setCurrentPlan(defaultValue);
                         }}
                     >
                         <Feather name="plus-square" size={24} color={Colors[theme].text} />
@@ -1477,7 +1372,7 @@ const CouponScreen = () => {
                 isVisible={isModalVisible}
                 onBackdropPress={() => {
                     reset();
-                    setCurrentOffer(defaultValue);
+                    setCurrentPlan(defaultValue);
                     setEditModal(false);
                     setModalVisible(false);
                 }}
@@ -1508,7 +1403,7 @@ const CouponScreen = () => {
                             onPress={() => {
                                 reset();
                                 setEditModal(false);
-                                setCurrentOffer(defaultValue);
+                                setCurrentPlan(defaultValue);
                                 setModalVisible(false);
                             }}
                         >
@@ -1705,22 +1600,6 @@ const CouponScreen = () => {
                 </View>
             </Modal>
 
-
-            {/* date time picker modal */}
-            <DateTimePickerModal
-                dateTimePickerProps={dateTimePickerProps}
-                setDateTimePickerProps={setDateTimePickerProps}
-                onDateTimeSelection={(event: any, selectedDate: any) => {
-                    console.log("selectedDate", selectedDate)
-                    if (event.type != "dismissed") {
-                        setValue(
-                            dateModal.start ? "start_date" : "end_date",
-                            formatTimeForAPI(selectedDate, "yyyy-mm-dd") || "",
-                        );
-                    }
-                    setDateTimePickerProps(getDateTimePickerProps(false));
-                }}
-            />
         </CustomHeader>
     );
 };

@@ -458,16 +458,36 @@ const ModuleScreen = () => {
                     setStatusModalVisible(false);
                 }}
             >
+
                 <View
                     style={{
                         backgroundColor: Colors[theme].cartBg,
-                        height: 380,
+                        height: vs(320),
                         width: s(300),
                         borderRadius: 10,
                         alignSelf: "center",
                         padding: 10,
                     }}
                 >
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            padding: 10,
+                        }}
+                    >
+                        <ThemedText type="subtitle">
+                            {"Change Status"}
+                        </ThemedText>
+                        <Pressable
+                            onPress={() => {
+                                setStatusModalVisible(false);
+                            }}
+                        >
+                            <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+                        </Pressable>
+                    </View>
+
                     <CustomValidation
                         data={pickerData}
                         type="picker"

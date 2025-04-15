@@ -274,8 +274,8 @@ const UserScreen = () => {
   };
 
   const renderItem = (item, index) => {
-    let rolesId = item.roles.map((item) => {
-      return item.id
+    let rolesId = item?.roles?.map((item) => {
+      return item?.id
     })
     return (
       <View

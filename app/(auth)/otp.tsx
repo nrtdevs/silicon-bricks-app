@@ -38,7 +38,6 @@ const LoginCodeScreen = () => {
     try {
       const otpValue = Number(otp);
       if (params?.otp == otp) {
-        console.log(otpValue);
         const response = await verifyOtp({
           variables: {
             loginData: {
@@ -53,11 +52,13 @@ const LoginCodeScreen = () => {
         const accessToken: any = response?.data?.login?.accessToken;
         if (accessToken) {
           // Save the accessToken to SecureStore
-          await SecureStore.setItemAsync("accessToken", accessToken);
-          await SecureStore.setItemAsync("userId", response?.data?.login?.user?.id as string);
-          await SecureStore.setItemAsync("userType", response?.data?.login?.user?.userType as string);
+          const userData = {
+            accessToken: accessToken,
+            userId: response?.data?.login?.user?.id,
+            userType: response?.data?.login?.user?.userType,
+          };
+          await SecureStore.setItemAsync("userData", JSON.stringify(userData));
           // Retrieve the token from SecureStore
-          const token = await SecureStore.getItemAsync("accessToken");
           router.replace("/(drawer)/(tabs)");
         } else {
           console.log("Failed to retrieve accessToken");

@@ -35,15 +35,24 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import * as SecureStore from 'expo-secure-store'
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry'
 
 // Define the HTTP link
 const httpLink = createHttpLink({
   uri: 'http://192.168.1.36:5001/graphql'
 })
 
+const getAccessToken = async () => {
+  const storedData = await SecureStore.getItemAsync("userData");
+  if (!storedData) return null;
+  let parsedUserData = JSON.parse(storedData);
+  return parsedUserData?.accessToken
+}
+
 // Define the Authentication Link (Fixing Async Issue)
 const authLink = setContext((_, { headers }) => {
-  return SecureStore.getItemAsync('accessToken')
+  const accessToken = getAccessToken()
+  return accessToken
     .then(token => ({
       headers: {
         ...headers,

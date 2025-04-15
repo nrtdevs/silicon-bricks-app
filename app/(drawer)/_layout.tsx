@@ -15,8 +15,10 @@ const CustomDrawerContent = (props: any) => {
 
   const { theme } = useTheme();
   const getUserType = async () => {
-    const userType = await SecureStore.getItemAsync("userType");
-    setUserType(userType);
+    const storedData = await SecureStore.getItemAsync("userData");
+    if (!storedData) return null;
+    let parsedUserData = JSON.parse(storedData);
+    setUserType(parsedUserData?.userType);
   };
 
   useEffect(() => {
