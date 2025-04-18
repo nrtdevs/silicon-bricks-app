@@ -1018,6 +1018,11 @@ const CouponScreen = () => {
 
     const { can, hasAny } = useUserContext();
 
+    const deletePermission = can("MasterApp:Plan:Delete");
+    const updatePermission = can("MasterApp:Plan:Update");
+    const createPermission = can("MasterApp:Plan:Create");
+    const statusUpdatePermission = can("MasterApp:Plan:Action");
+
     const [plansData, { error, data, loading, refetch }] = useLazyQuery(
         PaginatedPlansDocument
     );
@@ -1205,19 +1210,19 @@ const CouponScreen = () => {
                         {item?.name}
                     </ThemedText>
                     <View style={styles.organizationInfo}>
-                        <MaterialIcons
+                        {statusUpdatePermission && <MaterialIcons
                             name="attractions"
-                            size={ms(20)}
+                            size={ms(22)}
                             color={Colors[theme].text}
                             onPress={() => {
                                 setCurrentPlanId(item?.id);
                                 setStatusModalVisible(true);
                             }}
-                        />
+                        />}
 
-                        <Feather
+                        {updatePermission && <Feather
                             name="edit"
-                            size={ms(20)}
+                            size={ms(22)}
                             color={Colors[theme].text}
                             onPress={() => {
                                 setCurrentPlan({
@@ -1235,11 +1240,11 @@ const CouponScreen = () => {
                                 setModalVisible(true);
                                 setEditModal(true);
                             }}
-                        />
-                        
-                        <MaterialIcons
+                        />}
+
+                        {deletePermission && <MaterialIcons
                             name="delete-outline"
-                            size={ms(20)}
+                            size={ms(22)}
                             color={Colors[theme].text}
                             onPress={() => {
                                 Alert.alert("Delete", "Are you sure you want to delete?", [
@@ -1256,7 +1261,7 @@ const CouponScreen = () => {
                                     { text: "No", onPress: () => { } },
                                 ]);
                             }}
-                        />
+                        />}
                     </View>
                 </View>
 
@@ -1311,7 +1316,7 @@ const CouponScreen = () => {
 
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{ flex: 1 }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             onChangeText={(text) => {
@@ -1333,7 +1338,7 @@ const CouponScreen = () => {
                                 setCurrentPlan(defaultValue);
                         }}
                     >
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
+                        <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
                     </Pressable>
                 </View>
                 <View style={styles.organizationParentContainer}>
@@ -1653,7 +1658,7 @@ const styles = ScaledSheet.create({
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    buttonContainer: {},
+    buttonContainer: {marginLeft: "12@ms"},
     organizationParentContainer: {
         marginTop: "12@ms",
     },
@@ -1670,9 +1675,8 @@ const styles = ScaledSheet.create({
         justifyContent: "space-between",
     },
     organizationInfo: {
-        width: "30%",
         flexDirection: "row",
-        justifyContent: "space-between",
+        gap: "15@ms",
     },
     status: {
         color: "green",

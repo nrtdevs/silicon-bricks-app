@@ -34,6 +34,8 @@ import CustomValidation from "@/components/CustomValidation";
 import { useForm } from "react-hook-form";
 import CustomButton from "@/components/CustomButton";
 import * as ImagePicker from "expo-image-picker";
+import { Env } from "@/constants/ApiEndpoints";
+import * as FileSystem from "expo-file-system";
 
 
 const { NetworkManager } = NativeModules;
@@ -111,6 +113,7 @@ const SettingScreen = () => {
         findUserByIdId: Number(parsedUserData?.userId)
       }
     });
+    setImage(data?.findUserById?.avatar)
   };
 
   const rightIcon = () => {
@@ -254,6 +257,7 @@ const SettingScreen = () => {
       mobileNo: Number(watch("phoneNo")),
       id: userId,
       email: watch("email"),
+      avatar: image
     }
 
     try {
@@ -269,20 +273,77 @@ const SettingScreen = () => {
     }
   }
 
+  // const handleImagePickerPress = async () => {
+  //   let result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsEditing: true,
+  //     aspect: [1, 1],
+  //     quality: 1,
+  //   });
+
+  //   if (!result.canceled) {
+  //     setImage(result.assets[0].uri)
+  //   }
+  // };
+
+  const uploadImage = async (uri: string) => {
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      if (!fileInfo.exists) {
+        console.error("File does not exist:", uri);
+        return;
+      }
+
+      const fileExtension = uri.split(".").pop() || "jpg"; // Default to jpg if no extension
+      const mimeType = `image/${fileExtension}`;
+
+      const formData = new FormData();
+
+      formData.append("file", {
+        uri,
+        name: `upload.${fileExtension}`,
+        type: mimeType,
+      } as unknown as Blob);
+
+      // formData.append("file", {
+      //   uri: uri,
+      //   name: `upload.${fileExtension}`,
+      //   type: mimeType,
+      // } as any); 
+
+      const uploadResponse = await fetch(`${Env.SERVER_URL}/api/files/upload`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+      if (!uploadResponse.ok) {
+        const err = await uploadResponse.text();
+        throw new Error(`Upload failed: ${err}`);
+      }
+      const responseData = await uploadResponse.json();
+      // console.log("Upload successful:", responseData?.files[0]);
+      setImage(responseData?.files[0]);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+  };
+
   const handleImagePickerPress = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri)
+    if (!result.canceled && result.assets?.length > 0) {
+      const uri = result.assets[0].uri;
+      uploadImage(uri);
     }
   };
 
-  console.log("image", image);
 
 
   return (
@@ -311,14 +372,16 @@ const SettingScreen = () => {
       >
         <ThemedView>
           <View style={styles.userInfo}>
-            <View
-              style={{
-                height: 80,
-                width: 80,
-                borderRadius: "100%",
-                backgroundColor: "#808080",
-              }}
-            ></View>
+            <Pressable
+              style={styles.imageContainer}
+            >
+              <Image
+                source={{
+                  uri: `${Env?.SERVER_URL}${image}`,
+                }}
+                style={styles.image}
+              />
+            </Pressable>
             <View>
               <ThemedText style={styles.userName}>{data?.findUserById?.name}</ThemedText>
               <ThemedText style={styles.userEmail}>{data?.findUserById?.email}</ThemedText>
@@ -403,9 +466,26 @@ const SettingScreen = () => {
             </View>
 
             <View style={{ padding: 10 }}>
-              <Pressable onPress={handleImagePickerPress} style={styles.imageContainer}>
-                {image && <Image source={{ uri: image }} style={styles.image} />}
+              <Pressable
+                style={styles.imageContainer}
+              >
+                <Image
+                  source={{
+                    uri: `${Env?.SERVER_URL}${image}`,
+                  }}
+                  style={styles.image}
+                />
               </Pressable>
+              <Pressable
+                onPress={handleImagePickerPress}
+                style={styles?.editImage}>
+                <Feather name="edit-2" size={ms(20)} color='black' style={{ fontWeight: 'bold', }} />
+              </Pressable>
+
+
+              {/* <Pressable onPress={handleImagePickerPress} style={styles.imageContainer}>
+                {image && <Image source={{ uri: image }} style={styles.image} />}
+              </Pressable> */}
               <CustomValidation
                 type="input"
                 control={control}
@@ -423,6 +503,7 @@ const SettingScreen = () => {
                 control={control}
                 name={"email"}
                 label={"Email"}
+                editable={false}
                 labelStyle={styles.label}
                 rules={{
                   required: "Email is required",
@@ -496,17 +577,32 @@ const styles = ScaledSheet.create({
     fontWeight: 400,
   },
   imageContainer: {
-    width: ms(50),
-    height: ms(50),
-    borderRadius: ms(50),
-    marginBottom: "12@ms",
+    width: '80@ms',
+    height: '80@ms',
+    borderRadius: '70@ms',
+    marginBottom: '12@ms',
     backgroundColor: Colors.gray,
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#ccc",
   },
   image: {
-    width: 40,
-    height: 40,
-    resizeMode: "cover", // Ensures the image covers the container
+    width: '100%',
+    height: '100%',
+    borderRadius: ms(50),
+    resizeMode: 'cover',
   },
+  editImage: {
+    position: 'absolute',
+    top: 3,
+    left: 55,
+    width: 35,
+    height: 35,
+    borderRadius: 100,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

@@ -1,20 +1,3 @@
-query PaginatedOrganization($listInputDto: ListInputDTO!) {
-  paginatedOrganization(ListInputDTO: $listInputDto) {
-    meta {
-      totalItems
-      totalPages
-      currentPage
-      limit
-    }
-    data {
-      id
-      name
-      description
-      status
-    }
-  }
-}
-
 query Modules {
   permissionGroup {
     modules {
@@ -81,24 +64,6 @@ query PaginatedUsers($listInputDto: ListInputDTO!) {
       userType
       username
       updatedAt
-    }
-  }
-}
-
-query PaginatedRoles($listInputDto: ListInputDTO!) {
-  paginatedRoles(ListInputDTO: $listInputDto) {
-    meta {
-      totalItems
-      totalPages
-      currentPage
-      limit
-    }
-    data {
-      id
-      name
-      description
-      roleType
-      permissionCount
     }
   }
 }
@@ -178,7 +143,6 @@ query PaginatedSubscriptions($listInputDto: ListInputDTO!) {
         discountedPrice
         status
         couponId
-        offerId
       }
     }
     meta {
@@ -337,10 +301,8 @@ query PaginatedPlans($listInputDto: ListInputDTO!) {
         price
         discountedPrice
         status
-        offerId
       }
       couponId
-      offerId
     }
   }
 }
@@ -395,6 +357,25 @@ query PaginatedRoles($listInputDto: ListInputDTO!) {
       totalPages
       currentPage
       limit
+    }
+  }
+}
+
+
+query AllPermissions {
+  allPermissions {
+    apps {
+      appName
+      modules {
+        name
+        permissions {
+          id
+          module
+          action
+          description
+          slug
+        }
+      }
     }
   }
 }

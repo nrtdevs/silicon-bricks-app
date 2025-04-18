@@ -19,6 +19,7 @@ import Modal from 'react-native-modal';
 import CustomButton from '@/components/CustomButton';
 import { CreateProjectDocument, DeleteProjectDocument, EnableProjectStatusDocument, PaginatedProjectsDocument, UpdateProjectDocument } from '@/graphql/generated';
 import debounce from "lodash.debounce";
+import { useUserContext } from '@/context/RoleContext';
 
 interface ProjectData {
   id: number;
@@ -47,15 +48,21 @@ const Project = () => {
   const [isStatusModalVisible, setStatusModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isModalVisible, setModalVisible] = useState(false);
+  const [projectId, setProjectId] = useState<string>("");
   const [currentProject, setCurrentProject] = useState<{
     project_name: string,
     description: string,
     id: string,
   }>(defaultValue);
+  const { can, hasAny } = useUserContext();
+
+  const deletePermission = can("MasterApp:Project:Delete");
+  const updatePermission = can("MasterApp:Project:Update");
+  const createPermission = can("MasterApp:Project:Create");
+  const statusUpdatePermission = can("MasterApp:Project:Action");
 
   const [getProjects, { data, refetch, loading }] = useLazyQuery<any>(PaginatedProjectsDocument);
-  console.log('data', data?.paginatedProjects?.data);
-  
+
   const [updateProject] = useMutation(UpdateProjectDocument, {
     onCompleted: (data) => {
       refetch();
@@ -72,8 +79,8 @@ const Project = () => {
     onCompleted: (data) => {
       refetch();
       setEditVisible(false);
-      setModalVisible(false);
       setCurrentProject(defaultValue)
+      setModalVisible(false);
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -85,10 +92,10 @@ const Project = () => {
     onCompleted: (data) => {
       refetch();
       setEditVisible(false);
-      setModalVisible(false);
-      setCurrentProject(defaultValue)
+      setStatusModalVisible(false);
     },
     onError: (error) => {
+      setStatusModalVisible(false);
       Alert.alert("Error", error.message);
     }
   });
@@ -132,7 +139,7 @@ const Project = () => {
       updateProjectStatus({
         variables: {
           data: {
-            ids: [Number(currentProject?.id)],
+            ids: [Number(projectId)],
             status: watch("status")?.value
           }
         },
@@ -172,6 +179,8 @@ const Project = () => {
   );
 
   const renderItem = ({ item, index }: any) => {
+    console.log('9999', item);
+
     return (
       <View
         key={index}
@@ -183,22 +192,18 @@ const Project = () => {
         <View style={styles.organizationHeader}>
           <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
           <View style={styles.organizationInfo}>
-            <MaterialIcons
+           {statusUpdatePermission && <MaterialIcons
               name="attractions"
-              size={ms(20)}
+              size={ms(22)}
               color={Colors[theme].text}
               onPress={() => {
-                setCurrentProject({
-                  id: String(item.id),
-                  project_name: item?.name,
-                  description: item?.description
-                })
+                setProjectId(item.id)
                 setStatusModalVisible(true);
               }}
-            />
-            <Feather
+            />}
+            {updatePermission && <Feather
               name="edit"
-              size={ms(20)}
+              size={ms(22)}
               color={Colors[theme].text}
               onPress={() => {
                 setCurrentProject({
@@ -208,11 +213,11 @@ const Project = () => {
                 })
                 setModalVisible(true), setEditVisible(true)
               }}
-            />
+            />}
 
-            <MaterialIcons
+            {deletePermission && <MaterialIcons
               name="delete-outline"
-              size={ms(20)}
+              size={ms(22)}
               color={Colors[theme].text}
               onPress={() => {
                 Alert.alert(
@@ -233,7 +238,7 @@ const Project = () => {
                 );
 
               }}
-            />
+            />}
 
 
           </View>
@@ -263,7 +268,7 @@ const Project = () => {
       <ThemedView style={styles.contentContainer}>
         <View>
           <View style={styles.searchContainer}>
-            <View style={{ width: "90%" }}>
+            <View style={{ flex: 1 }}>
               <CustomSearchBar
                 searchQuery={searchQuery}
                 onChangeText={(text) => {
@@ -277,12 +282,12 @@ const Project = () => {
                 }}
               />
             </View>
-            <Pressable
+            {createPermission && <Pressable
               style={styles.buttonContainer}
               onPress={() => { setCurrentProject(defaultValue), setModalVisible(true), showDialogue() }}
             >
-              <Feather name="plus-square" size={24} color={Colors[theme].text} />
-            </Pressable>
+              {createPermission && <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />}
+            </Pressable>}
           </View>
 
           <View style={styles.scrollContainer}>
@@ -417,9 +422,9 @@ const Project = () => {
             control={control}
             name="status"
             placeholder="Select Status"
-            inputStyle={{ height: vs(50), marginTop:0, paddingTop:0 }}
-            inputContainerStyle={{marginTop:0, paddingTop:0}}
-            containerStyle={{marginTop:0, paddingTop:0}}
+            inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
+            inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
+            containerStyle={{ marginTop: 0, paddingTop: 0 }}
             rules={{
               required: {
                 value: true,
@@ -449,8 +454,7 @@ const styles = ScaledSheet.create({
   },
   organizationInfo: {
     flexDirection: "row",
-    width: "30%",
-    justifyContent: "space-between",
+    gap: "15@ms",
   },
   organizationHeader: {
     width: "100%",
@@ -464,7 +468,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     marginBottom: "12@ms",
   },
-  buttonContainer: {},
+  buttonContainer: { marginLeft: "12@ms" },
   organizationParentContainer: {
     marginTop: "12@ms",
   },

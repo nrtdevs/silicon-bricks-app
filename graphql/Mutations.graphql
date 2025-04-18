@@ -285,22 +285,6 @@ query PaginatedPackages($listInputDto: ListInputDTO!) {
         description
         status
       }
-      offer {
-        id
-        title
-        description
-        offerType
-        discountType
-        discountValue
-        maxDiscountAmount
-        cashbackAmount
-        minOrderAmount
-        usageLimit
-        status
-        startDate
-        endDate
-      }
-      offerId
     }
   }
 }
@@ -313,7 +297,6 @@ mutation CreatePackage($createPackageInput: CreatePackageDto!) {
     price
     discountedPrice
     status
-    offerId
   }
 }
 
@@ -325,7 +308,6 @@ mutation UpdatePackage($updatePackageInput: UpdatePackageDto!) {
     price
     discountedPrice
     status
-    offerId
   }
 }
 
@@ -455,7 +437,6 @@ mutation CreatePlan($createPlanInput: CreatePlanDto!) {
       name
     }
     couponId
-    offerId
   }
 }
 
@@ -469,7 +450,6 @@ mutation UpdatePlan($updatePlanInput: UpdatePlanDto!) {
     discountedPrice
     status
     couponId
-    offerId
   }
 }
 
@@ -484,7 +464,6 @@ mutation ChangePlanStatus($updatePlanStatusInput: PlanStatusDto!) {
       discountedPrice
       status
       couponId
-      offerId
     }
     ... on PlanArray {
       data {

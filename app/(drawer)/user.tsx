@@ -42,6 +42,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import debounce from "lodash.debounce";
 import { Env } from "@/constants/ApiEndpoints";
+import { useUserContext } from "@/context/RoleContext";
 
 const defaultValue = {
   name: "",
@@ -96,6 +97,13 @@ const UserScreen = () => {
     id: string;
     imagePath: string;
   }>(defaultValue);
+
+  const { can, hasAny } = useUserContext();
+
+  const deletePermission = can("MasterApp:User:Delete");
+  const updatePermission = can("MasterApp:User:Update");
+  const createPermission = can("MasterApp:User:Create");
+  const statusUpdatePermission = can("MasterApp:User:Action");
 
   const [userData, { error, data, loading, refetch }] = useLazyQuery<any>(
     PaginatedUsersDocument
@@ -304,9 +312,9 @@ const UserScreen = () => {
         <View style={styles.organizationHeader}>
           <ThemedText type="subtitle">{item?.name}</ThemedText>
           <View style={styles.organizationInfo}>
-            <MaterialIcons
+            {statusUpdatePermission && <MaterialIcons
               name="attractions"
-              size={ms(20)}
+              size={ms(22)}
               color={Colors[theme].text}
               onPress={() => {
                 setCurrentUser({
@@ -318,13 +326,14 @@ const UserScreen = () => {
                   id: item?.id,
                   imagePath: item?.avatar,
                 });
+                setImage(item?.avatar)
                 setStatusModalVisible(true);
               }}
-            />
+            />}
 
             <AntDesign
               name="eyeo"
-              size={ms(20)}
+              size={ms(22)}
               color={Colors[theme].text}
               onPress={() => {
                 setCurrentUser({
@@ -340,9 +349,10 @@ const UserScreen = () => {
               }}
             />
 
-            <Feather
+
+            {updatePermission && <Feather
               name="edit"
-              size={ms(20)}
+              size={ms(22)}
               color={Colors[theme].text}
               onPress={() => {
                 setCurrentUser({
@@ -354,13 +364,15 @@ const UserScreen = () => {
                   id: item?.id,
                   imagePath: item?.avatar,
                 });
+                setImage(item?.avatar)
                 setEditModal(true);
                 setModalVisible(true);
               }}
-            />
-            <MaterialIcons
+            />}
+
+            {deletePermission && <MaterialIcons
               name="delete-outline"
-              size={ms(20)}
+              size={ms(22)}
               color={Colors[theme].text}
               onPress={() => {
 
@@ -383,7 +395,7 @@ const UserScreen = () => {
                   ]
                 );
               }}
-            />
+            />}
           </View>
         </View>
 
@@ -405,7 +417,7 @@ const UserScreen = () => {
 
   const handleImagePickerPress = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
@@ -440,9 +452,9 @@ const UserScreen = () => {
       //   uri: uri,
       //   name: `upload.${fileExtension}`,
       //   type: mimeType,
-      // } as any); 
+      // } as any);
 
-      const uploadResponse = await fetch("http://192.168.1.62:5001/api/files/upload", {
+      const uploadResponse = await fetch(`${Env.SERVER_URL}/api/files/upload`, {
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
@@ -481,13 +493,11 @@ const UserScreen = () => {
     []
   );
 
-  console.log('09876', image);
-
   return (
     <CustomHeader>
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ width: "90%" }}>
+          <View style={{ flex: 1 }}>
             <CustomSearchBar
               searchQuery={searchQuery}
               onChangeText={(text) => {
@@ -508,7 +518,7 @@ const UserScreen = () => {
               // setCurrentOrganization(defaultValue);
             }}
           >
-            <Feather name="plus-square" size={24} color={Colors[theme].text} />
+            <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
           </Pressable>
         </View>
         <View style={styles.organizationParentContainer}>
@@ -544,7 +554,7 @@ const UserScreen = () => {
             borderRadius: 10,
             alignSelf: "center",
             paddingHorizontal: 10,
-            paddingVertical: 20,
+            paddingVertical: 22,
             justifyContent: "flex-start",
           }}
         >
@@ -571,22 +581,23 @@ const UserScreen = () => {
             </Pressable>
           </View>
 
-          <View style={{ padding: 10 }}>
+          <View style={{ padding: 10, position: "relative" }}>
             <Pressable
-              onPress={handleImagePickerPress}
               style={styles.imageContainer}
             >
-              {image.length > 0 || currentUser?.imagePath?.length > 0 ? (
-                <Image
-                  source={{
-                    uri: !editModal
-                      ? `${Env?.SERVER_URL}${image}`
-                      : `${Env?.SERVER_URL}${currentUser?.imagePath}`,
-                  }}
-                  style={styles.image}
-                />
-              ) : null} 
+              <Image
+                source={{
+                  uri: `${Env?.SERVER_URL}${image}`,
+                }}
+                style={styles.image}
+              />
             </Pressable>
+
+            {<Pressable
+              onPress={handleImagePickerPress}
+              style={styles?.editImage}>
+              <Feather name="edit-2" size={ms(18)} color='black' style={{ fontWeight: 'bold', }} />
+            </Pressable>}
 
             {/* <Pressable
               onPress={handleImagePickerPress}
@@ -633,11 +644,13 @@ const UserScreen = () => {
             <CustomValidation
               data={roleData?.paginatedRoles?.data}
               type="picker"
-              hideStar
+              hideStar={false}
               keyToCompareData="id"
               keyToShowData="name"
               control={control}
               name="roles"
+              label="Role"
+              labelStyle={styles.label}
               multiSelect
               placeholder="Select role name"
               inputStyle={{ height: vs(50) }}
@@ -652,10 +665,12 @@ const UserScreen = () => {
             <CustomValidation
               data={userTypeData}
               type="picker"
-              hideStar
+              hideStar={false}
               control={control}
               keyToCompareData="value"
               keyToShowData="label"
+              label="User Type"
+              labelStyle={styles.label}
               name="usertype"
               placeholder="Select UserType"
               inputStyle={{ height: vs(50) }}
@@ -831,7 +846,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     marginBottom: "12@ms",
   },
-  buttonContainer: {},
+  buttonContainer: { marginLeft: "12@ms" },
   organizationParentContainer: {
     marginTop: "12@ms",
   },
@@ -843,14 +858,13 @@ const styles = ScaledSheet.create({
     gap: "8@ms",
   },
   organizationHeader: {
-    width: "100%",
+    flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
   },
   organizationInfo: {
-    width: "35%",
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: "15@ms",
   },
   status: {
     color: "green",
@@ -888,4 +902,15 @@ const styles = ScaledSheet.create({
     borderRadius: ms(50),
     resizeMode: 'cover',
   },
+  editImage: {
+    position: 'absolute',
+    top: 3,
+    left: 50,
+    width: 35,
+    height: 35,
+    borderRadius: 100,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

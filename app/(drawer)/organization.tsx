@@ -90,9 +90,11 @@ const OrganizationScreen = () => {
 
   const { can, hasAny } = useUserContext();
 
-  const deletepermission = can("MasterApp:Organization:Delete");
-  const updatepermission = can("MasterApp:Organization:Update");
-  const createpermission = can("MasterApp:Organization:Create");
+  const deletePermission = can("MasterApp:Organization:Delete");
+  const updatePermission = can("MasterApp:Organization:Update");
+  const createPermission = can("MasterApp:Organization:Create");
+  const statusUpdatePermission = can("MasterApp:Organization:Action");
+
 
   //   const ckeckall = hasAny(['MasterApp:Organization:Create', 'MasterApp:Organization:Update', 'MasterApp:Organization:Delete'])
 
@@ -170,14 +172,18 @@ const OrganizationScreen = () => {
 
   const onSubmit = (data: any) => {
     try {
-      let param = {
-        id: Number(currentOrganization?.id),
-        ...data,
+      let params = {
+        name: data?.name,
+        description: data?.description,
       };
+
       editModal
         ? updateOrganization({
           variables: {
-            updateOrganizationInput: param,
+            updateOrganizationInput: {
+              id: Number(currentOrganization?.id),
+              ...params,
+            },
           },
         })
         : createOrganization({
@@ -191,7 +197,7 @@ const OrganizationScreen = () => {
       console.log("onSubmit error", error);
     }
   };
-  
+
 
   const renderItem = ({ item, index }: any) => {
     return (
@@ -207,9 +213,9 @@ const OrganizationScreen = () => {
             {item?.name}
           </ThemedText>
           <View style={styles.organizationInfo}>
-            <MaterialIcons
+            {statusUpdatePermission && <MaterialIcons
               name="attractions"
-              size={ms(20)}
+              size={ms(22)}
               color={Colors[theme].text}
               onPress={() => {
                 setCurrentOrganization({
@@ -219,10 +225,11 @@ const OrganizationScreen = () => {
                 });
                 setStatusModalVisible(true);
               }}
-            />
-            <Feather
+            />}
+
+            {updatePermission && <Feather
               name="edit"
-              size={ms(20)}
+              size={ms(22)}
               color={Colors[theme].text}
               onPress={() => {
                 setCurrentOrganization({
@@ -234,11 +241,12 @@ const OrganizationScreen = () => {
                 setModalVisible(true);
                 setEditModal(true);
               }}
-            />
-            {deletepermission && (
+            />}
+
+            {deletePermission && (
               <MaterialIcons
                 name="delete-outline"
-                size={ms(20)}
+                size={ms(22)}
                 color={Colors[theme].text}
                 onPress={() => {
                   Alert.alert("Delete", "Are you sure you want to delete?", [
@@ -321,7 +329,6 @@ const OrganizationScreen = () => {
     debounce((text) => {
       fetchOrganization(true, text);
       console.log(text);
-
     }, 500),
     [searchQuery]
   );
@@ -339,7 +346,7 @@ const OrganizationScreen = () => {
     <CustomHeader>
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ width: "90%" }}>
+          <View style={{ flex: 1 }}>
             <CustomSearchBar
               searchQuery={searchQuery}
               onChangeText={(text) => {
@@ -353,14 +360,14 @@ const OrganizationScreen = () => {
               }}
             />
           </View>
-          <Pressable
+          {createPermission && <Pressable
             style={styles.buttonContainer}
             onPress={() => {
               setModalVisible(true), setCurrentOrganization(defaultValue);
             }}
           >
-            <Feather name="plus-square" size={24} color={Colors[theme].text} />
-          </Pressable>
+            <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
+          </Pressable>}
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
@@ -406,7 +413,7 @@ const OrganizationScreen = () => {
         <View
           style={{
             backgroundColor: Colors[theme].cartBg,
-            height: vs(400),
+            height: vs(350),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
@@ -419,7 +426,6 @@ const OrganizationScreen = () => {
               flexDirection: "row",
               justifyContent: "space-between",
               padding: 10,
-              bottom: 30,
             }}
           >
             <ThemedText type="subtitle">
@@ -461,11 +467,6 @@ const OrganizationScreen = () => {
               label={"Description"}
               labelStyle={styles.label}
               onFocus={() => setIsFocused("description")}
-              rules={{
-                required: editModal
-                  ? "Test organization description is required"
-                  : "Description is required",
-              }}
               autoCapitalize="none"
             />
           </View>
@@ -529,9 +530,9 @@ const OrganizationScreen = () => {
             control={control}
             name="status"
             placeholder="Select Status"
-            inputStyle={{ height: vs(50), marginTop:0, paddingTop:0 }}
-            inputContainerStyle={{marginTop:0, paddingTop:0}}
-            containerStyle={{marginTop:0, paddingTop:0}}
+            inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
+            inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
+            containerStyle={{ marginTop: 0, paddingTop: 0 }}
             rules={{
               required: {
                 value: true,
@@ -568,9 +569,10 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     marginBottom: "12@ms",
   },
-  buttonContainer: {},
+  buttonContainer: { marginLeft: "12@ms" },
   organizationParentContainer: {
     marginTop: "12@ms",
+
   },
   organizationContainer: {
     width: "100%",
@@ -585,9 +587,8 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
   },
   organizationInfo: {
-    width: "30%",
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: '15@ms'
   },
   status: {
     color: "green",

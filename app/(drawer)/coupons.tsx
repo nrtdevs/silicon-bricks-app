@@ -38,6 +38,7 @@ import DateTimePickerModal from "@/components/DateTimePickerModal";
 import { formatTimeForAPI } from "@/utils/formatDateTime";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
+import EditPromotion from "@/components/EditPromotion";
 
 const defaultValue = {
     couponCode: "",
@@ -105,8 +106,12 @@ const CouponScreen = () => {
         defaultValues: {},
     });
     const [searchQuery, setSearchQuery] = useState<string>("");
-
     const { can, hasAny } = useUserContext();
+
+    const deletePermission = can("MasterApp:Coupon:Delete");
+    const updatePermission = can("MasterApp:Coupon:Update");
+    const createPermission = can("MasterApp:Coupon:Create");
+    const statusUpdatePermission = can("MasterApp:Coupon:Action");
 
     const [couponData, { error, data, loading, refetch }] = useLazyQuery(
         PaginatedCouponsDocument
@@ -278,9 +283,9 @@ const CouponScreen = () => {
                         {item?.couponCode}
                     </ThemedText>
                     <View style={styles.organizationInfo}>
-                        <MaterialIcons
+                        {statusUpdatePermission && <MaterialIcons
                             name="attractions"
-                            size={ms(20)}
+                            size={ms(22)}
                             color={Colors[theme].text}
                             onPress={() => {
                                 // setCurrentOrganization({
@@ -302,11 +307,11 @@ const CouponScreen = () => {
                                 });
                                 setStatusModalVisible(true);
                             }}
-                        />
+                        />}
 
-                        <Feather
+                        {updatePermission && <Feather
                             name="edit"
-                            size={ms(20)}
+                            size={ms(22)}
                             color={Colors[theme].text}
                             onPress={() => {
                                 setCurrentCoupon({
@@ -324,10 +329,11 @@ const CouponScreen = () => {
                                 setModalVisible(true);
                                 setEditModal(true);
                             }}
-                        />
-                        <MaterialIcons
+                        />}
+
+                        {deletePermission && <MaterialIcons
                             name="delete-outline"
-                            size={ms(20)}
+                            size={ms(22)}
                             color={Colors[theme].text}
                             onPress={() => {
                                 Alert.alert("Delete", "Are you sure you want to delete?", [
@@ -356,7 +362,7 @@ const CouponScreen = () => {
                                     { text: "No", onPress: () => { } },
                                 ]);
                             }}
-                        />
+                        />}
                     </View>
                 </View>
 
@@ -406,7 +412,7 @@ const CouponScreen = () => {
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{flex:1}}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             onChangeText={(text) => {
@@ -426,7 +432,7 @@ const CouponScreen = () => {
                             setModalVisible(true), setCurrentCoupon(defaultValue);
                         }}
                     >
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
+                        <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
                     </Pressable>
                 </View>
                 <View style={styles.organizationParentContainer}>
@@ -663,11 +669,6 @@ const CouponScreen = () => {
                             containerStyle={{
                                 height: vs(100),
                             }}
-                            rules={{
-                                required: editModal
-                                    ? "Test organization description is required"
-                                    : "Description is required",
-                            }}
                             autoCapitalize="none"
                         />
 
@@ -789,7 +790,7 @@ const styles = ScaledSheet.create({
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    buttonContainer: {},
+    buttonContainer: {marginLeft: "12@ms"},
     organizationParentContainer: {
         marginTop: "12@ms",
     },
@@ -806,9 +807,8 @@ const styles = ScaledSheet.create({
         justifyContent: "space-between",
     },
     organizationInfo: {
-        width: "30%",
         flexDirection: "row",
-        justifyContent: "space-between",
+        gap: "15@ms",
     },
     status: {
         color: "green",

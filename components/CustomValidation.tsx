@@ -304,7 +304,7 @@ const CustomValidation = (props: TextInputProps) => {
                   returnKeyType={props.returnKeyType}
                   returnKeyLabel="google"
                   onSubmitEditing={props.onSubmitEditing}
-                  editable={!props.editable}
+                  editable={props.editable}
                   pointerEvents={props?.pointerEvents}
                   maxLength={props.maxLength}
                   multiline={props.multiline}

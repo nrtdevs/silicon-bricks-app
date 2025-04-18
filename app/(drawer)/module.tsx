@@ -34,6 +34,7 @@ import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
+import { useUserContext } from "@/context/RoleContext";
 
 const defaultValue = {
     name: "",
@@ -71,6 +72,12 @@ const ModuleScreen = () => {
         defaultValues: {},
     });
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const { can, hasAny } = useUserContext();
+
+    const deletePermission = can("MasterApp:Module:Delete");
+    const updatePermission = can("MasterApp:Module:Update");
+    const createPermission = can("MasterApp:Module:Create");
+    const statusUpdatePermission = can("MasterApp:Module:Action");
 
     const [moduleData, { error, data, loading, refetch }] = useLazyQuery(
         PaginatedModulesDocument
@@ -211,9 +218,9 @@ const ModuleScreen = () => {
         <View style={styles.organizationHeader}>
             <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
             <View style={styles.organizationInfo}>
-                <MaterialIcons
+                {statusUpdatePermission && <MaterialIcons
                     name="attractions"
-                    size={ms(20)}
+                    size={ms(22)}
                     color={Colors[theme].text}
                     onPress={() => {
                         setCurrentModule({
@@ -223,10 +230,10 @@ const ModuleScreen = () => {
                         });
                         setStatusModalVisible(true);
                     }}
-                />
-                <Feather
+                />}
+                {updatePermission && <Feather
                     name="edit"
-                    size={ms(20)}
+                    size={ms(22)}
                     color={Colors[theme].text}
                     onPress={() => {
                         setCurrentModule({
@@ -239,10 +246,10 @@ const ModuleScreen = () => {
                         setEditModal(true);
                         setModalVisible(true);
                     }}
-                />
-                <MaterialIcons
+                />}
+                {deletePermission && <MaterialIcons
                     name="delete-outline"
-                    size={ms(20)}
+                    size={ms(22)}
                     color={Colors[theme].text}
                     onPress={() => {
                         console.log(item?.id);
@@ -265,7 +272,7 @@ const ModuleScreen = () => {
                             ]
                         );
                     }}
-                />
+                />}
             </View>
         </View>
 
@@ -283,11 +290,11 @@ const ModuleScreen = () => {
             {item?.status}
         </ThemedText>
 
-        <View style={styles.userInfo}>
+        {item?.description && <View style={styles.userInfo}>
             <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
                 {item?.description}
             </ThemedText>
-        </View>
+        </View>}
     </View>)
 
     const debouncedSearch = useCallback(
@@ -313,7 +320,7 @@ const ModuleScreen = () => {
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{ flex: 1 }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             onChangeText={(text) => {
@@ -327,14 +334,14 @@ const ModuleScreen = () => {
                             }}
                         />
                     </View>
-                    <Pressable
+                    {createPermission && <Pressable
                         style={styles.buttonContainer}
                         onPress={() => {
                             setModalVisible(true)
                         }}
                     >
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                    </Pressable>
+                        <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
+                    </Pressable>}
                 </View>
                 <View style={styles.organizationParentContainer}>
                     <FlatList
@@ -435,9 +442,6 @@ const ModuleScreen = () => {
                             onFocus={() =>
                                 setIsFocused(editModal ? "testDescription" : "description")
                             }
-                            rules={{
-                                required: "Description is required",
-                            }}
                         />
                     </View>
 
@@ -538,7 +542,7 @@ const styles = ScaledSheet.create({
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    buttonContainer: {},
+    buttonContainer: {marginLeft: "12@ms"},
     organizationParentContainer: {
         marginTop: "12@ms",
     },
@@ -555,9 +559,8 @@ const styles = ScaledSheet.create({
         justifyContent: "space-between",
     },
     organizationInfo: {
-        width: "30%",
         flexDirection: "row",
-        justifyContent: "space-between",
+        gap: "15@ms",
     },
     status: {
         color: "green",

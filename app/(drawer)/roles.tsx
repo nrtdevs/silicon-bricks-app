@@ -26,6 +26,8 @@ import { Pressable } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import debounce from "lodash.debounce";
 import { PaginatedRolesDocument } from '@/graphql/generated';
+import { useUserContext } from '@/context/RoleContext';
+import { router } from 'expo-router';
 
 const RoleModule = gql`
   query PaginatedRoles($listInputDto: ListInputDTO!) {
@@ -128,6 +130,12 @@ const RolesScreen = () => {
   const [visible, setVisible] = useState(false);
   const showDialogue = () => setVisible(true);
   const [updatePermission] = useMutation(Update_Permission);
+  const { can, hasAny } = useUserContext();
+
+    const deletePermission = can("MasterApp:Module:Delete");
+    const checkUpdatePermission = can("MasterApp:Module:Update");
+    const createPermission = can("MasterApp:Module:Create");
+    const statusUpdatePermission = can("MasterApp:Module:Action");
 
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const schema = z.object({
@@ -191,7 +199,7 @@ const RolesScreen = () => {
       <ThemedView style={styles.contentContainer}>
 
         <View style={styles.searchContainer}>
-          <View style={{ width: "90%" }}>
+          <View style={{ flex: 1 }}>
             <CustomSearchBar
               searchQuery={searchQuery}
               onChangeText={(text) => {
@@ -208,8 +216,11 @@ const RolesScreen = () => {
           <Pressable
             style={styles.buttonContainer}
           // onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
+          onPress={() => {
+            router.push('/(subComponents)/createRole')
+          }}
           >
-            <Feather name="plus-square" size={24} color={Colors[theme].text} />
+            <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
           </Pressable>
         </View>
 
@@ -229,7 +240,7 @@ const RolesScreen = () => {
                   <View style={styles.organizationInfo}>
                     <Feather
                       name="edit"
-                      size={ms(20)}
+                      size={ms(22)}
                       color={Colors[theme].text}
                     // onPress={() => {
                     //   setModalVisible(true),
@@ -381,7 +392,7 @@ const styles = ScaledSheet.create({
   innerContainer: {
     paddingVertical: 10
   },
-  buttonContainer: {},
+  buttonContainer: {marginLeft: "12@ms"},
   searchContainer: {
     width: "100%",
     flexDirection: "row",
@@ -406,6 +417,7 @@ const styles = ScaledSheet.create({
   },
   organizationInfo: {
     flexDirection: "row",
+    gap: "15@ms",
   },
   loadingText: {
     fontSize: 18,

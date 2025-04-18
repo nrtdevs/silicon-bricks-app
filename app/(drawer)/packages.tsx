@@ -40,6 +40,7 @@ import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import debounce from "lodash.debounce";
 import NoDataFound from "@/components/NoDataFound";
+import { useUserContext } from "@/context/RoleContext";
 
 const defaultValue = {
     name: "",
@@ -73,6 +74,14 @@ const PackageScreen = () => {
     });
 
     const [searchQuery, setSearchQuery] = useState<string>("");
+
+    const { can, hasAny } = useUserContext();
+
+    const deletePermission = can("MasterApp:Package:Delete");
+    const updatePermission = can("MasterApp:Package:Update");
+    const createPermission = can("MasterApp:Package:Create");
+    const statusUpdatePermission = can("MasterApp:Package:Action");
+
     const [packagesData, { error, data, loading, refetch }] = useLazyQuery(
         PaginatedPackagesDocument
     );
@@ -292,18 +301,18 @@ const PackageScreen = () => {
                     {item?.name}
                 </ThemedText>
                 <View style={styles.organizationInfo}>
-                    <MaterialIcons
+                    {statusUpdatePermission && <MaterialIcons
                         name="attractions"
-                        size={ms(20)}
+                        size={ms(22)}
                         color={Colors[theme].text}
                         onPress={() => {
                             setStatusModalVisible(true);
                         }}
-                    />
+                    />}
 
-                    <Feather
+                    {updatePermission && <Feather
                         name="edit"
-                        size={ms(20)}
+                        size={ms(22)}
                         color={Colors[theme].text}
                         onPress={() => {
                             setCurrentPackage({
@@ -318,10 +327,11 @@ const PackageScreen = () => {
                             setModalVisible(true);
                             setEditModal(true);
                         }}
-                    />
-                    <MaterialIcons
+                    />}
+
+                    {deletePermission && <MaterialIcons
                         name="delete-outline"
-                        size={ms(20)}
+                        size={ms(22)}
                         color={Colors[theme].text}
                         onPress={() => {
                             Alert.alert(
@@ -342,7 +352,7 @@ const PackageScreen = () => {
                                 ]
                             );
                         }}
-                    />
+                    />}
                 </View>
             </View>
 
@@ -361,7 +371,7 @@ const PackageScreen = () => {
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{ flex: 1 }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             onChangeText={(text) => {
@@ -380,7 +390,7 @@ const PackageScreen = () => {
                             setModalVisible(true), setCurrentPackage(defaultValue);
                         }}
                     >
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
+                        <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
                     </Pressable>
                 </View>
 
@@ -688,7 +698,7 @@ const styles = ScaledSheet.create({
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    buttonContainer: {},
+    buttonContainer: {marginLeft: "12@ms"},
     organizationParentContainer: {
         marginTop: "12@ms",
     },
@@ -705,9 +715,8 @@ const styles = ScaledSheet.create({
         justifyContent: "space-between",
     },
     organizationInfo: {
-        width: "30%",
         flexDirection: "row",
-        justifyContent: "space-between",
+        gap: "15@ms",
     },
     status: {
         color: "green",
