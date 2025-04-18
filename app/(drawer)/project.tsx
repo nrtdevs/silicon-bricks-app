@@ -180,7 +180,6 @@ const Project = () => {
 
   const renderItem = ({ item, index }: any) => {
     console.log('9999', item);
-
     return (
       <View
         key={index}
@@ -192,7 +191,7 @@ const Project = () => {
         <View style={styles.organizationHeader}>
           <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
           <View style={styles.organizationInfo}>
-           {statusUpdatePermission && <MaterialIcons
+            {statusUpdatePermission && <MaterialIcons
               name="attractions"
               size={ms(22)}
               color={Colors[theme].text}
@@ -256,9 +255,9 @@ const Project = () => {
         >
           {item?.status}
         </ThemedText>
-        <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+        {item?.description && <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
           {item?.description}
-        </ThemedText>
+        </ThemedText>}
       </View>
     )
   }
@@ -365,9 +364,6 @@ const Project = () => {
                 name={"description"}
                 label={`${labels.description}`}
                 labelStyle={styles.label}
-                rules={{
-                  required: labels.description,
-                }}
               />
             </View>
             <CustomButton

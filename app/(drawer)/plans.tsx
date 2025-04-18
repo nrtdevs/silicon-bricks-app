@@ -1159,6 +1159,13 @@ const CouponScreen = () => {
 
     const onSubmit = (data: any) => {
         try {
+    //         "couponId": null,
+    // "description": null,
+    // "discountedPrice": null,
+    // "duration": null,
+    // "name": null,
+    // "packageId": null,
+    // "price": null
 
             let params = {
                 couponId: typeof data?.coupon == 'string' ? Number(data?.coupon) : Number(data?.coupon?.id),

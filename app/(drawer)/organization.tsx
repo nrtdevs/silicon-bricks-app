@@ -444,6 +444,7 @@ const OrganizationScreen = () => {
           </View>
 
           <View style={{ padding: 10 }}>
+            
             <CustomValidation
               type="input"
               control={control}

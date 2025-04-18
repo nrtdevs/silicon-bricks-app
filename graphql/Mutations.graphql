@@ -493,3 +493,29 @@ mutation CreatePermission($data: CreatePermissionDto!) {
     description
   }
 }
+
+mutation CreateRole($data: CreateRoleDto!) {
+  createRole(data: $data) {
+    id
+    name
+    permissions {
+      id
+      appName
+      groupName
+      module
+      action
+      slug
+      description
+    }
+    description
+    roleType
+    status
+    permissionCount
+    organization {
+      id
+      name
+      description
+      status
+    }
+  }
+}
