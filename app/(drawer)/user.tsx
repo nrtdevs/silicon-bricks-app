@@ -92,7 +92,7 @@ const UserScreen = () => {
     name: string;
     email: string;
     phoneNo: string;
-    roles: any[];
+    roles: any[]; 
     usertype: any;
     id: string;
     imagePath: string;
@@ -244,7 +244,7 @@ const UserScreen = () => {
 
   const onSubmit = (data: any) => {
     console.log('0909', data);
-    try {
+    try { 
       const roleIds: number[] = [];
       if (data?.roles && Array.isArray(data.roles)) {
         for (let i = 0; i < data.roles.length; i++) {

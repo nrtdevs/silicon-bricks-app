@@ -937,7 +937,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import { ScrollView } from "react-native";
-import { AntDesign, Entypo, Feather, Fontisto, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -1159,14 +1159,6 @@ const CouponScreen = () => {
 
     const onSubmit = (data: any) => {
         try {
-    //         "couponId": null,
-    // "description": null,
-    // "discountedPrice": null,
-    // "duration": null,
-    // "name": null,
-    // "packageId": null,
-    // "price": null
-
             let params = {
                 couponId: typeof data?.coupon == 'string' ? Number(data?.coupon) : Number(data?.coupon?.id),
                 description: data?.description,
@@ -1665,7 +1657,7 @@ const styles = ScaledSheet.create({
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    buttonContainer: {marginLeft: "12@ms"},
+    buttonContainer: { marginLeft: "12@ms" },
     organizationParentContainer: {
         marginTop: "12@ms",
     },

@@ -108,12 +108,12 @@ const SettingScreen = () => {
     if (!storedData) return null;
     let parsedUserData = JSON.parse(storedData);
     setUserId(Number(parsedUserData?.userId));
-    userData({
+    const response = await userData({
       variables: {
         findUserByIdId: Number(parsedUserData?.userId)
       }
     });
-    setImage(data?.findUserById?.avatar)
+    setImage(response.data?.findUserById?.avatar);
   };
 
   const rightIcon = () => {

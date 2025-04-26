@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
-import { AllPermissionsDocument, CreateRoleDocument } from "@/graphql/generated";
+import { AllPermissionsDocument, CreateRoleDocument, DeleteRoleDocument, FindRoleByIdDocument, FindUserByIdDocument, UpdateRoleDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import CustomValidation from "@/components/CustomValidation";
 import { set, useForm } from "react-hook-form";
@@ -12,11 +12,19 @@ import { ThemedText } from "@/components/ThemedText";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 import CustomButton from "@/components/CustomButton";
+import { router, useLocalSearchParams } from "expo-router";
 
 const CreateRoleScreen = () => {
     const [rolesData, { data, error, loading, refetch }] = useLazyQuery<any>(
         AllPermissionsDocument
     );
+
+    const [editRolesData, { data: editData, error: editError, loading: editLoading, refetch: editRefresh }] = useLazyQuery(
+        FindRoleByIdDocument
+    );
+
+    const { editable, id, name } = useLocalSearchParams();
+
 
     const [createRole,] = useMutation(CreateRoleDocument, {
         onCompleted: (data) => {
@@ -26,8 +34,25 @@ const CreateRoleScreen = () => {
             //   setModalVisible(false);
             setSelectedRoles([]);
             setValue("name", "");
-            Alert.alert("Success", "Role created successfully");
+            router.replace('/roles')
+        },
+        onError: (error) => {
+            setSelectedRoles([]);
+            setValue("name", "");
+            Alert.alert("Error09", error.message);
+        }
+    });
 
+
+    const [updateRole,] = useMutation(UpdateRoleDocument, {
+        onCompleted: (data) => {
+            refetch();
+            //   setEditVisible(false);
+            //   setCurrentProject(defaultValue)
+            //   setModalVisible(false);
+            setSelectedRoles([]);
+            setValue("name", "");
+            router.replace('/roles')
         },
         onError: (error) => {
             setSelectedRoles([]);
@@ -55,7 +80,26 @@ const CreateRoleScreen = () => {
 
     useEffect(() => {
         rolesData();
+        editable == 'true' && getEditData();
     }, []);
+
+    const getEditData = async () => {
+        const res = await editRolesData({
+            variables: {
+                findRoleByIdId: Number(id),
+            },
+            fetchPolicy: "network-only",
+        });
+        console.log('called');
+        res?.data?.findRoleById?.permissions?.map((item: any) => {
+            console.log(item.id);
+            setSelectedRoles((prev: any) => [...prev, Number(item.id)]);
+        })
+        // setSelectedRoles(res?.data?.findRoleById?.permissions);
+    };
+    // console.log('987', editData?.findRoleById?.permissions);
+    // console.log('890', selectedRoles);
+
 
     // useEffect(() => {
     //     if (data?.allPermissions?.apps) {
@@ -70,7 +114,7 @@ const CreateRoleScreen = () => {
 
     useEffect(() => {
         setCurrentRole(watch("role")?.appName);
-        setSelectedRoles([])
+        // setSelectedRoles([])
     }, [watch("role")]);
 
     const onSubmit = () => {
@@ -85,12 +129,24 @@ const CreateRoleScreen = () => {
             name: watch('name'),
             permissionIds: selectedRoles
         }
-        console.log('087p', typeof params?.permissionIds[0]);
-        createRole({
+
+        editable == 'true' ? updateRole({
+            variables: {
+                data: {
+                    id: Number(id),
+                    permissionIds: selectedRoles,
+                    name: watch('name'),
+                }
+            },
+        }) : createRole({
             variables: {
                 data: params
             },
-        });
+        }
+        )
+
+
+        // console.log('087p', params);
         // createRole(
         //     {
         //         variables: {
@@ -114,13 +170,12 @@ const CreateRoleScreen = () => {
                         label="Select role name"
                         labelStyle={styles.label}
                         placeholder="Select role name"
-                        inputStyle={{ height: vs(50) }}
-                    // rules={{
-                    //     required: {
-                    //         value: true,
-                    //         message: "Select a role",
-                    //     },
-                    // }}
+                        rules={{
+                            required: {
+                                value: true,
+                                message: "Select a role",
+                            },
+                        }}
                     />
 
                     <CustomValidation
@@ -130,13 +185,14 @@ const CreateRoleScreen = () => {
                         name={"name"}
                         inputStyle={[{ lineHeight: ms(20) }]}
                         label={"Name"}
+                        defaultValue={editable == 'true' ? name : ''}
                         rules={{
                             required: "name is required",
                         }}
                         autoCapitalize="none"
                     />
 
-                    <View style={{ marginTop: 20 }}>
+                    <View style={{ marginTop: 20, gap: 20 }}>
                         {data?.allPermissions?.apps?.map(
                             (item: any) =>
                                 item?.appName === currentRole &&
@@ -149,7 +205,7 @@ const CreateRoleScreen = () => {
                                     );
                                     // console.log("00089", allIncluded);
                                     return (
-                                        <View >
+                                        <View style={{ backgroundColor: Colors[theme].cartBg, padding: 10, borderRadius: 10 }}>
                                             <View style={{ marginBottom: 10, flexDirection: "row", alignItems: "center" }}>
                                                 <Pressable
                                                     // onPress={() => {
@@ -168,6 +224,11 @@ const CreateRoleScreen = () => {
 
                                                     //     setSelectedRoles(arr);
                                                     // }}
+                                                    style={{
+                                                        flexDirection: "row",
+                                                        alignItems: "center",
+                                                        marginRight: 5,
+                                                    }}
                                                     onPress={() => {
                                                         let arr: any[] = [];
 
@@ -242,7 +303,6 @@ const CreateRoleScreen = () => {
                                                     );
                                                 })}
                                             </View>
-                                            <View style={{ height: 30 }} />
                                         </View>
                                     );
                                 })
@@ -252,6 +312,7 @@ const CreateRoleScreen = () => {
                     <CustomButton
                         title="Save"
                         onPress={onSubmit}
+                        style={{ marginTop: 20 }}
                     />
 
                 </ThemedView>

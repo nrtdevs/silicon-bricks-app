@@ -1,25 +1,131 @@
-query Modules {
-  permissionGroup {
-    modules {
-      groups {
-        name
-        permissions {
-          action
-          appName
-          description
-          groupName
-          id
-          module
-          slug
-        }
-      }
+#role list
+query PaginatedRoles($listInputDto: ListInputDTO!) {
+  paginatedRoles(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
       name
+      description
+      roleType
+      permissionCount
+      status
     }
   }
 }
 
-#organization list
+#trashed roles list
 
+query ListTrashedRoles($listInputDto: ListInputDTO!) {
+  listTrashedRoles(ListInputDTO: $listInputDto) {
+    data {
+      description
+      id
+      name
+      organization {
+        description
+        id
+        name
+        status
+      }
+      permissionCount
+
+      roleType
+      status
+    }
+    meta {
+      currentPage
+      limit
+      totalItems
+      totalPages
+    }
+  }
+}
+
+#getfindroleid
+query FindRoleById($findRoleByIdId: Float!) {
+  findRoleById(id: $findRoleByIdId) {
+    id
+    name
+    description
+    permissions {
+      id
+    }
+  }
+}
+
+#All Paginated Users
+query PaginatedUsers($listInputDto: ListInputDTO!) {
+  paginatedUsers(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      username
+      mobileNo
+      email
+      status
+      avatar
+      userType
+      designation
+      roles {
+        id
+        name
+      }
+    }
+  }
+}
+
+#All Permissions
+query AllPermissions {
+  allPermissions {
+    apps {
+      appName
+      modules {
+        name
+        permissions {
+          module
+          description
+          action
+          slug
+          id
+        }
+      }
+    }
+  }
+}
+
+# paginated Permission list
+query PaginatedPermissions($listInputDto: ListInputDTO!) {
+  paginatedPermissions(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      appName
+      groupName
+      module
+      action
+      slug
+      description
+    }
+  }
+}
+
+#list of all Organization
 query PaginatedOrganization($listInputDto: ListInputDTO!) {
   paginatedOrganization(ListInputDTO: $listInputDto) {
     meta {
@@ -37,8 +143,9 @@ query PaginatedOrganization($listInputDto: ListInputDTO!) {
   }
 }
 
-query PaginatedUsers($listInputDto: ListInputDTO!) {
-  paginatedUsers(ListInputDTO: $listInputDto) {
+#list of all project
+query PaginatedProjects($listInputDto: ListInputDTO!) {
+  paginatedProjects(ListInputDTO: $listInputDto) {
     meta {
       totalItems
       totalPages
@@ -46,30 +153,93 @@ query PaginatedUsers($listInputDto: ListInputDTO!) {
       limit
     }
     data {
-      avatar
-      email
-      deletedAt
-      createdAt
       id
-      mobileNo
       name
-      organizationId
-      parentId
-      roles {
-        id
-        name
-        roleType
-      }
+      description
       status
-      userType
-      username
-      updatedAt
+      organizationId
+      organization {
+        name
+      }
     }
   }
 }
 
+#trashed projects list
+query ListTrashedProjects($listInputDto: ListInputDTO!) {
+  listTrashedProjects(ListInputDTO: $listInputDto) {
+    data {
+      createdBy {
+        id
+      }
+      description
+      id
+      name
+      organization {
+        id
+        name
+      }
+      organizationId
+      status
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+  }
+}
+
+#find permission by id
+query FindPermissionById($findPermissionByIdId: Float!) {
+  findPermissionById(id: $findPermissionByIdId) {
+    id
+    appName
+    groupName
+    module
+    action
+    slug
+    description
+  }
+}
+
+#find id user id
+query FindPermsissonByUserId($findPermissionsByUserId: Float!) {
+  findPermissionsByUser(id: $findPermissionsByUserId)
+}
+
+#dahsboard count
+query DashboardCount($filters: ReportFilters!) {
+  dashboardCount(filters: $filters) {
+    userCount
+    roleCount
+    permissionCount
+    projectCount
+    organizationCount
+    assignedPermissionCount
+  }
+}
+
+#find user  by id
 query FindUserById($findUserByIdId: Float!) {
   findUserById(id: $findUserByIdId) {
+    id
+    name
+    username
+    mobileNo
+    designation
+    email
+    status
+    avatar
+    userType
+    parentId
+  }
+}
+
+#find hirarchy by id
+query UserHierarchy($parentId: Int, $nameFilter: String) {
+  userHierarchy(parentId: $parentId, nameFilter: $nameFilter) {
     id
     name
     username
@@ -80,70 +250,96 @@ query FindUserById($findUserByIdId: Float!) {
     parentId
     organizationId
     userType
-    createdAt
-    updatedAt
-    deletedAt
+    designation
+    subordinates {
+      name
+      designation
+      subordinates {
+        name
+        designation
+        subordinates {
+          name
+          designation
+          username
+        }
+        username
+      }
+      username
+    }
   }
 }
 
+#paginated module list
 query PaginatedModules($listInputDto: ListInputDTO!) {
   paginatedModules(ListInputDTO: $listInputDto) {
-    data {
-      id
-      name
-      description
-      status
-    }
     meta {
       totalItems
       totalPages
       currentPage
       limit
     }
+    data {
+      id
+      name
+      description
+      status
+    }
   }
 }
 
+#paginated Coupans list
 query PaginatedCoupons($listInputDto: ListInputDTO!) {
   paginatedCoupons(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
     data {
       id
       couponCode
       description
-      discountType
-      maxDiscountAmount
       minOrderAmount
       usageLimit
+      discountValue
       status
       startDate
       endDate
     }
+  }
+}
+
+#trashed Coupons list
+query TrashedCoupons($listInputDto: ListInputDTO!) {
+  trashedCoupons(ListInputDTO: $listInputDto) {
+    data {
+      couponCode
+      description
+      endDate
+      id
+      discountValue
+      minOrderAmount
+      startDate
+      status
+      usageLimit
+    }
     meta {
-      totalItems
-      totalPages
       currentPage
       limit
+      totalItems
+      totalPages
     }
   }
 }
 
-query PaginatedSubscriptions($listInputDto: ListInputDTO!) {
-  paginatedSubscriptions(ListInputDTO: $listInputDto) {
+# dropdown list of all coupans
+query CouponsDropdown($listInputDto: ListInputDTO!) {
+  couponsDropdown(ListInputDTO: $listInputDto) {
     data {
       id
-      name
-      price
-      duration
-      status
-      plans {
-        id
-        name
-        description
-        price
-        duration
-        discountedPrice
-        status
-        couponId
-      }
+      couponCode
+      discountValue
     }
     meta {
       totalItems
@@ -154,48 +350,60 @@ query PaginatedSubscriptions($listInputDto: ListInputDTO!) {
   }
 }
 
+#paginated Offers list
 query PaginatedOffers($listInputDto: ListInputDTO!) {
   paginatedOffers(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
     data {
       id
       title
       description
       offerType
-      discountType
       discountValue
-      maxDiscountAmount
-      cashbackAmount
-      minOrderAmount
       usageLimit
       status
       startDate
       endDate
     }
+  }
+}
+
+#trashed offers list
+query TrashedOffers($listInputDto: ListInputDTO!) {
+  trashedOffers(ListInputDTO: $listInputDto) {
+    data {
+      description
+      discountValue
+      endDate
+      id
+      offerType
+      startDate
+      status
+      title
+      usageLimit
+    }
     meta {
-      totalItems
-      totalPages
       currentPage
       limit
+      totalItems
+      totalPages
     }
   }
 }
 
+# dropdown of all  offers
 query DropdownOffers($listInputDto: ListInputDTO!) {
   dropdownOffers(ListInputDTO: $listInputDto) {
     data {
       id
       title
-      description
-      offerType
-      discountType
       discountValue
-      maxDiscountAmount
-      cashbackAmount
-      minOrderAmount
       usageLimit
-      status
-      startDate
-      endDate
     }
     meta {
       totalItems
@@ -206,78 +414,89 @@ query DropdownOffers($listInputDto: ListInputDTO!) {
   }
 }
 
-query DashboardCount($filters: ReportFilters!) {
-  dashboardCount(filters: $filters) {
-    userCount
-    roleCount
-    permissionCount
-    assignedPermissionCount
-    projectCount
-    organizationCount
-    couponCount
-    offerCount
-    moduleCount
-    packageCount
-    planCount
-    subscriptionCount
-    packageModuleCount
-    subscriptionPlanCount
-  }
-}
-
-query Query($findPermissionsByUserId: Float!) {
-  findPermissionsByUser(id: $findPermissionsByUserId)
-}
-
-query PaginatedProjects($listInputDto: ListInputDTO!) {
-  paginatedProjects(ListInputDTO: $listInputDto) {
+#paginated Packages list
+query PaginatedPackages($listInputDto: ListInputDTO!) {
+  paginatedPackages(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
     data {
       id
       name
       description
+      price
+      discountedPrice
       status
-      organizationId
-      organization {
+      modules {
         id
         name
-        status
       }
     }
+  }
+}
+
+#trashed packages list
+query TrashedPackages($listInputDto: ListInputDTO!) {
+  trashedPackages(ListInputDTO: $listInputDto) {
+    data {
+      description
+      discountedPrice
+      id
+      modules {
+        id
+      }
+      name
+
+      price
+      status
+    }
+    meta {
+      currentPage
+      limit
+      totalItems
+      totalPages
+    }
+  }
+}
+
+# find package by id
+query FindPackageById($findPackageByIdId: Int!) {
+  findPackageById(id: $findPackageByIdId) {
+    name
+    price
+    offerExpiryDate
+    offerDescription
+    discountedPrice
+    modules {
+      id
+      name
+    }
+    description
+    id
+  }
+}
+
+# dropdown packages
+query PackagesDropdown($listInputDto: ListInputDTO!) {
+  packagesDropdown(ListInputDTO: $listInputDto) {
     meta {
       totalItems
       totalPages
       currentPage
       limit
     }
-  }
-}
-
-query PaginatedOffers($listInputDto: ListInputDTO!) {
-  paginatedOffers(ListInputDTO: $listInputDto) {
     data {
       id
-      title
-      description
-      offerType
-      discountType
-      discountValue
-      maxDiscountAmount
-      cashbackAmount
-      minOrderAmount
-      usageLimit
-      status
-      startDate
-      endDate
-    }
-    meta {
-      totalItems
-      totalPages
-      currentPage
-      limit
+      name
+      price
     }
   }
 }
 
+# paginated Plan list
 query PaginatedPlans($listInputDto: ListInputDTO!) {
   paginatedPlans(ListInputDTO: $listInputDto) {
     meta {
@@ -294,88 +513,129 @@ query PaginatedPlans($listInputDto: ListInputDTO!) {
       duration
       discountedPrice
       status
+      couponCode
+
+      coupon {
+        couponCode
+        id
+      }
       package {
         id
         name
-        description
         price
-        discountedPrice
-        status
       }
-      couponId
     }
   }
 }
 
-query PaginatedPermissions($listInputDto: ListInputDTO!) {
-  paginatedPermissions(ListInputDTO: $listInputDto) {
-    data {
-      id
-      appName
-      groupName
-      module
-      action
-      slug
-      description
-    }
+# TRASHED PLAN LIST
+query TrashedPlans($listInputDto: ListInputDTO!) {
+  trashedPlans(ListInputDTO: $listInputDto) {
     meta {
       totalItems
       totalPages
       currentPage
       limit
     }
-  }
-}
-
-query PaginatedRoles($listInputDto: ListInputDTO!) {
-  paginatedRoles(ListInputDTO: $listInputDto) {
     data {
       id
       name
-      permissions {
-        id
-        appName
-        groupName
-        module
-        action
-        slug
-        description
-      }
-      description
-      roleType
+      price
       status
-      permissionCount
-      organization {
-        id
-        name
-        status
-        description
-      }
+      duration
     }
+  }
+}
+
+#main pAGE of all PLANS list
+query PaginatedPlansForList($listInputDto: ListInputDTO!) {
+  paginatedPlansForList(ListInputDTO: $listInputDto) {
     meta {
       totalItems
       totalPages
       currentPage
       limit
     }
+    data {
+      id
+      name
+      description
+      price
+      duration
+      discountedPrice
+      status
+      couponCode
+    }
   }
 }
 
+# find plan by id
+query FindPlanById($findPlanByIdId: Int!) {
+  findPlanById(id: $findPlanByIdId) {
+    id
+    name
+    description
+    price
+    duration
+    discountedPrice
+    status
+    couponCode
+  }
+}
 
-query AllPermissions {
-  allPermissions {
-    apps {
-      appName
-      modules {
-        name
-        permissions {
-          id
-          module
-          action
-          description
-          slug
-        }
+#paginated Subscriptions list
+query PaginatedSubscriptions($listInputDto: ListInputDTO!) {
+  paginatedSubscriptions(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      price
+      duration
+      status
+      plans {
+        id
       }
     }
   }
+}
+
+#trashed list of all users
+query TrashedUsers($listInputDto: ListInputDTO!) {
+  trashedUsers(ListInputDTO: $listInputDto) {
+    data {
+      avatar
+      createdAt
+      deletedAt
+      email
+      id
+      mobileNo
+      name
+      organizationId
+      parentId
+      roles {
+        id
+        name
+      }
+      status
+      updatedAt
+      userType
+      username
+    }
+    meta {
+      currentPage
+      limit
+      totalItems
+      totalPages
+    }
+  }
+}
+
+query Query($findPermissionsByUserId: Float!) {
+  findPermissionsByUser(id: $findPermissionsByUserId)
 }

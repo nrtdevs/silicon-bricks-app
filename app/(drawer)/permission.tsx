@@ -75,7 +75,7 @@ const PermissionScreen = () => {
     });
     // Add and Edit state
 
-    const [createOrganization, createOrganizationState] = useMutation(CreatePermissionDocument, {
+    const [createPermission, createPermissionState] = useMutation(CreatePermissionDocument, {
         onCompleted: (data) => {
             reset()
             refetch();
@@ -100,6 +100,7 @@ const PermissionScreen = () => {
     } = useForm<{ appName: string, description: string, module: string, action: string }>({
         defaultValues: {},
     });
+
     const [currentPermission, setCurrentPermission] = useState<{
         appName: string;
         description: string;
@@ -124,6 +125,13 @@ const PermissionScreen = () => {
         //     },
         // });
 
+        createPermission({
+            variables: {
+                data: {
+                    ...param
+                },
+            },
+        });
     };
     const [currentPremission, setCurrentProject] = useState<{
         appName: string,
@@ -137,6 +145,13 @@ const PermissionScreen = () => {
         setValue('description', currentPremission?.description)
         setValue('module', String(currentPremission?.module))
     }, [currentPremission])
+
+    // useEffect(() => {
+    //     setValue("appName", currentPermission?.appName);
+    //     setValue("module", currentPermission?.module);
+    //     setValue("action", currentPermission?.action);
+    //     setValue("description", currentPermission?.description);
+    // }, [currentPermission]);
 
     console.log('00999', data?.paginatedPermissions?.data[0]);
 
@@ -349,7 +364,7 @@ const PermissionScreen = () => {
 
                     <CustomButton
                         title="Submit"
-                        isLoading={createOrganizationState.loading}
+                        isLoading={createPermissionState.loading}
                         onPress={() => {
                             handleSubmit(onSubmit)();
                         }}
@@ -379,9 +394,10 @@ const styles = ScaledSheet.create({
     status: {
         color: "green",
         borderRadius: "10@ms",
-        width: "90@ms",
+        width: "100%",
         textAlign: "center",
-        fontSize: "12@ms",
+        fontSize: "14@ms",
+        fontWeight: 'bold',
     },
     organizationContainer: {
         width: "100%",

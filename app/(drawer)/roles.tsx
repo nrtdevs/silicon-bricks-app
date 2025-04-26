@@ -25,7 +25,7 @@ import CustomSearchBar from '@/components/CustomSearchBar';
 import { Pressable } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import debounce from "lodash.debounce";
-import { PaginatedRolesDocument } from '@/graphql/generated';
+import { DeleteRoleDocument, PaginatedRolesDocument } from '@/graphql/generated';
 import { useUserContext } from '@/context/RoleContext';
 import { router } from 'expo-router';
 
@@ -87,6 +87,7 @@ const RolesScreen = () => {
       variables: {
         listInputDto: {},
       },
+      fetchPolicy: "network-only",
     });
   };
   useEffect(() => {
@@ -115,6 +116,16 @@ const RolesScreen = () => {
       console.error("Error deleting project:", error);
     },
   });
+  const [deleteRole,] = useMutation(DeleteRoleDocument, {
+    onCompleted: (data) => {
+        refetch();
+        //   setEditVisible(false);
+        //   setCurrentProject(defaultValue)
+        //   setModalVisible(false);
+    },
+    onError: (error) => {
+    }
+});
   const handleDelete = async () => {
     console.log(selectedProjectId);
     if (selectedProjectId !== null) {
@@ -132,10 +143,10 @@ const RolesScreen = () => {
   const [updatePermission] = useMutation(Update_Permission);
   const { can, hasAny } = useUserContext();
 
-    const deletePermission = can("MasterApp:Module:Delete");
-    const checkUpdatePermission = can("MasterApp:Module:Update");
-    const createPermission = can("MasterApp:Module:Create");
-    const statusUpdatePermission = can("MasterApp:Module:Action");
+  const deletePermission = can("MasterApp:Module:Delete");
+  const checkUpdatePermission = can("MasterApp:Module:Update");
+  const createPermission = can("MasterApp:Module:Create");
+  const statusUpdatePermission = can("MasterApp:Module:Action");
 
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const schema = z.object({
@@ -191,7 +202,6 @@ const RolesScreen = () => {
     }, 500),
     [searchQuery]
   );
-  
 
   return (
     <CustomHeader>
@@ -215,11 +225,15 @@ const RolesScreen = () => {
           </View>
           <Pressable
             style={styles.buttonContainer}
-          // onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
-          onPress={() => {
-            router.push('/(subComponents)/createRole')
-          }}
-          >
+            // onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
+            onPress={() => {
+              router.push({
+                pathname: "/(subComponents)/createRole",
+                params: {
+                  editable: "false",
+                }
+              })
+            }}          >
             <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
           </Pressable>
         </View>
@@ -242,15 +256,16 @@ const RolesScreen = () => {
                       name="edit"
                       size={ms(22)}
                       color={Colors[theme].text}
-                    // onPress={() => {
-                    //   setModalVisible(true),
-                    //     setCurrentPermission({
-                    //       appName: item.appName,
-                    //       description: item.description,
-                    //       id: String(item.id),
-                    //       module: item.module
-                    //     })
-                    // }}
+                      onPress={() => {
+                        router.push({
+                          pathname: "/(subComponents)/createRole",
+                          params: {
+                            editable: "true",
+                            id: item.id,
+                            name: item.name,
+                          }
+                        })
+                      }}
                     />
                     <View style={{ width: 5 }}></View>
                     <MaterialIcons
@@ -264,11 +279,11 @@ const RolesScreen = () => {
                           [
                             {
                               text: "Yes", onPress: () => {
-                                // deletePermission({
-                                //   variables: {
-                                //     deletePermissionId: Number(item?.id),
-                                //   }
-                                // });
+                                deleteRole({
+                                  variables: {
+                                    ids: Number(item?.id),
+                                  }
+                                });
                               }
                             },
                             { text: "No", onPress: () => { } },
@@ -392,7 +407,7 @@ const styles = ScaledSheet.create({
   innerContainer: {
     paddingVertical: 10
   },
-  buttonContainer: {marginLeft: "12@ms"},
+  buttonContainer: { marginLeft: "12@ms" },
   searchContainer: {
     width: "100%",
     flexDirection: "row",

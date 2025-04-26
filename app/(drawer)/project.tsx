@@ -179,7 +179,7 @@ const Project = () => {
   );
 
   const renderItem = ({ item, index }: any) => {
-    console.log('9999', item);
+    // console.log('9999', item);
     return (
       <View
         key={index}
@@ -225,6 +225,7 @@ const Project = () => {
                   [
                     {
                       text: "Yes", onPress: () => {
+                        console.log('908', item?.id);
                         deleteProject({
                           variables: {
                             ids: [Number(item?.id)],

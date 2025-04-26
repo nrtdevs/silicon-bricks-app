@@ -88,7 +88,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     const fetchUserPermissions = async () => {
       const storedData = await SecureStore.getItemAsync("userData");
       if (!storedData) return null;
-      let  parsedUserData = JSON.parse(storedData);
+      let parsedUserData = JSON.parse(storedData);
       if (parsedUserData?.userId) {
         getUserPermissionById({
           variables: {
