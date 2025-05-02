@@ -1,7 +1,9 @@
 import {
   View,
   TouchableOpacity,
-  Alert
+  Alert,
+  ActivityIndicator,
+  RefreshControl
 } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,7 +20,7 @@ import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from "zod";
-import { ms, ScaledSheet } from 'react-native-size-matters';
+import { ms, ScaledSheet, vs } from 'react-native-size-matters';
 import { labels } from '@/constants/Labels';
 import { ThemedView } from '@/components/ThemedView';
 import CustomSearchBar from '@/components/CustomSearchBar';
@@ -28,6 +30,7 @@ import debounce from "lodash.debounce";
 import { DeleteRoleDocument, PaginatedRolesDocument } from '@/graphql/generated';
 import { useUserContext } from '@/context/RoleContext';
 import { router } from 'expo-router';
+import NoDataFound from '@/components/NoDataFound';
 
 const RoleModule = gql`
   query PaginatedRoles($listInputDto: ListInputDTO!) {
@@ -72,28 +75,90 @@ const RolesScreen = () => {
   const [rolesData, { error, data, loading, refetch }] = useLazyQuery(
     PaginatedRolesDocument
   );
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const fetchRoles = async (isRefreshing = false) => {
-    if (isRefreshing) {
-      setPage(1);
-      setRefreshing(true);
-    }
+  const [rolesList, setRolesList] = useState<any[]>([]);
+  const fetchRoles = async (isRefreshing = false, searchParams = "") => {
+    // if (isRefreshing) {
+    //   setPage(1);
+    //   setRefreshing(true);
+    // }
+    // const params = {
+    //   per_page_record: 10,
+    //   page: isRefreshing ? 1 : page,
+    // };
+
+    // await rolesData({
+    //   variables: {
+    //     listInputDto: {},
+    //   },
+    //   fetchPolicy: "network-only",
+    // });
+    // if (isRefreshing) {
+    //   setPage(1);
+    //   setRefreshing(true);
+    // }
+
+    const currentPage = isRefreshing ? 1 : page;
+
     const params = {
-      per_page_record: 10,
-      page: isRefreshing ? 1 : page,
+      limit: 7,
+      page: currentPage,
+      search: searchParams,
     };
 
-    await rolesData({
-      variables: {
-        listInputDto: {},
-      },
-      fetchPolicy: "network-only",
-    });
+    try {
+      const res: any = await rolesData({
+        variables: {
+          listInputDto: params,
+        },
+        fetchPolicy: "network-only",
+      });
+
+      // console.log("Roles Data:00", res?.data?.paginatedRoles?.data);
+
+      if (res?.data?.paginatedRoles?.data) {
+        const data: any = res?.data?.paginatedRoles?.data;
+        const newItems = data || [];
+
+        setRolesList((prev: any) => {
+          if (isRefreshing) {
+            return newItems;
+          } else {
+            // Avoid duplicates by comparing item IDs
+            const existingIds = new Set(prev.map((item: any) => item.id));
+            const filteredNewItems = newItems.filter(
+              (item: any) => !existingIds.has(item.id)
+            );
+            return [...prev, ...filteredNewItems];
+          }
+        });
+
+        setRefreshing(false);
+
+        // Update page number only if we received new items
+        if (!isRefreshing) {
+          setPage(currentPage + 1);
+        }
+        const lastPage = Math.ceil(data?.meta?.totalItems / 6);
+        setHasMore(data?.meta?.currentPage < lastPage);
+      } else {
+        console.log("API call failed or returned no data:", res?.errors);
+        setRefreshing(false);
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Fetch failed:", error);
+      setRefreshing(false);
+      setHasMore(false);
+    }
   };
+
   useEffect(() => {
     fetchRoles();
-  }, []);
-  /// serach state 
+  }, [!refreshing]);
+
+  /// search state 
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   /// delete role state --
@@ -118,14 +183,14 @@ const RolesScreen = () => {
   });
   const [deleteRole,] = useMutation(DeleteRoleDocument, {
     onCompleted: (data) => {
-        refetch();
-        //   setEditVisible(false);
-        //   setCurrentProject(defaultValue)
-        //   setModalVisible(false);
+      refetch();
+      //   setEditVisible(false);
+      //   setCurrentProject(defaultValue)
+      //   setModalVisible(false);
     },
     onError: (error) => {
     }
-});
+  });
   const handleDelete = async () => {
     console.log(selectedProjectId);
     if (selectedProjectId !== null) {
@@ -161,7 +226,6 @@ const RolesScreen = () => {
   const hideDialogue = () => {
     setVisible(false);
   };
-
 
   const handleEdit = async (formData: any) => {
     if (!selectedProjectId) {
@@ -205,9 +269,7 @@ const RolesScreen = () => {
 
   return (
     <CustomHeader>
-
       <ThemedView style={styles.contentContainer}>
-
         <View style={styles.searchContainer}>
           <View style={{ flex: 1 }}>
             <CustomSearchBar
@@ -240,7 +302,7 @@ const RolesScreen = () => {
 
         <View style={styles.organizationParentContainer}>
           <FlatList
-            data={data?.paginatedRoles?.data}
+            data={rolesList}
             renderItem={({ item, index }: any) => {
               return <View
                 key={index}
@@ -314,6 +376,28 @@ const RolesScreen = () => {
             }
             }
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing && !loading}
+                onRefresh={async () => {
+                  fetchRoles(true);
+                }}
+              />
+            }
+            keyExtractor={(item: any, index: number) => index.toString()}
+            contentContainerStyle={{ paddingBottom: vs(40) }}
+            ListEmptyComponent={!loading ? <NoDataFound /> : null}
+            ListFooterComponent={
+              hasMore ? (
+                <ActivityIndicator size="small" color={Colors.primary} />
+              ) : null
+            }
+            onEndReached={() => {
+              if (hasMore && !loading) {
+                fetchRoles();
+              }
+            }}
+            onEndReachedThreshold={0.5}
           />
         </View>
       </ThemedView>
@@ -432,7 +516,7 @@ const styles = ScaledSheet.create({
   },
   organizationInfo: {
     flexDirection: "row",
-    gap: "15@ms",
+    gap: "5@ms",
   },
   loadingText: {
     fontSize: 18,

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, Alert } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert, FlatList } from "react-native";
 import React, { useEffect, useState } from "react";
 import { AllPermissionsDocument, CreateRoleDocument, DeleteRoleDocument, FindRoleByIdDocument, FindUserByIdDocument, UpdateRoleDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
@@ -15,6 +15,7 @@ import CustomButton from "@/components/CustomButton";
 import { router, useLocalSearchParams } from "expo-router";
 
 const CreateRoleScreen = () => {
+
     const [rolesData, { data, error, loading, refetch }] = useLazyQuery<any>(
         AllPermissionsDocument
     );
@@ -194,118 +195,122 @@ const CreateRoleScreen = () => {
 
                     <View style={{ marginTop: 20, gap: 20 }}>
                         {data?.allPermissions?.apps?.map(
-                            (item: any) =>
+                            (item: any, index: any) =>
                                 item?.appName === currentRole &&
-                                item?.modules?.map((item: any) => {
-                                    let currentRoles = item?.permissions?.map(
-                                        (item: any) => item.id
-                                    );
-                                    let allIncluded = currentRoles.every((el) =>
-                                        selectedRoles?.includes(el)
-                                    );
-                                    // console.log("00089", allIncluded);
-                                    return (
-                                        <View style={{ backgroundColor: Colors[theme].cartBg, padding: 10, borderRadius: 10 }}>
-                                            <View style={{ marginBottom: 10, flexDirection: "row", alignItems: "center" }}>
-                                                <Pressable
-                                                    // onPress={() => {
-                                                    //     let arr = [];
-                                                    //     allIncluded 
-                                                    //         ? (arr = selectedRoles.filter(
-                                                    //             (el) => !currentRoles?.includes(el)
-                                                    //         ))
-                                                    //         : arr = selectedRoles.forEach((el) => {
-                                                    //             if (!selectedRoles?.includes(el)) {
-                                                    //                 selectedRoles.push(el);
-                                                    //             }
-                                                    //         });
+                                <View key={index}>
+                                    {
+                                        item?.modules?.map((item: any, index: any) => {
+                                            let currentRoles = item?.permissions?.map(
+                                                (item: any) => item.id
+                                            );
+                                            let allIncluded = currentRoles.every((el) =>
+                                                selectedRoles?.includes(el)
+                                            );
+                                            // console.log("00089", allIncluded);
+                                            return (
+                                                <View key={index} style={{ backgroundColor: Colors[theme].cartBg, padding: 10, borderRadius: 10, marginBottom: 20 }}>
+                                                    <View style={{ marginBottom: 10, flexDirection: "row", alignItems: "center" }}>
+                                                        <Pressable
+                                                            // onPress={() => {
+                                                            //     let arr = [];
+                                                            //     allIncluded 
+                                                            //         ? (arr = selectedRoles.filter(
+                                                            //             (el) => !currentRoles?.includes(el)
+                                                            //         ))
+                                                            //         : arr = selectedRoles.forEach((el) => {
+                                                            //             if (!selectedRoles?.includes(el)) {
+                                                            //                 selectedRoles.push(el);
+                                                            //             }
+                                                            //         });
 
-                                                    //         console.log(arr);
+                                                            //         console.log(arr);
 
-                                                    //     setSelectedRoles(arr);
-                                                    // }}
-                                                    style={{
-                                                        flexDirection: "row",
-                                                        alignItems: "center",
-                                                        marginRight: 5,
-                                                    }}
-                                                    onPress={() => {
-                                                        let arr: any[] = [];
-
-                                                        if (allIncluded) {
-                                                            // Remove currentRoles from selectedRoles
-                                                            arr = selectedRoles.filter(el => !currentRoles?.includes(el));
-                                                            // allIncluded = true;
-                                                        } else {
-                                                            // Add currentRoles to selectedRoles without duplicates
-                                                            const added = currentRoles?.filter(el => !selectedRoles.includes(el)) || [];
-                                                            arr = [...selectedRoles, ...added];
-                                                        }
-                                                        // console.log("Updated roles:", allIncluded);
-                                                        setSelectedRoles(arr);
-                                                    }}
-                                                >
-                                                    <MaterialCommunityIcons
-                                                        name={
-                                                            allIncluded
-                                                                ? "checkbox-outline"
-                                                                : "checkbox-blank-outline"
-                                                        }
-                                                        size={35}
-                                                        color={Colors[theme].text}
-                                                    />
-                                                </Pressable>
-                                                <ThemedText type="subtitle" >{item.name}</ThemedText>
-                                            </View>
-
-                                            <View
-                                                style={{
-                                                    flexDirection: "row",
-                                                    flexWrap: "wrap",
-                                                    gap: 10,
-                                                }}
-                                            >
-                                                {item.permissions?.map((item: any) => {
-                                                    return (
-                                                        <View
+                                                            //     setSelectedRoles(arr);
+                                                            // }}
                                                             style={{
                                                                 flexDirection: "row",
-                                                                // backgroundColor:'white'
+                                                                alignItems: "center",
+                                                                marginRight: 5,
+                                                            }}
+                                                            onPress={() => {
+                                                                let arr: any[] = [];
+                                                                if (allIncluded) {
+                                                                    // Remove currentRoles from selectedRoles
+                                                                    arr = selectedRoles.filter(el => !currentRoles?.includes(el));
+                                                                    // allIncluded = true;
+                                                                } else {
+                                                                    // Add currentRoles to selectedRoles without duplicates
+                                                                    const added = currentRoles?.filter(el => !selectedRoles.includes(el)) || [];
+                                                                    arr = [...selectedRoles, ...added];
+                                                                }
+                                                                // console.log("Updated roles:", allIncluded);
+                                                                setSelectedRoles(arr);
                                                             }}
                                                         >
-                                                            {/* <CustomValidation
-                                                                type="checkbox"
-                                                                control={control}
+                                                            <MaterialCommunityIcons
+                                                                name={
+                                                                    allIncluded
+                                                                        ? "checkbox-outline"
+                                                                        : "checkbox-blank-outline"
+                                                                }
+                                                                size={35}
+                                                                color={Colors[theme].text}
+                                                            />
+                                                        </Pressable>
+                                                        <ThemedText type="subtitle" >{item.name}</ThemedText>
+                                                    </View>
 
-                                                                label={item.action}
-                                                                name={item.action}
-                                                            /> */}
-                                                            <Pressable onPress={() => {
-                                                                setSelectedRoles(prev =>
-                                                                    prev.includes(item.id)
-                                                                        ? prev.filter(id => id !== item.id)
-                                                                        : [...prev, item.id]
-                                                                );
-                                                            }}>
-                                                                <MaterialCommunityIcons
-                                                                    name={
-                                                                        selectedRoles.includes(item.id)
-                                                                            ? "checkbox-outline"
-                                                                            : "checkbox-blank-outline"
-                                                                    }
-                                                                    size={28}
-                                                                    color={Colors[theme].text}
-                                                                />
-                                                            </Pressable>
-                                                            {/* <MaterialCommunityIcons name="checkbox-outline" size={24} color="black" /> */}
-                                                            <ThemedText style={{ fontSize: 20 }}>{item.action}</ThemedText>
-                                                        </View>
-                                                    );
-                                                })}
-                                            </View>
-                                        </View>
-                                    );
-                                })
+                                                    <View
+                                                        style={{
+                                                            flexDirection: "row",
+                                                            flexWrap: "wrap",
+                                                            gap: 10,
+                                                        }}
+                                                    >
+                                                        {item.permissions?.map((item: any, index: number) => {
+                                                            return (
+                                                                <View
+                                                                    key={index}
+                                                                    style={{
+                                                                        flexDirection: "row",
+                                                                        // backgroundColor:'white'
+                                                                    }}
+                                                                >
+                                                                    {/* <CustomValidation
+                                                                        type="checkbox"
+                                                                        control={control}
+        
+                                                                        label={item.action}
+                                                                        name={item.action}
+                                                                    /> */}
+                                                                    <Pressable onPress={() => {
+                                                                        setSelectedRoles(prev =>
+                                                                            prev.includes(item.id)
+                                                                                ? prev.filter(id => id !== item.id)
+                                                                                : [...prev, item.id]
+                                                                        );
+                                                                    }}>
+                                                                        <MaterialCommunityIcons
+                                                                            name={
+                                                                                selectedRoles.includes(item.id)
+                                                                                    ? "checkbox-outline"
+                                                                                    : "checkbox-blank-outline"
+                                                                            }
+                                                                            size={28}
+                                                                            color={Colors[theme].text}
+                                                                        />
+                                                                    </Pressable>
+                                                                    {/* <MaterialCommunityIcons name="checkbox-outline" size={24} color="black" /> */}
+                                                                    <ThemedText style={{ fontSize: 20 }}>{item.action}</ThemedText>
+                                                                </View>
+                                                            );
+                                                        })}
+                                                    </View>
+                                                </View>
+                                            );
+                                        })
+                                    }
+                                </View>
                         )}
                     </View>
 

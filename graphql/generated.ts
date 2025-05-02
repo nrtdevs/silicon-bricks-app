@@ -18,6 +18,15 @@ export type Scalars = {
   JSONObject: { input: any; output: any; }
 };
 
+export type About = {
+  __typename?: 'About';
+  content?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+};
+
 export type AppPermissionsDto = {
   __typename?: 'AppPermissionsDto';
   appName: Scalars['String']['output'];
@@ -38,6 +47,75 @@ export type ApplicationModuleArray = {
 };
 
 export type ApplicationModuleUnion = ApplicationModule | ApplicationModuleArray;
+
+export type Breakdown = {
+  __typename?: 'Breakdown';
+  breakdownDate: Scalars['DateTime']['output'];
+  breakdownDescription?: Maybe<Scalars['String']['output']>;
+  breakdownLocation: Scalars['String']['output'];
+  breakdownType?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<User>;
+  createdById?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  latitude: Scalars['String']['output'];
+  longitude: Scalars['String']['output'];
+  media: Array<BreakdownMedia>;
+  status: Scalars['String']['output'];
+  statuses: Array<BreakdownStatus>;
+  updatedAt: Scalars['DateTime']['output'];
+  vehicle: Vehicle;
+  vehicleId: Scalars['Int']['output'];
+};
+
+export type BreakdownMedia = {
+  __typename?: 'BreakdownMedia';
+  breakdown: Breakdown;
+  breakdownId: Scalars['Int']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  mediaType: Scalars['String']['output'];
+  mediaUrl: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type BreakdownMediaDto = {
+  breakdownId: Scalars['Float']['input'];
+  mediaType?: InputMaybe<Scalars['String']['input']>;
+  mediaUrl: Array<Scalars['String']['input']>;
+};
+
+export type BreakdownStatus = {
+  __typename?: 'BreakdownStatus';
+  approver?: Maybe<User>;
+  approverId?: Maybe<Scalars['Float']['output']>;
+  breakdown: Breakdown;
+  breakdownId: Scalars['Int']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<User>;
+  createdById?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  remark: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type BreakdownStatusDto = {
+  approverId?: InputMaybe<Scalars['Float']['input']>;
+  assignId?: InputMaybe<Scalars['Float']['input']>;
+  id: Scalars['Float']['input'];
+  remark: Scalars['String']['input'];
+  status: Breakdown_Status;
+};
+
+export type Category = {
+  __typename?: 'Category';
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
 
 export type ChangePasswordDto = {
   currentPassword: Scalars['String']['input'];
@@ -78,6 +156,17 @@ export type CouponStatusDto = {
   status: CouponStatus;
 };
 
+export type CreateBreakdownDto = {
+  breakdownDate: Scalars['String']['input'];
+  breakdownDescription: Scalars['String']['input'];
+  breakdownLocation: Scalars['String']['input'];
+  breakdownType: Scalars['String']['input'];
+  latitude: Scalars['String']['input'];
+  longitude: Scalars['String']['input'];
+  mediaUrl?: InputMaybe<Array<MediaDto>>;
+  vehicleId: Scalars['Float']['input'];
+};
+
 export type CreateCouponDto = {
   couponCode: Scalars['String']['input'];
   description: Scalars['String']['input'];
@@ -94,7 +183,7 @@ export type CreateFollowUpDto = {
 };
 
 export type CreateMeetingDto = {
-  attendees?: InputMaybe<Array<Scalars['String']['input']>>;
+  attendees?: InputMaybe<Array<Scalars['Float']['input']>>;
   endTime: Scalars['String']['input'];
   meetingAgenda?: InputMaybe<Scalars['String']['input']>;
   meetingDate: Scalars['DateTime']['input'];
@@ -239,6 +328,38 @@ export type CreateUserDto = {
   userType?: InputMaybe<UserType>;
 };
 
+export type CreateVehicleDto = {
+  avatar?: InputMaybe<Scalars['String']['input']>;
+  chassisNumber: Scalars['String']['input'];
+  color: Scalars['String']['input'];
+  insurance: Scalars['Boolean']['input'];
+  insuranceValidTill?: InputMaybe<Scalars['String']['input']>;
+  maintenanceHistory?: InputMaybe<Scalars['String']['input']>;
+  make: Scalars['String']['input'];
+  model: Scalars['String']['input'];
+  numberPlate: Scalars['String']['input'];
+  year: Scalars['String']['input'];
+};
+
+export type CreateVehicleExpenseDto = {
+  amount: Scalars['Float']['input'];
+  breakDownId?: InputMaybe<Scalars['Float']['input']>;
+  description: Scalars['String']['input'];
+  expenseDate: Scalars['String']['input'];
+  expenseType: Scalars['String']['input'];
+  uploadDoc?: InputMaybe<Scalars['String']['input']>;
+  vehicleId: Scalars['Float']['input'];
+};
+
+export type CreateWarehouseDto = {
+  capacity: Scalars['Float']['input'];
+  contactPerson?: InputMaybe<Scalars['String']['input']>;
+  email: Scalars['String']['input'];
+  location: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  phone: Scalars['Float']['input'];
+};
+
 /** Custom Status */
 export enum CustomStatus {
   Active = 'active',
@@ -251,13 +372,9 @@ export type Dashboard = {
   __typename?: 'Dashboard';
   activeMeetings?: Maybe<Scalars['Int']['output']>;
   completedMeeting?: Maybe<Scalars['Int']['output']>;
-  completedTasks?: Maybe<Scalars['Int']['output']>;
-  inComingTasks?: Maybe<Scalars['Int']['output']>;
   inactiveMeetings?: Maybe<Scalars['Int']['output']>;
-  ongoingTasks?: Maybe<Scalars['Int']['output']>;
   todayMeeting?: Maybe<Scalars['Int']['output']>;
   totalMeetings?: Maybe<Scalars['Int']['output']>;
-  totalTasks?: Maybe<Scalars['Int']['output']>;
   upComingMeeting?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -320,6 +437,18 @@ export type Group = {
   permissions: Array<Permissions>;
 };
 
+export type Inventory = {
+  __typename?: 'Inventory';
+  batchNumber?: Maybe<Scalars['String']['output']>;
+  currentStock: Scalars['Float']['output'];
+  expiryDate?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['String']['output'];
+  minStockLevel: Scalars['Float']['output'];
+  openingStock: Scalars['Float']['output'];
+  status: Scalars['String']['output'];
+  warehouse: Warehouse;
+};
+
 export type ListInputDto = {
   filter?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['Float']['input']>;
@@ -334,9 +463,24 @@ export type LoginRes = {
   user: User;
 };
 
+export type Material = {
+  __typename?: 'Material';
+  barcode?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  sku: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+};
+
+export type MediaDto = {
+  mediaType: Scalars['String']['input'];
+  url: Scalars['String']['input'];
+};
+
 export type Meeting = {
   __typename?: 'Meeting';
-  attendees?: Maybe<Array<Scalars['String']['output']>>;
+  attendees?: Maybe<Array<Scalars['Float']['output']>>;
   children?: Maybe<Array<Meeting>>;
   createdAt: Scalars['DateTime']['output'];
   createdBy: User;
@@ -482,11 +626,13 @@ export type ModuleStatusDto = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addMediaToBreakdown: Array<BreakdownMedia>;
   applyCouponToPlan: Plan;
   assignModuleToPkg: Package;
   assignPermissionsToRole: Role;
   assignPlanToSubscription: Subscriptions;
   assignRoleToUser: User;
+  changeBreakdownStatus: BreakdownStatus;
   changeCouponStatus: CouponOrCoupons;
   changeModuleStatus: ApplicationModuleUnion;
   changeOfferStatus: OfferUnion;
@@ -496,6 +642,10 @@ export type Mutation = {
   changeRoleStatus: RoleUnion;
   changeSubscriptionStatus: SubscriptionsUnion;
   changeUserStatus: UserUnion;
+  changeVehicleExpenseStatus: VehicleExpenseStatus;
+  changeWarehouseStatus: Warehouse;
+  createAbout: About;
+  createBreakdown: Breakdown;
   createCoupon: Coupon;
   createFollowUp: FollowUp;
   createMeeting: Meeting;
@@ -517,6 +667,11 @@ export type Mutation = {
   createSubscription: Subscriptions;
   createSubscriptionWithPlans: Subscriptions;
   createUser: User;
+  createVehicle: Vehicle;
+  createVehicleExpense: VehicleExpense;
+  createWarehouse: Warehouse;
+  deleteAbout: Scalars['Boolean']['output'];
+  deleteBreakdown: Scalars['Boolean']['output'];
   deleteCoupon: Scalars['Boolean']['output'];
   deleteFollowUp: Scalars['Boolean']['output'];
   deleteMeting: Scalars['Boolean']['output'];
@@ -535,11 +690,15 @@ export type Mutation = {
   deleteRole: Scalars['Boolean']['output'];
   deleteSubscription: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  deleteVehicle: Scalars['Boolean']['output'];
+  deleteVehicleExpense: Scalars['Boolean']['output'];
+  deleteWarehouse: Scalars['Boolean']['output'];
   enableMeetingStatus: MeetingOrMeetings;
   enableMeetingTaskStatus: MeetingTaskOrMeetingTasks;
   enableNotePad: NotePadOrNotePads;
   enableOrganizationStatus: OrganizationUnion;
   enableProjectStatus: ProjectUnion;
+  enableVehicleStatus: Vehicle;
   forgotPassword: Scalars['Boolean']['output'];
   hardDeleteCoupon: Scalars['Boolean']['output'];
   hardDeleteFollowUp: Scalars['Boolean']['output'];
@@ -558,6 +717,7 @@ export type Mutation = {
   hardDeleteRole: Scalars['Boolean']['output'];
   hardDeleteSubscription: Scalars['Boolean']['output'];
   hardDeleteUser: Scalars['Boolean']['output'];
+  hardDeleteWarehouse: Scalars['Boolean']['output'];
   login: LoginRes;
   logout: Scalars['Boolean']['output'];
   register: LoginRes;
@@ -579,7 +739,13 @@ export type Mutation = {
   restoreRole: Scalars['Boolean']['output'];
   restoreSubscription: Scalars['Boolean']['output'];
   restoreUser: Scalars['Boolean']['output'];
+  restoreVehicle: Scalars['Boolean']['output'];
+  restoreVehicleBreakdown: Scalars['Boolean']['output'];
+  restoreVehicleExpense: Scalars['Boolean']['output'];
+  restoreWarehouse: Scalars['Boolean']['output'];
   sendRegistrationOtp: OtpRes;
+  updateAbout: About;
+  updateBreakdown: Breakdown;
   updateCoupon: Coupon;
   updateFollowUp: FollowUp;
   updateMeeting: Meeting;
@@ -599,7 +765,15 @@ export type Mutation = {
   updateRole: Role;
   updateSubscription: Subscriptions;
   updateUser: User;
+  updateVehicle: Vehicle;
+  updateVehicleExpense: VehicleExpense;
+  updateWarehouse: Warehouse;
   verifyPayment: Array<Subscriptions>;
+};
+
+
+export type MutationAddMediaToBreakdownArgs = {
+  data: BreakdownMediaDto;
 };
 
 
@@ -630,6 +804,11 @@ export type MutationAssignPlanToSubscriptionArgs = {
 export type MutationAssignRoleToUserArgs = {
   roleIds: Array<Scalars['Int']['input']>;
   userId: Scalars['Int']['input'];
+};
+
+
+export type MutationChangeBreakdownStatusArgs = {
+  data: BreakdownStatusDto;
 };
 
 
@@ -675,6 +854,21 @@ export type MutationChangeSubscriptionStatusArgs = {
 
 export type MutationChangeUserStatusArgs = {
   data: UserStatusDto;
+};
+
+
+export type MutationChangeVehicleExpenseStatusArgs = {
+  data: VehicleExpenseStatusDto;
+};
+
+
+export type MutationChangeWarehouseStatusArgs = {
+  data: WarehouseStatusDto;
+};
+
+
+export type MutationCreateBreakdownArgs = {
+  data: CreateBreakdownDto;
 };
 
 
@@ -784,6 +978,26 @@ export type MutationCreateUserArgs = {
 };
 
 
+export type MutationCreateVehicleArgs = {
+  createVehicleInput: CreateVehicleDto;
+};
+
+
+export type MutationCreateVehicleExpenseArgs = {
+  data: CreateVehicleExpenseDto;
+};
+
+
+export type MutationCreateWarehouseArgs = {
+  CreateWarehouseDto: CreateWarehouseDto;
+};
+
+
+export type MutationDeleteBreakdownArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationDeleteCouponArgs = {
   ids: Array<Scalars['Int']['input']>;
 };
@@ -874,6 +1088,21 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationDeleteVehicleArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteVehicleExpenseArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteWarehouseArgs = {
+  id: Scalars['Float']['input'];
+};
+
+
 export type MutationEnableMeetingStatusArgs = {
   updateMeetingStatusInput: MeetingStatusDto;
 };
@@ -896,6 +1125,11 @@ export type MutationEnableOrganizationStatusArgs = {
 
 export type MutationEnableProjectStatusArgs = {
   data: ProjectStatusDto;
+};
+
+
+export type MutationEnableVehicleStatusArgs = {
+  data: VehicleStatusDto;
 };
 
 
@@ -986,6 +1220,11 @@ export type MutationHardDeleteSubscriptionArgs = {
 
 export type MutationHardDeleteUserArgs = {
   ids: Array<Scalars['Int']['input']>;
+};
+
+
+export type MutationHardDeleteWarehouseArgs = {
+  id: Scalars['Float']['input'];
 };
 
 
@@ -1090,8 +1329,33 @@ export type MutationRestoreUserArgs = {
 };
 
 
+export type MutationRestoreVehicleArgs = {
+  id: Scalars['Float']['input'];
+};
+
+
+export type MutationRestoreVehicleBreakdownArgs = {
+  id: Scalars['Float']['input'];
+};
+
+
+export type MutationRestoreVehicleExpenseArgs = {
+  id: Scalars['Float']['input'];
+};
+
+
+export type MutationRestoreWarehouseArgs = {
+  id: Scalars['Float']['input'];
+};
+
+
 export type MutationSendRegistrationOtpArgs = {
   email: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateBreakdownArgs = {
+  data: UpdateBreakdownDto;
 };
 
 
@@ -1187,6 +1451,21 @@ export type MutationUpdateSubscriptionArgs = {
 
 export type MutationUpdateUserArgs = {
   data: UpdateUserDto;
+};
+
+
+export type MutationUpdateVehicleArgs = {
+  updateVehicleInput: UpdateVehicleDto;
+};
+
+
+export type MutationUpdateVehicleExpenseArgs = {
+  updateVehicleExpenseInput: UpdateVehicleExpenseDto;
+};
+
+
+export type MutationUpdateWarehouseArgs = {
+  UpdateWarehouseDto: UpdateWarehouseDto;
 };
 
 
@@ -1340,6 +1619,12 @@ export type PaginatedApplicationModules = {
   meta: Meta;
 };
 
+export type PaginatedBreakdowns = {
+  __typename?: 'PaginatedBreakdowns';
+  data: Array<Breakdown>;
+  meta: Meta;
+};
+
 export type PaginatedCoupons = {
   __typename?: 'PaginatedCoupons';
   data: Array<Coupon>;
@@ -1442,6 +1727,24 @@ export type PaginatedUsers = {
   meta: Meta;
 };
 
+export type PaginatedVehicleExpense = {
+  __typename?: 'PaginatedVehicleExpense';
+  data: Array<VehicleExpense>;
+  meta: Meta;
+};
+
+export type PaginatedVehicles = {
+  __typename?: 'PaginatedVehicles';
+  data: Array<Vehicle>;
+  meta: Meta;
+};
+
+export type PaginatedWarehouse = {
+  __typename?: 'PaginatedWarehouse';
+  data: Array<Warehouse>;
+  meta: Meta;
+};
+
 export type PermissionDto = {
   __typename?: 'PermissionDto';
   action: Scalars['String']['output'];
@@ -1506,6 +1809,14 @@ export type PlanStatusDto = {
   status: PlanStatus;
 };
 
+export type Post = {
+  __typename?: 'Post';
+  authorId: Scalars['Int']['output'];
+  id: Scalars['ID']['output'];
+  title: Scalars['String']['output'];
+  user: User;
+};
+
 export type Project = {
   __typename?: 'Project';
   createdBy?: Maybe<User>;
@@ -1535,15 +1846,18 @@ export type Query = {
   MeetingHierarchyTree: Array<Meeting>;
   MeetingTaskCalender: Array<MeetingTask>;
   allPermissions: DynamicPermissionsDto;
+  breakdownDropdown: PaginatedBreakdowns;
   couponsDropdown: PaginatedCoupons;
   dashboardCount: DashboardCount;
   dashboardMeetingTaskStatus: PaginatedMeetingTask;
+  dashboardVehicleCount: VehicleDashboardCount;
   dropDownMeeting: PaginatedMeeting;
   dropDownMeetingTask: PaginatedMeetingTask;
   dropDownMeetingType: PaginatedMeetingType;
   dropDownMeetingVenue: PaginatedMeetingVenue;
   dropDownNotes: PaginatedNotes;
   dropdownOffers: PaginatedOffers;
+  findBreakdownById: Breakdown;
   findCouponById: Coupon;
   findModuleById: ApplicationModule;
   findOfferById: Offer;
@@ -1555,8 +1869,15 @@ export type Query = {
   findRoleById: Role;
   findSubscriptionById: Subscriptions;
   findUserById: User;
+  findVehicleById: Vehicle;
+  findVehicleExpenseById: VehicleExpense;
+  findWarehouseById: Warehouse;
+  getAboutById: About;
+  getAllAbout: Array<About>;
   getAllMeetingTypes: Array<MeetingType>;
   getAllNotePad: Array<NotePad>;
+  getBreakdownStatuses: Array<BreakdownStatus>;
+  getBreakdownTypeSuggestions: Array<Scalars['JSON']['output']>;
   getFollowUpById: FollowUp;
   getMeetingDashboard: Dashboard;
   getMeetingId: Meeting;
@@ -1569,6 +1890,8 @@ export type Query = {
   getPaginatedNotesByMeetingId: PaginatedNotes;
   getUpcomingMeetingTask: PaginatedMeetingTask;
   getUpcomingMeetings: PaginatedMeeting;
+  getVehicleExpenseStatuses: Array<VehicleExpenseStatus>;
+  getVehicleExpenseTypeSuggestions: Array<Scalars['JSON']['output']>;
   listTrashedFollowUp: PaginatedFollowUp;
   listTrashedMeeting: PaginatedMeeting;
   listTrashedMeetingTask: PaginatedMeetingTask;
@@ -1580,6 +1903,7 @@ export type Query = {
   listTrashedProjects: PaginatedProjects;
   listTrashedRoles: PaginatedRoles;
   packagesDropdown: PaginatedPackages;
+  paginatedBreakdowns: PaginatedBreakdowns;
   paginatedCoupons: PaginatedCoupons;
   paginatedFollowUp: PaginatedFollowUp;
   paginatedMeeting: PaginatedMeeting;
@@ -1588,6 +1912,7 @@ export type Query = {
   paginatedMeetingTask: PaginatedMeetingTask;
   paginatedMeetingType: PaginatedMeetingType;
   paginatedMeetingVenue: PaginatedMeetingVenue;
+  paginatedMeetingsForUserId: PaginatedMeeting;
   paginatedModules: PaginatedApplicationModules;
   paginatedNotePad: PaginatedNotePad;
   paginatedNotes: PaginatedNotes;
@@ -1600,8 +1925,14 @@ export type Query = {
   paginatedProjects: PaginatedProjects;
   paginatedRoles: PaginatedRoles;
   paginatedSubscriptions: PaginatedSubscriptions;
+  paginatedTrashedWarehouses: PaginatedWarehouse;
   paginatedUsers: PaginatedUsers;
+  paginatedVehicleExpense: PaginatedVehicleExpense;
+  paginatedVehicles: PaginatedVehicles;
+  paginatedWarehouses: PaginatedWarehouse;
   permissionGroup: PermissionGroup;
+  post: Post;
+  posts: Array<Post>;
   project: Project;
   trashedCoupons: PaginatedCoupons;
   trashedModules: PaginatedApplicationModules;
@@ -1611,6 +1942,7 @@ export type Query = {
   trashedSubscriptions: PaginatedSubscriptions;
   trashedUsers: PaginatedUsers;
   userHierarchy: Array<User>;
+  vehiclesDropdown: PaginatedVehicles;
 };
 
 
@@ -1630,6 +1962,11 @@ export type QueryMeetingTaskCalenderArgs = {
 };
 
 
+export type QueryBreakdownDropdownArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
 export type QueryCouponsDropdownArgs = {
   ListInputDTO: ListInputDto;
 };
@@ -1643,6 +1980,11 @@ export type QueryDashboardCountArgs = {
 export type QueryDashboardMeetingTaskStatusArgs = {
   query: ListInputDto;
   status?: InputMaybe<Array<MeetingTaskStatus>>;
+};
+
+
+export type QueryDashboardVehicleCountArgs = {
+  filters: ReportFilters;
 };
 
 
@@ -1673,6 +2015,11 @@ export type QueryDropDownNotesArgs = {
 
 export type QueryDropdownOffersArgs = {
   ListInputDTO: ListInputDto;
+};
+
+
+export type QueryFindBreakdownByIdArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -1728,6 +2075,31 @@ export type QueryFindSubscriptionByIdArgs = {
 
 export type QueryFindUserByIdArgs = {
   id: Scalars['Float']['input'];
+};
+
+
+export type QueryFindVehicleByIdArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type QueryFindVehicleExpenseByIdArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type QueryFindWarehouseByIdArgs = {
+  id: Scalars['Float']['input'];
+};
+
+
+export type QueryGetBreakdownStatusesArgs = {
+  breakdownId: Scalars['Int']['input'];
+};
+
+
+export type QueryGetBreakdownTypeSuggestionsArgs = {
+  search?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1793,6 +2165,16 @@ export type QueryGetUpcomingMeetingsArgs = {
 };
 
 
+export type QueryGetVehicleExpenseStatusesArgs = {
+  expenseId: Scalars['Int']['input'];
+};
+
+
+export type QueryGetVehicleExpenseTypeSuggestionsArgs = {
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryListTrashedFollowUpArgs = {
   ListInputDto: ListInputDto;
 };
@@ -1848,6 +2230,11 @@ export type QueryPackagesDropdownArgs = {
 };
 
 
+export type QueryPaginatedBreakdownsArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
 export type QueryPaginatedCouponsArgs = {
   ListInputDTO: ListInputDto;
 };
@@ -1887,6 +2274,12 @@ export type QueryPaginatedMeetingTypeArgs = {
 
 export type QueryPaginatedMeetingVenueArgs = {
   ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedMeetingsForUserIdArgs = {
+  query: ListInputDto;
+  userId: Scalars['Int']['input'];
 };
 
 
@@ -1950,8 +2343,33 @@ export type QueryPaginatedSubscriptionsArgs = {
 };
 
 
+export type QueryPaginatedTrashedWarehousesArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
 export type QueryPaginatedUsersArgs = {
   ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedVehicleExpenseArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedVehiclesArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedWarehousesArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPostArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1998,6 +2416,11 @@ export type QueryTrashedUsersArgs = {
 export type QueryUserHierarchyArgs = {
   nameFilter?: InputMaybe<Scalars['String']['input']>;
   parentId?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryVehiclesDropdownArgs = {
+  ListInputDTO: ListInputDto;
 };
 
 export type RegisterDto = {
@@ -2076,6 +2499,54 @@ export type SubscriptionsArray = {
 
 export type SubscriptionsUnion = Subscriptions | SubscriptionsArray;
 
+export type Supplier = {
+  __typename?: 'Supplier';
+  address?: Maybe<Scalars['String']['output']>;
+  contactPerson?: Maybe<Scalars['String']['output']>;
+  email: Scalars['String']['output'];
+  gstNumber?: Maybe<Scalars['String']['output']>;
+  id: Scalars['Float']['output'];
+  name: Scalars['String']['output'];
+  phone?: Maybe<Scalars['String']['output']>;
+  status: Scalars['String']['output'];
+};
+
+export type Unit = {
+  __typename?: 'Unit';
+  conversionFactor?: Maybe<Scalars['Float']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  parentUnit?: Maybe<Unit>;
+  parentUnitId?: Maybe<Scalars['Int']['output']>;
+  symbol: Scalars['String']['output'];
+  type: UnitType;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+/** UnitType */
+export enum UnitType {
+  Area = 'area',
+  Density = 'density',
+  Length = 'length',
+  Time = 'time',
+  Volume = 'volume',
+  Weight = 'weight'
+}
+
+export type UpdateBreakdownDto = {
+  breakdownDate: Scalars['String']['input'];
+  breakdownDescription: Scalars['String']['input'];
+  breakdownLocation: Scalars['String']['input'];
+  breakdownType: Scalars['String']['input'];
+  id: Scalars['Int']['input'];
+  latitude: Scalars['String']['input'];
+  longitude: Scalars['String']['input'];
+  mediaUrl?: InputMaybe<Array<MediaDto>>;
+  vehicleId: Scalars['Float']['input'];
+};
+
 export type UpdateCouponDto = {
   couponCode: Scalars['String']['input'];
   description: Scalars['String']['input'];
@@ -2094,7 +2565,7 @@ export type UpdateFollowUpDto = {
 };
 
 export type UpdateMeetingDto = {
-  attendees?: InputMaybe<Array<Scalars['String']['input']>>;
+  attendees?: InputMaybe<Array<Scalars['Float']['input']>>;
   endTime?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['Float']['input'];
   meetingAgenda?: InputMaybe<Scalars['String']['input']>;
@@ -2248,6 +2719,41 @@ export type UpdateUserDto = {
   userType?: InputMaybe<UserType>;
 };
 
+export type UpdateVehicleDto = {
+  avatar?: InputMaybe<Scalars['String']['input']>;
+  chassisNumber?: InputMaybe<Scalars['String']['input']>;
+  color?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Float']['input'];
+  insurance?: InputMaybe<Scalars['Boolean']['input']>;
+  insuranceValidTill?: InputMaybe<Scalars['String']['input']>;
+  maintenanceHistory?: InputMaybe<Scalars['String']['input']>;
+  make?: InputMaybe<Scalars['String']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
+  numberPlate?: InputMaybe<Scalars['String']['input']>;
+  year?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateVehicleExpenseDto = {
+  amount?: InputMaybe<Scalars['Float']['input']>;
+  breakDownId?: InputMaybe<Scalars['Float']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  expenseDate?: InputMaybe<Scalars['String']['input']>;
+  expenseType?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Float']['input'];
+  uploadDoc?: InputMaybe<Scalars['String']['input']>;
+  vehicleId?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type UpdateWarehouseDto = {
+  capacity?: InputMaybe<Scalars['Float']['input']>;
+  contactPerson?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Float']['input'];
+  location?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['Float']['input']>;
+};
+
 export type User = {
   __typename?: 'User';
   avatar?: Maybe<Scalars['String']['output']>;
@@ -2256,11 +2762,13 @@ export type User = {
   designation?: Maybe<Designation>;
   email: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  meetingAttendees: Array<Meeting>;
   mobileNo?: Maybe<Scalars['Float']['output']>;
   name: Scalars['String']['output'];
   organizationId?: Maybe<Scalars['Float']['output']>;
   parent?: Maybe<User>;
   parentId?: Maybe<Scalars['Float']['output']>;
+  posts: Array<Post>;
   roles?: Maybe<Array<Role>>;
   status: Scalars['String']['output'];
   subordinates?: Maybe<Array<User>>;
@@ -2297,6 +2805,86 @@ export type ValidateDto = {
   password: Scalars['String']['input'];
 };
 
+export type Vehicle = {
+  __typename?: 'Vehicle';
+  avatar?: Maybe<Scalars['String']['output']>;
+  chassisNumber: Scalars['String']['output'];
+  color: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  createdBy: User;
+  createdById: Scalars['Int']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  insurance: Scalars['Boolean']['output'];
+  insuranceValidTill?: Maybe<Scalars['DateTime']['output']>;
+  latitude?: Maybe<Scalars['Float']['output']>;
+  longitude?: Maybe<Scalars['Float']['output']>;
+  maintenanceHistory?: Maybe<Scalars['String']['output']>;
+  make: Scalars['String']['output'];
+  model: Scalars['String']['output'];
+  numberPlate: Scalars['String']['output'];
+  organizationBy: Organization;
+  organizationId: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  year: Scalars['String']['output'];
+};
+
+export type VehicleDashboardCount = {
+  __typename?: 'VehicleDashboardCount';
+  breakdownCount?: Maybe<Scalars['Int']['output']>;
+  expenseCount?: Maybe<Scalars['Int']['output']>;
+  vehicleCount?: Maybe<Scalars['Int']['output']>;
+};
+
+export type VehicleExpense = {
+  __typename?: 'VehicleExpense';
+  BreakDown?: Maybe<Breakdown>;
+  amount: Scalars['Float']['output'];
+  breakDownId?: Maybe<Scalars['Float']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy: User;
+  createdById: Scalars['Int']['output'];
+  deletedAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  expenseDate?: Maybe<Scalars['DateTime']['output']>;
+  expenseType: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  status: Scalars['String']['output'];
+  statuses?: Maybe<Array<VehicleExpenseStatus>>;
+  updatedAt: Scalars['DateTime']['output'];
+  uploadDoc?: Maybe<Scalars['String']['output']>;
+  vehicle: Vehicle;
+  vehicleId: Scalars['Int']['output'];
+};
+
+export type VehicleExpenseStatus = {
+  __typename?: 'VehicleExpenseStatus';
+  approver?: Maybe<User>;
+  approverId?: Maybe<Scalars['Float']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<User>;
+  createdById?: Maybe<Scalars['Float']['output']>;
+  expense: VehicleExpense;
+  expenseId: Scalars['Int']['output'];
+  id: Scalars['ID']['output'];
+  remark: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type VehicleExpenseStatusDto = {
+  approverId?: InputMaybe<Scalars['Float']['input']>;
+  id: Scalars['Float']['input'];
+  remark: Scalars['String']['input'];
+  status: Vehicle_Expense_Status;
+};
+
+export type VehicleStatusDto = {
+  id: Scalars['Float']['input'];
+  status: Vehicle_Status;
+};
+
 export type VerifyPaymentInput = {
   amount: Scalars['Float']['input'];
   couponCode?: InputMaybe<Scalars['String']['input']>;
@@ -2307,11 +2895,68 @@ export type VerifyPaymentInput = {
   razorpaySignature: Scalars['String']['input'];
 };
 
+export type Warehouse = {
+  __typename?: 'Warehouse';
+  capacity: Scalars['Float']['output'];
+  contactPerson?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  location: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  phone?: Maybe<Scalars['Float']['output']>;
+  status: Scalars['String']['output'];
+};
+
+/** Warehouse Status */
+export enum WarehouseStatus {
+  Active = 'active',
+  Full = 'full',
+  Inactive = 'inactive',
+  OutOfStock = 'outOfStock'
+}
+
+export type WarehouseStatusDto = {
+  id: Scalars['Float']['input'];
+  status: WarehouseStatus;
+};
+
 export enum AppName {
   MasterApp = 'MasterApp',
   MaterialManagement = 'MaterialManagement',
   TaskManagement = 'TaskManagement',
   VehicleManagement = 'VehicleManagement'
+}
+
+export enum Breakdown_Status {
+  Approved = 'approved',
+  Assigned = 'assigned',
+  Cancelled = 'cancelled',
+  Closed = 'closed',
+  Completed = 'completed',
+  InProgress = 'in_progress',
+  InService = 'in_service',
+  Pending = 'pending',
+  Rejected = 'rejected',
+  ServiceScheduled = 'service_scheduled',
+  UnderReview = 'under_review'
+}
+
+export enum Vehicle_Expense_Status {
+  Approved = 'approved',
+  Assigned = 'assigned',
+  Cancelled = 'cancelled',
+  Completed = 'completed',
+  InProgress = 'in_progress',
+  Pending = 'pending',
+  Rejected = 'rejected',
+  UnderReview = 'under_review'
+}
+
+export enum Vehicle_Status {
+  Active = 'active',
+  Breakdown = 'breakdown',
+  Inactive = 'inactive',
+  Maintenance = 'maintenance'
 }
 
 export type RequestOtpMutationVariables = Exact<{

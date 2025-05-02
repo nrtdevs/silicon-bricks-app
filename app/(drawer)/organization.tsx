@@ -278,49 +278,110 @@ const OrganizationScreen = () => {
         >
           {item?.status}
         </ThemedText>
-        <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+        {item?.description && <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
           {item?.description}
-        </ThemedText>
+        </ThemedText>}
       </View>
     );
   };
 
-  const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
+  // const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
 
+  //   if (isRefreshing) {
+  //     setPage(1);
+  //     setRefreshing(true);
+  //   }
+
+  //   const params = {
+  //     limit: 6,
+  //     page: isRefreshing ? 1 : page,
+  //     search: searchParams,
+  //   };
+
+  //   let res: any = await organizationData({
+  //     variables: {
+  //       listInputDto: params,
+  //     },
+  //     fetchPolicy: "network-only",
+  //   });
+
+  //   if (res?.data?.paginatedOrganization) {
+  //     const data: any = res?.data?.paginatedOrganization;
+  //     setOrganizationList((prev: any) => {
+  //       const updatedData =
+  //         isRefreshing ? data?.data : [...prev, ...data?.data];
+  //       return updatedData;
+  //     });
+
+  //     setRefreshing(false);
+  //     setPage((prevPage) => prevPage + 1);
+  //     const lastPage = Math.ceil(data?.meta?.totalItems / 6);
+  //     setHasMore(data?.meta?.currentPage < lastPage);
+  //   } else {
+  //     console.log("API call failed:", res?.errors);
+  //     setRefreshing(false);
+  //     setHasMore(false)
+  //   }
+  // };
+
+  const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
     if (isRefreshing) {
       setPage(1);
       setRefreshing(true);
     }
 
+    const currentPage = isRefreshing ? 1 : page;
+    console.log("currentPage", currentPage);
+
     const params = {
       limit: 6,
-      page: isRefreshing ? 1 : page,
+      page: currentPage,
       search: searchParams,
     };
 
-    let res: any = await organizationData({
-      variables: {
-        listInputDto: params,
-      },
-      fetchPolicy: "network-only",
-    });
-
-    if (res?.data?.paginatedOrganization) {
-      const data: any = res?.data?.paginatedOrganization;
-      setOrganizationList((prev: any) => {
-        const updatedData =
-          isRefreshing ? data?.data : [...prev, ...data?.data];
-        return updatedData;
+    try {
+      const res: any = await organizationData({
+        variables: {
+          listInputDto: params,
+        },
+        fetchPolicy: "network-only",
       });
 
+      if (res?.data?.paginatedOrganization) {
+        const data: any = res?.data?.paginatedOrganization;
+        const newItems = data?.data || [];
+
+        setOrganizationList((prev: any) => {
+          if (isRefreshing) {
+            return newItems;
+          } else {
+            // Avoid duplicates by comparing item IDs
+            const existingIds = new Set(prev.map((item: any) => item.id));
+            const filteredNewItems = newItems.filter(
+              (item: any) => !existingIds.has(item.id)
+            );
+            return [...prev, ...filteredNewItems];
+          }
+        });
+
+        setRefreshing(false);
+
+        // Update page number only if we received new items
+        if (!isRefreshing) {
+          setPage(currentPage + 1);
+        }
+
+        const lastPage = Math.ceil(data?.meta?.totalItems / 6);
+        setHasMore(data?.meta?.currentPage < lastPage);
+      } else {
+        console.log("API call failed or returned no data:", res?.errors);
+        setRefreshing(false);
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Fetch failed:", error);
       setRefreshing(false);
-      setPage((prevPage) => prevPage + 1);
-      const lastPage = Math.ceil(data?.meta?.totalItems / 6);
-      setHasMore(data?.meta?.currentPage < lastPage);
-    } else {
-      console.log("API call failed:", res?.errors);
-      setRefreshing(false);
-      setHasMore(false)
+      setHasMore(false);
     }
   };
 
