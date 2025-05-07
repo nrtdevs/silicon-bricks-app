@@ -61,7 +61,9 @@ const OrganizationScreen = () => {
   });
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [organizationList, setOrganizationList] = useState<any>([]);
-  const [organizationData, { error, data, loading, refetch }] = useLazyQuery(PaginatedOrganizationDocument);
+  const [organizationData, { error, data, loading, refetch }] = useLazyQuery(
+    PaginatedOrganizationDocument
+  );
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
@@ -94,7 +96,6 @@ const OrganizationScreen = () => {
   const updatePermission = can("MasterApp:Organization:Update");
   const createPermission = can("MasterApp:Organization:Create");
   const statusUpdatePermission = can("MasterApp:Organization:Action");
-
 
   //   const ckeckall = hasAny(['MasterApp:Organization:Create', 'MasterApp:Organization:Update', 'MasterApp:Organization:Delete'])
 
@@ -198,7 +199,6 @@ const OrganizationScreen = () => {
     }
   };
 
-
   const renderItem = ({ item, index }: any) => {
     return (
       <View
@@ -213,35 +213,39 @@ const OrganizationScreen = () => {
             {item?.name}
           </ThemedText>
           <View style={styles.organizationInfo}>
-            {statusUpdatePermission && <MaterialIcons
-              name="attractions"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentOrganization({
-                  name: item?.name,
-                  description: item?.description,
-                  id: item?.id,
-                });
-                setStatusModalVisible(true);
-              }}
-            />}
+            {statusUpdatePermission && (
+              <MaterialIcons
+                name="attractions"
+                size={ms(22)}
+                color={Colors[theme].text}
+                onPress={() => {
+                  setCurrentOrganization({
+                    name: item?.name,
+                    description: item?.description,
+                    id: item?.id,
+                  });
+                  setStatusModalVisible(true);
+                }}
+              />
+            )}
 
-            {updatePermission && <Feather
-              name="edit"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentOrganization({
-                  name: item?.name,
-                  description: item?.description,
-                  id: item?.id,
-                });
-                // setCurrentOrganizationData();
-                setModalVisible(true);
-                setEditModal(true);
-              }}
-            />}
+            {updatePermission && (
+              <Feather
+                name="edit"
+                size={ms(22)}
+                color={Colors[theme].text}
+                onPress={() => {
+                  setCurrentOrganization({
+                    name: item?.name,
+                    description: item?.description,
+                    id: item?.id,
+                  });
+                  // setCurrentOrganizationData();
+                  setModalVisible(true);
+                  setEditModal(true);
+                }}
+              />
+            )}
 
             {deletePermission && (
               <MaterialIcons
@@ -278,63 +282,25 @@ const OrganizationScreen = () => {
         >
           {item?.status}
         </ThemedText>
-        {item?.description && <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-          {item?.description}
-        </ThemedText>}
+        {item?.description && (
+          <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+            {item?.description}
+          </ThemedText>
+        )}
       </View>
     );
   };
 
-  // const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
-
-  //   if (isRefreshing) {
-  //     setPage(1);
-  //     setRefreshing(true);
-  //   }
-
-  //   const params = {
-  //     limit: 6,
-  //     page: isRefreshing ? 1 : page,
-  //     search: searchParams,
-  //   };
-
-  //   let res: any = await organizationData({
-  //     variables: {
-  //       listInputDto: params,
-  //     },
-  //     fetchPolicy: "network-only",
-  //   });
-
-  //   if (res?.data?.paginatedOrganization) {
-  //     const data: any = res?.data?.paginatedOrganization;
-  //     setOrganizationList((prev: any) => {
-  //       const updatedData =
-  //         isRefreshing ? data?.data : [...prev, ...data?.data];
-  //       return updatedData;
-  //     });
-
-  //     setRefreshing(false);
-  //     setPage((prevPage) => prevPage + 1);
-  //     const lastPage = Math.ceil(data?.meta?.totalItems / 6);
-  //     setHasMore(data?.meta?.currentPage < lastPage);
-  //   } else {
-  //     console.log("API call failed:", res?.errors);
-  //     setRefreshing(false);
-  //     setHasMore(false)
-  //   }
-  // };
-
   const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
+    const currentPage = isRefreshing ? 1 : page;
+    console.log('999', typeof searchParams);
+
     if (isRefreshing) {
-      setPage(1);
       setRefreshing(true);
     }
 
-    const currentPage = isRefreshing ? 1 : page;
-    console.log("currentPage", currentPage);
-
     const params = {
-      limit: 6,
+      limit: 8,
       page: currentPage,
       search: searchParams,
     };
@@ -352,24 +318,16 @@ const OrganizationScreen = () => {
         const newItems = data?.data || [];
 
         setOrganizationList((prev: any) => {
-          if (isRefreshing) {
-            return newItems;
-          } else {
-            // Avoid duplicates by comparing item IDs
-            const existingIds = new Set(prev.map((item: any) => item.id));
-            const filteredNewItems = newItems.filter(
-              (item: any) => !existingIds.has(item.id)
-            );
-            return [...prev, ...filteredNewItems];
-          }
+          return isRefreshing ? newItems : [...prev, ...newItems];
         });
 
-        setRefreshing(false);
-
-        // Update page number only if we received new items
-        if (!isRefreshing) {
-          setPage(currentPage + 1);
+        if (isRefreshing) {
+          setPage(2); // since page 1 is already fetched
+        } else {
+          setPage((prevPage) => prevPage + 1);
         }
+
+        setRefreshing(false);
 
         const lastPage = Math.ceil(data?.meta?.totalItems / 6);
         setHasMore(data?.meta?.currentPage < lastPage);
@@ -385,20 +343,17 @@ const OrganizationScreen = () => {
     }
   };
 
-
   const debouncedSearch = useCallback(
     debounce((text) => {
       fetchOrganization(true, text);
-      console.log(text);
     }, 500),
     [searchQuery]
   );
 
   if (
     (loading ||
-      deleteOrganizationState.loading) &&
-    page == 1 &&
-    !refreshing
+      deleteOrganizationState.loading ||
+      updateOrganizationStatusState?.loading) && page == 1 && !refreshing
   ) {
     return <Loader />;
   }
@@ -421,14 +376,20 @@ const OrganizationScreen = () => {
               }}
             />
           </View>
-          {createPermission && <Pressable
-            style={styles.buttonContainer}
-            onPress={() => {
-              setModalVisible(true), setCurrentOrganization(defaultValue);
-            }}
-          >
-            <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
-          </Pressable>}
+          {createPermission && (
+            <Pressable
+              style={styles.buttonContainer}
+              onPress={() => {
+                setModalVisible(true), setCurrentOrganization(defaultValue);
+              }}
+            >
+              <Feather
+                name="plus-square"
+                size={ms(25)}
+                color={Colors[theme].text}
+              />
+            </Pressable>
+          )}
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
@@ -505,7 +466,6 @@ const OrganizationScreen = () => {
           </View>
 
           <View style={{ padding: 10 }}>
-
             <CustomValidation
               type="input"
               control={control}
@@ -536,7 +496,7 @@ const OrganizationScreen = () => {
           <CustomButton
             title="Submit"
             isLoading={
-              createOrganizationState.loading || updateOrganizationState.loading
+              editModal ? updateOrganizationState.loading : createOrganizationState.loading
             }
             onPress={() => {
               handleSubmit(onSubmit)();
@@ -564,7 +524,6 @@ const OrganizationScreen = () => {
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
-
           }}
         >
           <View
@@ -574,9 +533,7 @@ const OrganizationScreen = () => {
               padding: 10,
             }}
           >
-            <ThemedText type="subtitle">
-              {"Change Status"}
-            </ThemedText>
+            <ThemedText type="subtitle">{"Change Status"}</ThemedText>
             <Pressable
               onPress={() => {
                 setStatusModalVisible(false);
@@ -634,7 +591,6 @@ const styles = ScaledSheet.create({
   buttonContainer: { marginLeft: "12@ms" },
   organizationParentContainer: {
     marginTop: "12@ms",
-
   },
   organizationContainer: {
     width: "100%",
@@ -650,7 +606,7 @@ const styles = ScaledSheet.create({
   },
   organizationInfo: {
     flexDirection: "row",
-    gap: '15@ms'
+    gap: "15@ms",
   },
   status: {
     color: "green",

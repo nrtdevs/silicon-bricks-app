@@ -22,7 +22,7 @@ const Index = () => {
   ) : (
     // <Redirect href="/(auth)/login" />
     // <Redirect href="/(drawer)/(tabs)/setting" />
-    <Redirect href="/(drawer)/roles" />
+    <Redirect href="/(drawer)/module" />
     // <Redirect href="/(drawer)/plans" />
   );
 };

@@ -13,6 +13,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 import CustomButton from "@/components/CustomButton";
 import { router, useLocalSearchParams } from "expo-router";
+import Loader from "@/components/ui/Loader";
 
 const CreateRoleScreen = () => {
 
@@ -25,7 +26,6 @@ const CreateRoleScreen = () => {
     );
 
     const { editable, id, name } = useLocalSearchParams();
-
 
     const [createRole,] = useMutation(CreateRoleDocument, {
         onCompleted: (data) => {
@@ -62,9 +62,10 @@ const CreateRoleScreen = () => {
         }
     });
 
-    const [currentRole, setCurrentRole] = useState<string>("");
+    const [currentRole, setCurrentRole] = useState<string>("MasterApp");
     const [selectedRoles, setSelectedRoles] = useState<any>([]);
     const [roleHeadings, setRoleHeadings] = useState<any>([]);
+    // console.log('0909', data?.allPermissions?.apps);
 
     const {
         control,
@@ -76,13 +77,29 @@ const CreateRoleScreen = () => {
     } = useForm<{ role: any, name: string }>({
         defaultValues: {},
     });
+    console.log('0909', watch('role')?.appName);
 
     const { theme } = useTheme();
 
+    // useEffect(() => {
+    //     // setCurrentRole('MasterApp');
+    //     if (editable === 'true') {
+    //         await getEditData();
+    //         rolesData();
+    //     } else {
+    //         rolesData();
+    //     }
+    // }, []);
     useEffect(() => {
-        rolesData();
-        editable == 'true' && getEditData();
+        if (editable === 'true') {
+            getEditData().then(() => {
+                rolesData();
+            });
+        } else {
+            rolesData();
+        }
     }, []);
+
 
     const getEditData = async () => {
         const res = await editRolesData({
@@ -93,7 +110,7 @@ const CreateRoleScreen = () => {
         });
         console.log('called');
         res?.data?.findRoleById?.permissions?.map((item: any) => {
-            console.log(item.id);
+            // console.log(item.id);
             setSelectedRoles((prev: any) => [...prev, Number(item.id)]);
         })
         // setSelectedRoles(res?.data?.findRoleById?.permissions);
@@ -114,7 +131,7 @@ const CreateRoleScreen = () => {
     // console.log("9999", selectedRoles);
 
     useEffect(() => {
-        setCurrentRole(watch("role")?.appName);
+        watch('role').appName && setCurrentRole(watch("role")?.appName);
         // setSelectedRoles([])
     }, [watch("role")]);
 
@@ -146,7 +163,6 @@ const CreateRoleScreen = () => {
         }
         )
 
-
         // console.log('087p', params);
         // createRole(
         //     {
@@ -156,6 +172,8 @@ const CreateRoleScreen = () => {
         //     }
         // )
     }
+    console.log('09', data?.allPermissions);
+
 
     return (
         <CustomHeader>
@@ -177,6 +195,7 @@ const CreateRoleScreen = () => {
                                 message: "Select a role",
                             },
                         }}
+                        defaultValue={"MasterApp"}
                     />
 
                     <CustomValidation
@@ -194,7 +213,7 @@ const CreateRoleScreen = () => {
                     />
 
                     <View style={{ marginTop: 20, gap: 20 }}>
-                        {data?.allPermissions?.apps?.map(
+                        {loading ? <Loader /> : data?.allPermissions?.apps?.map(
                             (item: any, index: any) =>
                                 item?.appName === currentRole &&
                                 <View key={index}>

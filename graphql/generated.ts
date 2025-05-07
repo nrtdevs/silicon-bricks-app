@@ -21,9 +21,11 @@ export type Scalars = {
 export type About = {
   __typename?: 'About';
   content?: Maybe<Scalars['String']['output']>;
+  contentJson?: Maybe<Scalars['String']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   imageUrl?: Maybe<Scalars['String']['output']>;
+  slug: Scalars['String']['output'];
   title: Scalars['String']['output'];
 };
 
@@ -154,6 +156,14 @@ export enum CouponStatus {
 export type CouponStatusDto = {
   ids: Array<Scalars['Float']['input']>;
   status: CouponStatus;
+};
+
+export type CreateAboutDto = {
+  content: Scalars['String']['input'];
+  contentJson: Scalars['String']['input'];
+  description: Scalars['String']['input'];
+  imageUrl: Scalars['String']['input'];
+  title: Scalars['String']['input'];
 };
 
 export type CreateBreakdownDto = {
@@ -644,9 +654,9 @@ export type Mutation = {
   changeUserStatus: UserUnion;
   changeVehicleExpenseStatus: VehicleExpenseStatus;
   changeWarehouseStatus: Warehouse;
-  createAbout: About;
   createBreakdown: Breakdown;
   createCoupon: Coupon;
+  createDynamicPage: About;
   createFollowUp: FollowUp;
   createMeeting: Meeting;
   createMeetingTask: MeetingTask;
@@ -670,9 +680,9 @@ export type Mutation = {
   createVehicle: Vehicle;
   createVehicleExpense: VehicleExpense;
   createWarehouse: Warehouse;
-  deleteAbout: Scalars['Boolean']['output'];
   deleteBreakdown: Scalars['Boolean']['output'];
   deleteCoupon: Scalars['Boolean']['output'];
+  deleteDynamicPage: Scalars['Boolean']['output'];
   deleteFollowUp: Scalars['Boolean']['output'];
   deleteMeting: Scalars['Boolean']['output'];
   deleteMetingTask: Scalars['Boolean']['output'];
@@ -744,9 +754,9 @@ export type Mutation = {
   restoreVehicleExpense: Scalars['Boolean']['output'];
   restoreWarehouse: Scalars['Boolean']['output'];
   sendRegistrationOtp: OtpRes;
-  updateAbout: About;
   updateBreakdown: Breakdown;
   updateCoupon: Coupon;
+  updateDynamicPage: About;
   updateFollowUp: FollowUp;
   updateMeeting: Meeting;
   updateMeetingTask: MeetingTask;
@@ -874,6 +884,11 @@ export type MutationCreateBreakdownArgs = {
 
 export type MutationCreateCouponArgs = {
   createCouponInput: CreateCouponDto;
+};
+
+
+export type MutationCreateDynamicPageArgs = {
+  data: CreateAboutDto;
 };
 
 
@@ -1361,6 +1376,11 @@ export type MutationUpdateBreakdownArgs = {
 
 export type MutationUpdateCouponArgs = {
   updateCouponInput: UpdateCouponDto;
+};
+
+
+export type MutationUpdateDynamicPageArgs = {
+  data: UpdateAboutDto;
 };
 
 
@@ -1872,12 +1892,12 @@ export type Query = {
   findVehicleById: Vehicle;
   findVehicleExpenseById: VehicleExpense;
   findWarehouseById: Warehouse;
-  getAboutById: About;
-  getAllAbout: Array<About>;
+  getAllDynamicPage: Array<About>;
   getAllMeetingTypes: Array<MeetingType>;
   getAllNotePad: Array<NotePad>;
   getBreakdownStatuses: Array<BreakdownStatus>;
   getBreakdownTypeSuggestions: Array<Scalars['JSON']['output']>;
+  getDynamicPageById: About;
   getFollowUpById: FollowUp;
   getMeetingDashboard: Dashboard;
   getMeetingId: Meeting;
@@ -2100,6 +2120,11 @@ export type QueryGetBreakdownStatusesArgs = {
 
 export type QueryGetBreakdownTypeSuggestionsArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryGetDynamicPageByIdArgs = {
+  id: Scalars['Float']['input'];
 };
 
 
@@ -2534,6 +2559,15 @@ export enum UnitType {
   Volume = 'volume',
   Weight = 'weight'
 }
+
+export type UpdateAboutDto = {
+  content: Scalars['String']['input'];
+  contentJson: Scalars['String']['input'];
+  description: Scalars['String']['input'];
+  id: Scalars['Float']['input'];
+  imageUrl: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
 
 export type UpdateBreakdownDto = {
   breakdownDate: Scalars['String']['input'];

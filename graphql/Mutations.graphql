@@ -19,7 +19,7 @@ mutation Login($loginData: ValidateDto!) {
   }
 }
 
-#logout 
+#logout
 mutation Mutation {
   logout
 }
@@ -681,8 +681,12 @@ mutation DeleteSubscription($ids: [Int!]!) {
 }
 
 #status change Subscription
-mutation ChangeSubscriptionStatus($updateSubscriptionStatusInput: SubscriptionStatusDto!) {
-  changeSubscriptionStatus(updateSubscriptionStatusInput: $updateSubscriptionStatusInput) {
+mutation ChangeSubscriptionStatus(
+  $updateSubscriptionStatusInput: SubscriptionStatusDto!
+) {
+  changeSubscriptionStatus(
+    updateSubscriptionStatusInput: $updateSubscriptionStatusInput
+  ) {
     ... on Subscriptions {
       id
       status
@@ -696,12 +700,12 @@ mutation ChangeSubscriptionStatus($updateSubscriptionStatusInput: SubscriptionSt
   }
 }
 
-# creat muitiple payment 
+# creat muitiple payment
 mutation CreateMultipleOrder($input: CreateMultipleOrderInput!) {
   createMultipleOrder(input: $input)
 }
 
-# verify payment 
+# verify payment
 mutation VerifyPayment($input: VerifyPaymentInput!) {
   verifyPayment(input: $input) {
     id

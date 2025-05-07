@@ -1,4 +1,5 @@
 import {
+    ActivityIndicator,
     Alert,
     FlatList,
     Pressable,
@@ -56,6 +57,8 @@ const ModuleScreen = () => {
     const [page, setPage] = useState<number>(1);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
+    const [moduleList, setModuleList] = useState<any>([])
     const [currentModule, setCurrentModule] = useState<{
         name: string;
         description: string;
@@ -150,38 +153,65 @@ const ModuleScreen = () => {
         }
     }, [watch("status")]);
 
-    // const handleImagePickerPress = async () => {
-    //   let result = await ImagePicker.launchImageLibraryAsync({
-    //     mediaTypes: ['images'],
-    //     allowsEditing: true,
-    //     aspect: [1, 1],
-    //     quality: 1
-    //   })
-    //   if (!result.canceled) {
-    //     setImage(result.assets[0].uri)
-    //   }
-    // }
-    // console.log('image',image);
+    const fetchModules = async (isRefreshing = false, searchParams = "") => {
+        // if (isRefreshing) {
+        //     setPage(1);
+        //     setRefreshing(true);
+        // }
+        // // Params for API
+        // const params = {
+        //     per_page_record: 10,
+        //     page: isRefreshing ? 1 : page,
+        // };
 
-    const fetchModules = async (isRefreshing = false) => {
+        const currentPage = isRefreshing ? 1 : page;
+
         if (isRefreshing) {
-            setPage(1);
             setRefreshing(true);
         }
-        // Params for API
+
         const params = {
-            per_page_record: 10,
-            page: isRefreshing ? 1 : page,
+            limit: 8,
+            page: currentPage,
+            search: searchParams,
         };
 
-        await moduleData({
-            variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1,
+        try {
+            const res: any = await moduleData({
+                variables: {
+                    listInputDto: params
                 },
-            },
-        });
+            });
+            // console.log('res', currentPage);
+            if (res?.data?.paginatedModules?.data) {
+                const data: any = res?.data?.paginatedModules;
+                const newItems = data?.data || [];
+
+                setModuleList((prev: any) => {
+                    return isRefreshing ? newItems : [...prev, ...newItems];
+                });
+
+                if (isRefreshing) {
+                    setPage(2); // since page 1 is already fetched
+                } else {
+                    setPage((prevPage) => prevPage + 1);
+                }
+
+                setRefreshing(false);
+                console.log('99', data);
+
+                const lastPage = Math.ceil(data?.meta?.totalItems / 6);
+                setHasMore(data?.meta?.currentPage < lastPage);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
     };
 
     const onSubmit = (data: any) => {
@@ -316,6 +346,9 @@ const ModuleScreen = () => {
         return <Loader />
     }
 
+    console.log('-0', hasMore);
+
+
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -347,27 +380,30 @@ const ModuleScreen = () => {
                     <FlatList
                         data={data?.paginatedModules?.data}
                         contentContainerStyle={{ paddingBottom: vs(40) }}
-                        showsVerticalScrollIndicator={false}
                         renderItem={({ item, index }: any) => renderItem(item, index)
                         }
-                        // refreshControl={
-                        //     <RefreshControl
-                        //         refreshing={refreshing}
-                        //         onRefresh={() => fetchModules(true)}
-                        //     />
-                        // }
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing && !loading}
+                                onRefresh={async () => {
+                                    fetchModules(true);
+                                }}
+                            />
+                        }
+                        keyExtractor={(item: any, index: number) => index.toString()}
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
-                    // ListFooterComponent={
-                    //     hasMore ? (
-                    //         <ActivityIndicator size="small" color={Colors.primary} />
-                    //     ) : null
-                    // }
-                    // onEndReached={() => {
-                    //     if (hasMore && !isLoading) {
-                    //         fetchNotification();
-                    //     }
-                    // }}
-                    // onEndReachedThreshold={0.5}
+                        ListFooterComponent={
+                            hasMore ? (
+                                <ActivityIndicator size="small" color={Colors.primary} />
+                            ) : null
+                        }
+                        onEndReached={() => {
+                            if (hasMore) {
+                                fetchModules();
+                            }
+                        }}
+                        onEndReachedThreshold={0.5}
                     />
                 </View>
             </ThemedView>
@@ -430,6 +466,7 @@ const ModuleScreen = () => {
                                 required: "Module name is required",
                             }}
                             autoCapitalize="none"
+                            autoFocus={true}
                         />
 
                         <CustomValidation
@@ -542,7 +579,7 @@ const styles = ScaledSheet.create({
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    buttonContainer: {marginLeft: "12@ms"},
+    buttonContainer: { marginLeft: "12@ms" },
     organizationParentContainer: {
         marginTop: "12@ms",
     },

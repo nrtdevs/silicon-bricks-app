@@ -102,6 +102,7 @@ interface TextInputProps extends RequiredProps {
   hideStar?: boolean
   itemContainerStyle?: any
   wrapperStyle?: any
+  autoFocus?: boolean
 }
 
 const CustomValidation = (props: TextInputProps) => {
@@ -308,6 +309,7 @@ const CustomValidation = (props: TextInputProps) => {
                   pointerEvents={props?.pointerEvents}
                   maxLength={props.maxLength}
                   multiline={props.multiline}
+                  autoFocus={props.autoFocus}
                   onFocus={() => {
                     props.onFocus?.()
                     setIsFocused(true)
