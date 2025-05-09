@@ -412,7 +412,7 @@ const CouponScreen = () => {
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{flex:1}}>
+                    <View style={{ flex: 1 }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             onChangeText={(text) => {
@@ -525,24 +525,6 @@ const CouponScreen = () => {
                         />
 
                         <CustomValidation
-                            data={pickerData}
-                            type="picker"
-                            hideStar={false}
-                            control={control}
-                            label="Discount Type"
-                            labelStyle={styles.label}
-                            name="discountType"
-                            placeholder="Select discount type"
-                            inputStyle={{ height: vs(50) }}
-                            rules={{
-                                required: {
-                                    value: true,
-                                    message: "Select discountType",
-                                },
-                            }}
-                        />
-
-                        <CustomValidation
                             type="input"
                             control={control}
                             name={"maxDiscountAmount"}
@@ -578,6 +560,24 @@ const CouponScreen = () => {
                             labelStyle={styles.label}
                             rules={{
                                 required: "Usage limit is required",
+                            }}
+                        />
+
+                        <CustomValidation
+                            data={pickerData}
+                            type="picker"
+                            hideStar={false}
+                            control={control}
+                            label="Discount Type"
+                            labelStyle={styles.label}
+                            name="discountType"
+                            placeholder="Select discount type"
+                            inputStyle={{ height: vs(50) }}
+                            rules={{
+                                required: {
+                                    value: true,
+                                    message: "Select discountType",
+                                },
                             }}
                         />
 
@@ -790,7 +790,7 @@ const styles = ScaledSheet.create({
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    buttonContainer: {marginLeft: "12@ms"},
+    buttonContainer: { marginLeft: "12@ms" },
     organizationParentContainer: {
         marginTop: "12@ms",
     },

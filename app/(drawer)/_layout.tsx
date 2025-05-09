@@ -114,6 +114,13 @@ const CustomDrawerContent = (props: any) => {
               onPress={() => router.push('/permission')}
             />
 
+            <DrawerItem
+              icon={({ color, size }) => <MaterialIcons name="create" size={ms(24)} color={Colors[theme].text} />}
+              label={labels?.pages}
+              labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+              onPress={() => router.push('/pages')}
+            />
+
           </DrawerContentScrollView>
         ) : (<DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cartBg }}>
           <DrawerItem
@@ -144,12 +151,12 @@ const CustomDrawerContent = (props: any) => {
             onPress={() => router.push('/project')}
           />
 
-          <DrawerItem
+          {/* <DrawerItem
             icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
             label={labels?.offerPromotions}
             labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
             onPress={() => router.push('/promotions')}
-          />
+          /> */}
         </DrawerContentScrollView>
         )
       }

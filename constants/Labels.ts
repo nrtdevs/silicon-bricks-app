@@ -77,4 +77,5 @@ export const labels = {
   searchProject:"Search Project",
   searchPlan:"Search Plan",
   searchRole:"Search Role",
+  pages:"Pages",
 };

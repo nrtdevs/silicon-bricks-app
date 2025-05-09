@@ -1160,14 +1160,12 @@ const CouponScreen = () => {
     const onSubmit = (data: any) => {
         try {
             let params = {
-                couponId: typeof data?.coupon == 'string' ? Number(data?.coupon) : Number(data?.coupon?.id),
-                description: data?.description,
-                discountedPrice: Number(data?.discountPrice),
-                duration: Number(data?.duration),
                 name: data?.name,
-                offerId: typeof data?.coupon == 'string' ? Number(data?.offer) : Number(data?.offer?.id),
+                duration: Number(data?.duration),
                 packageId: typeof data?.coupon == 'string' ? Number(data?.package) : Number(data?.package?.id),
                 price: Number(data?.price),
+                couponId: typeof data?.coupon == 'string' ? Number(data?.coupon) : Number(data?.coupon?.id),
+                description: data?.description,
             }
 
             let params2 = {
@@ -1434,61 +1432,15 @@ const CouponScreen = () => {
                             type="input"
                             control={control}
                             labelStyle={styles.label}
-                            name={"discountPrice"}
-                            inputStyle={[{ lineHeight: ms(20) }]}
-                            label={"Discount Price"}
-                            placeholder={"Provide Discount Price"}
-                            rules={{
-                                required: "Discount Price is required",
-                            }}
-                            autoCapitalize="none"
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            labelStyle={styles.label}
                             name={"duration"}
                             inputStyle={[{ lineHeight: ms(20) }]}
-                            label={"Duration"}
+                            label={"Duration (in month)"}
                             placeholder={"Provide Duration"}
                             rules={{
                                 required: "Duration is required",
                             }}
                             autoCapitalize="none"
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            labelStyle={styles.label}
-                            name={"price"}
-                            inputStyle={[{ lineHeight: ms(20) }]}
-                            label={"Price"}
-                            placeholder={"Provide Price"}
-                            rules={{
-                                required: "Price is required",
-                            }}
-                            autoCapitalize="none"
-                        />
-
-                        <CustomValidation
-                            data={offerState?.data?.dropdownOffers?.data}
-                            type="picker"
-                            control={control}
-                            keyToCompareData="id"
-                            keyToShowData="title"
-                            label="Offer"
-                            labelStyle={styles.label}
-                            name="offer"
-                            placeholder="Select Offer"
-                            inputStyle={{ height: vs(50) }}
-                            rules={{
-                                required: {
-                                    value: true,
-                                    message: "Select offerType",
-                                },
-                            }}
+                            keyboardType="numeric"
                         />
 
                         <CustomValidation
@@ -1508,6 +1460,21 @@ const CouponScreen = () => {
                                     message: "Select PackageType",
                                 },
                             }}
+                        />
+
+                        <CustomValidation
+                            type="input"
+                            control={control}
+                            labelStyle={styles.label}
+                            name={"price"}
+                            inputStyle={[{ lineHeight: ms(20) }]}
+                            label={"Price"}
+                            placeholder={"Provide Price"}
+                            rules={{
+                                required: "Price is required",
+                            }}
+                            autoCapitalize="none"
+                            keyboardType="numeric"
                         />
 
                         <CustomValidation
@@ -1545,11 +1512,6 @@ const CouponScreen = () => {
                             }}
                             containerStyle={{
                                 height: vs(100),
-                            }}
-                            rules={{
-                                required: editModal
-                                    ? "Test organization description is required"
-                                    : "Description is required",
                             }}
                             autoCapitalize="none"
                         />

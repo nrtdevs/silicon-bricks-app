@@ -199,7 +199,7 @@ const SubscriptionScreen = () => {
     <CustomHeader>
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ width: "90%" }}>
+          <View style={{ width: "100%" }}>
             <CustomSearchBar
               searchQuery={searchQuery}
               onChangeText={(text) => {
@@ -217,14 +217,14 @@ const SubscriptionScreen = () => {
               }}
             />
           </View>
-          <Pressable
+          {/* <Pressable
             style={styles.buttonContainer}
             onPress={() => {
               setModalVisible(true), setCurrentOrganization(defaultValue);
             }}
           >
             <Feather name="plus-square" size={24} color={Colors[theme].text} />
-          </Pressable>
+          </Pressable> */}
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList

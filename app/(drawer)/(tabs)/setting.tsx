@@ -11,6 +11,7 @@ import {
   Entypo,
   Feather,
   FontAwesome,
+  Foundation,
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
@@ -28,7 +29,7 @@ import Toggle from "react-native-toggle-element";
 import * as SecureStore from "expo-secure-store";
 import { ThemedView } from "@/components/ThemedView";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { FindUserByIdDocument, UpdateProfileDocument } from "@/graphql/generated";
+import { FindUserByIdDocument, GetAllDynamicPageDocument, UpdateProfileDocument } from "@/graphql/generated";
 import Modal from "react-native-modal";
 import CustomValidation from "@/components/CustomValidation";
 import { useForm } from "react-hook-form";
@@ -46,6 +47,7 @@ const SettingScreen = () => {
   const [image, setImage] = useState<string>("");
   const [toggleValue, setToggleValue] = useState<any>(false);
   const [isModalVisible, setModalVisible] = useState<boolean>(false)
+  const [pages, setPages] = useState<any>([])
   const { control, setValue, handleSubmit, watch } = useForm<{ name: string, email: string, phoneNo: string }>({
     defaultValues: {
       name: "",
@@ -56,7 +58,9 @@ const SettingScreen = () => {
   });
 
   const [userData, { data, error, loading, refetch }] = useLazyQuery<any>(FindUserByIdDocument)
-
+  const [pagesData, { error: pageDataError, data: pagesApiData, loading: pageDataLoading, refetch: pageDataRefetch }] = useLazyQuery(
+    GetAllDynamicPageDocument
+  );
   // const [updateUser, updateUserState] = useMutation(UpdateProfileDocument, {
   //   onCompleted: () => {
   //     refetch();
@@ -90,7 +94,6 @@ const SettingScreen = () => {
   useFocusEffect(
     useCallback(() => {
       getUserData();
-
     }, [])
   );
 
@@ -104,6 +107,15 @@ const SettingScreen = () => {
 
 
   const getUserData = async () => {
+    const res = await pagesData({
+      variables: {
+        listInputDto: {
+          limit: 10,
+          page: 1
+        }
+      },
+    });
+    setPages(res?.data?.getAllDynamicPage?.data);
     const storedData = await SecureStore.getItemAsync("userData");
     if (!storedData) return null;
     let parsedUserData = JSON.parse(storedData);
@@ -220,15 +232,6 @@ const SettingScreen = () => {
       iconLib: Feather,
       iconName: "help-circle",
       onTouchAction: () => { },
-    },
-    {
-      id: 7,
-      title: labels.about,
-      iconLib: AntDesign,
-      iconName: "infocirlceo",
-      onTouchAction: () => {
-        router.push("/about");
-      },
     },
   ];
 
@@ -409,6 +412,55 @@ const SettingScreen = () => {
 
                 <View style={{ width: "80%" }}>
                   <ThemedText type="default">{item.title}</ThemedText>
+                  {item.subtitle && (
+                    <ThemedText
+                      type="default"
+                      style={{
+                        fontSize: ms(12),
+                        lineHeight: ms(17),
+                      }}
+                    >
+                      {item.subtitle}
+                    </ThemedText>
+                  )}
+                </View>
+
+                {item.rightIcon && item.rightIcon}
+              </Pressable>
+            );
+          })}
+
+          {pages.map((item: any, i: number) => {
+            return (
+              <Pressable
+                key={i}
+                onPress={() => router.push({
+                  pathname: '/dynamicPage',
+                  params: {
+                    data: JSON.stringify(item)
+                  }
+                })}
+                style={[
+                  styles.container,
+                  { backgroundColor: Colors[theme].cartBg },
+                ]}
+              >
+                {item.image ? (
+                  item.image
+                ) : item.iconLib ? (
+                  <item.iconLib
+                    name={item.iconName}
+                    size={ms(22)}
+                    color={Colors[theme].text}
+                  />
+                ) : <Foundation name="page-csv" size={ms(22)}
+                  color={Colors[theme].text} />}
+
+                <View style={{ width: "80%" }}>
+                  <ThemedText type="default">
+                    {item.slug.charAt(0).toUpperCase() + item.slug.slice(1)}
+                  </ThemedText>
+
                   {item.subtitle && (
                     <ThemedText
                       type="default"

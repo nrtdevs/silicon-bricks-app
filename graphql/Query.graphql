@@ -639,3 +639,23 @@ query TrashedUsers($listInputDto: ListInputDTO!) {
 query Query($findPermissionsByUserId: Float!) {
   findPermissionsByUser(id: $findPermissionsByUserId)
 }
+
+query GetAllDynamicPage($listInputDto: ListInputDTO!) {
+  getAllDynamicPage(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      title
+      slug
+      description
+      imageUrl
+      content
+      contentJson
+    }
+  }
+}
