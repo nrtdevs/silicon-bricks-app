@@ -24,7 +24,7 @@ const _layout = () => {
           justifyContent: "center",
         },
       }),
-      
+
     }}>
       <Tabs.Screen name="index"
 

@@ -45,10 +45,10 @@ const CustomDrawerContent = (props: any) => {
             />
 
             <DrawerItem
-              icon={({ color, size }) => <MaterialIcons name="subscriptions" size={ms(24)} color={Colors[theme].text} />}
-              label={labels?.subscriptions}
+              icon={({ color, size }) => <Feather name="user" size={ms(24)} color={Colors[theme].text} />}
+              label={labels?.user}
               labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-              onPress={() => router.push('/subscriptions')}
+              onPress={() => router.push('/user')}
             />
 
             <DrawerItem
@@ -59,17 +59,10 @@ const CustomDrawerContent = (props: any) => {
             />
 
             <DrawerItem
-              icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
-              label={labels?.offerPromotions}
+              icon={({ color, size }) => <MaterialIcons name="subscriptions" size={ms(24)} color={Colors[theme].text} />}
+              label={labels?.subscriptions}
               labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-              onPress={() => router.push('/offer')}
-            />
-
-            <DrawerItem
-              icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
-              label={labels?.plans}
-              labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-              onPress={() => router.push('/plans')}
+              onPress={() => router.push('/subscriptions')}
             />
 
             <DrawerItem
@@ -77,20 +70,6 @@ const CustomDrawerContent = (props: any) => {
               label={labels?.module}
               labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
               onPress={() => router.push('/module')}
-            />
-
-            <DrawerItem
-              icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
-              label={labels?.coupons}
-              labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-              onPress={() => router.push('/coupons')}
-            />
-
-            <DrawerItem
-              icon={({ color, size }) => <Feather name="user" size={ms(24)} color={Colors[theme].text} />}
-              label={labels?.user}
-              labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-              onPress={() => router.push('/user')}
             />
 
             <DrawerItem
@@ -107,19 +86,41 @@ const CustomDrawerContent = (props: any) => {
               onPress={() => router.push('/roles')}
             />
 
-            <DrawerItem
-              icon={({ color, size }) => <Ionicons name="people-outline" size={ms(24)} color={Colors[theme].text} />}
-              label={labels?.permission}
-              labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-              onPress={() => router.push('/permission')}
-            />
-
-            <DrawerItem
+            {/* <DrawerItem
               icon={({ color, size }) => <MaterialIcons name="create" size={ms(24)} color={Colors[theme].text} />}
               label={labels?.pages}
               labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
               onPress={() => router.push('/pages')}
+            /> */}
+
+            <DrawerItem
+              icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
+              label={labels?.coupons}
+              labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+              onPress={() => router.push('/coupons')}
             />
+
+            {/* <DrawerItem
+              icon={({ color, size }) => <Ionicons name="people-outline" size={ms(24)} color={Colors[theme].text} />}
+              label={labels?.permission}
+              labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+              onPress={() => router.push('/permission')}
+            /> */}
+
+            <DrawerItem
+              icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
+              label={labels?.offerPromotions}
+              labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+              onPress={() => router.push('/offer')}
+            />
+
+            <DrawerItem
+              icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
+              label={labels?.plans}
+              labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+              onPress={() => router.push('/plans')}
+            />
+
 
           </DrawerContentScrollView>
         ) : (<DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cartBg }}>

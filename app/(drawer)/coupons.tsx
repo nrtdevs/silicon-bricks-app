@@ -42,13 +42,12 @@ import EditPromotion from "@/components/EditPromotion";
 
 const defaultValue = {
     couponCode: "",
-    discountType: "",
-    usageLimit: "",
-    description: "",
-    maxDiscountAmount: "",
     minOrderAmount: "",
+    discountValue: "",
+    usageLimit: "",
     start_date: " ",
     end_date: " ",
+    description: "",
     status: "",
     id: "",
 };
@@ -73,12 +72,12 @@ const CouponScreen = () => {
     const [page, setPage] = useState<number>(1);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
+    const [infoModalVisible, setInfoModalVisible] = useState(false);
     const [currentCoupon, setCurrentCoupon] = useState<{
         couponCode: any;
-        discountType: string;
         usageLimit: string;
         description: string;
-        maxDiscountAmount: string;
+        discountValue: string;
         minOrderAmount: string;
         start_date: string;
         end_date: string;
@@ -94,10 +93,9 @@ const CouponScreen = () => {
         setValue,
     } = useForm<{
         couponCode: any;
-        discountType: string;
         usageLimit: string;
         description: string;
-        maxDiscountAmount: string;
+        discountValue: string;
         minOrderAmount: string;
         start_date: string;
         end_date: string;
@@ -131,6 +129,7 @@ const CouponScreen = () => {
             reset();
             refetch();
             setModalVisible(false);
+            setCurrentCoupon(defaultValue);
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -143,6 +142,7 @@ const CouponScreen = () => {
             refetch();
             setEditModal(false);
             setModalVisible(false);
+            setCurrentCoupon(defaultValue);
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -189,10 +189,9 @@ const CouponScreen = () => {
 
     useEffect(() => {
         setValue("couponCode", currentCoupon?.couponCode || "");
-        setValue("discountType", currentCoupon?.discountType);
         setValue("usageLimit", currentCoupon?.usageLimit?.toString() || "");
         setValue("description", currentCoupon?.description || "");
-        setValue("maxDiscountAmount", currentCoupon?.maxDiscountAmount?.toString() || "");
+        setValue("discountValue", currentCoupon?.discountValue?.toString() || "");
         setValue("minOrderAmount", currentCoupon?.minOrderAmount?.toString() || "");
         setValue("start_date", formatTimeForAPI(currentCoupon?.start_date, "yyyy-mm-dd") || "");
         setValue("end_date", formatTimeForAPI(currentCoupon?.end_date, "yyyy-mm-dd") || "");
@@ -238,13 +237,13 @@ const CouponScreen = () => {
 
             let params = {
                 couponCode: data?.couponCode,
-                description: data?.description,
-                discountType: data?.discountType?.value,
-                maxDiscountAmount: Number(data?.maxDiscountAmount),
                 minOrderAmount: Number(data?.minOrderAmount),
+                discountValue: Number(data?.discountValue),
+                // discountType: data?.discountType?.value,
+                usageLimit: Number(data?.usageLimit),
                 startDate: data?.start_date,
                 endDate: data?.end_date,
-                usageLimit: Number(data?.usageLimit),
+                description: data?.description,
             };
             let params2 = {
                 id: Number(currentCoupon?.id),
@@ -285,7 +284,7 @@ const CouponScreen = () => {
                     <View style={styles.organizationInfo}>
                         {statusUpdatePermission && <MaterialIcons
                             name="attractions"
-                            size={ms(22)}
+                            size={ms(26)}
                             color={Colors[theme].text}
                             onPress={() => {
                                 // setCurrentOrganization({
@@ -295,10 +294,9 @@ const CouponScreen = () => {
                                 // });
                                 setCurrentCoupon({
                                     couponCode: item?.couponCode,
-                                    discountType: item?.discountType,
                                     usageLimit: item?.usageLimit,
                                     description: item?.description,
-                                    maxDiscountAmount: item?.maxDiscountAmount,
+                                    discountValue: item?.discountValue,
                                     minOrderAmount: item?.minOrderAmount,
                                     start_date: item?.startDate,
                                     end_date: item?.endDate,
@@ -311,15 +309,14 @@ const CouponScreen = () => {
 
                         {updatePermission && <Feather
                             name="edit"
-                            size={ms(22)}
+                            size={ms(26)}
                             color={Colors[theme].text}
                             onPress={() => {
                                 setCurrentCoupon({
                                     couponCode: item?.couponCode,
-                                    discountType: item?.discountType,
                                     usageLimit: item?.usageLimit,
                                     description: item?.description,
-                                    maxDiscountAmount: item?.maxDiscountAmount,
+                                    discountValue: item?.discountValue,
                                     minOrderAmount: item?.minOrderAmount,
                                     start_date: item?.startDate,
                                     end_date: item?.endDate,
@@ -331,9 +328,31 @@ const CouponScreen = () => {
                             }}
                         />}
 
+
+                        {updatePermission && <Feather
+                            name="eye"
+                            size={ms(26)}
+                            color={Colors[theme].text}
+                            onPress={() => {
+                                setCurrentCoupon({
+                                    couponCode: item?.couponCode,
+                                    usageLimit: item?.usageLimit,
+                                    description: item?.description,
+                                    discountValue: item?.discountValue,
+                                    minOrderAmount: item?.minOrderAmount,
+                                    start_date: item?.startDate,
+                                    end_date: item?.endDate,
+                                    status: item?.status,
+                                    id: item?.id,
+                                });
+                                setInfoModalVisible(true);
+                                // setEditModal(true);
+                            }}
+                        />}
+
                         {deletePermission && <MaterialIcons
                             name="delete-outline"
-                            size={ms(22)}
+                            size={ms(26)}
                             color={Colors[theme].text}
                             onPress={() => {
                                 Alert.alert("Delete", "Are you sure you want to delete?", [
@@ -342,10 +361,9 @@ const CouponScreen = () => {
                                         onPress: () => {
                                             setCurrentCoupon({
                                                 couponCode: item?.couponCode,
-                                                discountType: item?.discountType,
                                                 usageLimit: item?.usageLimit,
                                                 description: item?.description,
-                                                maxDiscountAmount: item?.maxDiscountAmount,
+                                                discountValue: item?.discountValue,
                                                 minOrderAmount: item?.minOrderAmount,
                                                 start_date: item?.startDate,
                                                 end_date: item?.end_date,
@@ -379,11 +397,13 @@ const CouponScreen = () => {
                     {item?.status}
                 </ThemedText>
 
-                <View style={styles.userInfo}>
+
+
+                {item?.description && <View style={styles.userInfo}>
                     <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                        {item?.discountType}
+                        {item?.description}
                     </ThemedText>
-                </View>
+                </View>}
             </View>
         );
     };
@@ -403,6 +423,7 @@ const CouponScreen = () => {
         [searchQuery]
     );
 
+    console.log('09', currentCoupon?.end_date);
 
     // if (loading) {
     //   return <Loader />
@@ -527,19 +548,6 @@ const CouponScreen = () => {
                         <CustomValidation
                             type="input"
                             control={control}
-                            name={"maxDiscountAmount"}
-                            label={"Max Discount Amount"}
-                            placeholder={"Enter max discount amount"}
-                            keyboardType="number-pad"
-                            labelStyle={styles.label}
-                            rules={{
-                                required: "Max discount amount is required",
-                            }}
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
                             name={"minOrderAmount"}
                             keyboardType="number-pad"
                             label={"Min Order Amount"}
@@ -553,6 +561,19 @@ const CouponScreen = () => {
                         <CustomValidation
                             type="input"
                             control={control}
+                            name={"discountValue"}
+                            label={"discount Value"}
+                            placeholder={"Discount Value"}
+                            keyboardType="number-pad"
+                            labelStyle={styles.label}
+                            rules={{
+                                required: "Max discount amount is required",
+                            }}
+                        />
+
+                        <CustomValidation
+                            type="input"
+                            control={control}
                             name={"usageLimit"}
                             keyboardType="number-pad"
                             label={"Usage Limit"}
@@ -560,24 +581,6 @@ const CouponScreen = () => {
                             labelStyle={styles.label}
                             rules={{
                                 required: "Usage limit is required",
-                            }}
-                        />
-
-                        <CustomValidation
-                            data={pickerData}
-                            type="picker"
-                            hideStar={false}
-                            control={control}
-                            label="Discount Type"
-                            labelStyle={styles.label}
-                            name="discountType"
-                            placeholder="Select discount type"
-                            inputStyle={{ height: vs(50) }}
-                            rules={{
-                                required: {
-                                    value: true,
-                                    message: "Select discountType",
-                                },
                             }}
                         />
 
@@ -608,7 +611,7 @@ const CouponScreen = () => {
                         <CustomValidation
                             type="input"
                             control={control}
-                            placeholder="Start Date"
+                            placeholder="End Date"
                             name="end_date"
                             label="End Date"
                             labelStyle={styles.label}
@@ -684,6 +687,99 @@ const CouponScreen = () => {
                         />
                     </View>
                 </ScrollView>
+            </Modal>
+
+            {/* user info modal */}
+            <Modal
+                isVisible={infoModalVisible}
+                onBackdropPress={() => {
+                    setInfoModalVisible(false);
+                    setCurrentCoupon(defaultValue);
+                }}
+            >
+                <View
+                    style={{
+                        backgroundColor: Colors[theme].cartBg,
+
+                        borderRadius: 10,
+                        padding: 10,
+                    }}
+                >
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            padding: ms(10),
+                        }}
+                    >
+                        <ThemedText type="subtitle">User</ThemedText>
+                        <Pressable
+                            onPress={() => {
+                                setCurrentCoupon(defaultValue);
+                                setInfoModalVisible(false);
+                            }}
+                        >
+                            <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+                        </Pressable>
+                    </View>
+                    <View
+                        style={{
+                            borderWidth: 1,
+                            borderColor: Colors[theme].text,
+                            borderStyle: "dashed",
+                        }}
+                    />
+                    <View style={{ gap: vs(10), padding: ms(10) }}>
+                        <View>
+                            <ThemedText type="subtitle">Coupon Code</ThemedText>
+                            <ThemedText type="default">{currentCoupon?.couponCode}</ThemedText>
+                        </View>
+                        <View>
+                            <ThemedText type="subtitle">Min Order Amount</ThemedText>
+                            <ThemedText type="default">{currentCoupon?.minOrderAmount}</ThemedText>
+                        </View>
+                        <View>
+                            <ThemedText type="subtitle">Discount Value</ThemedText>
+                            <ThemedText type="default">{currentCoupon?.discountValue}</ThemedText>
+                        </View>
+                        <View>
+                            <ThemedText type="subtitle">Usage Limit</ThemedText>
+                            <ThemedText type="default">{currentCoupon?.usageLimit}</ThemedText>
+                        </View>
+                        {/* <View>
+                            <ThemedText type="subtitle">Start Date</ThemedText>
+                            <ThemedText type="default">{parseDate(currentCoupon?.start_date)}</ThemedText>
+                        </View> */}
+
+                        <View>
+                            <ThemedText type="subtitle">Start Date</ThemedText>
+                            <ThemedText type="default">
+                                {new Date(currentCoupon?.start_date).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })}
+                            </ThemedText>
+                        </View>
+
+
+                        <View>
+                            <ThemedText type="subtitle">End Date</ThemedText>
+                            <ThemedText type="default">
+                                {new Date(currentCoupon?.end_date).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })}
+                            </ThemedText>
+                        </View>
+
+                        {currentCoupon?.description && <View>
+                            <ThemedText type="subtitle">Description</ThemedText>
+                            <ThemedText type="default">{currentCoupon?.description}</ThemedText>
+                        </View>}
+                    </View>
+                </View>
             </Modal>
 
 

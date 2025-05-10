@@ -205,7 +205,7 @@ const OrganizationScreen = () => {
         key={index}
         style={[
           styles.organizationContainer,
-          { backgroundColor: Colors[theme].cartBg },
+          { backgroundColor: '#2D2D30' },
         ]}
       >
         <View style={styles.organizationHeader}>
@@ -216,7 +216,7 @@ const OrganizationScreen = () => {
             {statusUpdatePermission && (
               <MaterialIcons
                 name="attractions"
-                size={ms(22)}
+                size={ms(26)}
                 color={Colors[theme].text}
                 onPress={() => {
                   setCurrentOrganization({
@@ -232,7 +232,7 @@ const OrganizationScreen = () => {
             {updatePermission && (
               <Feather
                 name="edit"
-                size={ms(22)}
+                size={ms(26)}
                 color={Colors[theme].text}
                 onPress={() => {
                   setCurrentOrganization({
@@ -250,7 +250,7 @@ const OrganizationScreen = () => {
             {deletePermission && (
               <MaterialIcons
                 name="delete-outline"
-                size={ms(22)}
+                size={ms(26)}
                 color={Colors[theme].text}
                 onPress={() => {
                   Alert.alert("Delete", "Are you sure you want to delete?", [

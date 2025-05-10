@@ -145,8 +145,8 @@ const UserScreen = () => {
       error: organizationError,
       data: organizationInfo,
       loading: OrganizationLoading,
-    },
-  ] = useLazyQuery(PaginatedOrganizationDocument);
+    }, 
+  ] = useLazyQuery(PaginatedOrganizationDocument); 
 
   const [updateUser, updateUserState] = useMutation(UpdateUserDocument, {
     onCompleted: (data) => {

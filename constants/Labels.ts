@@ -46,7 +46,7 @@ export const labels = {
   cancel:"Cancel",
   logout:"Logout",
   project:"Project",
-  user:"user",
+  user:"User",
   RolesPermission:"Roles",
   enterCode:"Enter Code",
   enterCodeMsg:"Enter the code we sent to your email",

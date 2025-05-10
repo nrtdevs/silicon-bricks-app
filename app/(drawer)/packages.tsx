@@ -28,7 +28,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import { ScrollView } from "react-native";
-import { AntDesign, Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Entypo, Feather, Fontisto, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -41,6 +41,9 @@ import Loader from "@/components/ui/Loader";
 import debounce from "lodash.debounce";
 import NoDataFound from "@/components/NoDataFound";
 import { useUserContext } from "@/context/RoleContext";
+import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
+import DateTimePickerModal from "@/components/DateTimePickerModal";
+import { formatTimeForAPI } from "@/utils/formatDateTime";
 
 const defaultValue = {
     name: "",
@@ -48,8 +51,8 @@ const defaultValue = {
     description: "",
     id: "",
     price: "",
-    offer: "",
     moduleIds: [],
+    endDate: "",
 };
 
 const PackageScreen = () => {
@@ -67,8 +70,8 @@ const PackageScreen = () => {
         status: string;
         price: string;
         discountedPrice: string;
-        offer: any;
         module: any;
+        endDate: string;
     }>({
         defaultValues: {},
     });
@@ -84,10 +87,6 @@ const PackageScreen = () => {
 
     const [packagesData, { error, data, loading, refetch }] = useLazyQuery(
         PaginatedPackagesDocument
-    );
-
-    const [offerDataApi, { error: offerError, data: offerData, loading: offerLoading, refetch: offerRefetch }] = useLazyQuery(
-        DropdownOffersDocument
     );
 
     const [moduleDataApi, { error: moduleError, data: moduleData, loading: moduleLoading, refetch: moduleRefetch }] = useLazyQuery(
@@ -143,15 +142,14 @@ const PackageScreen = () => {
     const [isFocused, setIsFocused] = useState("");
     const [editModal, setEditModal] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
-    const [discountedPrice, setDiscountedPrice] = useState<string>("");
     const [currentPackage, setCurrentPackage] = useState<{
         name: string,
         discountedPrice: string,
         description: string,
         id: string,
         price: string,
-        offer: any,
         moduleIds: string[],
+        endDate: string,
     }>(defaultValue);
 
     // const
@@ -164,16 +162,14 @@ const PackageScreen = () => {
     useEffect(() => {
         if (currentPackage) {
             setValue("name", currentPackage?.name);
-            setValue("discountedPrice", currentPackage?.discountedPrice);
             setValue("description", currentPackage?.description);
             setValue("price", currentPackage?.price);
-            setValue("offer", currentPackage?.offer?.id);
             setValue("module", currentPackage?.moduleIds);
+            setValue("endDate", formatTimeForAPI(currentPackage?.endDate, "yyyy-mm-dd") || "");
+            // setValue("start_date", formatTimeForAPI(currentCoupon?.start_date, "yyyy-mm-dd") || "");
+            setValue("discountedPrice", currentPackage?.discountedPrice);
         }
     }, [currentPackage]);
-
-    console.log(watch('offer'), "watch")
-    console.log('offer', currentPackage.offer);
 
 
     useEffect(() => {
@@ -185,14 +181,6 @@ const PackageScreen = () => {
                 },
             },
         });
-        offerDataApi({
-            variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1,
-                },
-            },
-        })
         moduleDataApi({
             variables: {
                 listInputDto: {
@@ -203,27 +191,26 @@ const PackageScreen = () => {
         })
     }, []);
 
-    useEffect(() => {
-        if (watch('price')) {
-            setValue('discountedPrice', "");
-            setValue('offer', "");
-        }
-    }, [watch('price')]);
+    // useEffect(() => {
+    //     if (watch('price')) {
+    //         setValue('discountedPrice', "");
+    //     }
+    // }, [watch('price')]);
 
-    useEffect(() => {
-        if (watch('offer') && watch('price').length > 0) {
-            let discount = 0;
-            let amt = Number(watch('price'));
-            if (watch('offer')?.discountType === 'PERCENTAGE') {
-                discount = (amt * watch('offer')?.discountValue) / 100;
-            } else if (watch('offer')?.discountType === 'FIXED_AMOUNT') {
-                discount = watch('offer')?.discountValue;
-            }
-            setValue('discountedPrice', String(amt - discount));
-            // console.log('99999', typeof watch('price'));
-            // console.log('0099', watch('offer')?.discountType);
-        }
-    }, [watch('offer')]);
+    // useEffect(() => {
+    //     if (watch('price').length > 0) {
+    //         let discount = 0;
+    //         let amt = Number(watch('price'));
+    //         if (watch('offer')?.discountType === 'PERCENTAGE') {
+    //             discount = (amt * watch('offer')?.discountValue) / 100;
+    //         } else if (watch('offer')?.discountType === 'FIXED_AMOUNT') {
+    //             discount = watch('offer')?.discountValue;
+    //         }
+    //         setValue('discountedPrice', String(amt - discount));
+    //         // console.log('99999', typeof watch('price'));
+    //         // console.log('0099', watch('offer')?.discountType);
+    //     }
+    // }, [watch('offer')]);
 
     const debouncedSearch = useCallback(
         debounce((text) => {
@@ -244,17 +231,18 @@ const PackageScreen = () => {
         try {
             const moduleIds = data.module.map(Number);
             let params = {
-                description: data?.description,
+                name: data?.name,
+                endDate: data?.endDate,
+                price: Number(data?.price),
                 discountedPrice: Number(data?.discountedPrice),
                 moduleIds: moduleIds,
-                name: data?.name,
-                offerId: Number(data?.offer?.id),
-                price: Number(data?.price)
+                description: data?.description,
             };
             let params2 = {
                 id: Number(currentPackage?.id),
                 ...params,
             };
+            console.log('params2', params2);
 
             editModal ?
                 updatePackage({
@@ -273,28 +261,26 @@ const PackageScreen = () => {
         }
     };
 
+    const [dateModal, setDateModal] = useState({
+        start: false,
+        end: false,
+    });
+
+    const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
+        getDateTimePickerProps(false)
+    );
+
     const renderData = ({ item, index }: any) => {
         let ids = item.modules.map((item: any) => item.id);
+        console.log('009', item?.discountedPrice);
         return <View
             key={index}
             style={[
                 styles.organizationContainer,
-                { backgroundColor: Colors[theme].cartBg },
+                { backgroundColor: '#d3a49a' },
             ]}
         >
-            <ThemedText
-                style={[
-                    styles.status,
-                    {
-                        // color:
-                        //   item.status == "active" ? Colors?.green : "#6d6d1b",
-                        backgroundColor:
-                            theme == "dark" ? Colors?.white : "#e6e2e2",
-                    },
-                ]}
-            >
-                {item?.status}
-            </ThemedText>
+
 
             <View style={styles.organizationHeader}>
                 <ThemedText type="subtitle" style={{ flex: 1 }}>
@@ -303,7 +289,7 @@ const PackageScreen = () => {
                 <View style={styles.organizationInfo}>
                     {statusUpdatePermission && <MaterialIcons
                         name="attractions"
-                        size={ms(22)}
+                        size={ms(26)}
                         color={Colors[theme].text}
                         onPress={() => {
                             setStatusModalVisible(true);
@@ -312,7 +298,7 @@ const PackageScreen = () => {
 
                     {updatePermission && <Feather
                         name="edit"
-                        size={ms(22)}
+                        size={ms(26)}
                         color={Colors[theme].text}
                         onPress={() => {
                             setCurrentPackage({
@@ -322,7 +308,7 @@ const PackageScreen = () => {
                                 id: item?.id,
                                 price: String(item?.price),
                                 moduleIds: ids,
-                                offer: item?.offer,
+                                endDate: item?.offerExpiryDate,
                             })
                             setModalVisible(true);
                             setEditModal(true);
@@ -331,7 +317,7 @@ const PackageScreen = () => {
 
                     {deletePermission && <MaterialIcons
                         name="delete-outline"
-                        size={ms(22)}
+                        size={ms(26)}
                         color={Colors[theme].text}
                         onPress={() => {
                             Alert.alert(
@@ -364,6 +350,21 @@ const PackageScreen = () => {
                     ${item?.discountedPrice} (after discount)
                 </ThemedText>
             </View>
+
+            <ThemedText
+                style={[
+                    styles.status,
+                    {
+                        // color:
+                        //   item.status == "active" ? Colors?.green : "#6d6d1b",
+                        backgroundColor:
+                            theme == "dark" ? Colors?.white : "#e6e2e2",
+                        fontSize: ms(14),
+                    },
+                ]}
+            >
+                {item?.status}
+            </ThemedText>
         </View>
     }
 
@@ -471,6 +472,30 @@ const PackageScreen = () => {
                         <CustomValidation
                             type="input"
                             control={control}
+                            placeholder="End Date"
+                            name="endDate"
+                            label="End Date"
+                            labelStyle={styles.label}
+                            editable={true}
+                            rightIcon={
+                                <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
+                            }
+                            onPress={() => {
+                                setDateModal({
+                                    start: !dateModal.start,
+                                    end: false,
+                                });
+                                setDateTimePickerProps(getDateTimePickerProps(true));
+                            }}
+                            pointerEvents="none"
+                            rules={{
+                                required: "End date is required",
+                            }}
+                        />
+
+                        <CustomValidation
+                            type="input"
+                            control={control}
                             name={"price"}
                             label={"Price"}
                             rightIcon={null}
@@ -484,30 +509,9 @@ const PackageScreen = () => {
                         />
 
                         <CustomValidation
-                            data={offerData?.dropdownOffers?.data}
-                            type="picker"
-                            control={control}
-                            keyToCompareData="id"
-                            keyToShowData="title"
-                            label="Offer"
-                            labelStyle={styles.label}
-                            name="offer"
-                            rightIcon={null}
-                            placeholder="Select offer"
-                            inputStyle={{ height: vs(50) }}
-                            rules={{
-                                required: {
-                                    value: true,
-                                    message: "Select offer",
-                                },
-                            }}
-                        />
-
-                        <CustomValidation
                             type="input"
                             control={control}
                             name={"discountedPrice"}
-                            editable
                             keyboardType="number-pad"
                             label={"Discounted Price"}
                             placeholder={"Discounted Price"}
@@ -631,6 +635,21 @@ const PackageScreen = () => {
                     />
                 </View>
             </Modal>
+
+            {/* date time picker modal */}
+            <DateTimePickerModal
+                dateTimePickerProps={dateTimePickerProps}
+                setDateTimePickerProps={setDateTimePickerProps}
+                onDateTimeSelection={(event: any, selectedDate: any) => {
+                    console.log("selectedDate", selectedDate)
+                    if (event.type != "dismissed") {
+                        setValue(
+                            dateModal.start ? "endDate" : "endDate",
+                            formatTimeForAPI(selectedDate, "yyyy-mm-dd") || "",
+                        );
+                    }
+                    setDateTimePickerProps(getDateTimePickerProps(false));
+                }} />
         </CustomHeader>
     );
 };
@@ -698,7 +717,7 @@ const styles = ScaledSheet.create({
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    buttonContainer: {marginLeft: "12@ms"},
+    buttonContainer: { marginLeft: "12@ms" },
     organizationParentContainer: {
         marginTop: "12@ms",
     },

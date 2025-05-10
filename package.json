@@ -29,7 +29,7 @@
     "@react-navigation/native": "^7.0.15",
     "@rneui/base": "^4.0.0-rc.8",
     "@rneui/themed": "^4.0.0-rc.8",
-    "expo": "~52.0.37",
+    "expo": "~52.0.46",
     "expo-blur": "~14.0.3",
     "expo-checkbox": "^4.0.1",
     "expo-constants": "~17.0.7",

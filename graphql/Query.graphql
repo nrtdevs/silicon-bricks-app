@@ -290,22 +290,22 @@ query PaginatedModules($listInputDto: ListInputDTO!) {
 #paginated Coupans list
 query PaginatedCoupons($listInputDto: ListInputDTO!) {
   paginatedCoupons(ListInputDTO: $listInputDto) {
-    meta {
-      totalItems
-      totalPages
-      currentPage
-      limit
-    }
     data {
       id
       couponCode
       description
       minOrderAmount
-      usageLimit
       discountValue
+      usageLimit
       status
       startDate
       endDate
+    }
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
     }
   }
 }
@@ -430,9 +430,14 @@ query PaginatedPackages($listInputDto: ListInputDTO!) {
       price
       discountedPrice
       status
+      offerType
+      offerDescription
+      offerExpiryDate
       modules {
         id
+        description
         name
+        status
       }
     }
   }
