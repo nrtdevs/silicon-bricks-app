@@ -53,6 +53,12 @@ const defaultValue = {
   id: "",
   imagePath: ""
 };
+const userTypeData = [
+  { label: "admin", value: "admin" },
+  { label: "adminEmployee", value: "adminEmployee" },
+  { label: "organization", value: "organization" },
+  { label: "organizationEmployee", value: "organizationEmployee" },
+];
 
 const pickerData = [
   { label: "Active", value: "active" },
@@ -92,7 +98,7 @@ const UserScreen = () => {
     name: string;
     email: string;
     phoneNo: string;
-    roles: any[]; 
+    roles: any[];
     usertype: any;
     id: string;
     imagePath: string;
@@ -145,8 +151,8 @@ const UserScreen = () => {
       error: organizationError,
       data: organizationInfo,
       loading: OrganizationLoading,
-    }, 
-  ] = useLazyQuery(PaginatedOrganizationDocument); 
+    },
+  ] = useLazyQuery(PaginatedOrganizationDocument);
 
   const [updateUser, updateUserState] = useMutation(UpdateUserDocument, {
     onCompleted: (data) => {
@@ -170,13 +176,6 @@ const UserScreen = () => {
   });
 
   //test
-
-  const userTypeData = [
-    { label: "admin", value: "admin" },
-    { label: "adminEmployee", value: "adminEmployee" },
-    { label: "organization", value: "organization" },
-    { label: "organizationEmployee", value: "organizationEmployee" },
-  ];
 
   useEffect(() => {
     setValue("name", currentUser?.name);
@@ -244,7 +243,7 @@ const UserScreen = () => {
 
   const onSubmit = (data: any) => {
     console.log('0909', data);
-    try { 
+    try {
       const roleIds: number[] = [];
       if (data?.roles && Array.isArray(data.roles)) {
         for (let i = 0; i < data.roles.length; i++) {
@@ -295,20 +294,6 @@ const UserScreen = () => {
           { backgroundColor: Colors[theme].cartBg },
         ]}
       >
-        <ThemedText
-          style={[
-            styles.status,
-            {
-              // color:
-              //   item.status == "active" ? Colors?.green : "#6d6d1b",
-              backgroundColor:
-                theme == "dark" ? Colors?.white : "#e6e2e2",
-            },
-          ]}
-        >
-          {item?.status}
-        </ThemedText>
-
         <View style={styles.organizationHeader}>
           <ThemedText type="subtitle">{item?.name}</ThemedText>
           <View style={styles.organizationInfo}>
@@ -399,6 +384,20 @@ const UserScreen = () => {
           </View>
         </View>
 
+        <ThemedText
+          style={[
+            styles.status,
+            {
+              // color:
+              //   item.status == "active" ? Colors?.green : "#6d6d1b",
+              backgroundColor:
+                theme == "dark" ? Colors?.white : "#e6e2e2",
+            },
+          ]}
+        >
+          {item?.status}
+        </ThemedText>
+
         <View style={styles.userInfo}>
           <ThemedText
             style={{ fontSize: ms(14), lineHeight: ms(18) }}
@@ -411,6 +410,7 @@ const UserScreen = () => {
             {item?.mobileNo}
           </ThemedText>
         </View>
+
       </View>
     );
   }

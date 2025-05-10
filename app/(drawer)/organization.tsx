@@ -205,7 +205,7 @@ const OrganizationScreen = () => {
         key={index}
         style={[
           styles.organizationContainer,
-          { backgroundColor: '#2D2D30' },
+          { backgroundColor: Colors[theme]?.cartBg },
         ]}
       >
         <View style={styles.organizationHeader}>
@@ -487,7 +487,7 @@ const OrganizationScreen = () => {
               control={control}
               name={"description"}
               label={"Description"}
-              labelStyle={styles.label}
+              labelStyle={[styles.label, { color: Colors[theme].text }]}
               onFocus={() => setIsFocused("description")}
               autoCapitalize="none"
             />
@@ -616,7 +616,6 @@ const styles = ScaledSheet.create({
     fontSize: "12@ms",
   },
   label: {
-    color: Colors.grayText,
     fontSize: "14@ms",
     marginBottom: "12@ms",
     fontWeight: 400,

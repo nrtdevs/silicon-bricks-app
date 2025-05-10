@@ -72,6 +72,7 @@ const PackageScreen = () => {
         discountedPrice: string;
         module: any;
         endDate: string;
+        offer
     }>({
         defaultValues: {},
     });
@@ -230,9 +231,10 @@ const PackageScreen = () => {
     const onSubmit = (data: any) => {
         try {
             const moduleIds = data.module.map(Number);
+            console.log('moduleIds', typeof moduleIds[0]);
             let params = {
                 name: data?.name,
-                endDate: data?.endDate,
+                offerExpiryDate: data?.endDate,
                 price: Number(data?.price),
                 discountedPrice: Number(data?.discountedPrice),
                 moduleIds: moduleIds,
@@ -277,7 +279,7 @@ const PackageScreen = () => {
             key={index}
             style={[
                 styles.organizationContainer,
-                { backgroundColor: '#d3a49a' },
+                { backgroundColor: Colors[theme]?.cartBg },
             ]}
         >
 

@@ -234,8 +234,8 @@ const CustomValidation = (props: TextInputProps) => {
           borderColor: error
             ? Colors.red
             : isFocused
-              ? Colors.white
-              : Colors.gray
+              ? Colors.black
+              : Colors.black
         }
         return (
           <View style={[styles.container, props.wrapperStyle]}>
