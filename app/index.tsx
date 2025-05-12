@@ -15,12 +15,10 @@ const Index = () => {
   React.useEffect(() => {
     getToken();
   }, []);
-  return token ? (
+  return !token ? (
     <Redirect href="/(auth)/login" />
-  ) : (
-    // <Redirect href="/(auth)/login" />
-    // <Redirect href="/(drawer)/(tabs)/promotions" />
-    <Redirect href="/(drawer)/project"/>
+  ) : ( 
+    <Redirect href="/(drawer)/(tabs)" /> 
   );
 };
 
