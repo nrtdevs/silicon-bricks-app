@@ -1,9 +1,11 @@
 import {
   View,
   TouchableOpacity,
-  Alert
+  Alert,
+  ActivityIndicator,
+  RefreshControl
 } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { LinearGradient } from "expo-linear-gradient";
 import { useLazyQuery } from '@apollo/client'
 import { FlatList } from 'react-native-gesture-handler'
@@ -16,80 +18,113 @@ import CustomValidation from '@/components/CustomValidation';
 import { Dialog, Portal, } from "react-native-paper";
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { set, useForm } from 'react-hook-form';
 import { z } from "zod";
-import { ms, ScaledSheet } from 'react-native-size-matters';
+import { ms, ScaledSheet, vs } from 'react-native-size-matters';
 import { labels } from '@/constants/Labels';
 import { ThemedView } from '@/components/ThemedView';
 import CustomSearchBar from '@/components/CustomSearchBar';
 import { Pressable } from 'react-native';
 import { Colors } from '@/constants/Colors';
+import debounce from "lodash.debounce";
+import { DeleteRoleDocument, PaginatedRolesDocument } from '@/graphql/generated';
+import { useUserContext } from '@/context/RoleContext';
+import { router } from 'expo-router';
+import NoDataFound from '@/components/NoDataFound';
 
-
-const RoleModule = gql`
-  query PaginatedRoles($listInputDto: ListInputDTO!) {
-  paginatedRoles(ListInputDTO: $listInputDto) {
-    data {
-      id
-      name
-      description
-      roleType
-      status
-      permissionCount
-      
-    }
-  }
-}
-`;
-
-const Delete_Permission = gql`
-  mutation DeletePermission($deletePermissionId: Float!) {
-  deletePermission(id: $deletePermissionId)
-}
-`;
-
-const Update_Permission = gql`
- mutation UpdatePermission($data: UpdatePermissionDto!) {
-  updatePermission(data: $data) {
-    id
-    appName
-    groupName
-    module
-    action
-    slug
-    description
-  }
-}
-`;
-
-const Permissions = () => {
+const RolesScreen = () => {
   const { theme } = useTheme();
   /// fetch Roles data
   const [page, setPage] = useState<number>(1);
-  const [rolesData, { error: errorData, data: dataD, loading: errorLoading, refetch }] = useLazyQuery(
-    RoleModule
+  const [rolesData, { error, data, loading, refetch }] = useLazyQuery(
+    PaginatedRolesDocument
   );
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const fetchRoles = async (isRefreshing = false) => {
-    if (isRefreshing) {
-      setPage(1);
-      setRefreshing(true);
-    }
+  const [rolesList, setRolesList] = useState<any[]>([]);
+  const fetchRoles = async (isRefreshing = false, searchParams = "") => {
+    // if (isRefreshing) {
+    //   setPage(1);
+    //   setRefreshing(true);
+    // }
+    // const params = {
+    //   per_page_record: 10,
+    //   page: isRefreshing ? 1 : page,
+    // };
+
+    // await rolesData({
+    //   variables: {
+    //     listInputDto: {},
+    //   },
+    //   fetchPolicy: "network-only",
+    // });
+    // if (isRefreshing) {
+    //   setPage(1);
+    //   setRefreshing(true);
+    // }
+
+    const currentPage = isRefreshing ? 1 : page;
+
     const params = {
-      per_page_record: 10,
-      page: isRefreshing ? 1 : page,
+      limit: 8,
+      page: currentPage,
+      search: searchParams,
     };
 
-    await rolesData({
-      variables: {
-        listInputDto: {},
-      },
-    });;
+    try {
+      const res: any = await rolesData({
+        variables: {
+          listInputDto: params,
+        },
+        fetchPolicy: "network-only",
+      });
+
+      // console.log("Roles Data:00", res?.data?.paginatedRoles?.data);
+
+      if (res?.data?.paginatedRoles?.data) {
+        const data: any = res?.data?.paginatedRoles?.data;
+        const newItems = data || [];
+
+        setRolesList((prev: any) => {
+          if (isRefreshing) {
+            return newItems;
+          } else {
+            // Avoid duplicates by comparing item IDs
+            const existingIds = new Set(prev.map((item: any) => item.id));
+            const filteredNewItems = newItems.filter(
+              (item: any) => !existingIds.has(item.id)
+            );
+            return [...prev, ...filteredNewItems];
+          }
+        });
+
+        setRefreshing(false);
+
+        // Update page number only if we received new items
+        // if (!isRefreshing) {
+        setPage(currentPage + 1);
+        // }
+        const lastPage = Math.ceil(res?.data?.paginatedRoles?.meta?.totalItems / 8);
+        setHasMore(res?.data?.paginatedRoles?.meta?.currentPage < lastPage);
+        console.log('currentPage', currentPage);
+        console.log('lastPage', res?.data?.paginatedRoles?.meta);
+      } else {
+        console.log("API call failed or returned no data:", res?.errors);
+        setRefreshing(false);
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Fetch failed:", error);
+      setRefreshing(false);
+      setHasMore(false);
+    }
   };
+
   useEffect(() => {
     fetchRoles();
   }, []);
-  /// serach state 
+
+  /// search state 
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   /// delete role state --
@@ -102,31 +137,27 @@ const Permissions = () => {
     setDeletePopupVisible(false);
     setSelectedProjectId(null);
   };
-  const [deleteProject] = useMutation(Delete_Permission, {
-    onCompleted: () => {
-      console.log("Project deleted successfully");
-      setDeletePopupVisible(false);
-      //refetch();
+  const [deleteRole,] = useMutation(DeleteRoleDocument, {
+    onCompleted: (data) => {
+      fetchRoles(true);
+      refetch();
+      //   setEditVisible(false);
+      //   setCurrentProject(defaultValue)
+      //   setModalVisible(false);
     },
     onError: (error) => {
-      console.error("Error deleting project:", error);
-    },
-  });
-  const handleDelete = async () => {
-    console.log(selectedProjectId);
-    if (selectedProjectId !== null) {
-      try {
-        await deleteProject({ variables: { deletePermissionId: Number(selectedProjectId) } });
-      } catch (error) {
-        console.error("Error:", error);
-      }
     }
-  };
+  });
 
 
   const [visible, setVisible] = useState(false);
   const showDialogue = () => setVisible(true);
-  const [updatePermission] = useMutation(Update_Permission);
+  const { can, hasAny } = useUserContext();
+
+  const deletePermission = can("MasterApp:Module:Delete");
+  const checkUpdatePermission = can("MasterApp:Module:Update");
+  const createPermission = can("MasterApp:Module:Create");
+  const statusUpdatePermission = can("MasterApp:Module:Action");
 
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const schema = z.object({
@@ -142,70 +173,83 @@ const Permissions = () => {
     setVisible(false);
   };
 
-
-  const handleEdit = async (formData: any) => {
-    if (!selectedProjectId) {
-      console.error("No project selected for update");
-      return;
-    }
-    try {
-      const { data } = await updatePermission({
+  const debouncedSearch = useCallback(
+    debounce(async (text) => {
+      const res = await rolesData({
         variables: {
-          data: {
-            id: Number(selectedProjectId),
-            appName: formData.name,
-            description: formData.description,
-            module: "",
-            action: ""
+          listInputDto: {
+            limit: 10,
+            page: 1,
+            search: text,
           },
         },
       });
+      setRolesList(res?.data?.paginatedRoles?.data ?? []);
+    }, 500),
+    [searchQuery]
+  );
+  console.log('00', hasMore);
 
-      console.log("Project Updated:", data);
-      hideDialogue();
-    } catch (error) {
-      console.error("Error updating project:", error);
-    }
-  };
   return (
     <CustomHeader>
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ width: "90%" }}>
+          <View style={{ flex: 1 }}>
             <CustomSearchBar
               searchQuery={searchQuery}
-              placeholder="Search Permissions"
               onChangeText={(text) => {
                 setSearchQuery(text);
+                debouncedSearch(text);
+              }}
+              placeholder={labels?.searchRole}
+              // loading={loading}
+              onClear={() => {
+                setSearchQuery("");
               }}
             />
           </View>
           <Pressable
-
-          // onPress={() => { setModalVisible(true), setCurrentPermission(defaultValue) }}
-          >
-            <Feather name="plus-square" size={24} color={Colors[theme].text} />
+            style={styles.buttonContainer}
+            // onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
+            onPress={() => {
+              router.push({
+                pathname: "/(subComponents)/createRole",
+                params: {
+                  editable: "false",
+                }
+              })
+            }}          >
+            <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
           </Pressable>
         </View>
-        <View style={styles.organizationParentContainer}>
-          <FlatList
-            data={dataD?.paginatedRoles?.data}
-            renderItem={({ item, index }: any) =>
-              <View
-                key={index}
-                style={[
-                  styles.organizationContainer,
-                  { backgroundColor: Colors[theme].cartBg },
-                ]}
-              >
-                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                  <ThemedText style={styles.name}>{item.name}</ThemedText>
-                  <View style={styles.organizationInfo}>
+
+        <FlatList
+          data={rolesList}
+          renderItem={({ item, index }: any) => {
+            return <View
+              key={index}
+              style={[
+                styles.organizationContainer,
+                { backgroundColor: Colors[theme].cartBg },
+              ]}
+            >
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <ThemedText type='subtitle' style={styles.name}>{item.name}</ThemedText>
+                <View style={styles.organizationInfo}>
                   <Feather
                     name="edit"
-                    size={ms(20)}
-                    color="black"
-                    onPress={showDialogue}
+                    size={ms(22)}
+                    color={Colors[theme].text}
+                    onPress={() => {
+                      router.push({
+                        pathname: "/(subComponents)/createRole",
+                        params: {
+                          editable: "true",
+                          id: item.id,
+                          name: item.name,
+                        }
+                      })
+                    }}
                   />
                   <View style={{ width: 5 }}></View>
                   <MaterialIcons
@@ -219,11 +263,12 @@ const Permissions = () => {
                         [
                           {
                             text: "Yes", onPress: () => {
-                              // deleteRoles({
-                              //   variables: {
-                              //     deletePlanId: Number(item?.id),
-                              //   }
-                              // });
+                              deleteRole({
+                                variables: {
+                                  ids: Number(item?.id),
+                                },
+                                fetchPolicy: "network-only",
+                              });
                             }
                           },
                           { text: "No", onPress: () => { } },
@@ -232,98 +277,57 @@ const Permissions = () => {
 
                     }}
                   />
-                  </View>
-                  
                 </View>
-                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                  {item?.description}
-                </ThemedText>
-              </View>}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      </ThemedView>
 
-      <Portal>
-        <ThemeProvider>
-          <Dialog visible={deletePopupVisible} onDismiss={hideDeleteDialogue}>
-            <Dialog.Title style={styles.dialogueTitle}>Delete Project</Dialog.Title>
-            <Dialog.Content>
-              <ThemedText style={styles.label}>
-                Do You Want To Really Delete The Project
+              </View>
+              <ThemedText
+                style={[
+                  styles.permission,
+                  {
+                    // color:
+                    // item.status == "active" ? Colors?.green : "#6d6d1b",
+                    backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
+                  },
+                ]}
+              >
+                {item?.permissionCount} Permissions
               </ThemedText>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <TouchableOpacity
-                onPress={handleDelete}
-                style={styles.buttonContainerSave}
-              >
-                <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Yes</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={hideDeleteDialogue}
-                style={styles.buttonContainerClose}
-              >
-                <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>No</ThemedText>
-              </TouchableOpacity>
-            </Dialog.Actions>
-          </Dialog>
-        </ThemeProvider>
-      </Portal>
-
-      <Portal>
-        <ThemeProvider>
-          <Dialog visible={visible} onDismiss={hideDialogue}>
-            <Dialog.Content>
-              <CustomValidation
-                type="input"
-                control={control}
-                labelStyle={styles.label}
-                name="name"
-                inputStyle={[{ lineHeight: ms(20) }]}
-                label={`${labels.projectName}`}
-                placeholder={`${labels.projectName}`}
-                // onFocus={() => setIsFocused("email")}
-                rules={{
-                  required: labels.projectName,
-                }}
-              />
-              <CustomValidation
-                type="input"
-                control={control}
-                labelStyle={styles.label}
-                name="description"
-                inputStyle={[{ lineHeight: ms(20) }]}
-                label={`${labels.description}`}
-                placeholder={`${labels.description}`}
-                // onFocus={() => setIsFocused("email")}
-                rules={{
-                  required: labels.description,
-                }}
-              />
-            </Dialog.Content>
-            <Dialog.Actions>
-              <TouchableOpacity
-                onPress={handleSubmit(handleEdit)}
-                style={styles.buttonContainerSave}
-              >
-                <ThemedText style={{ color: 'white', fontSize: 14, fontWeight: "normal" }}>Save</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={hideDialogue}
-                style={styles.buttonContainerClose}
-              >
-                <ThemedText style={{ color: 'black', fontSize: 14, fontWeight: "normal" }}>Close</ThemedText>
-              </TouchableOpacity>
-            </Dialog.Actions>
-          </Dialog>
-        </ThemeProvider>
-      </Portal>
+              {item?.description && <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                {item?.description}
+              </ThemedText>}
+            </View>
+          }
+          }
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={async () => {
+                fetchRoles(true);
+              }}
+            />
+          }
+          keyExtractor={(item: any, index: number) => index.toString()}
+          contentContainerStyle={{ paddingBottom: vs(20), paddingTop: vs(15) }}
+          ListEmptyComponent={!loading ? <NoDataFound /> : null}
+          ListFooterComponent={
+            hasMore ? (
+              <ActivityIndicator size="small" color={Colors.primary} />
+            ) : null
+          }
+          onEndReached={() => {
+            if (hasMore) {
+              fetchRoles();
+            }
+          }}
+          onEndReachedThreshold={0.5}
+        />
+      </ThemedView>
     </CustomHeader >
   )
 }
 
-export default Permissions
+export default RolesScreen
 
 const styles = ScaledSheet.create({
   contentContainer: {
@@ -333,6 +337,7 @@ const styles = ScaledSheet.create({
   innerContainer: {
     paddingVertical: 10
   },
+  buttonContainer: { marginLeft: "12@ms" },
   searchContainer: {
     width: "100%",
     flexDirection: "row",
@@ -357,10 +362,18 @@ const styles = ScaledSheet.create({
   },
   organizationInfo: {
     flexDirection: "row",
-},
+    gap: "5@ms",
+  },
   loadingText: {
     fontSize: 18,
     color: '#007BFF'
+  },
+  permission: {
+    color: "green",
+    borderRadius: "10@ms",
+    width: "110@ms",
+    textAlign: "center",
+    fontSize: "12@ms",
   },
   errorContainer: {
     flex: 1,
@@ -411,10 +424,7 @@ const styles = ScaledSheet.create({
     alignItems: 'center'
   },
   name: {
-    fontSize: 18,
-    width: 110,
-    color: "black",
-    fontWeight: "500",
+
   },
   cardDot: {
     fontSize: 16,

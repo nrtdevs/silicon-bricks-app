@@ -11,6 +11,7 @@ import {
   Entypo,
   Feather,
   FontAwesome,
+  Foundation,
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
@@ -28,12 +29,14 @@ import Toggle from "react-native-toggle-element";
 import * as SecureStore from "expo-secure-store";
 import { ThemedView } from "@/components/ThemedView";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { FindUserByIdDocument, UpdateProfileDocument } from "@/graphql/generated";
+import { FindUserByIdDocument, GetAllDynamicPageDocument, UpdateProfileDocument } from "@/graphql/generated";
 import Modal from "react-native-modal";
 import CustomValidation from "@/components/CustomValidation";
 import { useForm } from "react-hook-form";
 import CustomButton from "@/components/CustomButton";
 import * as ImagePicker from "expo-image-picker";
+import { Env } from "@/constants/ApiEndpoints";
+import * as FileSystem from "expo-file-system";
 
 
 const { NetworkManager } = NativeModules;
@@ -44,12 +47,20 @@ const SettingScreen = () => {
   const [image, setImage] = useState<string>("");
   const [toggleValue, setToggleValue] = useState<any>(false);
   const [isModalVisible, setModalVisible] = useState<boolean>(false)
+  const [pages, setPages] = useState<any>([])
   const { control, setValue, handleSubmit, watch } = useForm<{ name: string, email: string, phoneNo: string }>({
-    name: "",
-    email: "",
-    phoneNo: ""
+    defaultValues: {
+      name: "",
+      email: "",
+      phoneNo: ""
+    }
+
   });
+
   const [userData, { data, error, loading, refetch }] = useLazyQuery<any>(FindUserByIdDocument)
+  const [pagesData, { error: pageDataError, data: pagesApiData, loading: pageDataLoading, refetch: pageDataRefetch }] = useLazyQuery(
+    GetAllDynamicPageDocument
+  );
   // const [updateUser, updateUserState] = useMutation(UpdateProfileDocument, {
   //   onCompleted: () => {
   //     refetch();
@@ -68,7 +79,7 @@ const SettingScreen = () => {
       setModalVisible(false);
     },
     onError: (error) => {
-      Alert.alert("Error9", error.message);
+      Alert.alert("Error", error.message);
     }
   });
 
@@ -83,7 +94,6 @@ const SettingScreen = () => {
   useFocusEffect(
     useCallback(() => {
       getUserData();
-
     }, [])
   );
 
@@ -97,13 +107,25 @@ const SettingScreen = () => {
 
 
   const getUserData = async () => {
-    const id = await SecureStore.getItemAsync("userId");
-    setUserId(Number(id));
-    userData({
+    const res = await pagesData({
       variables: {
-        findUserByIdId: Number(id)
+        listInputDto: {
+          limit: 10,
+          page: 1
+        }
+      },
+    });
+    setPages(res?.data?.getAllDynamicPage?.data);
+    const storedData = await SecureStore.getItemAsync("userData");
+    if (!storedData) return null;
+    let parsedUserData = JSON.parse(storedData);
+    setUserId(Number(parsedUserData?.userId));
+    const response = await userData({
+      variables: {
+        findUserByIdId: Number(parsedUserData?.userId)
       }
-    })
+    });
+    setImage(response.data?.findUserById?.avatar);
   };
 
   const rightIcon = () => {
@@ -211,27 +233,23 @@ const SettingScreen = () => {
       iconName: "help-circle",
       onTouchAction: () => { },
     },
-    {
-      id: 7,
-      title: labels.about,
-      iconLib: AntDesign,
-      iconName: "infocirlceo",
-      onTouchAction: () => {
-        router.push("/about");
-      },
-    },
   ];
 
   const logoutFunc = () => {
     Alert.alert(labels.logout_title, labels.logout_msg, [
       {
         text: labels.cancel,
-        onPress: () => { },
+        onPress: () => {
+
+        },
         style: "cancel",
       },
       {
         text: labels.logout,
-        onPress: async () => { },
+        onPress: async () => {
+          await SecureStore.deleteItemAsync("userData");
+          router.dismissTo('/login');
+        },
       },
     ]);
   };
@@ -242,7 +260,9 @@ const SettingScreen = () => {
       mobileNo: Number(watch("phoneNo")),
       id: userId,
       email: watch("email"),
+      avatar: image
     }
+
     try {
       updateUser(
         {
@@ -256,20 +276,77 @@ const SettingScreen = () => {
     }
   }
 
+  // const handleImagePickerPress = async () => {
+  //   let result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsEditing: true,
+  //     aspect: [1, 1],
+  //     quality: 1,
+  //   });
+
+  //   if (!result.canceled) {
+  //     setImage(result.assets[0].uri)
+  //   }
+  // };
+
+  const uploadImage = async (uri: string) => {
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      if (!fileInfo.exists) {
+        console.error("File does not exist:", uri);
+        return;
+      }
+
+      const fileExtension = uri.split(".").pop() || "jpg"; // Default to jpg if no extension
+      const mimeType = `image/${fileExtension}`;
+
+      const formData = new FormData();
+
+      formData.append("file", {
+        uri,
+        name: `upload.${fileExtension}`,
+        type: mimeType,
+      } as unknown as Blob);
+
+      // formData.append("file", {
+      //   uri: uri,
+      //   name: `upload.${fileExtension}`,
+      //   type: mimeType,
+      // } as any); 
+
+      const uploadResponse = await fetch(`${Env.SERVER_URL}/api/files/upload`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+      if (!uploadResponse.ok) {
+        const err = await uploadResponse.text();
+        throw new Error(`Upload failed: ${err}`);
+      }
+      const responseData = await uploadResponse.json();
+      // console.log("Upload successful:", responseData?.files[0]);
+      setImage(responseData?.files[0]);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+  };
+
   const handleImagePickerPress = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Correct media type
+      mediaTypes: 'images',
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri)
+    if (!result.canceled && result.assets?.length > 0) {
+      const uri = result.assets[0].uri;
+      uploadImage(uri);
     }
   };
 
-  console.log("image", image);
 
 
   return (
@@ -298,14 +375,16 @@ const SettingScreen = () => {
       >
         <ThemedView>
           <View style={styles.userInfo}>
-            <View
-              style={{
-                height: 80,
-                width: 80,
-                borderRadius: "100%",
-                backgroundColor: "#808080",
-              }}
-            ></View>
+            <Pressable
+              style={styles.imageContainer}
+            >
+              <Image
+                source={{
+                  uri: `${Env?.SERVER_URL}${image}`,
+                }}
+                style={styles.image}
+              />
+            </Pressable>
             <View>
               <ThemedText style={styles.userName}>{data?.findUserById?.name}</ThemedText>
               <ThemedText style={styles.userEmail}>{data?.findUserById?.email}</ThemedText>
@@ -333,6 +412,55 @@ const SettingScreen = () => {
 
                 <View style={{ width: "80%" }}>
                   <ThemedText type="default">{item.title}</ThemedText>
+                  {item.subtitle && (
+                    <ThemedText
+                      type="default"
+                      style={{
+                        fontSize: ms(12),
+                        lineHeight: ms(17),
+                      }}
+                    >
+                      {item.subtitle}
+                    </ThemedText>
+                  )}
+                </View>
+
+                {item.rightIcon && item.rightIcon}
+              </Pressable>
+            );
+          })}
+
+          {pages.map((item: any, i: number) => {
+            return (
+              <Pressable
+                key={i}
+                onPress={() => router.push({
+                  pathname: '/dynamicPage',
+                  params: {
+                    data: JSON.stringify(item)
+                  }
+                })}
+                style={[
+                  styles.container,
+                  { backgroundColor: Colors[theme].cartBg },
+                ]}
+              >
+                {item.image ? (
+                  item.image
+                ) : item.iconLib ? (
+                  <item.iconLib
+                    name={item.iconName}
+                    size={ms(22)}
+                    color={Colors[theme].text}
+                  />
+                ) : <Foundation name="page-csv" size={ms(22)}
+                  color={Colors[theme].text} />}
+
+                <View style={{ width: "80%" }}>
+                  <ThemedText type="default">
+                    {item.slug.charAt(0).toUpperCase() + item.slug.slice(1)}
+                  </ThemedText>
+
                   {item.subtitle && (
                     <ThemedText
                       type="default"
@@ -390,9 +518,26 @@ const SettingScreen = () => {
             </View>
 
             <View style={{ padding: 10 }}>
-              <Pressable onPress={handleImagePickerPress} style={styles.imageContainer}>
-                {image && <Image source={{ uri: image }} style={styles.image} />}
+              <Pressable
+                style={styles.imageContainer}
+              >
+                <Image
+                  source={{
+                    uri: `${Env?.SERVER_URL}${image}`,
+                  }}
+                  style={styles.image}
+                />
               </Pressable>
+              <Pressable
+                onPress={handleImagePickerPress}
+                style={styles?.editImage}>
+                <Feather name="edit-2" size={ms(20)} color='black' style={{ fontWeight: 'bold', }} />
+              </Pressable>
+
+
+              {/* <Pressable onPress={handleImagePickerPress} style={styles.imageContainer}>
+                {image && <Image source={{ uri: image }} style={styles.image} />}
+              </Pressable> */}
               <CustomValidation
                 type="input"
                 control={control}
@@ -410,6 +555,7 @@ const SettingScreen = () => {
                 control={control}
                 name={"email"}
                 label={"Email"}
+                editable={false}
                 labelStyle={styles.label}
                 rules={{
                   required: "Email is required",
@@ -483,17 +629,32 @@ const styles = ScaledSheet.create({
     fontWeight: 400,
   },
   imageContainer: {
-    width: ms(50),
-    height: ms(50),
-    borderRadius: ms(50),
-    marginBottom: "12@ms",
+    width: '80@ms',
+    height: '80@ms',
+    borderRadius: '70@ms',
+    marginBottom: '12@ms',
     backgroundColor: Colors.gray,
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#ccc",
   },
   image: {
-    width: 40,
-    height: 40,
-    resizeMode: "cover", // Ensures the image covers the container
+    width: '100%',
+    height: '100%',
+    borderRadius: ms(50),
+    resizeMode: 'cover',
   },
+  editImage: {
+    position: 'absolute',
+    top: 3,
+    left: 55,
+    width: 35,
+    height: 35,
+    borderRadius: 100,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });

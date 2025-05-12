@@ -102,6 +102,7 @@ interface TextInputProps extends RequiredProps {
   hideStar?: boolean
   itemContainerStyle?: any
   wrapperStyle?: any
+  autoFocus?: boolean
 }
 
 const CustomValidation = (props: TextInputProps) => {
@@ -136,7 +137,7 @@ const CustomValidation = (props: TextInputProps) => {
       return <ActivityIndicator size="small" color={Colors.primary} />
     }
 
-    if (value && !props.disabled && !error && !props.multiSelect) {
+    if (value && !props.disabled && !error && !props.multiSelect && props.rightIcon) {
       return (
         <AntDesign
           name="close"
@@ -233,8 +234,8 @@ const CustomValidation = (props: TextInputProps) => {
           borderColor: error
             ? Colors.red
             : isFocused
-              ? Colors.white
-              : Colors.gray
+              ? Colors.black
+              : Colors.black
         }
         return (
           <View style={[styles.container, props.wrapperStyle]}>
@@ -304,10 +305,11 @@ const CustomValidation = (props: TextInputProps) => {
                   returnKeyType={props.returnKeyType}
                   returnKeyLabel="google"
                   onSubmitEditing={props.onSubmitEditing}
-                  editable={!props.editable}
+                  editable={props.editable}
                   pointerEvents={props?.pointerEvents}
                   maxLength={props.maxLength}
                   multiline={props.multiline}
+                  autoFocus={props.autoFocus}
                   onFocus={() => {
                     props.onFocus?.()
                     setIsFocused(true)
@@ -323,7 +325,7 @@ const CustomValidation = (props: TextInputProps) => {
                   rightIcon={
                     props.rightIcon
                       ? props.rightIcon
-                      : value && !props.disabled && !props.editable
+                      : value && !props.disabled && !props.editable && !props?.rightIcon == null
                         ? {
                           type: 'AntDesign ',
                           name: 'close',
@@ -458,7 +460,6 @@ const CustomValidation = (props: TextInputProps) => {
                     }}
                     itemContainerStyle={props.itemContainerStyle}
                     key={props.keyToCompareData}
-
                   />
                 ) : (
                   <MultiSelect

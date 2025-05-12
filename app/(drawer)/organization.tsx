@@ -1,15 +1,20 @@
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Pressable,
   RefreshControl,
-  StyleSheet,
-  Text,
   View,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { CreateOrganizationDocument, DeleteOrganizationDocument, EnableOrganizationStatusDocument, PaginatedOrganizationDocument, UpdateOrganizationDocument } from "@/graphql/generated";
+import {
+  CreateOrganizationDocument,
+  DeleteOrganizationDocument,
+  EnableOrganizationStatusDocument,
+  PaginatedOrganizationDocument,
+  UpdateOrganizationDocument,
+} from "@/graphql/generated";
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -27,14 +32,14 @@ import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
+import { useUserContext } from "@/context/RoleContext";
 
 const defaultValue = {
   name: "",
   description: "",
   id: "",
-}
+};
 
-// const 
 const pickerData = [
   { label: "Active", value: "active" },
   { label: "Inactive", value: "inactive" },
@@ -42,8 +47,7 @@ const pickerData = [
   { label: "Pending", value: "pending" },
 ];
 
-const organization = () => {
-
+const OrganizationScreen = () => {
   const { theme } = useTheme();
   const {
     control,
@@ -51,14 +55,16 @@ const organization = () => {
     formState: { errors },
     reset,
     watch,
-    setValue
-  } = useForm<{ name: string, description: string, status: any }>({
+    setValue,
+  } = useForm<{ name: string; description: string; status: any }>({
     defaultValues: {},
   });
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [organizationList, setOrganizationList] = useState<any>([]);
   const [organizationData, { error, data, loading, refetch }] = useLazyQuery(
     PaginatedOrganizationDocument
   );
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const [editModal, setEditModal] = useState<boolean>(false);
@@ -68,54 +74,75 @@ const organization = () => {
     description: string;
     id: string;
   }>(defaultValue);
-  const [selected, setSelected] = useState<any>([]);
   const [page, setPage] = useState<number>(1);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [createOrganization, createOrganizationState] = useMutation(CreateOrganizationDocument, {
-    onCompleted: (data) => {
-      reset()
-      refetch();
-      setModalVisible(false);
-      Alert.alert("success", "Project create successfully!");
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
+  const [createOrganization, createOrganizationState] = useMutation(
+    CreateOrganizationDocument,
+    {
+      onCompleted: (data) => {
+        reset();
+        fetchOrganization(true);
+        setModalVisible(false);
+      },
+      onError: (error) => {
+        Alert.alert("Error", error.message);
+      },
     }
-  });
+  );
 
-  const [updateOrganization, updateOrganizationState] = useMutation(UpdateOrganizationDocument, {
-    onCompleted: (data) => {
-      reset()
-      refetch();
-      setEditModal(false);
-      setModalVisible(false);
-      Alert.alert("success", "Project updated successfully!");
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    }
-  });
+  const { can, hasAny } = useUserContext();
 
-  const [deleteOrganization, deleteOrganizationState] = useMutation(DeleteOrganizationDocument, {
-    onCompleted: (data) => {
-      refetch();
-      Alert.alert("success", "Project deleted successfully!");
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    }
-  });
+  const deletePermission = can("MasterApp:Organization:Delete");
+  const updatePermission = can("MasterApp:Organization:Update");
+  const createPermission = can("MasterApp:Organization:Create");
+  const statusUpdatePermission = can("MasterApp:Organization:Action");
 
-  const [updateOrganizationStatus, updateOrganizationStatusState] = useMutation(EnableOrganizationStatusDocument, {
-    onCompleted: (data) => {
-      refetch();
-      setStatusModalVisible(false);
-      Alert.alert("success", "Status updated successfully!");
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
+  //   const ckeckall = hasAny(['MasterApp:Organization:Create', 'MasterApp:Organization:Update', 'MasterApp:Organization:Delete'])
+
+  //  console.log('9999',ckeckall);
+
+  const [updateOrganization, updateOrganizationState] = useMutation(
+    UpdateOrganizationDocument,
+    {
+      onCompleted: (data) => {
+        fetchOrganization(true);
+        setCurrentOrganization(defaultValue);
+        setEditModal(false);
+        setModalVisible(false);
+      },
+      onError: (error) => {
+        Alert.alert("Error", error.message);
+      },
     }
-  });
+  );
+
+  const [deleteOrganization, deleteOrganizationState] = useMutation(
+    DeleteOrganizationDocument,
+    {
+      onCompleted: (data) => {
+        fetchOrganization(true);
+        setCurrentOrganization(defaultValue);
+        setEditModal(false);
+        setModalVisible(false);
+      },
+      onError: (error) => {
+        Alert.alert("Error", error.message);
+      },
+    }
+  );
+
+  const [updateOrganizationStatus, updateOrganizationStatusState] = useMutation(
+    EnableOrganizationStatusDocument,
+    {
+      onCompleted: (data) => {
+        fetchOrganization(true);
+        setStatusModalVisible(false);
+      },
+      onError: (error) => {
+        Alert.alert("Error", error.message);
+      },
+    }
+  );
 
   // const setCurrentOrganizationData() => {
   //   setValue("name", currentOrganization?.name)
@@ -123,47 +150,53 @@ const organization = () => {
   // }
 
   useEffect(() => {
-    setValue("name", currentOrganization?.name)
-    setValue("description", currentOrganization?.description)
-  }, [currentOrganization])
+    setValue("name", currentOrganization?.name);
+    setValue("description", currentOrganization?.description);
+  }, [currentOrganization]);
 
   useEffect(() => {
     fetchOrganization();
-  }, []);
+  }, [!refreshing]);
 
   useEffect(() => {
     if (watch("status")) {
       updateOrganizationStatus({
         variables: {
           data: {
-            id: Number(currentOrganization?.id),
-            status: watch("status")?.value
-          }
-        },
-      });
-    }
-  }, [watch("status")])
-
-  const onSubmit = (data: any) => {
-    let param = {
-      id: Number(currentOrganization?.id),
-      ...data
-    }
-    console.log(param);
-    editModal ?
-      updateOrganization({
-        variables: {
-          updateOrganizationInput: param,
-        },
-      })
-      : createOrganization({
-        variables: {
-          createOrganizationInput: {
-            ...data
+            ids: [Number(currentOrganization?.id)],
+            status: watch("status")?.value,
           },
         },
       });
+    }
+  }, [watch("status")]);
 
+  const onSubmit = (data: any) => {
+    try {
+      let params = {
+        name: data?.name,
+        description: data?.description,
+      };
+
+      editModal
+        ? updateOrganization({
+          variables: {
+            updateOrganizationInput: {
+              id: Number(currentOrganization?.id),
+              ...params,
+            },
+          },
+        })
+        : createOrganization({
+          variables: {
+            createOrganizationInput: {
+              ...data,
+            },
+          },
+        });
+    } catch (error) {
+      console.log("onSubmit error", error);
+    }
   };
 
   const renderItem = ({ item, index }: any) => {
@@ -172,177 +205,219 @@ const organization = () => {
         key={index}
         style={[
           styles.organizationContainer,
-          { backgroundColor: Colors[theme].cartBg },
+          { backgroundColor: Colors[theme]?.cartBg },
         ]}
       >
         <View style={styles.organizationHeader}>
-          <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
+          <ThemedText type="subtitle" style={{ flex: 1 }}>
+            {item?.name}
+          </ThemedText>
           <View style={styles.organizationInfo}>
-            <MaterialIcons
-              name="attractions"
-              size={ms(20)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentOrganization({
-                  name: item?.name,
-                  description: item?.description,
-                  id: item?.id,
-                });
-                setStatusModalVisible(true);
-              }}
-            />
-            <Feather
-              name="edit"
-              size={ms(20)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentOrganization({
-                  name: item?.name,
-                  description: item?.description,
-                  id: item?.id,
-                });
-                // setCurrentOrganizationData();
-                setModalVisible(true);
-                setEditModal(true);
-              }}
-            />
-            <MaterialIcons
-              name="delete-outline"
-              size={ms(20)}
-              color={Colors[theme].text}
-              onPress={() => {
-                Alert.alert(
-                  "Delete",
-                  "Are you sure you want to delete?",
-                  [
+            {statusUpdatePermission && (
+              <MaterialIcons
+                name="attractions"
+                size={ms(26)}
+                color={Colors[theme].text}
+                onPress={() => {
+                  setCurrentOrganization({
+                    name: item?.name,
+                    description: item?.description,
+                    id: item?.id,
+                  });
+                  setStatusModalVisible(true);
+                }}
+              />
+            )}
+
+            {updatePermission && (
+              <Feather
+                name="edit"
+                size={ms(26)}
+                color={Colors[theme].text}
+                onPress={() => {
+                  setCurrentOrganization({
+                    name: item?.name,
+                    description: item?.description,
+                    id: item?.id,
+                  });
+                  // setCurrentOrganizationData();
+                  setModalVisible(true);
+                  setEditModal(true);
+                }}
+              />
+            )}
+
+            {deletePermission && (
+              <MaterialIcons
+                name="delete-outline"
+                size={ms(26)}
+                color={Colors[theme].text}
+                onPress={() => {
+                  Alert.alert("Delete", "Are you sure you want to delete?", [
                     {
-                      text: "Yes", onPress: () => {
+                      text: "Yes",
+                      onPress: () => {
                         deleteOrganization({
                           variables: {
-                            deleteOrganizationId: Number(item?.id),
-                          }
+                            ids: [Number(item?.id)],
+                          },
                         });
-                      }
+                      },
                     },
                     { text: "No", onPress: () => { } },
-                  ]
-                );
-
-              }}
-            />
+                  ]);
+                }}
+              />
+            )}
           </View>
         </View>
         <ThemedText
           style={[
             styles.status,
             {
-              color:
-                item.status == "active" ? Colors?.green : "#6d6d1b",
-              backgroundColor:
-                theme == "dark" ? Colors?.white : "#e6e2e2",
+              color: item.status == "active" ? Colors?.green : "#6d6d1b",
+              backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
             },
           ]}
         >
           {item?.status}
         </ThemedText>
-        <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-          {item?.description}
-        </ThemedText>
+        {item?.description && (
+          <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+            {item?.description}
+          </ThemedText>
+        )}
       </View>
-    )
-  }
+    );
+  };
 
-  const fetchOrganization = async (isRefreshing = false) => {
+  const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
+    const currentPage = isRefreshing ? 1 : page;
+    console.log('999', typeof searchParams);
+
     if (isRefreshing) {
-      setPage(1);
       setRefreshing(true);
     }
 
     const params = {
-      per_page_record: 10,
-      page: isRefreshing ? 1 : page,
+      limit: 8,
+      page: currentPage,
+      search: searchParams,
     };
 
-    await organizationData({
-      variables: {
-        listInputDto: {},
-      },
-    });;
+    try {
+      const res: any = await organizationData({
+        variables: {
+          listInputDto: params,
+        },
+        fetchPolicy: "network-only",
+      });
+
+      if (res?.data?.paginatedOrganization) {
+        const data: any = res?.data?.paginatedOrganization;
+        const newItems = data?.data || [];
+
+        setOrganizationList((prev: any) => {
+          return isRefreshing ? newItems : [...prev, ...newItems];
+        });
+
+        if (isRefreshing) {
+          setPage(2); // since page 1 is already fetched
+        } else {
+          setPage((prevPage) => prevPage + 1);
+        }
+
+        setRefreshing(false);
+
+        const lastPage = Math.ceil(data?.meta?.totalItems / 6);
+        setHasMore(data?.meta?.currentPage < lastPage);
+      } else {
+        console.log("API call failed or returned no data:", res?.errors);
+        setRefreshing(false);
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Fetch failed:", error);
+      setRefreshing(false);
+      setHasMore(false);
+    }
   };
 
   const debouncedSearch = useCallback(
     debounce((text) => {
-      organizationData({
-        variables: {
-          listInputDto: {
-            limit: 10,
-            page: 1,
-            search: text,
-          },
-        },
-      });
+      fetchOrganization(true, text);
     }, 500),
     [searchQuery]
   );
+
+  if (
+    (loading ||
+      deleteOrganizationState.loading ||
+      updateOrganizationStatusState?.loading) && page == 1 && !refreshing
+  ) {
+    return <Loader />;
+  }
 
   return (
     <CustomHeader>
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ width: "90%" }}>
+          <View style={{ flex: 1 }}>
             <CustomSearchBar
               searchQuery={searchQuery}
               onChangeText={(text) => {
                 setSearchQuery(text);
                 debouncedSearch(text);
               }}
-              placeholder={labels?.searchTeam}
+              placeholder={labels?.searchOrganization}
               loading={loading}
               onClear={() => {
                 setSearchQuery("");
               }}
             />
           </View>
-          <Pressable
-            style={styles.buttonContainer}
-            onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
-          >
-            <Feather name="plus-square" size={24} color={Colors[theme].text} />
-          </Pressable>
+          {createPermission && (
+            <Pressable
+              style={styles.buttonContainer}
+              onPress={() => {
+                setModalVisible(true), setCurrentOrganization(defaultValue);
+              }}
+            >
+              <Feather
+                name="plus-square"
+                size={ms(25)}
+                color={Colors[theme].text}
+              />
+            </Pressable>
+          )}
         </View>
-        {
-          selected && <View style={styles.selectedContainer}>
-            {
-              selected.map(() => (<View style={[styles.searchedResult, { backgroundColor: Colors[theme].cartBg }]}>
-                <ThemedText>lkjlkj</ThemedText>
-              </View>))
-            }
-          </View>
-        }
         <View style={styles.organizationParentContainer}>
           <FlatList
-            data={data?.paginatedOrganization?.data}
+            data={organizationList}
             renderItem={({ item, index }: any) => renderItem({ item, index })}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
-                refreshing={refreshing}
-                onRefresh={() => fetchOrganization(true)}
+                refreshing={refreshing && !loading}
+                onRefresh={async () => {
+                  fetchOrganization(true);
+                }}
               />
             }
+            keyExtractor={(item: any, index: number) => index.toString()}
             contentContainerStyle={{ paddingBottom: vs(40) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
-          // ListFooterComponent={
-          //   hasMore ? (
-          //     <ActivityIndicator size="small" color={Colors.primary} />
-          //   ) : null
-          // }
-          // onEndReached={() => {
-          //   if (hasMore && !isLoading) {
-          //     fetchNotification();
-          //   }
-          // }}
-          // onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              hasMore ? (
+                <ActivityIndicator size="small" color={Colors.primary} />
+              ) : null
+            }
+            onEndReached={() => {
+              if (hasMore && !loading) {
+                fetchOrganization();
+              }
+            }}
+            onEndReachedThreshold={0.5}
           />
         </View>
       </ThemedView>
@@ -360,7 +435,7 @@ const organization = () => {
         <View
           style={{
             backgroundColor: Colors[theme].cartBg,
-            height: vs(400),
+            height: vs(350),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
@@ -373,7 +448,6 @@ const organization = () => {
               flexDirection: "row",
               justifyContent: "space-between",
               padding: 10,
-              bottom: 30
             }}
           >
             <ThemedText type="subtitle">
@@ -401,7 +475,9 @@ const organization = () => {
               label={"Name"}
               onFocus={() => setIsFocused("name")}
               rules={{
-                required: editModal ? "Text organization is required" : "Module name is required"
+                required: editModal
+                  ? "Text organization is required"
+                  : "Module name is required",
               }}
               autoCapitalize="none"
             />
@@ -411,21 +487,24 @@ const organization = () => {
               control={control}
               name={"description"}
               label={"Description"}
-              labelStyle={styles.label}
+              labelStyle={[styles.label, { color: Colors[theme].text }]}
               onFocus={() => setIsFocused("description")}
-              rules={{
-                required: editModal ? "Test organization description is required" : "Description is required",
-              }}
+              autoCapitalize="none"
             />
           </View>
 
           <CustomButton
             title="Submit"
-            isLoading={createOrganizationState.loading || updateOrganizationState.loading}
+            isLoading={
+              editModal ? updateOrganizationState.loading : createOrganizationState.loading
+            }
             onPress={() => {
               handleSubmit(onSubmit)();
             }}
-            style={{ backgroundColor: Colors[theme].background, marginTop: vs(10) }}
+            style={{
+              backgroundColor: Colors[theme].background,
+              marginTop: vs(10),
+            }}
           />
         </View>
       </Modal>
@@ -440,13 +519,29 @@ const organization = () => {
         <View
           style={{
             backgroundColor: Colors[theme].cartBg,
-            height: 380,
+            height: vs(320),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
           }}
         >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 10,
+            }}
+          >
+            <ThemedText type="subtitle">{"Change Status"}</ThemedText>
+            <Pressable
+              onPress={() => {
+                setStatusModalVisible(false);
+              }}
+            >
+              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+            </Pressable>
+          </View>
           <CustomValidation
             data={pickerData}
             type="picker"
@@ -454,7 +549,9 @@ const organization = () => {
             control={control}
             name="status"
             placeholder="Select Status"
-            inputStyle={{ height: vs(50) }}
+            inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
+            inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
+            containerStyle={{ marginTop: 0, paddingTop: 0 }}
             rules={{
               required: {
                 value: true,
@@ -468,7 +565,7 @@ const organization = () => {
   );
 };
 
-export default organization;
+export default OrganizationScreen;
 
 const styles = ScaledSheet.create({
   container: {
@@ -478,9 +575,7 @@ const styles = ScaledSheet.create({
     flex: 1,
     padding: "12@ms",
   },
-  selectedContainer: {
-
-  },
+  selectedContainer: {},
   searchedResult: {
     marginBottom: "12@ms",
     borderRadius: "10@ms",
@@ -493,7 +588,7 @@ const styles = ScaledSheet.create({
     alignItems: "center",
     marginBottom: "12@ms",
   },
-  buttonContainer: {},
+  buttonContainer: { marginLeft: "12@ms" },
   organizationParentContainer: {
     marginTop: "12@ms",
   },
@@ -510,9 +605,8 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
   },
   organizationInfo: {
-    width: "30%",
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: "15@ms",
   },
   status: {
     color: "green",
@@ -522,7 +616,6 @@ const styles = ScaledSheet.create({
     fontSize: "12@ms",
   },
   label: {
-    color: Colors.grayText,
     fontSize: "14@ms",
     marginBottom: "12@ms",
     fontWeight: 400,

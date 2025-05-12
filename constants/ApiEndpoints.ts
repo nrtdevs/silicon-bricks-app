@@ -1,5 +1,6 @@
-export const domain = 'api.senton.ae/vpn'
-export const baseUrl = `https://${domain}/api/senton/v1/`
-export const server_url = `https://${domain}`
-
-export default {}
+export enum Env  {
+    DOMAIN = '192.168.1.35:5001',
+    BASE_URL = `http://${DOMAIN}/graphql`,
+    SERVER_URL = `http://${DOMAIN}`,
+    SOCKET_URL = `wss://${DOMAIN}/wss2/:8090`,
+}

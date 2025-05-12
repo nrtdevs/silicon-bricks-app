@@ -1,4 +1,5 @@
 import {
+    ActivityIndicator,
     Alert,
     FlatList,
     Pressable,
@@ -34,6 +35,7 @@ import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
+import { useUserContext } from "@/context/RoleContext";
 
 const defaultValue = {
     name: "",
@@ -47,7 +49,7 @@ const pickerData = [
     { label: "Pending", value: "pending" },
 ];
 
-const organization = () => {
+const ModuleScreen = () => {
     const { theme } = useTheme();
     const [isModalVisible, setModalVisible] = useState(false);
     const [isFocused, setIsFocused] = useState("");
@@ -55,12 +57,13 @@ const organization = () => {
     const [page, setPage] = useState<number>(1);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
+    const [moduleList, setModuleList] = useState<any>([])
     const [currentModule, setCurrentModule] = useState<{
         name: string;
         description: string;
         id: string;
     }>(defaultValue);
-    const [selected, setSelected] = useState<any>([]);
     const {
         control,
         handleSubmit,
@@ -72,6 +75,12 @@ const organization = () => {
         defaultValues: {},
     });
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const { can, hasAny } = useUserContext();
+
+    const deletePermission = can("MasterApp:Module:Delete");
+    const updatePermission = can("MasterApp:Module:Update");
+    const createPermission = can("MasterApp:Module:Create");
+    const statusUpdatePermission = can("MasterApp:Module:Action");
 
     const [moduleData, { error, data, loading, refetch }] = useLazyQuery(
         PaginatedModulesDocument
@@ -82,7 +91,6 @@ const organization = () => {
             reset();
             refetch();
             setModalVisible(false);
-            Alert.alert("success", "Module create successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -94,7 +102,6 @@ const organization = () => {
             reset()
             refetch();
             setStatusModalVisible(false);
-            Alert.alert("success", "Module updated successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -104,7 +111,6 @@ const organization = () => {
     const [deleteModule, deleteModuleState] = useMutation(DeleteModuleDocument, {
         onCompleted: (data) => {
             refetch();
-            Alert.alert("success", "Module deleted successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -116,7 +122,6 @@ const organization = () => {
             refetch();
             setModalVisible(false);
             setCurrentModule(defaultValue);
-            Alert.alert("success", "Status updated successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -148,59 +153,89 @@ const organization = () => {
         }
     }, [watch("status")]);
 
-    // const handleImagePickerPress = async () => {
-    //   let result = await ImagePicker.launchImageLibraryAsync({
-    //     mediaTypes: ['images'],
-    //     allowsEditing: true,
-    //     aspect: [1, 1],
-    //     quality: 1
-    //   })
-    //   if (!result.canceled) {
-    //     setImage(result.assets[0].uri)
-    //   }
-    // }
-    // console.log('image',image);
+    const fetchModules = async (isRefreshing = false, searchParams = "") => {
+        // if (isRefreshing) {
+        //     setPage(1);
+        //     setRefreshing(true);
+        // }
+        // // Params for API
+        // const params = {
+        //     per_page_record: 10,
+        //     page: isRefreshing ? 1 : page,
+        // };
 
-    const fetchModules = async (isRefreshing = false) => {
+        const currentPage = isRefreshing ? 1 : page;
+
         if (isRefreshing) {
-            setPage(1);
             setRefreshing(true);
         }
-        // Params for API
+
         const params = {
-            per_page_record: 10,
-            page: isRefreshing ? 1 : page,
+            limit: 8,
+            page: currentPage,
+            search: searchParams,
         };
 
-        await moduleData({
-            variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1,
+        try {
+            const res: any = await moduleData({
+                variables: {
+                    listInputDto: params
                 },
-            },
-        });
+            });
+            // console.log('res', currentPage);
+            if (res?.data?.paginatedModules?.data) {
+                const data: any = res?.data?.paginatedModules;
+                const newItems = data?.data || [];
+
+                setModuleList((prev: any) => {
+                    return isRefreshing ? newItems : [...prev, ...newItems];
+                });
+
+                if (isRefreshing) {
+                    setPage(2); // since page 1 is already fetched
+                } else {
+                    setPage((prevPage) => prevPage + 1);
+                }
+
+                setRefreshing(false);
+                console.log('99', data);
+
+                const lastPage = Math.ceil(data?.meta?.totalItems / 6);
+                setHasMore(data?.meta?.currentPage < lastPage);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
     };
 
     const onSubmit = (data: any) => {
-        let param = {
-            id: Number(currentModule?.id),
-            ...data,
-        };
-        console.log("999", param);
-        editModal
-            ? updateModule({
-                variables: {
-                    updateModuleInput: param,
-                },
-            })
-            : createModule({
-                variables: {
-                    createModuleInput: {
-                        ...data,
+        try {
+            let param = {
+                id: Number(currentModule?.id),
+                ...data,
+            };
+            editModal
+                ? updateModule({
+                    variables: {
+                        updateModuleInput: param,
                     },
-                },
-            });
+                })
+                : createModule({
+                    variables: {
+                        createModuleInput: {
+                            ...data,
+                        },
+                    },
+                });
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const renderItem = (item, index) => (<View
@@ -213,9 +248,9 @@ const organization = () => {
         <View style={styles.organizationHeader}>
             <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
             <View style={styles.organizationInfo}>
-                <MaterialIcons
+                {statusUpdatePermission && <MaterialIcons
                     name="attractions"
-                    size={ms(20)}
+                    size={ms(22)}
                     color={Colors[theme].text}
                     onPress={() => {
                         setCurrentModule({
@@ -225,10 +260,10 @@ const organization = () => {
                         });
                         setStatusModalVisible(true);
                     }}
-                />
-                <Feather
+                />}
+                {updatePermission && <Feather
                     name="edit"
-                    size={ms(20)}
+                    size={ms(22)}
                     color={Colors[theme].text}
                     onPress={() => {
                         setCurrentModule({
@@ -241,10 +276,10 @@ const organization = () => {
                         setEditModal(true);
                         setModalVisible(true);
                     }}
-                />
-                <MaterialIcons
+                />}
+                {deletePermission && <MaterialIcons
                     name="delete-outline"
-                    size={ms(20)}
+                    size={ms(22)}
                     color={Colors[theme].text}
                     onPress={() => {
                         console.log(item?.id);
@@ -267,7 +302,7 @@ const organization = () => {
                             ]
                         );
                     }}
-                />
+                />}
             </View>
         </View>
 
@@ -285,11 +320,11 @@ const organization = () => {
             {item?.status}
         </ThemedText>
 
-        <View style={styles.userInfo}>
+        {item?.description && <View style={styles.userInfo}>
             <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
                 {item?.description}
             </ThemedText>
-        </View>
+        </View>}
     </View>)
 
     const debouncedSearch = useCallback(
@@ -311,72 +346,64 @@ const organization = () => {
         return <Loader />
     }
 
+    console.log('-0', hasMore);
+
+
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{ flex: 1 }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             onChangeText={(text) => {
                                 setSearchQuery(text);
                                 debouncedSearch(text);
                             }}
-                            placeholder={labels?.searchTeam}
+                            placeholder={labels?.searchModule}
                             loading={loading}
                             onClear={() => {
                                 setSearchQuery("");
                             }}
                         />
                     </View>
-                    <Pressable
+                    {createPermission && <Pressable
                         style={styles.buttonContainer}
                         onPress={() => {
                             setModalVisible(true)
                         }}
                     >
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                    </Pressable>
+                        <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
+                    </Pressable>}
                 </View>
-                {selected && (
-                    <View style={styles.selectedContainer}>
-                        {selected.map(() => (
-                            <View
-                                style={[
-                                    styles.searchedResult,
-                                    { backgroundColor: Colors[theme].cartBg },
-                                ]}
-                            >
-                                <ThemedText>lkjlkj</ThemedText>
-                            </View>
-                        ))}
-                    </View>
-                )}
                 <View style={styles.organizationParentContainer}>
                     <FlatList
                         data={data?.paginatedModules?.data}
                         contentContainerStyle={{ paddingBottom: vs(40) }}
-                        showsVerticalScrollIndicator={false}
                         renderItem={({ item, index }: any) => renderItem(item, index)
                         }
-                        // refreshControl={
-                        //     <RefreshControl
-                        //         refreshing={refreshing}
-                        //         onRefresh={() => fetchModules(true)}
-                        //     />
-                        // }
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing && !loading}
+                                onRefresh={async () => {
+                                    fetchModules(true);
+                                }}
+                            />
+                        }
+                        keyExtractor={(item: any, index: number) => index.toString()}
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
-                    // ListFooterComponent={
-                    //     hasMore ? (
-                    //         <ActivityIndicator size="small" color={Colors.primary} />
-                    //     ) : null
-                    // }
-                    // onEndReached={() => {
-                    //     if (hasMore && !isLoading) {
-                    //         fetchNotification();
-                    //     }
-                    // }}
-                    // onEndReachedThreshold={0.5}
+                        ListFooterComponent={
+                            hasMore ? (
+                                <ActivityIndicator size="small" color={Colors.primary} />
+                            ) : null
+                        }
+                        onEndReached={() => {
+                            if (hasMore) {
+                                fetchModules();
+                            }
+                        }}
+                        onEndReachedThreshold={0.5}
                     />
                 </View>
             </ThemedView>
@@ -439,6 +466,7 @@ const organization = () => {
                                 required: "Module name is required",
                             }}
                             autoCapitalize="none"
+                            autoFocus={true}
                         />
 
                         <CustomValidation
@@ -451,9 +479,6 @@ const organization = () => {
                             onFocus={() =>
                                 setIsFocused(editModal ? "testDescription" : "description")
                             }
-                            rules={{
-                                required: "Description is required",
-                            }}
                         />
                     </View>
 
@@ -477,13 +502,32 @@ const organization = () => {
                 <View
                     style={{
                         backgroundColor: Colors[theme].cartBg,
-                        height: 380,
+                        height: vs(320),
                         width: s(300),
                         borderRadius: 10,
                         alignSelf: "center",
                         padding: 10,
+
                     }}
                 >
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            padding: 10,
+                        }}
+                    >
+                        <ThemedText type="subtitle">
+                            {"Change Status"}
+                        </ThemedText>
+                        <Pressable
+                            onPress={() => {
+                                setStatusModalVisible(false);
+                            }}
+                        >
+                            <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+                        </Pressable>
+                    </View>
                     <CustomValidation
                         data={pickerData}
                         type="picker"
@@ -491,7 +535,9 @@ const organization = () => {
                         control={control}
                         name="status"
                         placeholder="Select Status"
-                        inputStyle={{ height: vs(50) }}
+                        inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
+                        inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
+                        containerStyle={{ marginTop: 0, paddingTop: 0 }}
                         rules={{
                             required: {
                                 value: true,
@@ -505,7 +551,7 @@ const organization = () => {
     );
 };
 
-export default organization;
+export default ModuleScreen;
 
 const styles = ScaledSheet.create({
     container: {
@@ -533,7 +579,7 @@ const styles = ScaledSheet.create({
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    buttonContainer: {},
+    buttonContainer: { marginLeft: "12@ms" },
     organizationParentContainer: {
         marginTop: "12@ms",
     },
@@ -550,9 +596,8 @@ const styles = ScaledSheet.create({
         justifyContent: "space-between",
     },
     organizationInfo: {
-        width: "30%",
         flexDirection: "row",
-        justifyContent: "space-between",
+        gap: "15@ms",
     },
     status: {
         color: "green",

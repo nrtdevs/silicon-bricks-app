@@ -55,7 +55,7 @@ const CustomSearchBar = (props: CustomSearchBarProps) => {
       </Pressable>
     )
   }
-
+// #D8D9DF #3A3B3C
   return (
     <View style={{ width: '100%' }}>
       <SearchBar

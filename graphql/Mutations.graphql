@@ -1,70 +1,51 @@
-extend type Query {
-  isLoggedIn: Boolean!
-  cartItems: [Launch]!
-}
-
+#Request OTP
 mutation RequestOtp($otpRequestData: OtpRequestDto!) {
   requestOtp(otpRequestData: $otpRequestData) {
+    otpGeneratedSuccessfully
+    otp
+  }
+}
+
+#Login
+mutation Login($loginData: ValidateDto!) {
+  login(loginData: $loginData) {
+    user {
+      id
+      email
+      name
+      userType
+    }
+    accessToken
+  }
+}
+
+#logout
+mutation Mutation {
+  logout
+}
+
+# Register User
+mutation Register($registerData: RegisterDto!) {
+  register(registerData: $registerData) {
+    accessToken
+    user {
+      id
+      name
+      userType
+    }
+  }
+}
+
+#sendResetPasswordOtp
+mutation SendRegistrationOtp($email: String!) {
+  sendRegistrationOtp(email: $email) {
     otpGeneratedSuccessfully
     otp
     message
   }
 }
 
-mutation Login($loginData: ValidateDto!) {
-  login(loginData: $loginData) {
-    user {
-      id
-    }
-    accessToken
-  }
-}
-
-mutation DeleteOrganization($deleteOrganizationId: Int!) {
-  deleteOrganization(id: $deleteOrganizationId)
-}
-
-#register mutation
-mutation Register($registerData: RegisterDto!) {
-  register(registerData: $registerData) {
-    id
-    name
-    username
-    mobileNo
-    email
-    status
-    avatar
-    parentId
-  }
-}
-
-mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
-  createOrganization(createOrganizationInput: $createOrganizationInput) {
-    id
-    name
-    description
-    status
-  }
-}
-
-mutation EnableOrganizationStatus($data: OrganizationStatusDto!) {
-  enableOrganizationStatus(data: $data) {
-    id
-    name
-    description
-    status
-  }
-}
-
-mutation UpdateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
-  updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
-    id
-    name
-    description
-    status
-  }
-}
-
+# Create User
 mutation CreateUser($data: CreateUserDto!) {
   createUser(data: $data) {
     id
@@ -77,23 +58,100 @@ mutation CreateUser($data: CreateUserDto!) {
     parentId
     organizationId
     userType
-    createdAt
-    updatedAt
-    deletedAt
-    roles {
+  }
+}
+
+#updateUser
+mutation UpdateUser($data: UpdateUserDto!) {
+  updateUser(data: $data) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+    organizationId
+    userType
+  }
+}
+
+#Hard deleteUser
+mutation HardDeleteUser($ids: [Int!]!) {
+  hardDeleteUser(ids: $ids)
+}
+
+#soft deleteUser
+mutation DeleteUser($ids: [Int!]!) {
+  deleteUser(ids: $ids)
+}
+
+# change status user
+mutation ChangeUserStatus($data: UserStatusDto!) {
+  changeUserStatus(data: $data) {
+    ... on User {
       id
-      permissionCount
-      roleType
-      name
       status
-      permissions {
+    }
+    ... on UserArray {
+      data {
         id
-        appName
-        groupName
-        module
-        action
-        slug
-        description
+        status
+      }
+    }
+  }
+}
+
+#restore user
+mutation RestoreUser($ids: [Int!]!) {
+  restoreUser(ids: $ids)
+}
+
+#create role
+mutation CreateRole($data: CreateRoleDto!) {
+  createRole(data: $data) {
+    id
+    name
+    description
+  }
+}
+
+#update role
+mutation UpdateRole($data: UpdateRoleDto!) {
+  updateRole(data: $data) {
+    description
+    id
+    name
+  }
+}
+
+#delete role
+mutation DeleteRole($ids: [Int!]!) {
+  deleteRole(ids: $ids)
+}
+
+#hard delete role
+mutation HardDeleteRole($ids: [Int!]!) {
+  hardDeleteRole(ids: $ids)
+}
+
+#restore role
+mutation RestoreRole($ids: [Int!]!) {
+  restoreRole(ids: $ids)
+}
+
+#status change role
+mutation ChangeRoleStatus($data: RoleStatusDto!) {
+  changeRoleStatus(data: $data) {
+    ... on Role {
+      id
+      status
+    }
+    ... on RoleArray {
+      data {
+        id
+        status
       }
     }
   }
@@ -109,14 +167,169 @@ mutation UpdateProfile($data: UpdateUserDto!) {
     status
     avatar
     parentId
-    organizationId
-    userType
-    createdAt
-    updatedAt
-    deletedAt
   }
 }
 
+#create permission
+mutation CreatePermission($data: CreatePermissionDto!) {
+  createPermission(data: $data) {
+    id
+    appName
+    groupName
+    module
+    action
+    slug
+    description
+  }
+}
+
+#update permission
+mutation UpdatePermission($data: UpdatePermissionDto!) {
+  updatePermission(data: $data) {
+    id
+    appName
+    groupName
+    module
+    action
+    slug
+    description
+  }
+}
+
+#delete permission
+mutation DeletePermission($deletePermissionId: Float!) {
+  deletePermission(id: $deletePermissionId)
+}
+
+#create organization
+mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
+  createOrganization(createOrganizationInput: $createOrganizationInput) {
+    id
+    name
+    description
+    status
+  }
+}
+
+#update organization
+mutation UpdateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
+  updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
+    id
+    name
+    description
+    status
+  }
+}
+
+#delete organization
+mutation DeleteOrganization($ids: [Int!]!) {
+  deleteOrganization(ids: $ids)
+}
+
+#all organization delete
+mutation HardDeleteOrganization($ids: [Int!]!) {
+  hardDeleteOrganization(ids: $ids)
+}
+
+#restore organization
+mutation RestoreOrganization($ids: [Int!]!) {
+  restoreOrganization(ids: $ids)
+}
+
+# list trah organization
+query ListTrashedOrganizations($listInputDto: ListInputDTO!) {
+  listTrashedOrganizations(ListInputDTO: $listInputDto) {
+    meta {
+      currentPage
+      limit
+      totalItems
+      totalPages
+    }
+    data {
+      id
+      name
+      status
+    }
+  }
+}
+
+#status change organization
+mutation EnableOrganizationStatus($data: OrganizationStatusDto!) {
+  enableOrganizationStatus(data: $data) {
+    ... on Organization {
+      id
+      name
+      description
+      status
+    }
+    ... on OrganizationArray {
+      data {
+        id
+        name
+        description
+        status
+      }
+    }
+  }
+}
+
+#create project
+mutation CreateProject($createProjectInput: CreateProjectDto!) {
+  createProject(createProjectInput: $createProjectInput) {
+    id
+    name
+    description
+    organizationId
+  }
+}
+
+#update project
+mutation UpdateProject($updateProjectInput: UpdateProjectDto!) {
+  updateProject(updateProjectInput: $updateProjectInput) {
+    id
+    name
+    description
+    status
+    organizationId
+  }
+}
+
+#delete project
+mutation DeleteProject($ids: [Int!]!) {
+  deleteProject(ids: $ids)
+}
+
+#ennable project status
+mutation EnableProjectStatus($data: ProjectStatusDto!) {
+  enableProjectStatus(data: $data) {
+    ... on Project {
+      id
+      status
+    }
+    ... on ProjectArray {
+      data {
+        id
+        status
+      }
+    }
+  }
+}
+
+#update profile user
+mutation UpdateProfile($data: UpdateUserDto!) {
+  updateProfile(data: $data) {
+    id
+    name
+    username
+    mobileNo
+    email
+    status
+    avatar
+    parentId
+  }
+}
+
+#create MODULE
 mutation CreateModule($createModuleInput: CreateModuleDto!) {
   createModule(createModuleInput: $createModuleInput) {
     id
@@ -126,6 +339,7 @@ mutation CreateModule($createModuleInput: CreateModuleDto!) {
   }
 }
 
+#update MODULE
 mutation UpdateModule($updateModuleInput: UpdateModuleDto!) {
   updateModule(updateModuleInput: $updateModuleInput) {
     id
@@ -135,26 +349,76 @@ mutation UpdateModule($updateModuleInput: UpdateModuleDto!) {
   }
 }
 
+#delete MODULE
+mutation DeleteModule($ids: [Int!]!) {
+  deleteModule(ids: $ids)
+}
+
+#hard delete MODULE
+mutation HardDeleteModule($ids: [Int!]!) {
+  hardDeleteModule(ids: $ids)
+}
+
+#restore MODULE
+mutation RestoreModule($ids: [Int!]!) {
+  restoreModule(ids: $ids)
+}
+
+#status change MODULE
 mutation ChangeModuleStatus($updateModuleStatusInput: ModuleStatusDto!) {
   changeModuleStatus(updateModuleStatusInput: $updateModuleStatusInput) {
-    id
-    name
-    status
-    description
+    ... on ApplicationModule {
+      id
+      status
+    }
+    ... on ApplicationModuleArray {
+      data {
+        id
+        status
+      }
+    }
   }
 }
 
-mutation DeleteModule($deleteModuleId: Int!) {
-  deleteModule(id: $deleteModuleId)
+# trash MODULE pagination
+query TrashedModules($listInputDto: ListInputDTO!) {
+  trashedModules(ListInputDTO: $listInputDto) {
+    meta {
+      currentPage
+      limit
+      totalItems
+      totalPages
+    }
+    data {
+      id
+      name
+      status
+      description
+    }
+  }
 }
 
+#create Coupon
 mutation CreateCoupon($createCouponInput: CreateCouponDto!) {
   createCoupon(createCouponInput: $createCouponInput) {
+    couponCode
+    description
+    discountValue
+    endDate
+    id
+    minOrderAmount
+    startDate
+    status
+    usageLimit
+  }
+}
+
+#update Coupon
+mutation UpdateCoupon($updateCouponInput: UpdateCouponDto!) {
+  updateCoupon(updateCouponInput: $updateCouponInput) {
     id
     couponCode
     description
-    discountType
-    maxDiscountAmount
     minOrderAmount
     usageLimit
     status
@@ -163,42 +427,299 @@ mutation CreateCoupon($createCouponInput: CreateCouponDto!) {
   }
 }
 
+#delete Coupon
+mutation DeleteCoupon($ids: [Int!]!) {
+  deleteCoupon(ids: $ids)
+}
 
-mutation UpdateUser($data: UpdateUserDto!) {
-  updateUser(data: $data) {
-    id
-    name
-    username
-    mobileNo
-    email
-    status
-    avatar
-    parentId
-    organizationId
-    userType
-    createdAt
-    updatedAt
-    deletedAt
-    roles {
+#delete hard Coupon
+mutation HardDeleteCoupon($ids: [Int!]!) {
+  hardDeleteCoupon(ids: $ids)
+}
+
+#restore Coupon
+mutation RestoreCoupon($ids: [Int!]!) {
+  restoreCoupon(ids: $ids)
+}
+
+#status change Coupon
+mutation ChangeCouponStatus($updateCouponStatusInput: CouponStatusDto!) {
+  changeCouponStatus(updateCouponStatusInput: $updateCouponStatusInput) {
+    ... on Coupon {
       id
-      name
-      description
-      roleType
       status
+    }
+    ... on CouponArray {
+      data {
+        id
+        status
+      }
     }
   }
 }
 
-mutation DeleteUser($deleteUserId: Float!) {
-  deleteUser(id: $deleteUserId)
+#create oofers
+mutation CreateOffer($createOfferInput: CreateOfferDto!) {
+  createOffer(createOfferInput: $createOfferInput) {
+    id
+    title
+    description
+    offerType
+    discountValue
+    usageLimit
+    status
+    startDate
+    endDate
+  }
 }
 
-mutation CreatePermission($data: CreatePermissionDto!) {
-  createPermission(data: $data) {
+#update oofers
+mutation UpdateOffer($updateOfferInput: UpdateOfferDto!) {
+  updateOffer(updateOfferInput: $updateOfferInput) {
     id
-    appName
-    module
+    title
     description
-    action
+    offerType
+    discountValue
+    usageLimit
+    status
+    startDate
+    endDate
+  }
+}
+
+#delete soft offers
+mutation DeleteOffer($ids: [Int!]!) {
+  deleteOffer(ids: $ids)
+}
+
+#delete hard offers
+mutation HardDeleteOffer($ids: [Int!]!) {
+  hardDeleteOffer(ids: $ids)
+}
+
+#status change oofers
+mutation ChangeOfferStatus($updateOfferStatusInput: OfferStatusDto!) {
+  changeOfferStatus(updateOfferStatusInput: $updateOfferStatusInput) {
+    ... on Offer {
+      id
+      status
+    }
+    ... on OfferArray {
+      data {
+        id
+        status
+      }
+    }
+  }
+}
+
+# restore offers
+mutation RestoreOffer($ids: [Int!]!) {
+  restoreOffer(ids: $ids)
+}
+#create PACKAGE
+mutation CreatePackage($createPackageInput: CreatePackageDto!) {
+  createPackage(createPackageInput: $createPackageInput) {
+    id
+    name
+    description
+    price
+    discountedPrice
+    status
+    offerType
+    offerDescription
+    offerExpiryDate
+    modules {
+      id
+      name
+    }
+  }
+}
+
+#update PACKAGE
+mutation UpdatePackage($updatePackageInput: UpdatePackageDto!) {
+  updatePackage(updatePackageInput: $updatePackageInput) {
+    id
+    name
+    description
+    price
+    discountedPrice
+    status
+  }
+}
+
+#delete PACKAGE
+mutation DeletePackage($ids: [Int!]!) {
+  deletePackage(ids: $ids)
+}
+
+#status change PACKAGE
+mutation ChangePackageStatus($updatePackageStatusInput: PackageStatusDto!) {
+  changePackageStatus(updatePackageStatusInput: $updatePackageStatusInput) {
+    ... on Package {
+      id
+      status
+    }
+    ... on PackageArray {
+      data {
+        id
+        status
+      }
+    }
+  }
+}
+
+#restore PACKAGE
+mutation RestorePackage($ids: [Int!]!) {
+  restorePackage(ids: $ids)
+}
+
+#hard delete PACKAGE
+mutation HardDeletePackage($ids: [Int!]!) {
+  hardDeletePackage(ids: $ids)
+}
+
+#create Plan
+mutation CreatePlan($createPlanInput: CreatePlanDto!) {
+  createPlan(createPlanInput: $createPlanInput) {
+    id
+    name
+    description
+    price
+    duration
+    discountedPrice
+    status
+    couponCode
+  }
+}
+
+#update Plan
+mutation UpdatePlan($updatePlanInput: UpdatePlanDto!) {
+  updatePlan(updatePlanInput: $updatePlanInput) {
+    id
+    name
+    description
+    price
+    duration
+    discountedPrice
+    status
+    couponCode
+  }
+}
+
+#delete Plan
+mutation DeletePlan($ids: [Int!]!) {
+  deletePlan(ids: $ids)
+}
+
+# hard delete Plan
+mutation HardDeletePlan($ids: [Int!]!) {
+  hardDeletePlan(ids: $ids)
+}
+
+#restore Plan
+mutation RestorePlan($ids: [Int!]!) {
+  restorePlan(ids: $ids)
+}
+
+#status change Plan
+mutation ChangePlanStatus($updatePlanStatusInput: PlanStatusDto!) {
+  changePlanStatus(updatePlanStatusInput: $updatePlanStatusInput) {
+    ... on Plan {
+      id
+      status
+    }
+    ... on PlanArray {
+      data {
+        id
+        status
+      }
+    }
+  }
+}
+
+#ApplyCouponToPlan
+mutation ApplyCouponToPlan($planId: Int!, $couponCode: String!) {
+  applyCouponToPlan(planId: $planId, couponCode: $couponCode) {
+    id
+    name
+    couponCode
+    discountedPrice
+  }
+}
+
+#create Subscription
+mutation CreateSubscription($createSubscriptionInput: CreateSubscriptionDto!) {
+  createSubscription(createSubscriptionInput: $createSubscriptionInput) {
+    couponCode
+    duration
+    id
+    name
+    plans {
+      id
+    }
+    price
+    status
+  }
+}
+
+#update Subscription
+mutation UpdateSubscription($updateSubscriptionInput: UpdateSubscriptionDto!) {
+  updateSubscription(updateSubscriptionInput: $updateSubscriptionInput) {
+    id
+    name
+    price
+    duration
+    status
+  }
+}
+
+#delete Subscription
+mutation DeleteSubscription($ids: [Int!]!) {
+  deleteSubscription(ids: $ids)
+}
+
+#status change Subscription
+mutation ChangeSubscriptionStatus(
+  $updateSubscriptionStatusInput: SubscriptionStatusDto!
+) {
+  changeSubscriptionStatus(
+    updateSubscriptionStatusInput: $updateSubscriptionStatusInput
+  ) {
+    ... on Subscriptions {
+      id
+      status
+    }
+    ... on SubscriptionsArray {
+      data {
+        id
+        status
+      }
+    }
+  }
+}
+
+# creat muitiple payment
+mutation CreateMultipleOrder($input: CreateMultipleOrderInput!) {
+  createMultipleOrder(input: $input)
+}
+
+# verify payment
+mutation VerifyPayment($input: VerifyPaymentInput!) {
+  verifyPayment(input: $input) {
+    id
+    name
+    price
+    duration
+    status
+    plans {
+      id
+    }
+    coupon {
+      id
+    }
+    couponCode
+    paymentId
   }
 }

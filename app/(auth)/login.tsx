@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { View, TouchableOpacity, Pressable, ScrollView } from "react-native";
+import { View, TouchableOpacity, Pressable, ScrollView, Alert } from "react-native";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
 import { Colors } from "@/constants/Colors";
 import { router } from "expo-router";
@@ -24,7 +24,14 @@ interface LoginFormData {
 }
 
 export default function LoginScreen() {
-  const [createRequestOpt, createRequestState] = useMutation(RequestOtpDocument);
+  const [createRequestOpt, createRequestState] = useMutation(RequestOtpDocument, {
+    onCompleted: (data) => {
+      // Alert.alert("success", "login successfully!");
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  });
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const { theme } = useTheme();
@@ -40,7 +47,7 @@ export default function LoginScreen() {
   });
   const onSubmit = async (data: any) => {
     try {
-      createRequestOpt({
+      const response = await createRequestOpt({
         variables: {
           otpRequestData: {
             email: data.email,
@@ -48,9 +55,8 @@ export default function LoginScreen() {
           },
         },
       });
-      
 
-      if (true) {
+      if (response?.data?.requestOtp?.otp) {
         Toast.show({
           type: "success",
           text1: "Otp Send Successfully",
@@ -60,7 +66,7 @@ export default function LoginScreen() {
           params: {
             email: data.email,
             password: data.password,
-            otp: createRequestState?.data?.requestOtp?.otp,
+            otp: response?.data?.requestOtp?.otp,
           },
         });
       } else {
@@ -177,15 +183,6 @@ export default function LoginScreen() {
               onPress={handleSubmit(onSubmit)}
               isGradient
             />
-
-            {/* Social Login */}
-            <View style={styles.socialLogin}>
-              <CustomButton
-                style={{ width: "48%", alignSelf: "center" }}
-                title={labels.google}
-                onPress={() => { }}
-              />
-            </View>
 
             {/* Footer */}
             <View style={styles.footerText}>

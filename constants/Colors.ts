@@ -3,6 +3,7 @@ const tintColorDark = '#fff'
 
 export const Colors = {
   /** 🎨 Light Theme Colors */
+  // #D8D9DF #3A3B3C
   light: {
     text: '#333333',
     background: '#fff',
@@ -18,7 +19,7 @@ export const Colors = {
     middleContainerBg: '#FAFAFA',
     countryViewBg: '#F5F5F5',
     inputColor: '#B8B8B8',
-    cartBg: '#F5F5F5',
+    cartBg: '#D8D9DF',
     inputBg: '#F5F5F5',
     placeholder: '#a3a3a3',
     miniBtnBg: '#949494',
@@ -41,7 +42,7 @@ export const Colors = {
     middleContainerBg: '#292929',
     countryViewBg: '#333333',
     inputColor: '#3D3D3D',
-    cartBg: '#333333',
+    cartBg: '#3A3B3C',
     inputBg: '#333333',
     placeholder: '#858585',
     miniBtnBg: '#949494',

@@ -17,9 +17,16 @@ import * as SecureStore from "expo-secure-store";
 
 const LoginCodeScreen = () => {
   const { theme } = useTheme();
-  const [otp, setOtp] = useState("123456");;
+  const [otp, setOtp] = useState("123456");
   const params = useLocalSearchParams();
-  const [verifyOtp, verifyState] = useMutation(LoginDocument);
+  const [verifyOtp, verifyState] = useMutation(LoginDocument, {
+    onCompleted: (data) => {
+      // Alert.alert("success", "login successfully!");
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  });
 
   const handleOtpFilled = (code: string) => {
     setOtp(code);
@@ -30,9 +37,7 @@ const LoginCodeScreen = () => {
   const onSubmit = async () => {
     try {
       const otpValue = Number(otp);
-      
       if (params?.otp == otp) {
-        console.log(otpValue);
         const response = await verifyOtp({
           variables: {
             loginData: {
@@ -47,15 +52,18 @@ const LoginCodeScreen = () => {
         const accessToken: any = response?.data?.login?.accessToken;
         if (accessToken) {
           // Save the accessToken to SecureStore
-          await SecureStore.setItemAsync("accessToken", accessToken);
-          await SecureStore.setItemAsync("userId", response?.data?.login?.user?.id as string);
+          const userData = {
+            accessToken: accessToken,
+            userId: response?.data?.login?.user?.id,
+            userType: response?.data?.login?.user?.userType,
+          };
+          await SecureStore.setItemAsync("userData", JSON.stringify(userData));
           // Retrieve the token from SecureStore
-          const token = await SecureStore.getItemAsync("accessToken");
           router.replace("/(drawer)/(tabs)");
         } else {
           console.log("Failed to retrieve accessToken");
         }
-      }else{
+      } else {
         console.log("otp not match");
         Alert.alert("Otp not match");
       }

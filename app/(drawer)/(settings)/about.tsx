@@ -68,7 +68,7 @@ const AboutScreen = () => {
                     <ThemedText style={{ fontSize: ms(16) }}>
                         Silicon bricks app
                     </ThemedText>
-                    <ThemedText style={{ fontSize: ms(16),textAlign:'center' }}>
+                    <ThemedText style={{ fontSize: ms(16), textAlign: 'center' }}>
                         {labels?.copyRight}
                     </ThemedText>
                 </ThemedView>
@@ -83,7 +83,7 @@ const AboutScreen = () => {
                         title={labels?.termsOfService}
                         onPress={() => { }}
                         style={{ backgroundColor: Colors[theme].middleContainerBg }}
-                        titleStyle={{ textAlign:'center'}}
+                        titleStyle={{ textAlign: 'center' }}
                     />
                     <CustomButton
                         title={labels?.privacyPolicy}

@@ -15,52 +15,33 @@ import CustomValidation from "@/components/CustomValidation";
 import Modal from "react-native-modal";
 import CustomButton from "@/components/CustomButton";
 import { useForm } from "react-hook-form";
-import { CreatePermissionDocument } from "@/graphql/generated";
+import { CreatePermissionDocument, DeletePermissionDocument, PaginatedPermissionsDocument } from "@/graphql/generated";
 
 const defaultValue = {
     appName: "",
     description: "",
     id: "",
-    module: ""
+    module: "",
+    action: ""
 }
 
-const GetAllPermissionQuery = gql`
-  query PaginatedPermissions($listInputDto: ListInputDTO!) {
-  paginatedPermissions(ListInputDTO: $listInputDto) {
-    data {
-      id
-      appName
-      groupName
-      module
-      action
-      slug
-      description
-    }
-  }
-}
-`;
-
-const deletePermissionQuery = gql`
-  mutation DeletePermission($deletePermissionId: Float!) {
-  deletePermission(id: $deletePermissionId)
-}
-`;
 const pickerData = [
     { label: "Master App", value: "MasterApp" },
     { label: "Material Management", value: "MaterialManagement" },
     { label: "Task Management", value: "TaskManagement" },
     { label: "Vehicle Management", value: "VehicleManagement" },
 ];
+
 const PermissionScreen = () => {
     const { theme } = useTheme();
     /// serach state 
     const [searchQuery, setSearchQuery] = useState<string>("");
     /// fetch permission data 
 
-
     const [permissionData, { error, data, loading, refetch }] = useLazyQuery(
-        GetAllPermissionQuery
+        PaginatedPermissionsDocument
     );
+
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const fetchPermission = async (isRefreshing = false) => {
         if (isRefreshing) {
@@ -83,7 +64,7 @@ const PermissionScreen = () => {
     }, []);
     const [page, setPage] = useState<number>(1);
     /// delete permission 
-    const [deletePermission, deleteOrganizationState] = useMutation(deletePermissionQuery, {
+    const [deletePermission, deleteOrganizationState] = useMutation(DeletePermissionDocument, {
         onCompleted: (data) => {
             refetch();
             Alert.alert("success", "Permission deleted successfully!");
@@ -92,9 +73,9 @@ const PermissionScreen = () => {
             Alert.alert("Error", error.message);
         }
     });
-    /// Add and Edit state
+    // Add and Edit state
 
-    const [createOrganization, createOrganizationState] = useMutation(CreatePermissionDocument, {
+    const [createPermission, createPermissionState] = useMutation(CreatePermissionDocument, {
         onCompleted: (data) => {
             reset()
             refetch();
@@ -116,9 +97,10 @@ const PermissionScreen = () => {
         reset,
         watch,
         setValue
-    } = useForm<{ appName: string, description: string, module: string }>({
+    } = useForm<{ appName: string, description: string, module: string, action: string }>({
         defaultValues: {},
     });
+
     const [currentPermission, setCurrentPermission] = useState<{
         appName: string;
         description: string;
@@ -132,31 +114,47 @@ const PermissionScreen = () => {
             appName: data.appName.value,
             description: data.description,
             module: data.module,
-            action: "",
+            action: data.action,
         }
         console.log(param);
-        createOrganization({
+        // createOrganization({
+        //     variables: {
+        //         data: {
+        //             ...data
+        //         },
+        //     },
+        // });
+
+        createPermission({
             variables: {
                 data: {
-                    ...data
+                    ...param
                 },
             },
         });
-
     };
     const [currentPremission, setCurrentProject] = useState<{
         appName: string,
         description: string,
         id: string,
-        module : string
+        module: string
     }>(defaultValue);
 
-     useEffect(() => {
+    useEffect(() => {
         setValue('appName', currentPremission?.appName)
         setValue('description', currentPremission?.description)
         setValue('module', String(currentPremission?.module))
-      }, [currentPremission])
-    
+    }, [currentPremission])
+
+    // useEffect(() => {
+    //     setValue("appName", currentPermission?.appName);
+    //     setValue("module", currentPermission?.module);
+    //     setValue("action", currentPermission?.action);
+    //     setValue("description", currentPermission?.description);
+    // }, [currentPermission]);
+
+    console.log('00999', data?.paginatedPermissions?.data[0]);
+
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -197,12 +195,12 @@ const PermissionScreen = () => {
                                             color={Colors[theme].text}
                                             onPress={() => {
                                                 setModalVisible(true),
-                                                setCurrentPermission({
-                                                    appName : item.appName,
-                                                    description : item.description,
-                                                    id : String(item.id),
-                                                    module : item.module
-                                                })
+                                                    setCurrentPermission({
+                                                        appName: item.appName,
+                                                        description: item.description,
+                                                        id: String(item.id),
+                                                        module: item.module
+                                                    })
                                             }}
                                         />
                                         <View style={{ width: 5 }}></View>
@@ -232,25 +230,39 @@ const PermissionScreen = () => {
                                         />
                                     </View>
                                 </View>
-                                <ThemedText style={{ color: "black", fontSize: 14 }}
-                                >{item?.module}
+                                <ThemedText
+                                    style={[
+                                        styles.status,
+                                        {
+                                            color:
+                                                item.status == "active" ? Colors?.green : "#6d6d1b",
+                                            backgroundColor:
+                                                theme == "dark" ? Colors?.white : "#e6e2e2",
+                                        },
+                                    ]}
+                                >
+                                    {item?.module}
                                 </ThemedText>
+                                {/* <ThemedText style={{ color: "black", fontSize: 14 }}
+                                >{item?.module}
+                                </ThemedText> */}
                                 <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
                                     {item?.description}
                                 </ThemedText>
                             </View>}
                         showsVerticalScrollIndicator={false}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={refreshing}
-                                onRefresh={() => fetchPermission(true)}
-                            />
-                        }
+                        // refreshControl={
+                        // <RefreshControl
+                        //     refreshing={refreshing}
+                        //     onRefresh={() => fetchPermission(true)}
+                        // />
+                        // }
                         contentContainerStyle={{ paddingBottom: vs(40) }}
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
                     />
                 </View>
             </ThemedView>
+
             {/* create and edit modal */}
             <Modal
                 isVisible={isModalVisible}
@@ -263,7 +275,7 @@ const PermissionScreen = () => {
                 <View
                     style={{
                         backgroundColor: Colors[theme].cartBg,
-                        height: vs(420),
+                        height: vs(510),
                         width: s(300),
                         borderRadius: 10,
                         alignSelf: "center",
@@ -294,8 +306,9 @@ const PermissionScreen = () => {
                         <CustomValidation
                             data={pickerData}
                             type="picker"
-                            hideStar
+                            hideStar={false}
                             control={control}
+                            labelStyle={styles.label}
                             name="appName"
                             placeholder="Select App Name"
                             label={"App Name"}
@@ -325,6 +338,20 @@ const PermissionScreen = () => {
                         <CustomValidation
                             type="input"
                             control={control}
+                            labelStyle={styles.label}
+                            name={"action"}
+                            inputStyle={[{ lineHeight: ms(20) }]}
+                            label={"Action"}
+                            // onFocus={() => setIsFocused("name")}
+                            rules={{
+                                required: "Action name is required"
+                            }}
+                            autoCapitalize="none"
+                        />
+
+                        <CustomValidation
+                            type="input"
+                            control={control}
                             name={"description"}
                             label={"Description"}
                             labelStyle={styles.label}
@@ -337,11 +364,11 @@ const PermissionScreen = () => {
 
                     <CustomButton
                         title="Submit"
-                        isLoading={createOrganizationState.loading}
+                        isLoading={createPermissionState.loading}
                         onPress={() => {
                             handleSubmit(onSubmit)();
                         }}
-                        style={{ backgroundColor: Colors[theme].background }}
+                        style={{ backgroundColor: Colors[theme].background, marginTop: vs(10) }}
                     />
                 </View>
             </Modal>
@@ -367,9 +394,10 @@ const styles = ScaledSheet.create({
     status: {
         color: "green",
         borderRadius: "10@ms",
-        width: "60@ms",
+        width: "100%",
         textAlign: "center",
-        fontSize: "12@ms",
+        fontSize: "14@ms",
+        fontWeight: 'bold',
     },
     organizationContainer: {
         width: "100%",
