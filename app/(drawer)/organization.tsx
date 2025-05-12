@@ -156,7 +156,7 @@ const OrganizationScreen = () => {
 
   useEffect(() => {
     fetchOrganization();
-  }, [!refreshing]);
+  }, []);
 
   useEffect(() => {
     if (watch("status")) {
@@ -300,7 +300,7 @@ const OrganizationScreen = () => {
     }
 
     const params = {
-      limit: 8,
+      limit: 10,
       page: currentPage,
       search: searchParams,
     };
@@ -417,7 +417,7 @@ const OrganizationScreen = () => {
                 fetchOrganization();
               }
             }}
-            onEndReachedThreshold={0.5}
+            onEndReachedThreshold={0.1}
           />
         </View>
       </ThemedView>

@@ -4,7 +4,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 import { Colors } from "@/constants/Colors";
@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
 import { useQuery, gql } from "@apollo/client";
 import { DashboardCountDocument } from "@/graphql/generated";
+import * as SecureStore from "expo-secure-store";
 
 const index = () => {
   const navigation = useNavigation();
@@ -23,6 +24,7 @@ const index = () => {
   const { loading, error, data } = useQuery(DashboardCountDocument, {
     variables: { filters: {} },
   });
+    
 
   // if (loading) return <ThemedText>Loading...</ThemedText>;
   // if (error) return <ThemedText>Error: {error.message}</ThemedText>;
