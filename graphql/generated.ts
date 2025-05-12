@@ -506,7 +506,7 @@ export type Meeting = {
   meetingAgenda?: Maybe<Scalars['String']['output']>;
   meetingDate: Scalars['DateTime']['output'];
   meetingReference: Scalars['String']['output'];
-  meetingType?: Maybe<MeetingType>;
+  meetingType: MeetingType;
   meetingTypeId: Scalars['Float']['output'];
   meetingUrl?: Maybe<Scalars['String']['output']>;
   meetingVenue?: Maybe<MeetingVenue>;
@@ -649,6 +649,13 @@ export type ModuleStatusDto = {
   status: CustomStatus;
 };
 
+export type MultipleDeviceNotificationDto = {
+  body: Scalars['String']['input'];
+  icon: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  tokens: Array<Scalars['String']['input']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addMediaToBreakdown: Array<BreakdownMedia>;
@@ -768,7 +775,10 @@ export type Mutation = {
   restoreVehicleBreakdown: Scalars['Boolean']['output'];
   restoreVehicleExpense: Scalars['Boolean']['output'];
   restoreWarehouse: Scalars['Boolean']['output'];
+  sendMultiplePushNotification: NotificationResponse;
+  sendPushNotification: NotificationResponse;
   sendRegistrationOtp: OtpRes;
+  sendTopicNotification: NotificationResponse;
   updateBreakdown: Breakdown;
   updateCoupon: Coupon;
   updateDynamicPage: About;
@@ -1384,8 +1394,23 @@ export type MutationRestoreWarehouseArgs = {
 };
 
 
+export type MutationSendMultiplePushNotificationArgs = {
+  data: MultipleDeviceNotificationDto;
+};
+
+
+export type MutationSendPushNotificationArgs = {
+  data: NotificationDto;
+};
+
+
 export type MutationSendRegistrationOtpArgs = {
   email: Scalars['String']['input'];
+};
+
+
+export type MutationSendTopicNotificationArgs = {
+  data: TopicNotificationDto;
 };
 
 
@@ -1515,10 +1540,9 @@ export type MutationVerifyPaymentArgs = {
 
 export type NotePad = {
   __typename?: 'NotePad';
+  UserId: Scalars['ID']['output'];
   createdAt: Scalars['DateTime']['output'];
   createdBy: User;
-  createdByUserId: Scalars['ID']['output'];
-  createdUser: User;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
   notesField?: Maybe<Scalars['String']['output']>;
@@ -1556,6 +1580,19 @@ export type Notes = {
   notes?: Maybe<Scalars['String']['output']>;
   task?: Maybe<Array<MeetingTask>>;
   uploadDoc?: Maybe<Scalars['String']['output']>;
+};
+
+export type NotificationDto = {
+  body: Scalars['String']['input'];
+  icon: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  token: Scalars['String']['input'];
+};
+
+export type NotificationResponse = {
+  __typename?: 'NotificationResponse';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
 };
 
 export type Offer = {
@@ -1898,7 +1935,6 @@ export type Query = {
   breakdownDropdown: PaginatedBreakdowns;
   couponsDropdown: PaginatedCoupons;
   dashboardCount: DashboardCount;
-  dashboardMeetingTaskStatus: PaginatedMeetingTask;
   dashboardVehicleCount: VehicleDashboardCount;
   dropDownMeeting: PaginatedMeeting;
   dropDownMeetingTask: PaginatedMeetingTask;
@@ -1906,6 +1942,7 @@ export type Query = {
   dropDownMeetingVenue: PaginatedMeetingVenue;
   dropDownNotes: PaginatedNotes;
   dropdownOffers: PaginatedOffers;
+  dropdownRoles: PaginatedRoles;
   filteredMeetingTasks: PaginatedMeetingTask;
   findBreakdownById: Breakdown;
   findCouponById: Coupon;
@@ -2027,12 +2064,6 @@ export type QueryDashboardCountArgs = {
 };
 
 
-export type QueryDashboardMeetingTaskStatusArgs = {
-  query: ListInputDto;
-  status?: InputMaybe<Array<MeetingTaskStatus>>;
-};
-
-
 export type QueryDashboardVehicleCountArgs = {
   filters: ReportFilters;
 };
@@ -2068,9 +2099,13 @@ export type QueryDropdownOffersArgs = {
 };
 
 
+export type QueryDropdownRolesArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
 export type QueryFilteredMeetingTasksArgs = {
   assigneeIds?: InputMaybe<Array<Scalars['Int']['input']>>;
-  createdByUserIds?: InputMaybe<Array<Scalars['Int']['input']>>;
   query: ListInputDto;
 };
 
@@ -2576,6 +2611,13 @@ export type Supplier = {
   name: Scalars['String']['output'];
   phone?: Maybe<Scalars['String']['output']>;
   status: Scalars['String']['output'];
+};
+
+export type TopicNotificationDto = {
+  body: Scalars['String']['input'];
+  icon: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  topic: Scalars['String']['input'];
 };
 
 export type Unit = {
@@ -3436,7 +3478,7 @@ export type CreatePlanMutationVariables = Exact<{
 }>;
 
 
-export type CreatePlanMutation = { __typename?: 'Mutation', createPlan: { __typename?: 'Plan', id: string, name: string, description?: string | null, price: number, duration: number, discountedPrice?: number | null, status: string, couponCode?: string | null } };
+export type CreatePlanMutation = { __typename?: 'Mutation', createPlan: { __typename?: 'Plan', id: string, name: string, description?: string | null, price: number, duration: number, discountedPrice?: number | null, status: string, couponCode?: string | null, package?: { __typename?: 'Package', id: string, name: string, description?: string | null, price: number, discountedPrice: number, status: string, offerType?: string | null, offerDescription?: string | null, offerExpiryDate?: any | null, modules: Array<{ __typename?: 'ApplicationModule', id: string, name: string }> } | null } };
 
 export type UpdatePlanMutationVariables = Exact<{
   updatePlanInput: UpdatePlanDto;
@@ -3811,7 +3853,7 @@ export const DeletePackageDocument = {"kind":"Document","definitions":[{"kind":"
 export const ChangePackageStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ChangePackageStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updatePackageStatusInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PackageStatusDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"changePackageStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updatePackageStatusInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updatePackageStatusInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Package"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PackageArray"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ChangePackageStatusMutation, ChangePackageStatusMutationVariables>;
 export const RestorePackageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RestorePackage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"restorePackage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<RestorePackageMutation, RestorePackageMutationVariables>;
 export const HardDeletePackageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"HardDeletePackage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hardDeletePackage"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<HardDeletePackageMutation, HardDeletePackageMutationVariables>;
-export const CreatePlanDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePlan"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"createPlanInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreatePlanDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPlan"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"createPlanInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"createPlanInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"discountedPrice"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"couponCode"}}]}}]}}]} as unknown as DocumentNode<CreatePlanMutation, CreatePlanMutationVariables>;
+export const CreatePlanDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePlan"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"createPlanInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreatePlanDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPlan"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"createPlanInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"createPlanInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"discountedPrice"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"package"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"discountedPrice"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"offerType"}},{"kind":"Field","name":{"kind":"Name","value":"offerDescription"}},{"kind":"Field","name":{"kind":"Name","value":"offerExpiryDate"}},{"kind":"Field","name":{"kind":"Name","value":"modules"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"couponCode"}}]}}]}}]} as unknown as DocumentNode<CreatePlanMutation, CreatePlanMutationVariables>;
 export const UpdatePlanDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdatePlan"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updatePlanInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdatePlanDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updatePlan"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updatePlanInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updatePlanInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"duration"}},{"kind":"Field","name":{"kind":"Name","value":"discountedPrice"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"couponCode"}}]}}]}}]} as unknown as DocumentNode<UpdatePlanMutation, UpdatePlanMutationVariables>;
 export const DeletePlanDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeletePlan"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deletePlan"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<DeletePlanMutation, DeletePlanMutationVariables>;
 export const HardDeletePlanDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"HardDeletePlan"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hardDeletePlan"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<HardDeletePlanMutation, HardDeletePlanMutationVariables>;

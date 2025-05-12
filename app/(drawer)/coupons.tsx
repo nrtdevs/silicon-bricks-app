@@ -235,6 +235,12 @@ const CouponScreen = () => {
                 return;
             }
 
+            if (Number(data?.minOrderAmount) < Number(data?.discountValue)) {
+                console.log("Min Order should be greater than discount value date.");
+                Alert.alert("Error", "Min Order should be greater than or equal to discount value.");
+                return;
+            }
+
             let params = {
                 couponCode: data?.couponCode,
                 minOrderAmount: Number(data?.minOrderAmount),
@@ -591,7 +597,7 @@ const CouponScreen = () => {
                             name="start_date"
                             label="Start Date"
                             labelStyle={styles.label}
-                            editable={true}
+                            editable={false}
                             rightIcon={
                                 <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
                             }
@@ -615,7 +621,7 @@ const CouponScreen = () => {
                             name="end_date"
                             label="End Date"
                             labelStyle={styles.label}
-                            editable={true}
+                            editable={false}
                             rightIcon={
                                 <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
                             }

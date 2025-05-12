@@ -590,6 +590,21 @@ mutation CreatePlan($createPlanInput: CreatePlanDto!) {
     duration
     discountedPrice
     status
+    package {
+      id
+      name
+      description
+      price
+      discountedPrice
+      status
+      offerType
+      offerDescription
+      offerExpiryDate
+      modules {
+        id
+        name
+      }
+    }
     couponCode
   }
 }

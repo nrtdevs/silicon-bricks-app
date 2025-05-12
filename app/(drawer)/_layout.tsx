@@ -107,12 +107,12 @@ const CustomDrawerContent = (props: any) => {
               onPress={() => router.push('/permission')}
             /> */}
 
-            <DrawerItem
+            {/* <DrawerItem
               icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
               label={labels?.offerPromotions}
               labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
               onPress={() => router.push('/offer')}
-            />
+            /> */}
 
             <DrawerItem
               icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}

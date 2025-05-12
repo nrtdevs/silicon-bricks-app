@@ -28,7 +28,13 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import { ScrollView } from "react-native";
-import { AntDesign, Entypo, Feather, Fontisto, MaterialIcons } from "@expo/vector-icons";
+import {
+    AntDesign,
+    Entypo,
+    Feather,
+    Fontisto,
+    MaterialIcons,
+} from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -49,6 +55,7 @@ const defaultValue = {
     name: "",
     discountedPrice: "",
     description: "",
+    offerDescription: "",
     id: "",
     price: "",
     moduleIds: [],
@@ -67,17 +74,19 @@ const PackageScreen = () => {
     } = useForm<{
         name: string;
         description: string;
+        offerDescription: string;
         status: string;
         price: string;
         discountedPrice: string;
         module: any;
         endDate: string;
-        offer
+        offer;
     }>({
         defaultValues: {},
     });
 
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [selectedModules, setSelectedModules] = useState<any>(null);
 
     const { can, hasAny } = useUserContext();
 
@@ -90,9 +99,25 @@ const PackageScreen = () => {
         PaginatedPackagesDocument
     );
 
-    const [moduleDataApi, { error: moduleError, data: moduleData, loading: moduleLoading, refetch: moduleRefetch }] = useLazyQuery(
-        PaginatedModulesDocument
-    );
+    const [
+        moduleDataApi,
+        {
+            error: moduleError,
+            data: moduleData,
+            loading: moduleLoading,
+            refetch: moduleRefetch,
+        },
+    ] = useLazyQuery(PaginatedModulesDocument);
+
+    const findModule = (data, ids) => {
+
+        const matchedModuleNames = data
+            ?.filter((item) => ids?.includes(item?.id))
+            ?.map((item) => item.name); // Only extract 'name'
+
+        setSelectedModules(matchedModuleNames);
+
+    };
 
     const [deletePackage, deletePackageState] = useMutation(
         DeletePackageDocument,
@@ -143,14 +168,16 @@ const PackageScreen = () => {
     const [isFocused, setIsFocused] = useState("");
     const [editModal, setEditModal] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
+    const [infoModalVisible, setInfoModalVisible] = useState(false);
     const [currentPackage, setCurrentPackage] = useState<{
-        name: string,
-        discountedPrice: string,
-        description: string,
-        id: string,
-        price: string,
-        moduleIds: string[],
-        endDate: string,
+        name: string;
+        discountedPrice: string;
+        description: string;
+        offerDescription: string;
+        id: string;
+        price: string;
+        moduleIds: string[];
+        endDate: string;
     }>(defaultValue);
 
     // const
@@ -166,12 +193,14 @@ const PackageScreen = () => {
             setValue("description", currentPackage?.description);
             setValue("price", currentPackage?.price);
             setValue("module", currentPackage?.moduleIds);
-            setValue("endDate", formatTimeForAPI(currentPackage?.endDate, "yyyy-mm-dd") || "");
+            setValue(
+                "endDate",
+                formatTimeForAPI(currentPackage?.endDate, "yyyy-mm-dd") || ""
+            );
             // setValue("start_date", formatTimeForAPI(currentCoupon?.start_date, "yyyy-mm-dd") || "");
             setValue("discountedPrice", currentPackage?.discountedPrice);
         }
     }, [currentPackage]);
-
 
     useEffect(() => {
         packagesData({
@@ -189,7 +218,7 @@ const PackageScreen = () => {
                     page: 1,
                 },
             },
-        })
+        });
     }, []);
 
     // useEffect(() => {
@@ -230,8 +259,12 @@ const PackageScreen = () => {
 
     const onSubmit = (data: any) => {
         try {
-            const moduleIds = data.module.map(Number);
-            console.log('moduleIds', typeof moduleIds[0]);
+            const moduleIds = data?.module?.map(Number);
+            if (Number(data?.price) < Number(data?.discountedPrice)) {
+                console.log("Price should be greater than discounted price date.");
+                Alert.alert("Error", "Price should be greater than discounted price.");
+                return;
+            }
             let params = {
                 name: data?.name,
                 offerExpiryDate: data?.endDate,
@@ -239,15 +272,16 @@ const PackageScreen = () => {
                 discountedPrice: Number(data?.discountedPrice),
                 moduleIds: moduleIds,
                 description: data?.description,
+                offerDescription: data?.offerDescription,
             };
             let params2 = {
                 id: Number(currentPackage?.id),
                 ...params,
             };
-            console.log('params2', params2);
+            console.log("params2", params2);
 
-            editModal ?
-                updatePackage({
+            editModal
+                ? updatePackage({
                     variables: {
                         updatePackageInput: params2,
                     },
@@ -257,9 +291,8 @@ const PackageScreen = () => {
                         createPackageInput: params,
                     },
                 });
-
         } catch (error) {
-            console.log('error in onSubmit', error);
+            console.log("error in onSubmit", error);
         }
     };
 
@@ -273,102 +306,125 @@ const PackageScreen = () => {
     );
 
     const renderData = ({ item, index }: any) => {
-        let ids = item.modules.map((item: any) => item.id);
-        console.log('009', item?.discountedPrice);
-        return <View
-            key={index}
-            style={[
-                styles.organizationContainer,
-                { backgroundColor: Colors[theme]?.cartBg },
-            ]}
-        >
-
-
-            <View style={styles.organizationHeader}>
-                <ThemedText type="subtitle" style={{ flex: 1 }}>
-                    {item?.name}
-                </ThemedText>
-                <View style={styles.organizationInfo}>
-                    {statusUpdatePermission && <MaterialIcons
-                        name="attractions"
-                        size={ms(26)}
-                        color={Colors[theme].text}
-                        onPress={() => {
-                            setStatusModalVisible(true);
-                        }}
-                    />}
-
-                    {updatePermission && <Feather
-                        name="edit"
-                        size={ms(26)}
-                        color={Colors[theme].text}
-                        onPress={() => {
-                            setCurrentPackage({
-                                name: item?.name,
-                                discountedPrice: String(item?.discountedPrice),
-                                description: item?.description,
-                                id: item?.id,
-                                price: String(item?.price),
-                                moduleIds: ids,
-                                endDate: item?.offerExpiryDate,
-                            })
-                            setModalVisible(true);
-                            setEditModal(true);
-                        }}
-                    />}
-
-                    {deletePermission && <MaterialIcons
-                        name="delete-outline"
-                        size={ms(26)}
-                        color={Colors[theme].text}
-                        onPress={() => {
-                            Alert.alert(
-                                "Delete",
-                                "Are you sure you want to delete?",
-                                [
-                                    {
-                                        text: "Yes",
-                                        onPress: () => {
-                                            deletePackage({
-                                                variables: {
-                                                    ids: [Number(item?.id)],
-                                                }
-                                            });
-                                        },
-                                    },
-                                    { text: "No", onPress: () => { } },
-                                ]
-                            );
-                        }}
-                    />}
-                </View>
-            </View>
-
-            <View style={styles.userInfo}>
-                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                    ${item?.price}
-                </ThemedText>
-                <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                    ${item?.discountedPrice} (after discount)
-                </ThemedText>
-            </View>
-
-            <ThemedText
+        let ids = item?.modules?.map((item: any) => item.id);
+        return (
+            <View
+                key={index}
                 style={[
-                    styles.status,
-                    {
-                        // color:
-                        //   item.status == "active" ? Colors?.green : "#6d6d1b",
-                        backgroundColor:
-                            theme == "dark" ? Colors?.white : "#e6e2e2",
-                        fontSize: ms(14),
-                    },
+                    styles.organizationContainer,
+                    { backgroundColor: Colors[theme]?.cartBg },
                 ]}
             >
-                {item?.status}
-            </ThemedText>
-        </View>
-    }
+                <View style={styles.organizationHeader}>
+                    <ThemedText type="subtitle" style={{ flex: 1 }}>
+                        {item?.name}
+                    </ThemedText>
+                    <View style={styles.organizationInfo}>
+                        {statusUpdatePermission && (
+                            <MaterialIcons
+                                name="attractions"
+                                size={ms(26)}
+                                color={Colors[theme].text}
+                                onPress={() => {
+                                    setStatusModalVisible(true);
+                                }}
+                            />
+                        )}
+
+                        {updatePermission && (
+                            <Feather
+                                name="edit"
+                                size={ms(26)}
+                                color={Colors[theme].text}
+                                onPress={() => {
+                                    setCurrentPackage({
+                                        name: item?.name,
+                                        discountedPrice: String(item?.discountedPrice),
+                                        description: item?.description,
+                                        id: item?.id,
+                                        price: String(item?.price),
+                                        moduleIds: ids,
+                                        endDate: item?.offerExpiryDate,
+                                        offerDescription: item?.offerDescription,
+                                    });
+                                    setModalVisible(true);
+                                    setEditModal(true);
+                                }}
+                            />
+                        )}
+
+                        {updatePermission && (
+                            <Feather
+                                name="eye"
+                                size={ms(26)}
+                                color={Colors[theme].text}
+                                onPress={() => {
+                                    setCurrentPackage({
+                                        name: item?.name,
+                                        discountedPrice: String(item?.discountedPrice),
+                                        description: item?.description,
+                                        id: item?.id,
+                                        price: String(item?.price),
+                                        moduleIds: ids,
+                                        endDate: item?.offerExpiryDate,
+                                        offerDescription: item?.offerDescription,
+                                    });
+                                    findModule(item.modules, ids);
+                                    setInfoModalVisible(true);
+                                }}
+                            />
+                        )}
+
+                        {deletePermission && (
+                            <MaterialIcons
+                                name="delete-outline"
+                                size={ms(26)}
+                                color={Colors[theme].text}
+                                onPress={() => {
+                                    Alert.alert("Delete", "Are you sure you want to delete?", [
+                                        {
+                                            text: "Yes",
+                                            onPress: () => {
+                                                deletePackage({
+                                                    variables: {
+                                                        ids: [Number(item?.id)],
+                                                    },
+                                                });
+                                            },
+                                        },
+                                        { text: "No", onPress: () => { } },
+                                    ]);
+                                }}
+                            />
+                        )}
+                    </View>
+                </View>
+
+                <View style={styles.userInfo}>
+                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                        ${item?.price}
+                    </ThemedText>
+                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+                        ${item?.discountedPrice} (after discount)
+                    </ThemedText>
+                </View>
+
+                <ThemedText
+                    style={[
+                        styles.status,
+                        {
+                            // color:
+                            //   item.status == "active" ? Colors?.green : "#6d6d1b",
+                            backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
+                            fontSize: ms(14),
+                        },
+                    ]}
+                >
+                    {item?.status}
+                </ThemedText>
+            </View>
+        );
+    };
 
     return (
         <CustomHeader>
@@ -393,7 +449,11 @@ const PackageScreen = () => {
                             setModalVisible(true), setCurrentPackage(defaultValue);
                         }}
                     >
-                        <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
+                        <Feather
+                            name="plus-square"
+                            size={ms(25)}
+                            color={Colors[theme].text}
+                        />
                     </Pressable>
                 </View>
 
@@ -419,7 +479,7 @@ const PackageScreen = () => {
                 isVisible={isModalVisible}
                 onBackdropPress={() => {
                     reset();
-                    // setCurrentCoupon(defaultValue);
+                    setCurrentPackage(defaultValue);
                     setEditModal(false);
                     setModalVisible(false);
                 }}
@@ -449,7 +509,7 @@ const PackageScreen = () => {
                             onPress={() => {
                                 reset();
                                 setEditModal(false);
-                                // setCurrentCoupon(defaultValue);
+                                // setCurrentPackage(defaultValue);
                                 setModalVisible(false);
                             }}
                         >
@@ -478,9 +538,13 @@ const PackageScreen = () => {
                             name="endDate"
                             label="End Date"
                             labelStyle={styles.label}
-                            editable={true}
+                            editable={false}
                             rightIcon={
-                                <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
+                                <Fontisto
+                                    name="date"
+                                    size={ms(20)}
+                                    color={Colors[theme]?.text}
+                                />
                             }
                             onPress={() => {
                                 setDateModal({
@@ -507,7 +571,6 @@ const PackageScreen = () => {
                             rules={{
                                 required: "Price is required",
                             }}
-
                         />
 
                         <CustomValidation
@@ -546,10 +609,10 @@ const PackageScreen = () => {
                         <CustomValidation
                             type="input"
                             control={control}
-                            name={"description"}
+                            name={"offerDescription"}
                             multiline
-                            label={"Description"}
-                            // placeholder={editModal ? "Test organization description" : "Enter description"}
+                            label={"Offer Description"}
+                            // placeholder={editModal ? "Test organization Offer Description" : "Enter Offer Description"}
                             labelStyle={styles.label}
                             inputContainerStyle={{
                                 height: vs(100),
@@ -560,10 +623,24 @@ const PackageScreen = () => {
                             containerStyle={{
                                 height: vs(100),
                             }}
-                            rules={{
-                                required: editModal
-                                    ? "Test organization description is required"
-                                    : "Description is required",
+                        />
+
+                        <CustomValidation
+                            type="input"
+                            control={control}
+                            name={"description"}
+                            multiline
+                            label={"Description"}
+                            // placeholder={editModal ? "Test organization description" : "Enter description"}
+                            labelStyle={[styles.label, { marginTop: vs(30) }]}
+                            inputContainerStyle={{
+                                height: vs(100),
+                            }}
+                            inputStyle={{
+                                height: vs(100),
+                            }}
+                            containerStyle={{
+                                height: vs(100),
                             }}
                         />
 
@@ -572,15 +649,18 @@ const PackageScreen = () => {
                             onPress={() => {
                                 handleSubmit(onSubmit)();
                             }}
-                            isLoading={updatePackageState.loading || createPackageState.loading}
+                            isLoading={
+                                updatePackageState.loading || createPackageState.loading
+                            }
                             style={{
                                 backgroundColor: Colors[theme].background,
-                                marginTop: vs(50),
+                                marginTop: vs(90),
                             }}
                         />
                     </View>
                 </ScrollView>
             </Modal>
+
 
             {/* status modal */}
             <Modal
@@ -597,7 +677,6 @@ const PackageScreen = () => {
                         borderRadius: 10,
                         alignSelf: "center",
                         padding: 10,
-
                     }}
                 >
                     <View
@@ -607,9 +686,7 @@ const PackageScreen = () => {
                             padding: 10,
                         }}
                     >
-                        <ThemedText type="subtitle">
-                            {"Change Status"}
-                        </ThemedText>
+                        <ThemedText type="subtitle">{"Change Status"}</ThemedText>
                         <Pressable
                             onPress={() => {
                                 setStatusModalVisible(false);
@@ -638,58 +715,180 @@ const PackageScreen = () => {
                 </View>
             </Modal>
 
+            {/* user info modal */}
+            <Modal
+                isVisible={infoModalVisible}
+                onBackdropPress={() => {
+                    setInfoModalVisible(false);
+                    setCurrentPackage(defaultValue);
+                }}
+            >
+                <View
+                    style={{
+                        backgroundColor: Colors[theme].cartBg,
+
+                        borderRadius: 10,
+                        padding: 10,
+                    }}
+                >
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            padding: ms(10),
+                        }}
+                    >
+                        <ThemedText type="subtitle">User</ThemedText>
+                        <Pressable
+                            onPress={() => {
+                                setCurrentPackage(defaultValue);
+                                setInfoModalVisible(false);
+                            }}
+                        >
+                            <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
+                        </Pressable>
+                    </View>
+                    <View
+                        style={{
+                            borderWidth: 1,
+                            borderColor: Colors[theme].text,
+                            borderStyle: "dashed",
+                        }}
+                    />
+                    <View style={{ gap: vs(10), padding: ms(10) }}>
+                        <View>
+                            <ThemedText type="subtitle">Name</ThemedText>
+                            <ThemedText type="default">{currentPackage?.name}</ThemedText>
+                        </View>
+
+
+                        <View>
+                            <ThemedText type="subtitle">End Date</ThemedText>
+                            <ThemedText type="default">
+                                {new Date(currentPackage?.endDate).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })}
+                            </ThemedText>
+                        </View>
+
+                        <View>
+                            <ThemedText type="subtitle">Price</ThemedText>
+                            <ThemedText type="default">{currentPackage?.price}</ThemedText>
+                        </View>
+
+                        <View>
+                            <ThemedText type="subtitle">Discounted Price</ThemedText>
+                            <ThemedText type="default">
+                                {currentPackage?.discountedPrice}
+                            </ThemedText>
+                        </View>
+
+                        <View>
+                            <ThemedText type="subtitle">Module</ThemedText>
+                            <View style={{ flexDirection: "row", gap: ms(15) }}>
+                                {selectedModules?.map((item) => {
+                                    return <ThemedText type="default">
+                                        {item}
+                                    </ThemedText>
+                                })} 
+                            </View>
+                        </View>
+                        {/* <View>
+                            <ThemedText type="subtitle">Start Date</ThemedText>
+                            <ThemedText type="default">{parseDate(currentPackage?.start_date)}</ThemedText>
+                        </View> */}
+
+                        {/* <View>
+                            <ThemedText type="subtitle">Start Date</ThemedText>
+                            <ThemedText type="default">
+                                {new Date(currentPackage?.moduleIds).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })}
+                            </ThemedText>
+                        </View> */}
+
+                        {currentPackage?.offerDescription && (
+                            <View>
+                                <ThemedText type="subtitle">Offer Description</ThemedText>
+                                <ThemedText type="default">
+                                    {currentPackage?.offerDescription}
+                                </ThemedText>
+                            </View>
+                        )}
+
+                        {currentPackage?.description && (
+                            <View>
+                                <ThemedText type="subtitle">Description</ThemedText>
+                                <ThemedText type="default">
+                                    {currentPackage?.description}
+                                </ThemedText>
+                            </View>
+                        )}
+                    </View>
+                </View>
+            </Modal>
+
             {/* date time picker modal */}
             <DateTimePickerModal
                 dateTimePickerProps={dateTimePickerProps}
                 setDateTimePickerProps={setDateTimePickerProps}
                 onDateTimeSelection={(event: any, selectedDate: any) => {
-                    console.log("selectedDate", selectedDate)
+                    console.log("selectedDate", selectedDate);
                     if (event.type != "dismissed") {
                         setValue(
                             dateModal.start ? "endDate" : "endDate",
-                            formatTimeForAPI(selectedDate, "yyyy-mm-dd") || "",
+                            formatTimeForAPI(selectedDate, "yyyy-mm-dd") || ""
                         );
                     }
                     setDateTimePickerProps(getDateTimePickerProps(false));
-                }} />
+                }}
+            />
         </CustomHeader>
     );
 };
 
-{/* status modal */ }
-{/* <Modal
-    isVisible={isStatusModalVisible}
-    onBackdropPress={() => {
-        setStatusModalVisible(false);
-    }}
->
-    <View
-        style={{
-            backgroundColor: Colors[theme].cartBg,
-            height: 380,
-            width: s(300),
-            borderRadius: 10,
-            alignSelf: "center",
-            padding: 10,
-        }}
-    >
-        <CustomValidation
-            data={pickerData}
-            type="picker"
-            hideStar
-            control={control}
-            name="status"
-            placeholder="Select Status"
-            inputStyle={{ height: vs(50) }}
-            rules={{
-                required: {
-                    value: true,
-                    message: "Select status",
-                },
-            }}
-        />
-    </View>
-</Modal> */}
+{
+    /* status modal */
+}
+{
+    /* <Modal
+      isVisible={isStatusModalVisible}
+      onBackdropPress={() => {
+          setStatusModalVisible(false);
+      }}
+  >
+      <View
+          style={{
+              backgroundColor: Colors[theme].cartBg,
+              height: 380,
+              width: s(300),
+              borderRadius: 10,
+              alignSelf: "center",
+              padding: 10,
+          }}
+      >
+          <CustomValidation
+              data={pickerData}
+              type="picker"
+              hideStar
+              control={control}
+              name="status"
+              placeholder="Select Status"
+              inputStyle={{ height: vs(50) }}
+              rules={{
+                  required: {
+                      value: true,
+                      message: "Select status",
+                  },
+              }}
+          />
+      </View>
+  </Modal> */
+}
 
 export default PackageScreen;
 

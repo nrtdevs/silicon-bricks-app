@@ -167,7 +167,7 @@ const CustomValidation = (props: TextInputProps) => {
     return (
       <TouchableOpacity
         key={item[props?.keyToCompareData ?? 'value']}
-        style={[styles.selectedItem, { backgroundColor: Colors.primary }]}
+        style={[styles.selectedItem, { backgroundColor: Colors[theme].background }]}
         onPress={() => removeItem?.(item)}
       >
         <ThemedText
