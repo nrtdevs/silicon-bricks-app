@@ -4,6 +4,8 @@ import * as SecureStore from "expo-secure-store";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { ScaledSheet } from "react-native-size-matters";
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/context/ThemeContext";
 
 const Index = () => {
   const [token, setToken] = useState(null);
@@ -14,6 +16,7 @@ const Index = () => {
     let parsedUserData = JSON.parse(storedData);
     return parsedUserData.accessToken;
   };
+  const { theme } = useTheme()
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -24,52 +27,11 @@ const Index = () => {
     fetchToken();
   }, []);
 
-  if (loading) return null; // or a loading spinner
+  if (loading) return null; 
 
-  if (!token) {
-    return <Redirect href="/(auth)/login" />;
-  } 
-  return (
-    <SafeAreaView style={{ flex: 1, justifyContent: 'center', margin: 20 }}>
-
-      <Pressable onPress={() => router.replace("/(meeting)/(tabs)")}>
-        <View style={[styles.cardStyle, { backgroundColor: "#5b79ab" }]}>
-          <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-            <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-              <ThemedText style={styles.cardHeading}>M</ThemedText>
-            </View>
-            <ThemedText style={styles.cardTitle}>Meetings</ThemedText>
-          </View>
-        </View>
-      </Pressable>
-
-      <Pressable>
-        <View style={[styles.cardStyle, { backgroundColor: "#5b79ab" }]}>
-          <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-            <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-              <ThemedText style={styles.cardHeading}>V</ThemedText>
-            </View>
-            <ThemedText style={styles.cardTitle}>Vehicle</ThemedText>
-          </View>
-        </View>
-      </Pressable>
-
-      <Pressable>
-        <View style={[styles.cardStyle, { backgroundColor: "#5b79ab" }]}>
-          <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-            <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-              <ThemedText style={styles.cardHeading}>M</ThemedText>
-            </View>
-            <ThemedText style={styles.cardTitle}>Material</ThemedText>
-          </View>
-        </View>
-      </Pressable>
-
-    </SafeAreaView>
-  )
-
-
-
+  return <Redirect href="/(auth)/login" />;
+  // return <Redirect href="/(subComponents)/dashboard" />;
+  // return <Redirect href="/(drawer)/user" />;
 };
 
 

@@ -27,14 +27,39 @@ mutation Mutation {
 # Register User
 mutation Register($registerData: RegisterDto!) {
   register(registerData: $registerData) {
-    accessToken
     user {
       id
       name
+      username
+      mobileNo
+      email
+      status
+      avatar
+      parentId
+      organizationId
       userType
+      createdAt
+      updatedAt
+      deletedAt
+      roles {
+        id
+        name
+        description
+        roleType
+        status
+        permissionCount
+      }
+      designation
+      parent {
+        parent {
+          id
+        }
+      }
     }
+    accessToken
   }
 }
+
 
 #sendResetPasswordOtp
 mutation SendRegistrationOtp($email: String!) {

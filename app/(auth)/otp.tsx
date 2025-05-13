@@ -58,7 +58,7 @@ const LoginCodeScreen = () => {
             userType: response?.data?.login?.user?.userType,
           };
           console.log(userData);
-          
+
           await SecureStore.setItemAsync("userData", JSON.stringify(userData));
           // Retrieve the token from SecureStore
           router.replace("/(drawer)/(tabs)");

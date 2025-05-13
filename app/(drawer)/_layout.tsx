@@ -121,7 +121,6 @@ const CustomDrawerContent = (props: any) => {
               onPress={() => router.push('/plans')}
             />
 
-
           </DrawerContentScrollView>
         ) : (<DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cartBg }}>
           <DrawerItem

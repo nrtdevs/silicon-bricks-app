@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import {
   View,
   Text,
@@ -10,8 +10,9 @@ import {
 } from "react-native";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
 import { Colors } from "@/constants/Colors";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import CustomHeader from "@/components/CustomHeader";
+import Modal from "react-native-modal";
 import React from "react";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/context/ThemeContext";
@@ -21,14 +22,17 @@ import { Ionicons } from "@expo/vector-icons";
 import CustomButton from "@/components/CustomButton";
 import alertMsg from "@/constants/alertMsg";
 import Loader from "@/components/ui/Loader";
-import { RegisterDocument } from "@/graphql/generated";
+import { RegisterDocument, SendRegistrationOtpDocument } from "@/graphql/generated";
 import { useMutation } from "@apollo/client";
+import { ThemedView } from "@/components/ThemedView";
+import OtpInput from "@/components/OtpInput";
 
 // Define form data types
 interface SignUpFormData {
+  name: string;
+  organization: string;
   email: string;
   password: string;
-  confirmPassword: string;
 }
 
 export default function signup() {
@@ -36,10 +40,34 @@ export default function signup() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const { theme } = useTheme();
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [otp, setOtp] = useState("123456");
 
   // Api Call
+  // SendRegistrationOtpDocument
 
-  const [RegisterUser, { loading, error }] = useMutation(RegisterDocument);
+  const [RegisterUser, { loading, error }] = useMutation(RegisterDocument, {
+    onCompleted: (data) => {
+      Alert.alert("Success");
+      setModalVisible(true);
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  });
+
+  const [otpApi, { data: otpData, loading: registrationLoading, error: registration }] = useMutation(SendRegistrationOtpDocument, {
+    onCompleted: (data) => {
+      Alert.alert("Send Otp Success");
+      setModalVisible(true);
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  });
+
+  console.log("0909", otpData);
+
 
   const {
     control,
@@ -48,7 +76,42 @@ export default function signup() {
     formState: { errors },
   } = useForm<SignUpFormData>({ mode: "onBlur" });
 
-  const onSubmit = async (data: SignUpFormData) => {};
+  const onSubmit = async (data: SignUpFormData) => {
+    // setModalVisible(true);
+    otpApi({
+      variables: {
+        email: data.email,
+      },
+    });
+
+    // "email": null,
+    // "emailOTP": null,
+    // "name": null,
+    // "organizationName": null,
+    // "password": null
+  };
+
+  const optSubmit = () => {
+    const params = {
+      email: watch("email"),
+      emailOTP: Number(otp),
+      name: watch("name"),
+      organizationName: watch("organization"),
+      password: watch("password"),
+    }
+    console.log("9999", typeof params.emailOTP);
+    console.log('098', params);
+    RegisterUser({
+      variables: {
+        registerData: params
+      }
+    })
+  }
+
+  const handleOtpFilled = (code: string) => {
+    setOtp(code);
+    console.log(code);
+  };
 
   return (
     <CustomHeader>
@@ -71,6 +134,29 @@ export default function signup() {
 
           {/* signup form */}
           <View style={styles.form}>
+
+            <CustomValidation
+              type="input"
+              control={control}
+              name="name"
+              label={labels.name}
+              placeholder={"Name"}
+              rules={{
+                required: "Name is required",
+              }}
+            />
+
+            <CustomValidation
+              type="input"
+              control={control}
+              name="organization"
+              label={labels.organization}
+              placeholder={"Organization"}
+              rules={{
+                required: "Organization is required",
+              }}
+            />
+
             <CustomValidation
               type="input"
               control={control}
@@ -134,43 +220,6 @@ export default function signup() {
               }}
             />
 
-            <CustomValidation
-              type="input"
-              control={control}
-              onFocus={() => setIsFocused("confirmPassword")}
-              name="confirmPassword"
-              label={labels.confirm}
-              placeholder={`${labels.confirm} ${labels.password}`}
-              secureTextEntry={!confirmPasswordVisible}
-              containerStyle={[
-                {
-                  borderRadius: ms(20),
-                },
-                isFocused == "confirmPassword"
-                  ? { borderColor: Colors[theme].text, borderWidth: 1 }
-                  : {},
-              ]}
-              rightIcon={
-                <Pressable
-                  style={styles.eyeButton}
-                  onPress={() =>
-                    setConfirmPasswordVisible(!confirmPasswordVisible)
-                  }
-                >
-                  <Ionicons
-                    name={passwordVisible ? "eye-off" : "eye"}
-                    size={ms(25)}
-                    color="#666"
-                  />
-                </Pressable>
-              }
-              rules={{
-                required: labels.pleaseConfirmYourPassword,
-                validate: (value: string) =>
-                  value === watch("password") || labels.passwordDontMatch,
-              }}
-            />
-
             <View style={{ height: vs(20) }} />
             <CustomButton
               title={labels?.signUp}
@@ -197,6 +246,47 @@ export default function signup() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={() => {
+          setOtp("");
+          setModalVisible(false);
+        }}
+      >
+        <ThemedView style={[styles.modalContainer, { backgroundColor: Colors[theme].cartBg }]}>
+          <View style={{ flex: 1, justifyContent: "center" }}>
+            <View style={{ marginVertical: vs(20) }}>
+              <ThemedText style={{ textAlign: "center" }} type="title">
+                {labels?.enterCode}
+              </ThemedText>
+              <ThemedText style={{ textAlign: "center", fontSize: ms(14) }}>
+                Enter 6 digit code
+              </ThemedText>
+            </View>
+            <OtpInput
+              codeLength={6}
+              onCodeFilled={(code: any) => {
+                handleOtpFilled(code);
+              }}
+              error={error?.message ? true : false}
+              setError={(value: any) => { }}
+              errorMessage={labels?.errorMessage}
+              defaultValue={otp}
+            />
+          </View>
+
+          <CustomButton
+            titleStyle={{ color: Colors?.white }}
+            isLoading={loading}
+            title={labels?.confirm}
+            isGradient
+            onPress={optSubmit}
+          />
+        </ThemedView>
+      </Modal>
+
+
     </CustomHeader>
   );
 }
@@ -207,6 +297,16 @@ const styles = ScaledSheet.create({
     backgroundColor: "#1A1A1A",
     padding: "12@ms",
     paddingBottom: "10@vs",
+  },
+  modalContainer: {
+    paddingHorizontal: "12@ms",
+    paddingVertical: "20@ms",
+    gap: "20@ms",
+    height: "300@vs",
+    width: "100%",
+    // flex: 1,
+    borderRadius: "10@ms",
+    justifyContent: "space-between",
   },
   content: {
     flex: 1,

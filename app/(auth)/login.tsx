@@ -16,6 +16,7 @@ import alertMsg from "@/constants/alertMsg";
 import { useMutation } from "@apollo/client";
 import { RequestOtpDocument } from "@/graphql/generated";
 import Toast from "react-native-toast-message";
+import { LinearGradient } from "expo-linear-gradient";
 
 // Define form data types
 interface LoginFormData {
@@ -200,6 +201,15 @@ export default function LoginScreen() {
                 </ThemedText>
               </Pressable>
             </View>
+
+            <LinearGradient
+              colors={[Colors.gradient2, Colors.gradient1]}
+              start={{ x: 0, y: 1 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.gradient,]}
+            >
+              <ThemedText type="subtitle">Purchase Plans</ThemedText>
+            </LinearGradient>
           </View>
         </View>
       </ScrollView>
@@ -272,5 +282,14 @@ const styles = ScaledSheet.create({
     fontWeight: 600,
     textAlign: "center",
     fontFamily: "bold",
+  },
+  gradient: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: "55%",
+    height: "12%",
+    borderRadius: 20,
+    position: "relative",
+    marginHorizontal:'auto'
   },
 });

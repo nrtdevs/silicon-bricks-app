@@ -152,7 +152,7 @@ const MeetingType = () => {
                                         <View style={{ borderRadius: "100%", backgroundColor: Colors[theme].cartBg, width: 40, height: 40, justifyContent: "center", alignItems: "center" }}>
                                             <ThemedText style={styles.cardHeading}>{item.name.charAt(0).toUpperCase()}</ThemedText>
                                         </View>
-                                        <ThemedText type="subtitle" style={{ flex: 1,}} >  {item.name}</ThemedText>
+                                        <ThemedText type="subtitle" style={{ flex: 1, }} >  {item.name}</ThemedText>
                                         <View style={styles.organizationInfo}>
                                             <Feather
                                                 name="edit"
@@ -194,7 +194,7 @@ const MeetingType = () => {
                                             />
                                         </View>
                                     </View>
-                                    
+
                                 </View>
                             </LinearGradient>
                         </View>
