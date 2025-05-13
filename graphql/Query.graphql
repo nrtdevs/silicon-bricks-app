@@ -664,3 +664,62 @@ query GetAllDynamicPage($listInputDto: ListInputDTO!) {
     }
   }
 }
+# Meeting app query 
+
+query GetMeetingDashboard {
+  getMeetingDashboard {
+    totalMeetings
+    activeMeetings
+    inactiveMeetings
+    upComingMeeting
+    completedMeeting
+    todayMeeting
+    totalTasks
+    inComingTasks
+    ongoingTasks
+    completedTasks
+  }
+}
+query PaginatedMeeting($listInputDto: ListInputDTO!) {
+  paginatedMeeting(ListInputDTO: $listInputDto) {
+    data {
+      id
+      meetingReference
+      projectId
+      createdByUserId
+      meetingVenueId
+      projectName
+      parentMeetingId
+      title
+      startTime
+      endTime
+      status
+      meetingDate
+      meetingAgenda
+      meetingUrl
+      attendees
+      attendeesNames
+      uploadDoc
+    }
+  }
+}
+query GetAllMeetingTypes {
+  getAllMeetingTypes {
+    id
+    name
+    createdAt
+  }
+}
+
+query PaginatedMeetingVenue($listInputDto: ListInputDTO!) {
+  paginatedMeetingVenue(ListInputDTO: $listInputDto) {
+    data {
+      id
+      name
+      address
+      contactPerson
+      contactNumber
+      description
+    }
+  }
+}
