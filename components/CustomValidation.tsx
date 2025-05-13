@@ -230,12 +230,12 @@ const CustomValidation = (props: TextInputProps) => {
         fieldState: { error }
       }: any) => {
         const errStyle = {
-          backgroundColor: props.disabled ? Colors.gray : Colors[theme].cartBg,
+          backgroundColor: props.disabled ? Colors.gray : Colors[theme].background,
           borderColor: error
             ? Colors.red
             : isFocused
-              ? Colors.black
-              : Colors.black
+              ? Colors[theme].border
+              : Colors[theme].border
         }
         return (
           <View style={[styles.container, props.wrapperStyle]}>
