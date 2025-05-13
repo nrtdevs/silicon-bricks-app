@@ -144,7 +144,7 @@ const organization = () => {
         });
     }, []);
 
-    console.log(data?.getAllDynamicPage?.data);
+    console.log(data?.getAllDynamicPage?.data); // test
 
     const onSubmit = (data: any) => {
         let param = {
