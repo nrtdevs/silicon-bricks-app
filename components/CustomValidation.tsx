@@ -392,8 +392,8 @@ const CustomValidation = (props: TextInputProps) => {
                       errStyle,
                       props.inputStyle,
                       {
-                        backgroundColor: Colors[theme].cartBg,
-                        shadowColor: Colors[theme].cartBg
+                        backgroundColor: Colors[theme].background,
+                        shadowColor: Colors[theme].background
                       }
                     ]}
                     placeholderStyle={styles.placeholderStyle}
@@ -469,8 +469,8 @@ const CustomValidation = (props: TextInputProps) => {
                       errStyle,
                       props.inputStyle,
                       {
-                        backgroundColor: Colors[theme].cartBg,
-                        shadowColor: Colors[theme].cartBg
+                        backgroundColor: Colors[theme].background,
+                        shadowColor: Colors[theme].background
                       }
                     ]}
                     inputSearchStyle={[

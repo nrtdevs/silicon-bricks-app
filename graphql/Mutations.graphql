@@ -723,3 +723,65 @@ mutation VerifyPayment($input: VerifyPaymentInput!) {
     paymentId
   }
 }
+# metting app mutation 
+
+mutation CreateMeeting($data: CreateMeetingDto!) {
+  createMeeting(data: $data) {
+    id
+    meetingReference
+    projectId
+    createdByUserId
+    meetingVenueId
+    meetingTypeId
+    projectName
+    parentMeetingId
+    title
+    startTime
+    endTime
+    status
+    meetingDate
+    meetingAgenda
+    meetingUrl
+    attendees
+    attendeesNames
+    uploadDoc
+  }
+}
+
+mutation CreateNotes($notesData: [CreateNotesDto!]!) {
+  createNotes(notesData: $notesData) {
+    id
+    createdByUserId
+    meetingId
+    decision
+    notes
+    uploadDoc
+  }
+}
+
+mutation DeleteMeting($ids: [Int!]!) {
+  deleteMeting(ids: $ids)
+}
+
+mutation UpdateMeeting($updateMeetingInput: UpdateMeetingDto!) {
+  updateMeeting(updateMeetingInput: $updateMeetingInput) {
+    id
+    meetingReference
+    projectId
+    createdByUserId
+    meetingVenueId
+    meetingTypeId
+    projectName
+    parentMeetingId
+    title
+    startTime
+    endTime
+    status
+    meetingDate
+    meetingAgenda
+    meetingUrl
+    attendees
+    attendeesNames
+    uploadDoc
+  }
+}

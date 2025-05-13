@@ -95,7 +95,7 @@ export default function RootLayout() {
               screenOptions={{ headerShown: false }}
               initialRouteName="index"
             >
-              <Stack.Screen name="index" /> 
+              <Stack.Screen name="index" />
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" />
             </Stack>

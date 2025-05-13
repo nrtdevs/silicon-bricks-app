@@ -78,4 +78,12 @@ export const labels = {
   searchPlan:"Search Plan",
   searchRole:"Search Role",
   pages:"Pages",
+  meeting:"Meeting",
+  upcomingMeeting:"Upcoming Meeting",
+  meetingType:"Meeting Type",
+  meetingVenue:"Meeting Venue",
+  myNotes:"My Notes",
+  task:"Task",
+  upcomingTasks:"Upcoming Tasks",
+  meetingRoom:"Meeting Room",
 };

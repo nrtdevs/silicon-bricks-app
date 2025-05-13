@@ -10,10 +10,12 @@ const DateTimePickerModal = ({
     dateTimePickerProps,
     onDateTimeSelection,
     setDateTimePickerProps,
+    mode
 }: {
     dateTimePickerProps: any;
     onDateTimeSelection: any;
     setDateTimePickerProps: any;
+    mode:"date"|"time"
 }) => {
     const colorScheme = useColorScheme();
     if (!dateTimePickerProps?.visible) return null;
@@ -21,7 +23,7 @@ const DateTimePickerModal = ({
     return Platform.OS == "android" ? (
         <DateTimePicker
             value={dateTimePickerProps?.value || new Date()}
-            mode={dateTimePickerProps?.mode}
+            mode={mode || dateTimePickerProps?.mode}
             display={dateTimePickerProps?.display}
             is24Hour={dateTimePickerProps?.is24Hour}
             onChange={onDateTimeSelection}
@@ -44,7 +46,7 @@ const DateTimePickerModal = ({
         >
             <DateTimePicker
                 value={dateTimePickerProps?.value || new Date()}
-                mode={dateTimePickerProps?.mode}
+                mode={mode || dateTimePickerProps?.mode}
                 display={dateTimePickerProps?.display}
                 is24Hour={dateTimePickerProps?.is24Hour}
                 onChange={onDateTimeSelection}
