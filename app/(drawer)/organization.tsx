@@ -60,11 +60,11 @@ const OrganizationScreen = () => {
     defaultValues: {},
   });
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [organizationList, setOrganizationList] = useState<any>([]);
+  const [organizationList, setOrganizationList] = useState<any>([]); 
   const [organizationData, { error, data, loading, refetch }] = useLazyQuery(
     PaginatedOrganizationDocument
   );
-  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const [editModal, setEditModal] = useState<boolean>(false);
@@ -158,19 +158,6 @@ const OrganizationScreen = () => {
     fetchOrganization();
   }, []);
 
-  useEffect(() => {
-    if (watch("status")) {
-      updateOrganizationStatus({
-        variables: {
-          data: {
-            ids: [Number(currentOrganization?.id)],
-            status: watch("status")?.value,
-          },
-        },
-      });
-    }
-  }, [watch("status")]);
-
   const onSubmit = (data: any) => {
     try {
       let params = {
@@ -180,20 +167,20 @@ const OrganizationScreen = () => {
 
       editModal
         ? updateOrganization({
-          variables: {
-            updateOrganizationInput: {
-              id: Number(currentOrganization?.id),
-              ...params,
+            variables: {
+              updateOrganizationInput: {
+                id: Number(currentOrganization?.id),
+                ...params,
+              },
             },
-          },
-        })
+          })
         : createOrganization({
-          variables: {
-            createOrganizationInput: {
-              ...data,
+            variables: {
+              createOrganizationInput: {
+                ...data,
+              },
             },
-          },
-        });
+          });
     } catch (error) {
       console.log("onSubmit error", error);
     }
@@ -224,6 +211,7 @@ const OrganizationScreen = () => {
                     description: item?.description,
                     id: item?.id,
                   });
+                  setValue("status", item?.status);
                   setStatusModalVisible(true);
                 }}
               />
@@ -264,7 +252,7 @@ const OrganizationScreen = () => {
                         });
                       },
                     },
-                    { text: "No", onPress: () => { } },
+                    { text: "No", onPress: () => {} },
                   ]);
                 }}
               />
@@ -290,17 +278,17 @@ const OrganizationScreen = () => {
       </View>
     );
   };
+ 
 
   const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
     const currentPage = isRefreshing ? 1 : page;
-    console.log('999', typeof searchParams);
 
     if (isRefreshing) {
       setRefreshing(true);
+      setPage(1);
     }
-
     const params = {
-      limit: 10,
+      limit: 3,
       page: currentPage,
       search: searchParams,
     };
@@ -318,18 +306,15 @@ const OrganizationScreen = () => {
         const newItems = data?.data || [];
 
         setOrganizationList((prev: any) => {
-          return isRefreshing ? newItems : [...prev, ...newItems];
+          return isRefreshing && currentPage == 1
+            ? newItems
+            : [...prev, ...newItems];
         });
 
-        if (isRefreshing) {
-          setPage(2); // since page 1 is already fetched
-        } else {
-          setPage((prevPage) => prevPage + 1);
-        }
-
-        setRefreshing(false);
-
-        const lastPage = Math.ceil(data?.meta?.totalItems / 6);
+        if (isRefreshing) setRefreshing(false);
+        setPage((prev) => prev + 1);
+        setRefreshing(false); 
+        const lastPage = Math.ceil(data?.meta?.totalItems / 3);  
         setHasMore(data?.meta?.currentPage < lastPage);
       } else {
         console.log("API call failed or returned no data:", res?.errors);
@@ -353,7 +338,9 @@ const OrganizationScreen = () => {
   if (
     (loading ||
       deleteOrganizationState.loading ||
-      updateOrganizationStatusState?.loading) && page == 1 && !refreshing
+      updateOrganizationStatusState?.loading) &&
+    page == 1 &&
+    !refreshing
   ) {
     return <Loader />;
   }
@@ -396,14 +383,10 @@ const OrganizationScreen = () => {
             data={organizationList}
             renderItem={({ item, index }: any) => renderItem({ item, index })}
             showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing && !loading}
-                onRefresh={async () => {
-                  fetchOrganization(true);
-                }}
-              />
-            }
+            refreshing={refreshing && !loading}
+            onRefresh={() => { 
+              fetchOrganization(true);
+            }}
             keyExtractor={(item: any, index: number) => index.toString()}
             contentContainerStyle={{ paddingBottom: vs(40) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
@@ -416,8 +399,12 @@ const OrganizationScreen = () => {
               if (hasMore && !loading) {
                 fetchOrganization();
               }
-            }}
-            onEndReachedThreshold={0.1}
+            }} 
+               onEndReachedThreshold={0.1}
+          initialNumToRender={8}
+          maxToRenderPerBatch={5}
+          windowSize={7}
+          removeClippedSubviews={true}
           />
         </View>
       </ThemedView>
@@ -496,7 +483,9 @@ const OrganizationScreen = () => {
           <CustomButton
             title="Submit"
             isLoading={
-              editModal ? updateOrganizationState.loading : createOrganizationState.loading
+              editModal
+                ? updateOrganizationState.loading
+                : createOrganizationState.loading
             }
             onPress={() => {
               handleSubmit(onSubmit)();
@@ -552,6 +541,16 @@ const OrganizationScreen = () => {
             inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
             inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
             containerStyle={{ marginTop: 0, paddingTop: 0 }}
+            onChangeText={() => {
+              updateOrganizationStatus({
+                variables: {
+                  data: {
+                    ids: [Number(currentOrganization?.id)],
+                    status: watch("status")?.value,
+                  },
+                },
+              });
+            }}
             rules={{
               required: {
                 value: true,

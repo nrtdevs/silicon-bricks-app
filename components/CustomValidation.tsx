@@ -103,6 +103,7 @@ interface TextInputProps extends RequiredProps {
   itemContainerStyle?: any
   wrapperStyle?: any
   autoFocus?: boolean
+  onChangeText?:any
 }
 
 const CustomValidation = (props: TextInputProps) => {
@@ -454,6 +455,7 @@ const CustomValidation = (props: TextInputProps) => {
                     showsVerticalScrollIndicator={false}
                     value={value}
                     onChange={onChange}
+                    onChangeText={props.onChangeText}
                     onBlur={() => {
                       onBlur?.()
                       setIsFocused(false)
