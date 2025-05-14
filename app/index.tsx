@@ -29,9 +29,9 @@ const Index = () => {
 
   if (loading) return null;
 
-  // if(!token) return <Redirect href="/(auth)/login" />;
-  return <Redirect href="/(subComponents)/purchasePlane" />;
-  // return <Redirect href="/(drawer)/user" />;
+  if(!token) return <Redirect href="/(auth)/login" />;
+  // return <Redirect href="/(subComponents)/dashboard" />;
+  return <Redirect href="/(drawer)/organization" />;
 };
 
 
