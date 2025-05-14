@@ -723,7 +723,52 @@ mutation VerifyPayment($input: VerifyPaymentInput!) {
     paymentId
   }
 }
-# metting app mutation 
+# metting app mutation ------------
+
+
+mutation DeleteMeting($ids: [Int!]!) {
+  deleteMeting(ids: $ids)
+}
+
+mutation CreateMeetingType($data: CreateMeetingTypeDto!) {
+  createMeetingType(data: $data) {
+    id
+    name
+  }
+}
+
+mutation UpdateMeetingType($updateMeetingTypeInput: UpdateMeetingTypeDto!) {
+  updateMeetingType(updateMeetingTypeInput: $updateMeetingTypeInput) {
+    id
+    name
+  }
+}
+
+mutation DeleteMetingVenue($ids: [Int!]!) {
+  deleteMetingVenue(ids: $ids)
+}
+
+mutation CreateMeetingVenue($data: CreateMeetingVenueDto!) {
+  createMeetingVenue(data: $data) {
+    id
+    name
+    address
+    contactPerson
+    contactNumber
+    description
+    createdAt
+  }
+}
+mutation UpdateMeetingVenue($updateMeetingVenueInput: UpdateMeetingVenueDto!) {
+  updateMeetingVenue(updateMeetingVenueInput: $updateMeetingVenueInput) {
+    id
+    name
+    address
+    contactPerson
+    contactNumber
+    description
+  }
+}
 
 mutation CreateMeeting($data: CreateMeetingDto!) {
   createMeeting(data: $data) {
@@ -733,7 +778,6 @@ mutation CreateMeeting($data: CreateMeetingDto!) {
     createdByUserId
     meetingVenueId
     meetingTypeId
-    projectName
     parentMeetingId
     title
     startTime
@@ -743,26 +787,9 @@ mutation CreateMeeting($data: CreateMeetingDto!) {
     meetingAgenda
     meetingUrl
     attendees
-    attendeesNames
     uploadDoc
   }
 }
-
-mutation CreateNotes($notesData: [CreateNotesDto!]!) {
-  createNotes(notesData: $notesData) {
-    id
-    createdByUserId
-    meetingId
-    decision
-    notes
-    uploadDoc
-  }
-}
-
-mutation DeleteMeting($ids: [Int!]!) {
-  deleteMeting(ids: $ids)
-}
-
 mutation UpdateMeeting($updateMeetingInput: UpdateMeetingDto!) {
   updateMeeting(updateMeetingInput: $updateMeetingInput) {
     id
@@ -771,7 +798,6 @@ mutation UpdateMeeting($updateMeetingInput: UpdateMeetingDto!) {
     createdByUserId
     meetingVenueId
     meetingTypeId
-    projectName
     parentMeetingId
     title
     startTime
@@ -781,7 +807,74 @@ mutation UpdateMeeting($updateMeetingInput: UpdateMeetingDto!) {
     meetingAgenda
     meetingUrl
     attendees
-    attendeesNames
     uploadDoc
+  }
+}
+
+mutation DeleteNotes($ids: [Int!]!) {
+  deleteNotes(ids: $ids)
+}
+
+mutation CreateNotes($notesData: [CreateNotesDto!]!) {
+  createNotes(notesData: $notesData) {
+    id
+    meetingId
+    decision
+    notes
+    uploadDoc
+  }
+}
+
+mutation DeleteMetingTask($ids: [Int!]!) {
+  deleteMetingTask(ids: $ids)
+}
+mutation CreateMeetingTask($input: CreateMeetingTaskDto!) {
+  createMeetingTask(input: $input) {
+    id
+    ownerId
+    assigneeId
+    meetingId
+    notesId
+    projectId
+    parentTaskId
+    task
+    comment
+    openedDate
+    dueDate
+    completedDate
+    priority
+    status
+    completePercent
+    totalTaskComplete
+    weightType
+  }
+}
+
+mutation DeleteMetingTask($ids: [Int!]!) {
+  deleteMetingTask(ids: $ids)
+}
+
+mutation CreateFollowUp($data: CreateFollowUpDto!) {
+  createFollowUp(data: $data) {
+    body
+    id
+    subject
+  }
+}
+mutation CreateNotePad($notesData: CreateNotePadDto!) {
+  createNotePad(notesData: $notesData) {
+    id
+    notesField
+    status
+  }
+}
+mutation DeleteNotePad($ids: [Int!]!) {
+  deleteNotePad(ids: $ids)
+}
+mutation UpdateNotePad($updateNotesInput: UpdateNotePadDto!) {
+  updateNotePad(updateNotesInput: $updateNotesInput) {
+    id
+    notesField
+    status
   }
 }

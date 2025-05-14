@@ -664,22 +664,8 @@ query GetAllDynamicPage($listInputDto: ListInputDTO!) {
     }
   }
 }
-# Meeting app query 
+# Meeting app query ------------------
 
-query GetMeetingDashboard {
-  getMeetingDashboard {
-    totalMeetings
-    activeMeetings
-    inactiveMeetings
-    upComingMeeting
-    completedMeeting
-    todayMeeting
-    totalTasks
-    inComingTasks
-    ongoingTasks
-    completedTasks
-  }
-}
 query PaginatedMeeting($listInputDto: ListInputDTO!) {
   paginatedMeeting(ListInputDTO: $listInputDto) {
     data {
@@ -688,7 +674,7 @@ query PaginatedMeeting($listInputDto: ListInputDTO!) {
       projectId
       createdByUserId
       meetingVenueId
-      projectName
+      meetingTypeId
       parentMeetingId
       title
       startTime
@@ -698,16 +684,18 @@ query PaginatedMeeting($listInputDto: ListInputDTO!) {
       meetingAgenda
       meetingUrl
       attendees
-      attendeesNames
       uploadDoc
+      createdAt
+      updatedAt
+      deletedAt
     }
   }
 }
+
 query GetAllMeetingTypes {
   getAllMeetingTypes {
     id
     name
-    createdAt
   }
 }
 
@@ -721,5 +709,123 @@ query PaginatedMeetingVenue($listInputDto: ListInputDTO!) {
       contactNumber
       description
     }
+  }
+}
+
+
+query PaginatedMeetingType($listInputDto: ListInputDTO!) {
+  paginatedMeetingType(ListInputDTO: $listInputDto) {
+    data {
+      name
+      id
+    }
+  }
+}
+
+mutation DeleteMetingType($ids: [Int!]!) {
+  deleteMetingType(ids: $ids)
+}
+
+query PaginatedNotes($listInputDto: ListInputDTO!) {
+  paginatedNotes(ListInputDTO: $listInputDto) {
+    data {
+      decision
+      id
+      meetingId
+      notes
+    }
+  }
+}
+query GetUpcomingMeetingTask($listInputDto: ListInputDTO!) {
+  getUpcomingMeetingTask(ListInputDTO: $listInputDto) {
+    data {
+      id
+      ownerId
+      assigneeId
+      meetingId
+      notesId
+      projectId
+      parentTaskId
+      task
+      comment
+      openedDate
+      dueDate
+      completedDate
+      priority
+      status
+      completePercent
+      weightType
+    }
+  }
+}
+
+query PaginatedMeetingTask($listInputDto: ListInputDTO!) {
+  paginatedMeetingTask(ListInputDTO: $listInputDto) {
+    data {
+      id
+      ownerId
+      assigneeId
+      meetingId
+      notesId
+      projectId
+      parentTaskId
+      task
+      comment
+      openedDate
+      dueDate
+      completedDate
+      priority
+      status
+      completePercent
+      totalTaskComplete
+      weightType
+    }
+  }
+}
+
+query PaginatedNotePad($listInputDto: ListInputDTO!) {
+  paginatedNotePad(ListInputDTO: $listInputDto) {
+    data {
+      id
+      status
+      notesField
+    }
+  }
+}
+query GetUpcomingMeetings($listInputDto: ListInputDTO!) {
+  getUpcomingMeetings(ListInputDTO: $listInputDto) {
+    data {
+      id
+      meetingReference
+      projectId
+      createdByUserId
+      meetingVenueId
+      meetingTypeId
+      projectName
+      parentMeetingId
+      title
+      startTime
+      endTime
+      status
+      meetingDate
+      meetingAgenda
+      meetingUrl
+      attendees
+    }
+  }
+}
+
+query GetMeetingDashboard {
+  getMeetingDashboard {
+    totalMeetings
+    activeMeetings
+    inactiveMeetings
+    upComingMeeting
+    completedMeeting
+    todayMeeting
+    totalTasks
+    inComingTasks
+    ongoingTasks
+    completedTasks
   }
 }

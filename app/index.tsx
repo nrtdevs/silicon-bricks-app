@@ -24,11 +24,11 @@ const Index = () => {
     fetchToken();
   }, []);
 
-  if (loading) return null; // or a loading spinner
+  if (loading) return null; 
 
   if (!token) {
     return <Redirect href="/(auth)/login" />;
-  } 
+  }
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: 'center', margin: 20 }}>
 

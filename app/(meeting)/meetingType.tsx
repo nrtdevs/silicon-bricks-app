@@ -6,7 +6,6 @@ import NoDataFound from "@/components/NoDataFound";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
-import { labels } from "@/constants/Labels";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateMeetingTypeDocument, DeleteMetingTypeDocument, PaginatedMeetingTypeDocument, UpdateMeetingTypeDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
