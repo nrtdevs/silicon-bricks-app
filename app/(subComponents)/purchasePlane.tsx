@@ -54,7 +54,7 @@ const statusData = [
     { label: "Used", value: "used" },
 ];
 
-const CouponScreen = () => {
+const PurchasePlaneScreen = () => {
     const { theme } = useTheme();
     const [isModalVisible, setModalVisible] = useState(false);
     const [isFocused, setIsFocused] = useState("");
@@ -107,6 +107,8 @@ const CouponScreen = () => {
     const [plansData, { error, data, loading, refetch }] = useLazyQuery(
         PaginatedPlansDocument
     );
+    console.log('09887', data?.paginatedPlans?.data[0]);
+
 
     const [dropdownOfferData, offerState] = useLazyQuery(
         DropdownOffersDocument
@@ -299,85 +301,40 @@ const CouponScreen = () => {
                 ]}
             >
                 <View style={styles.organizationHeader}>
-                    <ThemedText type="subtitle" style={{ flex: 1 }}>
+                    <ThemedText type="title" style={{ flex: 1, fontSize: ms(26) }}>
                         {item?.name}
                     </ThemedText>
-                    <View style={styles.organizationInfo}>
-                        {statusUpdatePermission && <MaterialIcons
-                            name="attractions"
-                            size={ms(22)}
-                            color={Colors[theme].text}
-                            onPress={() => {
-                                setCurrentPlanId(item?.id);
-                                setStatusModalVisible(true);
-                            }}
-                        />}
-
-                        {updatePermission && <Feather
-                            name="edit"
-                            size={ms(22)}
-                            color={Colors[theme].text}
-                            onPress={() => {
-                                setCurrentPlan({
-                                    name: item?.name,
-                                    discountPrice: String(item?.discountedPrice),
-                                    duration: String(item?.duration),
-                                    price: String(item?.price),
-                                    package: item?.package?.id,
-                                    coupon: item?.couponId,
-                                    description: item?.description,
-                                    status: item?.status,
-                                    id: item?.id,
-                                });
-                                setEditModal(true);
-                                setModalVisible(true);
-                            }}
-                        />}
-
-                        {deletePermission && <MaterialIcons
-                            name="delete-outline"
-                            size={ms(22)}
-                            color={Colors[theme].text}
-                            onPress={() => {
-                                Alert.alert("Delete", "Are you sure you want to delete?", [
-                                    {
-                                        text: "Yes",
-                                        onPress: () => {
-                                            deletePlan({
-                                                variables: {
-                                                    ids: [Number(item?.id)],
-                                                }
-                                            });
-                                        },
-                                    },
-                                    { text: "No", onPress: () => { } },
-                                ]);
-                            }}
-                        />}
-                    </View>
                 </View>
 
                 <ThemedText
                     style={[
-                        styles.status,
-                        {
-                            color:
-                                item.status == "active" ? Colors?.green : "#6d6d1b",
-                            backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
-                        },
+                        styles.description,
                     ]}
                 >
-                    {item?.status}
+                    {item?.description}
                 </ThemedText>
 
                 <View style={styles.userInfo}>
-                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                        ${item?.price}
+                    <ThemedText type='title' style={{ fontSize: ms(22) }} >
+                        ${item?.price} <ThemedText style={{ fontSize: ms(20), color: 'gray' }} >
+                            /month
+                        </ThemedText>
                     </ThemedText>
-                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                        ${item?.discountedPrice} (after discount)
+                    <ThemedText style={{ fontSize: ms(20) }}>
+                        20% OFF
                     </ThemedText>
                 </View>
+
+                <CustomButton
+                    title="Choose Plan"
+                    onPress={() => {
+                        handleSubmit(onSubmit)();
+                    }}
+                    style={{
+                        backgroundColor: Colors[theme].background,
+                        marginTop: vs(10),
+                    }}
+                />
             </View>
         );
     };
@@ -404,34 +361,7 @@ const CouponScreen = () => {
 
     return (
         <CustomHeader>
-
             <ThemedView style={styles.contentContainer}>
-                <View style={styles.searchContainer}>
-                    <View style={{ flex: 1 }}>
-                        <CustomSearchBar
-                            searchQuery={searchQuery}
-                            onChangeText={(text) => {
-                                setSearchQuery(text);
-                                debouncedSearch(text);
-                            }}
-                            placeholder={labels?.searchPlan}
-                            loading={loading}
-                            onClear={() => {
-                                setSearchQuery("");
-                            }}
-                        />
-                    </View>
-                    <Pressable
-                        style={styles.buttonContainer}
-                        onPress={() => {
-                            fetchDropdownData(),
-                                setModalVisible(true),
-                                setCurrentPlan(defaultValue);
-                        }}
-                    >
-                        <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
-                    </Pressable>
-                </View>
                 <View style={styles.organizationParentContainer}>
                     <FlatList
                         data={data?.paginatedPlans?.data}
@@ -461,232 +391,11 @@ const CouponScreen = () => {
                     />
                 </View>
             </ThemedView>
-
-
-            {/* CREATE AND EDIT MODAL */}
-            <Modal
-                isVisible={isModalVisible}
-                onBackdropPress={() => {
-                    reset();
-                    setCurrentPlan(defaultValue);
-                    setEditModal(false);
-                    setModalVisible(false);
-                }}
-            >
-                <ScrollView
-                    contentContainerStyle={{
-                        backgroundColor: Colors[theme].cartBg,
-                        // height: vs(500),
-                        width: '100%',
-                        borderRadius: 10,
-                        alignSelf: "center",
-                        padding: 10,
-                    }}
-                    showsVerticalScrollIndicator={false}
-                >
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            paddingTop: 20,
-                        }}
-                    >
-                        <ThemedText type="subtitle">
-                            {editModal ? "Edit" : "Create Plan"}
-                        </ThemedText>
-
-                        <Pressable
-                            onPress={() => {
-                                reset();
-                                setEditModal(false);
-                                setCurrentPlan(defaultValue);
-                                setModalVisible(false);
-                            }}
-                        >
-                            <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
-                        </Pressable>
-                    </View>
-
-                    <View style={{ padding: 10 }}>
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            labelStyle={styles.label}
-                            name={"name"}
-                            inputStyle={[{ lineHeight: ms(20) }]}
-                            label={"Name"}
-                            placeholder={"Provide Name"}
-                            rules={{
-                                required: "Name is required",
-                            }}
-                            autoCapitalize="none"
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            labelStyle={styles.label}
-                            name={"duration"}
-                            inputStyle={[{ lineHeight: ms(20) }]}
-                            label={"Duration (in month)"}
-                            placeholder={"Provide Duration"}
-                            rules={{
-                                required: "Duration is required",
-                            }}
-                            autoCapitalize="none"
-                            keyboardType="numeric"
-                        />
-
-                        <CustomValidation
-                            data={packageData?.data?.paginatedPackages?.data}
-                            type="picker"
-                            control={control}
-                            keyToCompareData="id"
-                            keyToShowData="name"
-                            label="Package"
-                            labelStyle={styles.label}
-                            name="package"
-                            placeholder="Select Package"
-                            inputStyle={{ height: vs(50) }}
-                            rules={{
-                                required: {
-                                    value: true,
-                                    message: "Select PackageType",
-                                },
-                            }}
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            labelStyle={styles.label}
-                            name={"price"}
-                            inputStyle={[{ lineHeight: ms(20) }]}
-                            editable={false}
-                            label={"Price"}
-                            placeholder={"Provide Price"}
-                            rules={{
-                                required: "Price is required",
-                            }}
-                            autoCapitalize="none"
-                            keyboardType="numeric"
-                        />
-
-                        <CustomValidation
-                            data={couponData?.data?.paginatedCoupons?.data}
-                            type="picker"
-                            keyToCompareData="id"
-                            keyToShowData="couponCode"
-                            control={control}
-                            label="Coupon"
-                            labelStyle={styles.label}
-                            name="coupon"
-                            placeholder="Select Coupon"
-                            inputStyle={{ height: vs(50) }}
-                            rules={{
-                                required: {
-                                    value: true,
-                                    message: "Select CouponType",
-                                },
-                            }}
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            name={"description"}
-                            multiline
-                            label={"Description"}
-                            // placeholder={editModal ? "Test organization description" : "Enter description"}
-                            labelStyle={styles.label}
-                            inputContainerStyle={{
-                                height: vs(100),
-                            }}
-                            inputStyle={{
-                                height: vs(100),
-                            }}
-                            containerStyle={{
-                                height: vs(100),
-                            }}
-                            autoCapitalize="none"
-                        />
-
-                        <CustomButton
-                            title="Submit"
-                            onPress={() => {
-                                handleSubmit(onSubmit)();
-                            }}
-                            style={{
-                                backgroundColor: Colors[theme].background,
-                                marginTop: vs(50),
-                            }}
-                        />
-                    </View>
-                </ScrollView>
-            </Modal>
-
-
-            {/* status modal */}
-            <Modal
-                isVisible={isStatusModalVisible}
-                onBackdropPress={() => {
-                    setStatusModalVisible(false);
-                }}
-            >
-                <View
-                    style={{
-                        backgroundColor: Colors[theme].cartBg,
-                        height: vs(320),
-                        width: s(300),
-                        borderRadius: 10,
-                        alignSelf: "center",
-                        padding: 10,
-
-                    }}
-                >
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            padding: 10,
-                        }}
-                    >
-                        <ThemedText type="subtitle">
-                            {"Change Status"}
-                        </ThemedText>
-                        <Pressable
-                            onPress={() => {
-                                setStatusModalVisible(false);
-                            }}
-                        >
-                            <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
-                        </Pressable>
-                    </View>
-                    <CustomValidation
-                        data={statusData}
-                        type="picker"
-                        hideStar
-                        control={control}
-                        name="status"
-                        placeholder="Select Status"
-                        inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
-                        inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
-                        containerStyle={{ marginTop: 0, paddingTop: 0 }}
-                        rules={{
-                            required: {
-                                value: true,
-                                message: "Select status",
-                            },
-                        }}
-                    />
-                </View>
-            </Modal>
-
         </CustomHeader>
     );
 };
 
-export default CouponScreen;
+export default PurchasePlaneScreen;
 
 const styles = ScaledSheet.create({
     container: {
@@ -734,12 +443,9 @@ const styles = ScaledSheet.create({
         flexDirection: "row",
         gap: "15@ms",
     },
-    status: {
-        color: "green",
+    description: {
         borderRadius: "10@ms",
-        width: "60@ms",
-        textAlign: "center",
-        fontSize: "12@ms",
+        fontSize: "20@ms",
     },
     label: {
         color: Colors.grayText,
@@ -748,7 +454,7 @@ const styles = ScaledSheet.create({
         fontWeight: 400,
     },
     userInfo: {
-        width: "100%",
+        // width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
     },

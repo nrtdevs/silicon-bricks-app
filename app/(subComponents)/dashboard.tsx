@@ -46,7 +46,6 @@ const dashboard = () => {
                     end={{ x: 1, y: 0 }}
                     style={[styles.gradient,]}
                 >
-
                     <Pressable
                         style={[
                             styles.cardStyle,
@@ -57,20 +56,20 @@ const dashboard = () => {
                         <View style={{ flex: 1 }}>
                             <View
                                 style={{
-                                    flexDirection: "row",
-                                    justifyContent: "space-between",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "center",
                                     flex: 1,
                                 }}
                             >
-                                <ThemedText style={styles.cardTitle}>Admin</ThemedText>
                                 <View
                                     style={[styles?.cartLogo, {
                                         backgroundColor: Colors[theme]?.cartBg,
                                     }]}
                                 >
-                                    {/* <ThemedText style={styles.cardHeading}>A</ThemedText> */}
-                                    <Fontisto name="male" size={34} color={Colors[theme]?.text} />
+                                    <ThemedText style={styles.cardHeading}>A</ThemedText>
                                 </View>
+                                <ThemedText style={styles.cardTitle}>Admin</ThemedText>
                             </View>
                         </View>
                     </Pressable>
@@ -82,34 +81,33 @@ const dashboard = () => {
                     end={{ x: 1, y: 0 }}
                     style={[styles.gradient,]}
                 >
-                    {userType === "admin" && (
-                        <Pressable
-                            style={[
-                                styles.cardStyle,
-                                // { backgroundColor: Colors[theme]?.cartBg },
-                            ]}
-                            onPress={() => router.replace("/(drawer)/(tabs)")}
-                        >
-                            <View style={{ flex: 1 }}>
+                    <Pressable
+                        style={[
+                            styles.cardStyle,
+                            // { backgroundColor: Colors[theme]?.cartBg },
+                        ]}
+                        onPress={() => router.replace("/(drawer)/(tabs)")}
+                    >
+                        <View style={{ flex: 1 }}>
+                            <View
+                                style={{
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    flex: 1,
+                                }}
+                            >
                                 <View
-                                    style={{
-                                        flexDirection: "row",
-                                        justifyContent: "space-between",
-                                        flex: 1,
-                                    }}
+                                    style={[styles?.cartLogo, {
+                                        backgroundColor: Colors[theme]?.cartBg,
+                                    }]}
                                 >
-                                    <ThemedText style={styles.cardTitle}>Meeting</ThemedText>
-                                    <View
-                                        style={[styles?.cartLogo, {
-                                            backgroundColor: Colors[theme]?.cartBg,
-                                        }]}
-                                    >
-                                        <ThemedText style={styles.cardHeading}>M</ThemedText>
-                                    </View>
+                                    <ThemedText style={styles.cardHeading}>M</ThemedText>
                                 </View>
+                                <ThemedText style={styles.cardTitle}>Meeting</ThemedText>
                             </View>
-                        </Pressable>
-                    )}
+                        </View>
+                    </Pressable>
                 </LinearGradient>
 
                 <LinearGradient
@@ -118,34 +116,33 @@ const dashboard = () => {
                     end={{ x: 1, y: 0 }}
                     style={[styles.gradient,]}
                 >
-                    {userType === "admin" && (
-                        <Pressable
-                            style={[
-                                styles.cardStyle,
-                                // { backgroundColor: Colors[theme]?.cartBg },
-                            ]}
-                            onPress={() => router.replace("/(drawer)/(tabs)")}
-                        >
-                            <View style={{ flex: 1 }}>
+                    <Pressable
+                        style={[
+                            styles.cardStyle,
+                            // { backgroundColor: Colors[theme]?.cartBg },
+                        ]}
+                        onPress={() => router.replace("/(drawer)/(tabs)")}
+                    >
+                        <View style={{ flex: 1 }}>
+                            <View
+                                style={{
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    flex: 1,
+                                }}
+                            >
                                 <View
-                                    style={{
-                                        flexDirection: "row",
-                                        justifyContent: "space-between",
-                                        flex: 1,
-                                    }}
+                                    style={[styles?.cartLogo, {
+                                        backgroundColor: Colors[theme]?.cartBg,
+                                    }]}
                                 >
-                                    <ThemedText style={styles.cardTitle}>Vehicle</ThemedText>
-                                    <View
-                                        style={[styles?.cartLogo, {
-                                            backgroundColor: Colors[theme]?.cartBg,
-                                        }]}
-                                    >
-                                        <ThemedText style={styles.cardHeading}>V</ThemedText>
-                                    </View>
+                                    <ThemedText style={styles.cardHeading}>V</ThemedText>
                                 </View>
+                                <ThemedText style={styles.cardTitle}>Vehicle</ThemedText>
                             </View>
-                        </Pressable>
-                    )}
+                        </View>
+                    </Pressable>
                 </LinearGradient>
 
                 {/* <LinearGradient
@@ -212,9 +209,9 @@ const styles = ScaledSheet.create({
         height: 80,
         justifyContent: "center",
         alignItems: "center",
-        position: "absolute",
-        right: 10,
-        bottom: 10,
+        // position: "absolute",
+        // right: 10,
+        // bottom: 10,
     },
     gradient: {
         // borderRadius: '5@ms',
@@ -223,6 +220,7 @@ const styles = ScaledSheet.create({
         width: "45%",
         height: "25%",
         position: "relative",
+        borderRadius: 12,
     },
 });
 
