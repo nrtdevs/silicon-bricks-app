@@ -61,7 +61,7 @@ const LoginCodeScreen = () => {
 
           await SecureStore.setItemAsync("userData", JSON.stringify(userData));
           // Retrieve the token from SecureStore
-          router.replace("/(drawer)/(tabs)");
+          router.replace("/(subComponents)/dashboard");
         } else {
           console.log("Failed to retrieve accessToken");
         }

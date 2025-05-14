@@ -54,7 +54,7 @@ const statusData = [
     { label: "Used", value: "used" },
 ];
 
-const PlanScreen = () => {
+const CouponScreen = () => {
     const { theme } = useTheme();
     const [isModalVisible, setModalVisible] = useState(false);
     const [isFocused, setIsFocused] = useState("");
@@ -686,7 +686,7 @@ const PlanScreen = () => {
     );
 };
 
-export default PlanScreen;
+export default CouponScreen;
 
 const styles = ScaledSheet.create({
     container: {

@@ -24,6 +24,9 @@ const index = () => {
   const { loading, error, data } = useQuery(DashboardCountDocument, {
     variables: { filters: {} },
   });
+
+  console.log('0988',error);
+  
     
 
   // if (loading) return <ThemedText>Loading...</ThemedText>;

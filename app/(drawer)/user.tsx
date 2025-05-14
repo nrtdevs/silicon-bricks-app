@@ -251,7 +251,7 @@ const UserScreen = () => {
         }
       }
 
-      const params = {
+      const params: any = {
         email: data?.email,
         mobileNo: Number(data?.phoneNo),
         name: data?.name,
@@ -282,8 +282,8 @@ const UserScreen = () => {
     }
   };
 
-  const renderItem = (item, index) => {
-    let rolesId = item?.roles?.map((item) => {
+  const renderItem = (item: any, index: number) => {
+    let rolesId = item?.roles?.map((item: any) => {
       return item?.id
     })
     return (
@@ -473,13 +473,8 @@ const UserScreen = () => {
     }
   };
 
-
-  if (OrganizationLoading) {
-    return <Loader />;
-  }
-
   const debouncedSearch = useCallback(
-    debounce((text) => {
+    debounce((text: string) => {
       userData({
         variables: {
           listInputDto: {
@@ -492,6 +487,10 @@ const UserScreen = () => {
     }, 500),
     []
   );
+  // if (true) {
+  //   return <Loader />;
+  // }
+
 
   return (
     <CustomHeader>
@@ -523,8 +522,8 @@ const UserScreen = () => {
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
-            data={data?.paginatedUsers?.data}
-            keyExtractor={(item, index) => index.toString()}
+            data={data?.paginatedUsers?.data || []}
+            keyExtractor={(item, index) => index?.toString()}
             renderItem={({ item, index }: any) => {
               return renderItem(item, index);
             }}
@@ -812,7 +811,6 @@ const UserScreen = () => {
           />
         </View>
       </Modal>
-
 
     </CustomHeader>
   );

@@ -8,8 +8,7 @@ const Loader = ({ size }: { size?: 'small' | 'large' }) => {
       style={{
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: Colors.transparent
+        alignItems: 'center', 
       }}
       size={size ?? 'large'}
       color={Colors.gradient1}

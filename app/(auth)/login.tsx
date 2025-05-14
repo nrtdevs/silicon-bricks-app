@@ -202,14 +202,18 @@ export default function LoginScreen() {
               </Pressable>
             </View>
 
-            <LinearGradient
-              colors={[Colors.gradient2, Colors.gradient1]}
-              start={{ x: 0, y: 1 }}
-              end={{ x: 1, y: 0 }}
-              style={[styles.gradient,]}
+            <Pressable
+              // onPress={() => router.push("")}
             >
-              <ThemedText type="subtitle">Purchase Plans</ThemedText>
-            </LinearGradient>
+              <LinearGradient
+                colors={[Colors.gradient2, Colors.gradient1]}
+                start={{ x: 0, y: 1 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.gradient,]}
+              >
+                <ThemedText type="subtitle">Purchase Plans</ThemedText>
+              </LinearGradient>
+            </Pressable>
           </View>
         </View>
       </ScrollView>
@@ -287,9 +291,9 @@ const styles = ScaledSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: "55%",
-    height: "12%",
+    height: "28%",
     borderRadius: 20,
     position: "relative",
-    marginHorizontal:'auto'
+    marginHorizontal: 'auto',
   },
 });
