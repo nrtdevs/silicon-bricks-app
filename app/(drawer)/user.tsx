@@ -51,13 +51,24 @@ const defaultValue = {
   roles: [],
   usertype: "",
   id: "",
-  imagePath: ""
+  imagePath: "",
+  designation: "",
 };
 const userTypeData = [
   { label: "admin", value: "admin" },
   { label: "adminEmployee", value: "adminEmployee" },
   { label: "organization", value: "organization" },
   { label: "organizationEmployee", value: "organizationEmployee" },
+];
+
+const designationData = [
+  { label: "CEO", value: "CEO" },
+  { label: "CTO", value: "CTO" },
+  { label: "Employee", value: "Employee" },
+  { label: "HR", value: "HR" },
+  { label: "Manager", value: "Manager" },
+  { label: "Super Admin", value: "Super Admin" },
+  { label: "Team Lead", value: "Team Lead" },
 ];
 
 const pickerData = [
@@ -83,6 +94,7 @@ const UserScreen = () => {
     roles: any[];
     usertype: any;
     status: any;
+    designation: any;
   }>({
     defaultValues: {},
   });
@@ -102,6 +114,7 @@ const UserScreen = () => {
     usertype: any;
     id: string;
     imagePath: string;
+    designation: string;
   }>(defaultValue);
 
   const { can, hasAny } = useUserContext();
@@ -637,6 +650,24 @@ const UserScreen = () => {
               labelStyle={styles.label}
               rules={{
                 required: "User phoneNo is required",
+              }}
+            />
+
+            <CustomValidation
+              data={designationData}
+              type="picker"
+              hideStar={false}
+              control={control}
+              name="designation"
+              label="Designation"
+              labelStyle={styles.label}
+              placeholder="Select Designation"
+              inputStyle={{ height: vs(50) }}
+              rules={{
+                required: {
+                  value: true,
+                  message: "Select a designation",
+                },
               }}
             />
 

@@ -188,7 +188,7 @@ const RolesScreen = () => {
     }, 500),
     [searchQuery]
   );
-  console.log('00', hasMore);
+  // console.log('00', rolesList);
 
   return (
     <CustomHeader>

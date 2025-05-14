@@ -34,6 +34,8 @@ import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
+import RazorpayCheckout from "react-native-razorpay";
+
 
 const defaultValue = {
     name: "",
@@ -58,7 +60,7 @@ const PurchasePlaneScreen = () => {
     const { theme } = useTheme();
     const [isModalVisible, setModalVisible] = useState(false);
     const [isFocused, setIsFocused] = useState("");
-    const [editModal, setEditModal] = useState<boolean>(false);
+    const [editModal, setEditModal] = useState<boolean>(false); ``
     const [page, setPage] = useState<number>(1);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
@@ -328,7 +330,7 @@ const PurchasePlaneScreen = () => {
                 <CustomButton
                     title="Choose Plan"
                     onPress={() => {
-                        handleSubmit(onSubmit)();
+                        Pay()
                     }}
                     style={{
                         backgroundColor: Colors[theme].background,
@@ -337,6 +339,46 @@ const PurchasePlaneScreen = () => {
                 />
             </View>
         );
+    };
+
+    const Pay = async () => {
+        const options: any = {
+            description: "Credits towards consultation",
+            image: "https://i.imgur.com/3g7nmJC.png",
+            currency: "INR",
+            key: "rzp_test_yrANCWqt1Qye8M",
+            amount: 409 * 100,
+            name: 'Silicon Bricks',
+            order_id: 4578634345,
+            prefill: {
+                email: "sidhdadatri@gmail.com",
+                contact: "9999999999",
+                name: "Sidhdadatri",
+            },
+            theme: { color: Colors.primary },
+            remember_customer: true,
+        };
+
+        try {
+            const data = await RazorpayCheckout.open(options);
+            if (data?.razorpay_payment_id) {
+                // paymentUpdate(data, orderId);
+                console.log('098778', data);
+            } else {
+                Alert.alert(
+                    // Constants.error,
+                    // Constants.validationLabels.somethingWentWrong
+                    "Something went wrong"
+                );
+            }
+        } catch (error: any) {
+            console.log("Razorpay Error:", error?.error?.reason);
+            Alert.alert(
+                // Constants.error,
+                // error?.error?.reason ?? Constants.validationLabels.somethingWentWrong
+                "Error during payment"
+            );
+        }
     };
 
     const debouncedSearch = useCallback(

@@ -29,9 +29,10 @@ const Index = () => {
 
   if (loading) return null;
 
-  if(!token) return <Redirect href="/(auth)/login" />;
+  if (!token) return <Redirect href="/(auth)/login" />;
+  <Redirect href="/(auth)/login" />
   // return <Redirect href="/(subComponents)/dashboard" />;
-  return <Redirect href="/(drawer)/organization" />;
+  // return <Redirect href="/(drawer)/module" />;
 };
 
 
@@ -39,7 +40,6 @@ const styles = ScaledSheet.create({
   appBar: {
     fontSize: "18@ms",
     fontWeight: "500",
-
   },
   cardStyle: {
     backgroundColor: "#C9C9C9",

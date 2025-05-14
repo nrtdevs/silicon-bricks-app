@@ -103,7 +103,7 @@ interface TextInputProps extends RequiredProps {
   itemContainerStyle?: any
   wrapperStyle?: any
   autoFocus?: boolean
-  onChangeText?:any
+  onChangeText?: any
 }
 
 const CustomValidation = (props: TextInputProps) => {
@@ -231,7 +231,7 @@ const CustomValidation = (props: TextInputProps) => {
         fieldState: { error }
       }: any) => {
         const errStyle = {
-          backgroundColor: props.disabled ? Colors.gray : Colors[theme].cartBg,
+          backgroundColor: props.disabled ? Colors.gray : Colors[theme].background,
           borderColor: error
             ? Colors.red
             : isFocused

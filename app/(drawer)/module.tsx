@@ -57,7 +57,7 @@ const ModuleScreen = () => {
     const [page, setPage] = useState<number>(1);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
-    const [hasMore, setHasMore] = useState(false);
+    const [hasMore, setHasMore] = useState<boolean>(true);
     const [moduleList, setModuleList] = useState<any>([])
     const [currentModule, setCurrentModule] = useState<{
         name: string;
@@ -76,7 +76,6 @@ const ModuleScreen = () => {
     });
     const [searchQuery, setSearchQuery] = useState<string>("");
     const { can, hasAny } = useUserContext();
-
     const deletePermission = can("MasterApp:Module:Delete");
     const updatePermission = can("MasterApp:Module:Update");
     const createPermission = can("MasterApp:Module:Create");
@@ -88,8 +87,9 @@ const ModuleScreen = () => {
 
     const [createModule, createModuleState] = useMutation(CreateModuleDocument, {
         onCompleted: (data) => {
-            reset();
-            refetch();
+            fetchModules(true);
+            setCurrentModule(defaultValue);
+            setEditModal(false);
             setModalVisible(false);
         },
         onError: (error) => {
@@ -99,33 +99,35 @@ const ModuleScreen = () => {
 
     const [updateModuleStatus, updateModuleStatusState] = useMutation(ChangeModuleStatusDocument, {
         onCompleted: (data) => {
-            reset()
-            refetch();
-            setStatusModalVisible(false);
+            fetchModules(true);
+            setCurrentModule(defaultValue);
+            setEditModal(false);
+            setModalVisible(false);
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
-        }
+        },
     });
 
     const [deleteModule, deleteModuleState] = useMutation(DeleteModuleDocument, {
         onCompleted: (data) => {
-            refetch();
+            fetchModules(true);
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
-        }
+        },
     });
 
     const [updateModule, updateModuleState] = useMutation(UpdateModuleDocument, {
         onCompleted: (data) => {
-            refetch();
-            setModalVisible(false);
+            fetchModules(true);
             setCurrentModule(defaultValue);
+            setEditModal(false);
+            setModalVisible(false);
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
-        }
+        },
     });
 
     useEffect(() => {
@@ -137,69 +139,42 @@ const ModuleScreen = () => {
         fetchModules();
     }, []);
 
-    useEffect(() => {
-        const params = {
-            id: Number(currentModule?.id),
-            status: watch("status")?.value
-        }
-        console.log("selected", params);
-
-        if (watch("status")) {
-            updateModuleStatus({
-                variables: {
-                    updateModuleStatusInput: params
-                },
-            });
-        }
-    }, [watch("status")]);
-
     const fetchModules = async (isRefreshing = false, searchParams = "") => {
-        // if (isRefreshing) {
-        //     setPage(1);
-        //     setRefreshing(true);
-        // }
-        // // Params for API
-        // const params = {
-        //     per_page_record: 10,
-        //     page: isRefreshing ? 1 : page,
-        // };
-
         const currentPage = isRefreshing ? 1 : page;
 
         if (isRefreshing) {
             setRefreshing(true);
+            setPage(1);
         }
-
         const params = {
-            limit: 8,
+            limit: 6,
             page: currentPage,
             search: searchParams,
         };
+        console.log('999', currentPage);
+
 
         try {
             const res: any = await moduleData({
                 variables: {
                     listInputDto: params
                 },
+                fetchPolicy: "network-only",
             });
-            // console.log('res', currentPage);
-            if (res?.data?.paginatedModules?.data) {
+
+            if (res?.data?.paginatedModules) {
                 const data: any = res?.data?.paginatedModules;
                 const newItems = data?.data || [];
 
                 setModuleList((prev: any) => {
-                    return isRefreshing ? newItems : [...prev, ...newItems];
+                    return isRefreshing && currentPage == 1
+                        ? newItems
+                        : [...prev, ...newItems];
                 });
 
-                if (isRefreshing) {
-                    setPage(2); // since page 1 is already fetched
-                } else {
-                    setPage((prevPage) => prevPage + 1);
-                }
-
+                if (isRefreshing) setRefreshing(false);
+                setPage((prev) => prev + 1);
                 setRefreshing(false);
-                console.log('99', data);
-
                 const lastPage = Math.ceil(data?.meta?.totalItems / 6);
                 setHasMore(data?.meta?.currentPage < lastPage);
             } else {
@@ -232,6 +207,7 @@ const ModuleScreen = () => {
                             ...data,
                         },
                     },
+                    fetchPolicy: "network-only",
                 });
         } catch (error) {
             console.log(error);
@@ -258,6 +234,7 @@ const ModuleScreen = () => {
                             description: item?.description,
                             id: item?.id,
                         });
+                        setValue("status", item?.status)
                         setStatusModalVisible(true);
                     }}
                 />}
@@ -293,7 +270,7 @@ const ModuleScreen = () => {
                                     onPress: () => {
                                         deleteModule({
                                             variables: {
-                                                deleteModuleId: Number(item?.id),
+                                                ids: [Number(item?.id)],
                                             }
                                         });
                                     },
@@ -342,12 +319,11 @@ const ModuleScreen = () => {
         []
     );
 
-    if (loading) {
-        return <Loader />
-    }
+    console.log("moduleData", moduleList?.length);
 
-    console.log('-0', hasMore);
-
+    // if (loading) {
+    //     return <Loader />
+    // }
 
     return (
         <CustomHeader>
@@ -378,20 +354,42 @@ const ModuleScreen = () => {
                 </View>
                 <View style={styles.organizationParentContainer}>
                     <FlatList
-                        data={data?.paginatedModules?.data}
-                        contentContainerStyle={{ paddingBottom: vs(40) }}
-                        renderItem={({ item, index }: any) => renderItem(item, index)
-                        }
+                        // data={data?.paginatedModules?.data || []}
+                        // contentContainerStyle={{ paddingBottom: vs(40) }}
+                        // renderItem={({ item, index }: any) => renderItem(item, index)
+                        // }
+                        // showsVerticalScrollIndicator={false}
+                        // refreshControl={
+                        //     <RefreshControl
+                        //         refreshing={refreshing && !loading}
+                        //         onRefresh={async () => {
+                        //             fetchModules(true);
+                        //         }}
+                        //     />
+                        // }
+                        // keyExtractor={(item: any, index: number) => index.toString()}
+                        // ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                        // ListFooterComponent={
+                        //     hasMore ? (
+                        //         <ActivityIndicator size="small" color={Colors.primary} />
+                        //     ) : null
+                        // }
+                        // onEndReached={() => {
+                        //     if (hasMore) {
+                        //         fetchModules();
+                        //     }
+                        // }}
+                        // onEndReachedThreshold={0.5}
+
+                        data={moduleList || []}
+                        renderItem={({ item, index }: any) => renderItem(item, index)}
                         showsVerticalScrollIndicator={false}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={refreshing && !loading}
-                                onRefresh={async () => {
-                                    fetchModules(true);
-                                }}
-                            />
-                        }
+                        refreshing={refreshing && !loading}
+                        onRefresh={() => {
+                            fetchModules(true);
+                        }}
                         keyExtractor={(item: any, index: number) => index.toString()}
+                        contentContainerStyle={{ paddingBottom: vs(40) }}
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
                         ListFooterComponent={
                             hasMore ? (
@@ -399,11 +397,15 @@ const ModuleScreen = () => {
                             ) : null
                         }
                         onEndReached={() => {
-                            if (hasMore) {
+                            if (hasMore && !loading) {
                                 fetchModules();
                             }
                         }}
                         onEndReachedThreshold={0.5}
+                        initialNumToRender={8}
+                        maxToRenderPerBatch={5}
+                        windowSize={7}
+                        removeClippedSubviews={true}
                     />
                 </View>
             </ThemedView>
@@ -544,6 +546,20 @@ const ModuleScreen = () => {
                                 message: "Select status",
                             },
                         }}
+                        onChangeText={() => {
+                            const params = {
+                                ids: [Number(currentModule?.id)],
+                                status: watch("status")?.value
+                            }
+                            console.log("selected", params);
+                            updateModuleStatus({
+                                variables: {
+                                    updateModuleStatusInput: params
+                                },
+                                fetchPolicy: "network-only"
+                            });
+                        }
+                        }
                     />
                 </View>
             </Modal>

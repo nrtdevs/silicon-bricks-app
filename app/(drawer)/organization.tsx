@@ -60,7 +60,7 @@ const OrganizationScreen = () => {
     defaultValues: {},
   });
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [organizationList, setOrganizationList] = useState<any>([]); 
+  const [organizationList, setOrganizationList] = useState<any>([]);
   const [organizationData, { error, data, loading, refetch }] = useLazyQuery(
     PaginatedOrganizationDocument
   );
@@ -167,20 +167,20 @@ const OrganizationScreen = () => {
 
       editModal
         ? updateOrganization({
-            variables: {
-              updateOrganizationInput: {
-                id: Number(currentOrganization?.id),
-                ...params,
-              },
+          variables: {
+            updateOrganizationInput: {
+              id: Number(currentOrganization?.id),
+              ...params,
             },
-          })
+          },
+        })
         : createOrganization({
-            variables: {
-              createOrganizationInput: {
-                ...data,
-              },
+          variables: {
+            createOrganizationInput: {
+              ...data,
             },
-          });
+          },
+        });
     } catch (error) {
       console.log("onSubmit error", error);
     }
@@ -252,7 +252,7 @@ const OrganizationScreen = () => {
                         });
                       },
                     },
-                    { text: "No", onPress: () => {} },
+                    { text: "No", onPress: () => { } },
                   ]);
                 }}
               />
@@ -278,7 +278,7 @@ const OrganizationScreen = () => {
       </View>
     );
   };
- 
+
 
   const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
     const currentPage = isRefreshing ? 1 : page;
@@ -288,7 +288,7 @@ const OrganizationScreen = () => {
       setPage(1);
     }
     const params = {
-      limit: 3,
+      limit: 6,
       page: currentPage,
       search: searchParams,
     };
@@ -313,8 +313,8 @@ const OrganizationScreen = () => {
 
         if (isRefreshing) setRefreshing(false);
         setPage((prev) => prev + 1);
-        setRefreshing(false); 
-        const lastPage = Math.ceil(data?.meta?.totalItems / 3);  
+        setRefreshing(false);
+        const lastPage = Math.ceil(data?.meta?.totalItems / 6);
         setHasMore(data?.meta?.currentPage < lastPage);
       } else {
         console.log("API call failed or returned no data:", res?.errors);
@@ -334,6 +334,7 @@ const OrganizationScreen = () => {
     }, 500),
     [searchQuery]
   );
+
 
   if (
     (loading ||
@@ -384,7 +385,7 @@ const OrganizationScreen = () => {
             renderItem={({ item, index }: any) => renderItem({ item, index })}
             showsVerticalScrollIndicator={false}
             refreshing={refreshing && !loading}
-            onRefresh={() => { 
+            onRefresh={() => {
               fetchOrganization(true);
             }}
             keyExtractor={(item: any, index: number) => index.toString()}
@@ -399,12 +400,12 @@ const OrganizationScreen = () => {
               if (hasMore && !loading) {
                 fetchOrganization();
               }
-            }} 
-               onEndReachedThreshold={0.1}
-          initialNumToRender={8}
-          maxToRenderPerBatch={5}
-          windowSize={7}
-          removeClippedSubviews={true}
+            }}
+            onEndReachedThreshold={0.5}
+            initialNumToRender={8}
+            maxToRenderPerBatch={5}
+            windowSize={7}
+            removeClippedSubviews={true}
           />
         </View>
       </ThemedView>

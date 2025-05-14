@@ -390,7 +390,7 @@ const SettingScreen = () => {
               <ThemedText style={styles.userEmail}>{data?.findUserById?.email}</ThemedText>
             </View>
           </View>
-          {firstData.map((item: any, i: number) => {
+          {firstData?.map((item: any, i: number) => {
             return (
               <Pressable
                 key={i}
@@ -430,7 +430,7 @@ const SettingScreen = () => {
             );
           })}
 
-          {pages.map((item: any, i: number) => {
+          {pages?.map((item: any, i: number) => {
             return (
               <Pressable
                 key={i}
