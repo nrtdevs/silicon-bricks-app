@@ -582,22 +582,6 @@ mutation DeletePackage($ids: [Int!]!) {
   deletePackage(ids: $ids)
 }
 
-#status change PACKAGE
-mutation ChangePackageStatus($updatePackageStatusInput: PackageStatusDto!) {
-  changePackageStatus(updatePackageStatusInput: $updatePackageStatusInput) {
-    ... on Package {
-      id
-      status
-    }
-    ... on PackageArray {
-      data {
-        id
-        status
-      }
-    }
-  }
-}
-
 #restore PACKAGE
 mutation RestorePackage($ids: [Int!]!) {
   restorePackage(ids: $ids)
@@ -766,9 +750,6 @@ mutation VerifyPayment($input: VerifyPaymentInput!) {
     paymentId
   }
 }
-# metting app mutation
-# metting app mutation ------------
-
 
 mutation DeleteMeting($ids: [Int!]!) {
   deleteMeting(ids: $ids)
@@ -923,3 +904,31 @@ mutation UpdateNotePad($updateNotesInput: UpdateNotePadDto!) {
   }
 }
 
+mutation ChangePackageStatus($updatePackageStatusInput: PackageStatusDto!) {
+  changePackageStatus(updatePackageStatusInput: $updatePackageStatusInput) {
+    ... on Package {
+      id
+      name
+      description
+      price
+      discountedPrice
+      status
+      offerType
+      offerDescription
+      offerExpiryDate
+    }
+    ... on PackageArray {
+      data {
+        id
+        name
+        description
+        price
+        discountedPrice
+        status
+        offerType
+        offerDescription
+        offerExpiryDate
+      }
+    }
+  }
+}

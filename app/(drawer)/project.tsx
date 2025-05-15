@@ -1,25 +1,38 @@
-import { View, TouchableOpacity, FlatList, Alert, ActivityIndicator, Pressable } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react';
-import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons';
+import {
+  View,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+  ActivityIndicator,
+  Pressable,
+} from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { gql, useMutation } from "@apollo/client";
-import { useLazyQuery } from '@apollo/client';
+import { useLazyQuery } from "@apollo/client";
 import { set, useForm } from "react-hook-form";
-import { Colors } from '@/constants/Colors';
+import { Colors } from "@/constants/Colors";
 import { z } from "zod";
-import CustomHeader from '@/components/CustomHeader';
-import { ThemedText } from '@/components/ThemedText';
-import { useTheme } from '@/context/ThemeContext';
-import CustomValidation from '@/components/CustomValidation';
-import { labels } from '@/constants/Labels';
-import { ms, s, ScaledSheet, vs } from 'react-native-size-matters';
-import { ThemedView } from '@/components/ThemedView';
-import CustomSearchBar from '@/components/CustomSearchBar';
-import NoDataFound from '@/components/NoDataFound';
-import Modal from 'react-native-modal';
-import CustomButton from '@/components/CustomButton';
-import { CreateProjectDocument, DeleteProjectDocument, EnableProjectStatusDocument, PaginatedProjectsDocument, UpdateProjectDocument } from '@/graphql/generated';
+import CustomHeader from "@/components/CustomHeader";
+import { ThemedText } from "@/components/ThemedText";
+import { useTheme } from "@/context/ThemeContext";
+import CustomValidation from "@/components/CustomValidation";
+import { labels } from "@/constants/Labels";
+import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
+import { ThemedView } from "@/components/ThemedView";
+import CustomSearchBar from "@/components/CustomSearchBar";
+import NoDataFound from "@/components/NoDataFound";
+import Modal from "react-native-modal";
+import CustomButton from "@/components/CustomButton";
+import {
+  CreateProjectDocument,
+  DeleteProjectDocument,
+  EnableProjectStatusDocument,
+  PaginatedProjectsDocument,
+  UpdateProjectDocument,
+} from "@/graphql/generated";
 import debounce from "lodash.debounce";
-import { useUserContext } from '@/context/RoleContext';
+import { useUserContext } from "@/context/RoleContext";
 
 interface ProjectData {
   id: number;
@@ -31,7 +44,7 @@ const defaultValue = {
   project_name: "",
   description: "",
   id: "",
-}
+};
 
 const pickerData = [
   { label: "Active", value: "active" },
@@ -49,134 +62,170 @@ const Project = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isModalVisible, setModalVisible] = useState(false);
   const [projectId, setProjectId] = useState<string>("");
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [projectList, setProjectList] = useState<ProjectData[]>([]);
   const [currentProject, setCurrentProject] = useState<{
-    project_name: string,
-    description: string,
-    id: string,
+    project_name: string;
+    description: string;
+    id: string;
   }>(defaultValue);
   const { can, hasAny } = useUserContext();
-
   const deletePermission = can("MasterApp:Project:Delete");
   const updatePermission = can("MasterApp:Project:Update");
   const createPermission = can("MasterApp:Project:Create");
   const statusUpdatePermission = can("MasterApp:Project:Action");
 
-  const [getProjects, { data, refetch, loading }] = useLazyQuery<any>(PaginatedProjectsDocument);
+  const [getProjects, { data, refetch, loading }] = useLazyQuery<any>(
+    PaginatedProjectsDocument
+  );
 
   const [updateProject] = useMutation(UpdateProjectDocument, {
     onCompleted: (data) => {
-      refetch();
-      setEditVisible(false);
-      setModalVisible(false);
-      setCurrentProject(defaultValue)
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    }
-  });
-
-  const [createProject,] = useMutation(CreateProjectDocument, {
-    onCompleted: (data) => {
-      refetch();
-      setEditVisible(false);
-      setCurrentProject(defaultValue)
+      reset();
+      fetchProject(true);
       setModalVisible(false);
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
-    }
+    },
   });
 
-  // 
-  const [updateProjectStatus,] = useMutation(EnableProjectStatusDocument, {
+  const [createProject] = useMutation(CreateProjectDocument, {
+    onCompleted: (data) => {
+      reset();
+      fetchProject(true);
+      setModalVisible(false);
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  });
+
+  const [updateProjectStatus] = useMutation(EnableProjectStatusDocument, {
     onCompleted: (data) => {
       refetch();
-      setEditVisible(false);
       setStatusModalVisible(false);
+      fetchProject(true);
     },
     onError: (error) => {
       setStatusModalVisible(false);
       Alert.alert("Error", error.message);
-    }
+    },
   });
 
-  const [deleteProject, deleteOrganizationState] = useMutation(DeleteProjectDocument, {
-    onCompleted: (data) => {
-      refetch();
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
+  const [deleteProject, deleteOrganizationState] = useMutation(
+    DeleteProjectDocument,
+    {
+      onCompleted: (data) => {
+        refetch();
+        fetchProject(true);
+      },
+      onError: (error) => {
+        Alert.alert("Error", error.message);
+      },
     }
-  });
+  );
 
   const onSubmit = (data) => {
     const params = {
       name: data?.project_name,
       organizationId: 1,
-      description: data?.description
-    }
+      description: data?.description,
+    };
 
-    editVisible ?
-      updateProject({
+    editVisible
+      ? updateProject({
         variables: {
           updateProjectInput: {
             id: Number(currentProject?.id),
             ...params,
           },
         },
-      }) :
-      createProject({
-        variables: {
-          createProjectInput: { ...params }
-        }
       })
-  }
-
-  const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm();
-
-  useEffect(() => {
-    if (watch("status")) {
-      updateProjectStatus({
+      : createProject({
         variables: {
-          data: {
-            ids: [Number(projectId)],
-            status: watch("status")?.value
-          }
+          createProjectInput: { ...params },
         },
       });
-    }
-  }, [watch("status")])
+  };
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm();
 
   useEffect(() => {
-    getProjects({
-      variables: {
-        listInputDto: {
-          page: 1,
-          limit: 10,
-        },
-      },
-    });
-  }, [])
+    fetchProject();
+  }, []);
 
   useEffect(() => {
-    setValue('project_name', currentProject?.project_name)
-    setValue('description', currentProject?.description)
-  }, [currentProject])
+    setValue("project_name", currentProject?.project_name);
+    setValue("description", currentProject?.description);
+  }, [currentProject]);
 
   const debouncedSearch = useCallback(
     debounce((text) => {
-      getProjects({
-        variables: {
-          listInputDto: {
-            limit: 10,
-            page: 1,
-            search: text,
-          },
-        },
-      });
+      fetchProject(true, text);
     }, 500),
     [searchQuery]
   );
+
+  const fetchProject = async (isRefreshing = false, searchParams = "") => {
+    const currentPage = isRefreshing ? 1 : page;
+
+    if (isRefreshing) {
+      setRefreshing(true);
+      setPage(1);
+    }
+    const params = {
+      limit: 10,
+      page: currentPage,
+      search: searchParams,
+    };
+
+    try {
+      const res: any = await getProjects({
+        variables: {
+          listInputDto: params,
+        },
+        fetchPolicy: "network-only",
+      });
+
+      if (res?.data?.paginatedProjects) {
+        const data: any = res?.data?.paginatedProjects;
+        const newItems = data?.data || [];
+
+        setProjectList((prev: any) => {
+          return isRefreshing && currentPage == 1
+            ? newItems
+            : [...prev, ...newItems];
+        });
+
+        if (isRefreshing) setRefreshing(false);
+        setPage((prev) => prev + 1);
+        setRefreshing(false);
+        const lastPage = Math.ceil(data?.meta?.totalItems / 10);
+        setHasMore(data?.meta?.currentPage < lastPage);
+      } else {
+        console.log("API call failed or returned no data:", res?.errors);
+        setRefreshing(false);
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Fetch failed:", error);
+      setRefreshing(false);
+      setHasMore(false);
+    }
+  };
+
+  console.log('09', projectList?.length);
+
 
   const renderItem = ({ item, index }: any) => {
     // console.log('9999', item);
@@ -189,79 +238,82 @@ const Project = () => {
         ]}
       >
         <View style={styles.organizationHeader}>
-          <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
+          <ThemedText type="subtitle" style={{ flex: 1 }}>
+            {item?.name}
+          </ThemedText>
           <View style={styles.organizationInfo}>
-            {statusUpdatePermission && <MaterialIcons
-              name="attractions"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setProjectId(item.id)
-                setStatusModalVisible(true);
-              }}
-            />}
-            {updatePermission && <Feather
-              name="edit"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentProject({
-                  id: String(item.id),
-                  project_name: item?.name,
-                  description: item?.description
-                })
-                setModalVisible(true), setEditVisible(true)
-              }}
-            />}
+            {statusUpdatePermission && (
+              <MaterialIcons
+                name="attractions"
+                size={ms(22)}
+                color={Colors[theme].text}
+                onPress={() => {
+                  setProjectId(item.id);
+                  setValue('status', item?.status);
+                  setStatusModalVisible(true);
+                }}
+              />
+            )}
+            {updatePermission && (
+              <Feather
+                name="edit"
+                size={ms(22)}
+                color={Colors[theme].text}
+                onPress={() => {
+                  setCurrentProject({
+                    id: String(item.id),
+                    project_name: item?.name,
+                    description: item?.description,
+                  });
+                  setModalVisible(true), setEditVisible(true);
+                }}
+              />
+            )}
 
-            {deletePermission && <MaterialIcons
-              name="delete-outline"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                Alert.alert(
-                  "Delete",
-                  "Are you sure you want to delete?",
-                  [
+            {deletePermission && (
+              <MaterialIcons
+                name="delete-outline"
+                size={ms(22)}
+                color={Colors[theme].text}
+                onPress={() => {
+                  Alert.alert("Delete", "Are you sure you want to delete?", [
                     {
-                      text: "Yes", onPress: () => {
-                        console.log('908', item?.id);
+                      text: "Yes",
+                      onPress: () => {
+                        console.log("908", item?.id);
                         deleteProject({
                           variables: {
                             ids: [Number(item?.id)],
-                          }
+                          },
                         });
-                      }
+                      },
                     },
                     { text: "No", onPress: () => { } },
-                  ]
-                );
-
-              }}
-            />}
-
-
+                  ]);
+                }}
+              />
+            )}
           </View>
         </View>
         <ThemedText
           style={[
             styles.status,
             {
-              color:
-                item.status == "active" ? Colors?.green : "#6d6d1b",
-              backgroundColor:
-                theme == "dark" ? Colors?.white : "#e6e2e2",
+              color: item.status == "active" ? Colors?.green : "#6d6d1b",
+              backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
             },
           ]}
         >
           {item?.status}
         </ThemedText>
-        {item?.description && <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-          {item?.description}
-        </ThemedText>}
+        {item?.description && (
+          <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+            {item?.description}
+          </ThemedText>
+        )}
       </View>
-    )
-  }
+    );
+  };
 
   return (
     <CustomHeader>
@@ -282,31 +334,59 @@ const Project = () => {
                 }}
               />
             </View>
-            {createPermission && <Pressable
-              style={styles.buttonContainer}
-              onPress={() => { setCurrentProject(defaultValue), setModalVisible(true), showDialogue() }}
-            >
-              {createPermission && <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />}
-            </Pressable>}
+            {createPermission && (
+              <Pressable
+                style={styles.buttonContainer}
+                onPress={() => {
+                  setCurrentProject(defaultValue),
+                    setModalVisible(true),
+                    showDialogue();
+                }}
+              >
+                {createPermission && (
+                  <Feather
+                    name="plus-square"
+                    size={ms(25)}
+                    color={Colors[theme].text}
+                  />
+                )}
+              </Pressable>
+            )}
           </View>
 
           <View style={styles.scrollContainer}>
             <FlatList
-              data={data?.paginatedProjects?.data}
-              keyExtractor={(item: ProjectData) => item.id.toString()}
-              renderItem={renderItem}
+              data={projectList}
+              renderItem={({ item, index }: any) => renderItem({ item, index })}
+              showsVerticalScrollIndicator={false}
+              refreshing={refreshing && !loading}
+              onRefresh={() => {
+                fetchProject(true);
+              }}
+              keyExtractor={(item: any, index: number) => index.toString()}
+              contentContainerStyle={{ paddingBottom: vs(100) }}
               ListEmptyComponent={!loading ? <NoDataFound /> : null}
+              ListFooterComponent={
+                hasMore ? (
+                  <ActivityIndicator size="small" color={Colors.primary} />
+                ) : null
+              }
+              onEndReached={() => {
+                if (hasMore && !loading) {
+                  fetchProject();
+                }
+              }}
+              onEndReachedThreshold={0.5}
             />
           </View>
-
-
         </View>
       </ThemedView>
 
+      {/* create and edit modal */}
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={() => {
-          setCurrentProject(defaultValue)
+          setCurrentProject(defaultValue);
           setEditVisible(false);
           setModalVisible(false);
         }}
@@ -330,18 +410,20 @@ const Project = () => {
                 padding: 10,
               }}
             >
-              <ThemedText type="subtitle">Create Project
-              </ThemedText>
+              <ThemedText type="subtitle">Create Project</ThemedText>
               <Pressable
                 onPress={() => {
                   setModalVisible(false);
                 }}
               >
-                <Entypo name="cross" size={ms(20)} color={Colors[theme].text}
+                <Entypo
+                  name="cross"
+                  size={ms(20)}
+                  color={Colors[theme].text}
                   onPress={() => {
+                    setCurrentProject(defaultValue);
                     setEditVisible(false);
                     setModalVisible(false);
-                    setCurrentProject(defaultValue)
                   }}
                 />
               </Pressable>
@@ -370,7 +452,10 @@ const Project = () => {
             <CustomButton
               title="Submit"
               onPress={handleSubmit(onSubmit)}
-              style={{ backgroundColor: Colors[theme].background, marginTop: 20 }}
+              style={{
+                backgroundColor: Colors[theme].background,
+                marginTop: 20,
+              }}
             />
           </View>
         </ThemedView>
@@ -391,7 +476,6 @@ const Project = () => {
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
-
           }}
         >
           <View
@@ -401,9 +485,7 @@ const Project = () => {
               padding: 10,
             }}
           >
-            <ThemedText type="subtitle">
-              {"Change Status"}
-            </ThemedText>
+            <ThemedText type="subtitle">{"Change Status"}</ThemedText>
             <Pressable
               onPress={() => {
                 setStatusModalVisible(false);
@@ -427,6 +509,16 @@ const Project = () => {
                 value: true,
                 message: "Select status",
               },
+            }}
+            onChangeText={() => {
+              updateProjectStatus({
+                variables: {
+                  data: {
+                    ids: [Number(projectId)],
+                    status: watch("status")?.value,
+                  },
+                },
+              });
             }}
           />
         </View>
@@ -537,7 +629,7 @@ const styles = ScaledSheet.create({
     fontSize: "14@ms",
     fontWeight: "bold",
     justifyContent: "center",
-    alignSelf: "center"
+    alignSelf: "center",
   },
   buttonContainerClose: {
     borderRadius: 10,
@@ -562,3 +654,5 @@ const styles = ScaledSheet.create({
     fontSize: "12@ms",
   },
 });
+
+

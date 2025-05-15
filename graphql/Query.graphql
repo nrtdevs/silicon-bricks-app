@@ -712,7 +712,6 @@ query PaginatedMeetingVenue($listInputDto: ListInputDTO!) {
   }
 }
 
-
 query PaginatedMeetingType($listInputDto: ListInputDTO!) {
   paginatedMeetingType(ListInputDTO: $listInputDto) {
     data {
@@ -828,6 +827,8 @@ query GetMeetingDashboard {
     ongoingTasks
     completedTasks
   }
+}
+
 query PaginatedVehicles($listInputDto: ListInputDTO!) {
   paginatedVehicles(ListInputDTO: $listInputDto) {
     meta {
@@ -851,11 +852,30 @@ query PaginatedVehicles($listInputDto: ListInputDTO!) {
       status
       latitude
       longitude
-      createdById 
-      organizationId 
+      createdById
+      organizationId
       createdAt
       updatedAt
       deletedAt
+    }
+  }
+}
+
+query DropdownRoles($listInputDto: ListInputDTO!) {
+  dropdownRoles(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      description
+      roleType
+      status
+      permissionCount
     }
   }
 }

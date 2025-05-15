@@ -135,7 +135,7 @@ const SubscriptionScreen = () => {
     subscriptionsData({
       variables: {
         listInputDto: {
-          limit: 10,
+          limit: 12,
           page: 1,
         },
       },

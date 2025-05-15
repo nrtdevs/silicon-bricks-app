@@ -1,26 +1,18 @@
 import {
+    ActivityIndicator,
     Alert,
     FlatList,
     Pressable,
-    StyleSheet,
-    Text,
     View,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import {
-    CreateOrganizationDocument,
+    ChangePackageStatusDocument,
     CreatePackageDocument,
-    DeleteOrganizationDocument,
     DeletePackageDocument,
-    DropdownOffersDocument,
-    EnableOrganizationStatusDocument,
     PaginatedModulesDocument,
-    PaginatedOffersDocument,
-    PaginatedOrganizationDocument,
     PaginatedPackagesDocument,
-    PaginatedUsersDocument,
-    UpdateOrganizationDocument,
     UpdatePackageDocument,
 } from "@/graphql/generated";
 import CustomHeader from "@/components/CustomHeader";
@@ -87,9 +79,11 @@ const PackageScreen = () => {
 
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [selectedModules, setSelectedModules] = useState<any>(null);
-
+    const [packageList, setPackageList] = useState<any>([]);
     const { can, hasAny } = useUserContext();
-
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [page, setPage] = useState<number>(1);
     const deletePermission = can("MasterApp:Package:Delete");
     const updatePermission = can("MasterApp:Package:Update");
     const createPermission = can("MasterApp:Package:Create");
@@ -124,9 +118,22 @@ const PackageScreen = () => {
         {
             onCompleted: (data) => {
                 reset();
-                refetch();
-                setEditModal(false);
+                fetchPackage(true);
                 setModalVisible(false);
+            },
+            onError: (error) => {
+                Alert.alert("Error", error.message);
+            },
+        }
+    );
+
+    const [packageState, packageStateState] = useMutation(
+        ChangePackageStatusDocument,
+        {
+            onCompleted: (data) => {
+                reset();
+                fetchPackage(true);
+                setStatusModalVisible(false);
             },
             onError: (error) => {
                 Alert.alert("Error", error.message);
@@ -139,8 +146,7 @@ const PackageScreen = () => {
         {
             onCompleted: (data) => {
                 reset();
-                refetch();
-                setEditModal(false);
+                fetchPackage(true);
                 setModalVisible(false);
             },
             onError: (error) => {
@@ -154,8 +160,7 @@ const PackageScreen = () => {
         {
             onCompleted: (data) => {
                 reset();
-                refetch();
-                setEditModal(false);
+                fetchPackage(true);
                 setModalVisible(false);
             },
             onError: (error) => {
@@ -203,22 +208,7 @@ const PackageScreen = () => {
     }, [currentPackage]);
 
     useEffect(() => {
-        packagesData({
-            variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1,
-                },
-            },
-        });
-        moduleDataApi({
-            variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1,
-                },
-            },
-        });
+        fetchPackage()
     }, []);
 
     // useEffect(() => {
@@ -305,6 +295,58 @@ const PackageScreen = () => {
         getDateTimePickerProps(false)
     );
 
+    const fetchPackage = async (isRefreshing = false, searchParams = "") => {
+        const currentPage = isRefreshing ? 1 : page;
+
+        if (isRefreshing) {
+            setRefreshing(true);
+            setPage(1);
+        }
+        const params = {
+            limit: 8,
+            page: currentPage,
+            search: searchParams,
+        };
+
+        try {
+            const res: any = await packagesData({
+                variables: {
+                    listInputDto: params,
+                },
+                fetchPolicy: "network-only",
+            });
+
+            if (res?.data?.paginatedPackages) {
+                const data: any = res?.data?.paginatedPackages;
+                const newItems = data?.data || [];
+                console.log('000012', data?.meta?.totalItems);
+
+                setPackageList((prev: any) => {
+                    return isRefreshing && currentPage == 1
+                        ? newItems
+                        : [...prev, ...newItems];
+                });
+
+                if (isRefreshing) setRefreshing(false);
+                setPage((prev) => prev + 1);
+                setRefreshing(false);
+                const lastPage = Math.ceil(data?.meta?.totalItems / 8);
+                setHasMore(data?.meta?.currentPage < lastPage);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
+    };
+
+    console.log("packageList", packageList?.length);
+
+
     const renderData = ({ item, index }: any) => {
         let ids = item?.modules?.map((item: any) => item.id);
         return (
@@ -327,6 +369,7 @@ const PackageScreen = () => {
                                 color={Colors[theme].text}
                                 onPress={() => {
                                     setStatusModalVisible(true);
+                                    setValue('status', item?.status);
                                 }}
                             />
                         )}
@@ -459,17 +502,31 @@ const PackageScreen = () => {
 
                 <View style={styles.organizationParentContainer}>
                     <FlatList
-                        data={data?.paginatedPackages?.data}
+                        data={packageList}
                         renderItem={renderData}
                         showsVerticalScrollIndicator={false}
-                        // refreshControl={
-                        //     <RefreshControl
-                        //         refreshing={refreshing}
-                        //         onRefresh={() => fetchOrganization(true)}
-                        //     />
-                        // }
+                        refreshing={refreshing && !loading}
+                        onRefresh={() => {
+                            fetchPackage(true);
+                        }}
+                        keyExtractor={(item: any, index: number) => index.toString()}
                         contentContainerStyle={{ paddingBottom: vs(40) }}
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                        ListFooterComponent={
+                            hasMore ? (
+                                <ActivityIndicator size="small" color={Colors.primary} />
+                            ) : null
+                        }
+                        onEndReached={() => {
+                            if (hasMore && !loading) {
+                                fetchPackage();
+                            }
+                        }}
+                        onEndReachedThreshold={0.5}
+                    // initialNumToRender={8}
+                    // maxToRenderPerBatch={5}
+                    // windowSize={7}
+                    // removeClippedSubviews={true}
                     />
                 </View>
             </ThemedView>
@@ -509,7 +566,7 @@ const PackageScreen = () => {
                             onPress={() => {
                                 reset();
                                 setEditModal(false);
-                                // setCurrentPackage(defaultValue);
+                                setCurrentPackage(defaultValue);
                                 setModalVisible(false);
                             }}
                         >
@@ -711,6 +768,17 @@ const PackageScreen = () => {
                                 message: "Select status",
                             },
                         }}
+                        // packageState
+                        onChangeText={() => {
+                            packageState({
+                              variables: {
+                                data: {
+                                  ids: [Number(currentOrganization?.id)],
+                                  status: watch("status")?.value,
+                                },
+                              },
+                            });
+                          }}
                     />
                 </View>
             </Modal>
@@ -792,7 +860,7 @@ const PackageScreen = () => {
                                     return <ThemedText type="default">
                                         {item}
                                     </ThemedText>
-                                })} 
+                                })}
                             </View>
                         </View>
                         {/* <View>
@@ -834,6 +902,7 @@ const PackageScreen = () => {
 
             {/* date time picker modal */}
             <DateTimePickerModal
+                mode="date"
                 dateTimePickerProps={dateTimePickerProps}
                 setDateTimePickerProps={setDateTimePickerProps}
                 onDateTimeSelection={(event: any, selectedDate: any) => {
