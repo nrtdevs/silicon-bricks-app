@@ -51,7 +51,7 @@ const dashboard = () => {
                             styles.cardStyle,
                             // { backgroundColor: Colors[theme]?.cartBg },
                         ]}
-                        onPress={() => router.replace("/(drawer)/(tabs)")}
+                        onPress={() => router.navigate("/(drawer)/(tabs)")}
                     >
                         <View style={{ flex: 1 }}>
                             <View
@@ -86,7 +86,7 @@ const dashboard = () => {
                             styles.cardStyle,
                             // { backgroundColor: Colors[theme]?.cartBg },
                         ]}
-                        onPress={() => router.replace("/(drawer)/(tabs)")}
+                        onPress={() => router.navigate("/(meeting)/(tabs)")}
                     >
                         <View style={{ flex: 1 }}>
                             <View
@@ -121,7 +121,7 @@ const dashboard = () => {
                             styles.cardStyle,
                             // { backgroundColor: Colors[theme]?.cartBg },
                         ]}
-                        onPress={() => router.replace("/(drawer)/(tabs)")}
+                        onPress={() => router.navigate("/vehicle/(tabs)/home")}
                     >
                         <View style={{ flex: 1 }}>
                             <View

@@ -5,7 +5,7 @@ import { Stack } from 'expo-router'
 const _layout = () => {
   return (
   <Stack
-                screenOptions={{headerShown:false }} 
+                screenOptions={{headerShown:true }} 
                 initialRouteName='(vehicleList)'
               >
                 <Stack.Screen name="(vehicleList)" /> 
