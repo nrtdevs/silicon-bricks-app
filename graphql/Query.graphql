@@ -723,3 +723,36 @@ query PaginatedMeetingVenue($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+
+query PaginatedVehicles($listInputDto: ListInputDTO!) {
+  paginatedVehicles(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      make
+      model
+      year
+      color
+      chassisNumber
+      numberPlate
+      maintenanceHistory
+      avatar
+      insurance
+      insuranceValidTill
+      status
+      latitude
+      longitude
+      createdById 
+      organizationId 
+      createdAt
+      updatedAt
+      deletedAt
+    }
+  }
+}

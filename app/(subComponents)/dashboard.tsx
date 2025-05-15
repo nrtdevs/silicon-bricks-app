@@ -124,7 +124,7 @@ const dashboard = () => {
                                 styles.cardStyle,
                                 // { backgroundColor: Colors[theme]?.cartBg },
                             ]}
-                            onPress={() => router.replace("/(drawer)/(tabs)")}
+                            onPress={() => router.replace("/vehicle/(tabs)/home")}
                         >
                             <View style={{ flex: 1 }}>
                                 <View
