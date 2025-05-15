@@ -60,24 +60,24 @@ const MyNotes = () => {
     useEffect(() => {
         setValue("notesField", currentMeetingNote?.notesField)
     }, [currentMeetingNote])
-    const [createNotesMeeting, createOrganizationState] = useMutation(CreateNotePadDocument, {
+    const [createNotesMeeting, createNotesState] = useMutation(CreateNotePadDocument, {
         onCompleted: (data) => {
             reset()
             refetch();
             setAddEditModalVisible(false);
-            Alert.alert("success", "Notes Create successfully!");
+            Alert.alert("Success", "Notes Create successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
         }
     });
-    const [updateNotePad, updateMeetingVenueState] = useMutation(UpdateNotePadDocument, {
+    const [updateNotePad, updateMotesState] = useMutation(UpdateNotePadDocument, {
         onCompleted: (data) => {
             reset()
             refetch();
             setAddEditManage(false);
             setAddEditModalVisible(false);
-            Alert.alert("success", "Note updated successfully!");
+            Alert.alert("Success", "Note updated successfully!");
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -200,7 +200,7 @@ const MyNotes = () => {
                     ListEmptyComponent={!loading ? <NoDataFound /> : null}
                 />
             </ThemedView>
-            {/* add and Edit modal */}
+            {/* Create and Edit modal */}
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -255,6 +255,7 @@ const MyNotes = () => {
                             />
                             <CustomButton
                                 title="Submit"
+                                isLoading={createNotesState.loading || updateMotesState.loading}
                                 onPress={() => {
                                     handleSubmit(onSubmit)();
                                 }}

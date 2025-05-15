@@ -30,7 +30,8 @@ const Index = () => {
   if (loading) return null;
 
   if (!token) return <Redirect href="/(auth)/login" />; 
-  return <Redirect href="/(subComponents)/dashboard" />;
+  return <Redirect href="/(auth)/login" />;
+  //  return <Redirect href="/(subComponents)/dashboard" />;
   // return <Redirect href="/(drawer)/module" />;
 };
 

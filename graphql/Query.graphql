@@ -675,6 +675,7 @@ query PaginatedMeeting($listInputDto: ListInputDTO!) {
       createdByUserId
       meetingVenueId
       meetingTypeId
+      projectName
       parentMeetingId
       title
       startTime
@@ -684,10 +685,8 @@ query PaginatedMeeting($listInputDto: ListInputDTO!) {
       meetingAgenda
       meetingUrl
       attendees
+      attendeesNames
       uploadDoc
-      createdAt
-      updatedAt
-      deletedAt
     }
   }
 }
@@ -711,7 +710,6 @@ query PaginatedMeetingVenue($listInputDto: ListInputDTO!) {
     }
   }
 }
-
 
 query PaginatedMeetingType($listInputDto: ListInputDTO!) {
   paginatedMeetingType(ListInputDTO: $listInputDto) {
@@ -792,6 +790,7 @@ query PaginatedNotePad($listInputDto: ListInputDTO!) {
     }
   }
 }
+
 query GetUpcomingMeetings($listInputDto: ListInputDTO!) {
   getUpcomingMeetings(ListInputDTO: $listInputDto) {
     data {
@@ -828,34 +827,5 @@ query GetMeetingDashboard {
     ongoingTasks
     completedTasks
   }
-query PaginatedVehicles($listInputDto: ListInputDTO!) {
-  paginatedVehicles(ListInputDTO: $listInputDto) {
-    meta {
-      totalItems
-      totalPages
-      currentPage
-      limit
-    }
-    data {
-      id
-      make
-      model
-      year
-      color
-      chassisNumber
-      numberPlate
-      maintenanceHistory
-      avatar
-      insurance
-      insuranceValidTill
-      status
-      latitude
-      longitude
-      createdById 
-      organizationId 
-      createdAt
-      updatedAt
-      deletedAt
-    }
-  }
 }
+

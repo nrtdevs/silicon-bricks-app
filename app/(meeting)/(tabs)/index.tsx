@@ -1,13 +1,12 @@
 import {
   Pressable,
-  Text,
   View
 } from "react-native";
 import React from "react";
 import { ThemedView } from "@/components/ThemedView";
 import { ScaledSheet } from 'react-native-size-matters';
 import CustomHeader from "@/components/CustomHeader";
-import { Entypo, MaterialIcons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { DrawerActions } from "@react-navigation/native";
