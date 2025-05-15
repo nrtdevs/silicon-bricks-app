@@ -121,7 +121,7 @@ const dashboard = () => {
                             styles.cardStyle,
                             // { backgroundColor: Colors[theme]?.cartBg },
                         ]}
-                        onPress={() => router.navigate("/vehicle/(tabs)/home")}
+                        onPress={() => router.navigate("/(vehicle)/(tabs)/home")}
                     >
                         <View style={{ flex: 1 }}>
                             <View

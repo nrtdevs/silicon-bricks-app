@@ -828,6 +828,7 @@ query GetMeetingDashboard {
     ongoingTasks
     completedTasks
   }
+}
 query PaginatedVehicles($listInputDto: ListInputDTO!) {
   paginatedVehicles(ListInputDTO: $listInputDto) {
     meta {

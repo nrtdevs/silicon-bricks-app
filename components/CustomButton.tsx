@@ -116,17 +116,17 @@ const styles = ScaledSheet.create({
   gradient: {
     paddingVertical: '12@vs',
     paddingHorizontal: '32@s',
-    borderRadius: '25@ms',
+    borderRadius: '16@ms',
     alignItems: 'center',
-    justifyContent: 'center'
-    // elevation: 5,
-    // shadowColor: "#000",
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.25,
-    // shadowRadius: 3.84,
+    justifyContent: 'center',
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   loaderStyle: {
     position: 'relative',

@@ -179,20 +179,7 @@ mutation ChangeRoleStatus($data: RoleStatusDto!) {
       }
     }
   }
-}
-
-mutation UpdateProfile($data: UpdateUserDto!) {
-  updateProfile(data: $data) {
-    id
-    name
-    username
-    mobileNo
-    email
-    status
-    avatar
-    parentId
-  }
-}
+} 
 
 #create permission
 mutation CreatePermission($data: CreatePermissionDto!) {
@@ -766,8 +753,6 @@ mutation VerifyPayment($input: VerifyPaymentInput!) {
     paymentId
   }
 }
-# metting app mutation
-# metting app mutation ------------
 
 
 mutation DeleteMeting($ids: [Int!]!) {
@@ -894,9 +879,7 @@ mutation CreateMeetingTask($input: CreateMeetingTaskDto!) {
   }
 }
 
-mutation DeleteMetingTask($ids: [Int!]!) {
-  deleteMetingTask(ids: $ids)
-}
+ 
 
 mutation CreateFollowUp($data: CreateFollowUpDto!) {
   createFollowUp(data: $data) {
@@ -923,3 +906,19 @@ mutation UpdateNotePad($updateNotesInput: UpdateNotePadDto!) {
   }
 }
 
+
+ mutation CreateVehicle($createVehicleInput: CreateVehicleDto!) {
+  createVehicle(createVehicleInput: $createVehicleInput) {
+    id 
+  }
+}
+
+mutation UpdateVehicle($updateVehicleInput: UpdateVehicleDto!) {
+  updateVehicle(updateVehicleInput: $updateVehicleInput) {
+    id
+  }
+}
+
+mutation DeleteVehicle($deleteVehicleId: Int!) {
+  deleteVehicle(id: $deleteVehicleId)
+}

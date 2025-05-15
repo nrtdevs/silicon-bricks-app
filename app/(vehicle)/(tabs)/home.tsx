@@ -7,7 +7,7 @@ import { router } from "expo-router";
 const home = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <SmallCart icon={"car"} label={"Vehicle"} onPress={() => {router.navigate('/vehicle/(vehicleList)')}}/>
+      <SmallCart icon={"car"} label={"Vehicle"} onPress={() => {router.navigate('/vehicleList')}}/>
       <SmallCart icon={"hammer"} label={"Vehicle Breakdown"} />
       <SmallCart icon={"wallet-outline"} label={"Vehicle Expense"} />
       <SmallCart icon={"timelapse"} label={"Activity Logs"} />
