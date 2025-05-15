@@ -7,7 +7,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateNotePadDocument, CreateNotesDocument, DeleteNotePadDocument, DeleteNotesDocument, PaginatedNotePadDocument, PaginatedNotesDocument, UpdateNotePadDocument } from "@/graphql/generated";
+import { CreateNotePadDocument,DeleteNotePadDocument,PaginatedNotePadDocument,UpdateNotePadDocument} from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";

@@ -47,29 +47,29 @@ const TaskScreen = () => {
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{ name: string }>({
         defaultValues: {},
     });
-     const [createMeetingFollowUp, createOrganizationState] = useMutation(CreateFollowUpDocument, {
-            onCompleted: (data) => {
-                reset()
-                refetch();
-                setAddEditModalVisible(false);
-                Alert.alert("success", "Follow-Up successfully!");
-            },
-            onError: (error) => {
-                Alert.alert("Error", error.message);
-            }
-        });
+    const [createMeetingFollowUp, createOrganizationState] = useMutation(CreateFollowUpDocument, {
+        onCompleted: (data) => {
+            reset()
+            refetch();
+            setAddEditModalVisible(false);
+            Alert.alert("success", "Follow-Up successfully!");
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
     const onSubmit = (data: any) => {
         let param = {
             ...data
         }
         console.log(param);
         createMeetingFollowUp({
-                variables: {
-                    data: {
-                        ...data
-                    },
+            variables: {
+                data: {
+                    ...data
                 },
-            });
+            },
+        });
 
     };
 
@@ -88,7 +88,7 @@ const TaskScreen = () => {
                     </View>
                     <Pressable
                         onPress={() => {
-                            router.push("/(drawer)/addTask")
+                            router.push("/(meeting)/addTask")
                             // setAddEditModalVisible(true)
                             //setAddEditManage(false)
                         }}>
@@ -111,7 +111,12 @@ const TaskScreen = () => {
                                                 name="edit"
                                                 size={ms(20)}
                                                 color={Colors[theme].text}
-                                                onPress={() => { }}
+                                               onPress={() => {
+                                                    router.push({
+                                                        pathname: "/(meeting)/addTask",
+                                                        params: { task: `${item.task}`,comment : `${item.comment}` },
+                                                    });
+                                                }}
                                             />
                                             <View style={{ width: 5 }}></View>
 

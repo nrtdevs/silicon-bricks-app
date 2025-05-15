@@ -7,10 +7,12 @@ import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateMeetingTaskDocument, PaginatedMeetingDocument, PaginatedNotesDocument, PaginatedProjectsDocument, PaginatedUsersDocument } from "@/graphql/generated";
+import { formatTimeForAPI } from "@/utils/formatDateTime";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useMutation, useQuery } from "@apollo/client";
 import { Fontisto } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, ScrollView, View } from "react-native";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
@@ -24,11 +26,17 @@ const weightData = [
     { label: "Automated", value: "automated" },
     { label: "Manual", value: "manual" },
 ];
+const defaultValue = {
+    task: '',
+    comment : ""
+}
+
 const AddTask = () => {
+    const { task,comment } = useLocalSearchParams();
     const { theme } = useTheme();
     /// create and edit user state
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{
-        task: string, priority: string, comment: string, start_date: string, dueDate: string, completedDate: string
+        task: string, priority: string, comment: string, dueDate: string, openedDate: string
     }>({ defaultValues: {} });
     /// fetch user data api 
     const { data: attendeesData, loading: attendeesLoading, error: attendeesError } = useQuery(PaginatedUsersDocument, {
@@ -94,9 +102,7 @@ const AddTask = () => {
             value: item.id,
         }));
     }, [notesData])
-    const getLocalizedDate = (date: Date) => {
-        return new Date(date).toLocaleDateString();
-    };
+
     const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
         getDateTimePickerProps(false)
     );
@@ -108,8 +114,6 @@ const AddTask = () => {
     const [createMeetingTask, createMeetingTaskState] = useMutation(CreateMeetingTaskDocument, {
         onCompleted: (data) => {
             reset()
-            // refetch();
-            // setAddEditModalVisible(false);
             Alert.alert("success", "Task create successfully!");
         },
         onError: (error) => {
@@ -117,26 +121,23 @@ const AddTask = () => {
         }
     });
     const [activeDateField, setActiveDateField] = useState<string | null>(null);
-    const onSubmit = (data: any) => { 
+    const onSubmit = (data: any) => {
         let param = {
-            "assigneeId": 1,
+            "assigneeId": Number(data.owner?.value),
             "comment": data.comment,
             "completePercent": 10,
-            "completedDate": data.completedDate,
             "dueDate": data.dueDate,
             // "meetingId": Number(data.meeting?.value),
             "meetingId": null,
             "notesId": null,
-            "openedDate": "",
-            "ownerId": Number(data.owner?.value),
+            "openedDate": data.openedDate,
             "parentTaskId": null,
             "priority": data.priority?.value,
             "projectId": Number(data.project?.value),
             "task": data.task,
             "weightType": data.weight.value,
         }
-        console.log("param", param);
-        
+
         // addEditManage ?
         //     updateMeetingType({
         //         variables: {
@@ -155,11 +156,20 @@ const AddTask = () => {
             },
         });
     };
+
+    const [currentMeeting, setCurrentMeeting] = useState<{
+        task: string;
+        comment : string;
+    }>(defaultValue);
+    useEffect(() => {
+        setValue('task', task as string);
+        setValue('comment', comment as string);
+    }, [currentMeeting])
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
-                <ThemedText>Add Task</ThemedText>
-                <ScrollView style={{ paddingHorizontal: 10 }}>
+                <ThemedText style={{ fontSize: 20, fontWeight: "600", margin: 5 }}>Add Task</ThemedText>
+                <ScrollView style={{ paddingHorizontal: 10, backgroundColor: '#959b9e' }}>
                     <CustomValidation
                         type="input"
                         control={control}
@@ -194,13 +204,13 @@ const AddTask = () => {
                         control={control}
                         labelStyle={styles.label}
                         name="owner"
-                        label='Owner'
-                        placeholder={attendeesLoading ? "Loading..." : "Select owner"}
+                        label='Assigned To'
+                        placeholder={attendeesLoading ? "Loading..." : "Select Assigned To"}
                         inputStyle={{ height: vs(50) }}
                         rules={{
                             required: {
                                 value: true,
-                                message: "Select owner",
+                                message: "Select Assigned To",
                             },
                         }}
                     />
@@ -276,7 +286,7 @@ const AddTask = () => {
                         type="input"
                         control={control}
                         placeholder={"Start Date"}
-                        name="completedDate"
+                        name="openedDate"
                         editable={true}
                         label='Start Date'
                         rightIcon={
@@ -328,7 +338,6 @@ const AddTask = () => {
                     </View>
                     <CustomButton
                         title="Submit"
-                        //isLoading={createRequestState?.loading}
                         onPress={handleSubmit(onSubmit)}
                         isGradient
                     />
@@ -339,12 +348,12 @@ const AddTask = () => {
                 dateTimePickerProps={dateTimePickerProps}
                 setDateTimePickerProps={setDateTimePickerProps}
                 onDateTimeSelection={(event: any, selectedDate: any) => {
-                    if (event.type !== "dismissed") {
-                        const timeOrDate = getLocalizedDate(selectedDate);
-                        if (activeDateField) {
-                            setValue("completedDate", timeOrDate);
-                            setValue("dueDate", timeOrDate);
-                        }
+                    console.log("selectedDate", selectedDate)
+                    if (event.type != "dismissed") {
+                        setValue(
+                            dateModal.start ? "openedDate" : "dueDate",
+                            formatTimeForAPI(selectedDate, "yyyy-mm-dd") || "",
+                        );
                     }
                     setActiveDateField(null);
                     setDateTimePickerProps(getDateTimePickerProps(false));
@@ -357,6 +366,7 @@ const styles = ScaledSheet.create({
     contentContainer: {
         flex: 1,
         padding: "12@ms",
+
     },
     label: {
         fontSize: "16@ms",

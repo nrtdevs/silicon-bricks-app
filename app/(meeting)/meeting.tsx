@@ -19,6 +19,7 @@ import { View, Pressable, Alert, Modal, FlatList, ScrollView, Image, Button } fr
 import { ms, s, ScaledSheet, vs } from 'react-native-size-matters';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from "expo-file-system";
+import { Env } from '@/constants/ApiEndpoints';
 
 const defaultValue = {
     endTime: '',
@@ -229,6 +230,7 @@ const MeetingScreen = () => {
             "projectId": Number(data.projectId.value),
             "uploadDoc": image
         }
+        console.log(data);
         addEditManage ?
             updateMeeting({
                 variables: {
@@ -245,7 +247,8 @@ const MeetingScreen = () => {
                         "meetingTypeId": Number(data.meetingTypeId.value),
                         "meetingVenueId": Number(data.meetingVenueId.value),
                         "projectId": Number(data.projectId.value),
-                        "uploadDoc": image
+                        "uploadDoc": image,
+                        "projectName" : data.projectName
                     }
                 },
             }) :
@@ -254,6 +257,7 @@ const MeetingScreen = () => {
                     data: param
                 },
             });
+            
     };
     const getLocalizedTime = (date: Date) => {
         return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -276,7 +280,7 @@ const MeetingScreen = () => {
                 return;
             }
 
-            const fileExtension = uri.split(".").pop() || "jpg"; // Default to jpg if no extension
+            const fileExtension = uri.split(".").pop() || "jpg"; 
             const mimeType = `image/${fileExtension}`;
 
             const formData = new FormData();
@@ -293,7 +297,7 @@ const MeetingScreen = () => {
             //   type: mimeType,
             // } as any); 
 
-            const uploadResponse = await fetch(`http://192.168.1.35:5001/api/files/upload`, {
+            const uploadResponse = await fetch(`http://192.168.1.18:5001/api/files/upload`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -729,7 +733,7 @@ const MeetingScreen = () => {
                                     marginTop: vs(20),
                                 }}
                             />
-                            {image && <Image source={{ uri: `http://192.168.1.35:5001${image}`}} style={{ width: "100%", height: 200, marginTop: 20,justifyContent : "center" ,alignSelf : "center"}} />}
+                            {image && <Image source={{ uri: `http://192.168.1.18:5001${image}`}} style={{ width: "100%", height: 200, marginTop: 20,justifyContent : "center" ,alignSelf : "center"}} />}
                             <CustomButton
                                 title="Submit"
                                 onPress={() => {

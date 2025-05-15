@@ -87,4 +87,5 @@ export const labels = {
   upcomingTasks:"Upcoming Tasks",
   meetingRoom:"Meeting Room",
   name:"Name",
+  title : "Title",
 };
