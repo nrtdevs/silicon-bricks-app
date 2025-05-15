@@ -315,7 +315,7 @@ const CustomValidation = (props: TextInputProps) => {
                     props.onFocus?.()
                     setIsFocused(true)
                   }}
-                  autoCapitalize={props.autoCapitalize}
+                  autoCapitalize={props.autoCapitalize||"none"}
                   autoCorrect={props.autoCorrect}
                   readOnly={props.readOnly}
                   onBlur={() => {

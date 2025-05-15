@@ -922,3 +922,4 @@ mutation UpdateNotePad($updateNotesInput: UpdateNotePadDto!) {
     status
   }
 }
+
