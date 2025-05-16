@@ -78,7 +78,8 @@ const CustomButton = (props: CustomButtonProps) => {
         style={[
           styles.gradient,
           {
-            backgroundColor: props.disabled ? Colors.gray : Colors[theme].cart
+            backgroundColor: props.disabled ? Colors.gray : Colors[theme].cart,
+            borderColor: props.disabled ? Colors.gray : Colors[theme].border
           },
           props.style
         ]}
@@ -127,6 +128,7 @@ const styles = ScaledSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    borderWidth: 1
   },
   loaderStyle: {
     position: 'relative',

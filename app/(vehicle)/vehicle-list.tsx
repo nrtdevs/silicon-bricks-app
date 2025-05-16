@@ -34,13 +34,14 @@ import debounce from "lodash.debounce";
 import { Colors } from "@/constants/Colors";
 import { Env } from "@/constants/ApiEndpoints";
 import { ThemedView } from "@/components/ThemedView";
+import { useTheme } from "@/context/ThemeContext";
 
 const VehicleList = () => {
   const [getVehicleListApi, { data, loading, error, refetch }] =
     useLazyQuery<any>(PaginatedVehiclesDocument);
 
   const navigation = useNavigation();
-
+  const {theme} = useTheme()
   const statusArr = [
     {
       label: "Active",
@@ -78,7 +79,7 @@ const VehicleList = () => {
     DeleteVehicleDocument,
     {
       onCompleted: (data) => {
-        fetchVehicleList();
+        fetchVehicleList(true);
       },
       onError: (error) => {
         console.log(error);
@@ -92,7 +93,7 @@ const VehicleList = () => {
     {
       onCompleted: (data) => {
         setIsModalVisible(false);
-        fetchVehicleList();
+        fetchVehicleList(true);
       },
       onError: (error) => {
         console.log(error);
@@ -160,7 +161,7 @@ const VehicleList = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   useFocusEffect(
     useCallback(() => {
-      fetchVehicleList();
+      fetchVehicleList(true);
       navigation.setOptions({
         headerRight: () => (
           <Pressable
@@ -168,7 +169,7 @@ const VehicleList = () => {
               setIsSearch((prev) => !prev);
             }}
           >
-            <Ionicons name="search" size={24} color="black" />
+            <Ionicons name="search" size={ms(24)} color={Colors[theme].text} />
           </Pressable>
         ),
       });
@@ -247,8 +248,7 @@ const VehicleList = () => {
         renderItem={({ item }: any) => renderItems(item)}
         contentContainerStyle={{ paddingVertical: ms(10) }}
         refreshing={refreshing && !loading}
-        onRefresh={() => {
-          // setRefreshing(true);
+        onRefresh={() => { 
           fetchVehicleList(true);
         }}
         ListFooterComponent={

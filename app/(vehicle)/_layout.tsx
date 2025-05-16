@@ -11,10 +11,11 @@ const VehicleLayout = () => {
   return (
     <Stack screenOptions={{
       statusBarStyle: theme == 'dark' ? 'light' : 'dark',
-      statusBarBackgroundColor: Colors[theme].background,
-      contentStyle: { },
+      statusBarBackgroundColor: Colors[theme].background, 
       headerStyle: { backgroundColor: Colors[theme].background,},
-      headerTitleStyle: { color: Colors[theme].text },  
+      headerTitleStyle: { color: Colors[theme].text }, 
+      
+    headerTintColor: Colors[theme].text,  
 
     }}>
       <Stack.Screen
