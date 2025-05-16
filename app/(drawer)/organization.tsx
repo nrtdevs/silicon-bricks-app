@@ -278,15 +278,16 @@ const OrganizationScreen = () => {
       </View>
     );
   };
-
+  // console.log('page',data?.paginatedOrganization?.meta?.totalItems);
 
   const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
-    const currentPage = isRefreshing ? 1 : page;
+    let currentPage = isRefreshing ? 1 : page;
 
     if (isRefreshing) {
-      setRefreshing(true);
-      setPage(1);
+      setRefreshing(true)
+      setPage(1)
     }
+
     const params = {
       limit: 10,
       page: currentPage,
@@ -310,12 +311,10 @@ const OrganizationScreen = () => {
             ? newItems
             : [...prev, ...newItems];
         });
-
-        if (isRefreshing) setRefreshing(false);
-        setPage((prev) => prev + 1);
-        setRefreshing(false);
         const lastPage = Math.ceil(data?.meta?.totalItems / 10);
-        setHasMore(data?.meta?.currentPage < lastPage);
+        (currentPage < lastPage) && setPage(currentPage + 1);
+        setHasMore(currentPage < lastPage);
+        setRefreshing(false);
       } else {
         console.log("API call failed or returned no data:", res?.errors);
         setRefreshing(false);
@@ -328,25 +327,22 @@ const OrganizationScreen = () => {
     }
   };
 
+
   const debouncedSearch = useCallback(
     debounce((text) => {
       fetchOrganization(true, text);
     }, 500),
     [searchQuery]
   );
-  console.log("organizationList", organizationList?.length);
-
-
 
   if (
-    (loading ||
+    ((loading && page == 1 && !refreshing) ||
       deleteOrganizationState.loading ||
-      updateOrganizationStatusState?.loading) &&
-    page == 1 &&
-    !refreshing
+      updateOrganizationStatusState?.loading)
   ) {
     return <Loader />;
   }
+
 
   return (
     <CustomHeader>
@@ -542,12 +538,13 @@ const OrganizationScreen = () => {
             inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
             containerStyle={{ marginTop: 0, paddingTop: 0 }}
             onChangeText={() => {
-              updateOrganizationStatus({
+              const params = {
+                ids: [Number(currentOrganization?.id)],
+                status: watch("status")?.value,
+              };
+              watch("status")?.value && updateOrganizationStatus({
                 variables: {
-                  data: {
-                    ids: [Number(currentOrganization?.id)],
-                    status: watch("status")?.value,
-                  },
+                  data: params,
                 },
               });
             }}
@@ -560,6 +557,7 @@ const OrganizationScreen = () => {
           />
         </View>
       </Modal>
+
     </CustomHeader>
   );
 };

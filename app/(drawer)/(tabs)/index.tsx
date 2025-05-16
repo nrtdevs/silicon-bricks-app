@@ -14,25 +14,33 @@ import { ScaledSheet } from 'react-native-size-matters';
 import CustomHeader from "@/components/CustomHeader";
 import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql, useLazyQuery } from "@apollo/client";
 import { DashboardCountDocument } from "@/graphql/generated";
 import * as SecureStore from "expo-secure-store";
 
 const index = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const { loading, error, data } = useQuery(DashboardCountDocument, {
-    variables: { filters: {} },
-  });
+  const [fetchDashboardData, { loading, error, data }] = useLazyQuery(DashboardCountDocument);
 
-  console.log('0988',error);
-  
-    
+  useEffect(() => {
+    fetchDashboardData({
+      variables: {
+        filters: {
+          startDate: "2025-05-01",
+          endDate: "2025-05-31",
+        },
+      },
+      fetchPolicy: 'network-only',
+    });
+  }, []);
+
+  console.log('Dashboard Data:', error);
 
   // if (loading) return <ThemedText>Loading...</ThemedText>;
   // if (error) return <ThemedText>Error: {error.message}</ThemedText>;
   const userCount = data?.dashboardCount || {};
-  
+
   return (
     <CustomHeader>
       <ThemedView style={{ paddingTop: 0 }}>
@@ -53,37 +61,37 @@ const index = () => {
             </TouchableOpacity>
             <Text style={styles.appBar}>Dashboard</Text>
           </View>
-          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
+          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>User</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.userCount}</ThemedText>
             </View>
           </View>
-          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
+          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Role</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.roleCount}</ThemedText>
             </View>
           </View>
-          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
+          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Projects</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.projectCount}</ThemedText>
             </View>
           </View>
-          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
+          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Permission</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.permissionCount}</ThemedText>
             </View>
           </View>
-          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
+          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Organization</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.organizationCount}</ThemedText>
             </View>
           </View>
-          <View style={[styles.cardStyle,{ backgroundColor: Colors[theme].cartBg }]}>
+          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>Assigned Permission</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.assignedPermissionCount}</ThemedText>

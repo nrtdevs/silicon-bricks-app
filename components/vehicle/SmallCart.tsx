@@ -15,7 +15,7 @@ const SmallCart: React.FC<SmallCartProps> = ({ icon, label, onPress }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <View style={styles.iconWrapper}>
-        <Icon name={icon} size={30} color="#632CA6" />
+        <Icon name={icon} size={40} color="#632CA6" />
       </View>
       <ThemedText type='default' style={styles.label}>{label}</ThemedText>
     </TouchableOpacity>
