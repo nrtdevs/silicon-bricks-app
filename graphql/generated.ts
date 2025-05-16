@@ -1630,7 +1630,7 @@ export type Notifications = {
   id: Scalars['ID']['output'];
   isRead: Scalars['Boolean']['output'];
   message: Scalars['String']['output'];
-  module: VehicleModuleType;
+  module: Scalars['String']['output'];
   organizationBy: Organization;
   organizationId: Scalars['Int']['output'];
   readAt?: Maybe<Scalars['DateTime']['output']>;
@@ -3073,12 +3073,6 @@ export type VehicleExpenseStatusDto = {
   remark: Scalars['String']['input'];
   status: Vehicle_Expense_Status;
 };
-
-export enum VehicleModuleType {
-  Vehicle = 'VEHICLE',
-  VehicleBreakdown = 'VEHICLE_BREAKDOWN',
-  VehicleExpense = 'VEHICLE_EXPENSE'
-}
 
 export type VehicleStatusDto = {
   id: Scalars['Float']['input'];
