@@ -452,7 +452,6 @@ export type Group = {
   name: Scalars['String']['output'];
   permissions: Array<Permissions>;
 };
- 
 
 export type InputPermissionSlugDto = {
   permissionSlug: Scalars['String']['input'];
@@ -1619,7 +1618,7 @@ export type NotificationResponse = {
   message?: Maybe<Scalars['String']['output']>;
   success: Scalars['Boolean']['output'];
 };
- 
+
 export type Notifications = {
   __typename?: 'Notifications';
   actionUrl?: Maybe<Scalars['String']['output']>;
@@ -1809,8 +1808,6 @@ export type PaginatedNotes = {
   data: Array<Notes>;
   meta: Meta;
 };
-
- 
 
 export type PaginatedNotifications = {
   __typename?: 'PaginatedNotifications';
@@ -2035,7 +2032,7 @@ export type Query = {
   getPaginatedMeetingTaskByMeetingId: PaginatedMeetingTask;
   getPaginatedNotesByMeetingId: PaginatedNotes;
   getUpcomingMeetingTask: PaginatedMeetingTask;
-  getUpcomingMeetings: PaginatedMeeting; 
+  getUpcomingMeetings: PaginatedMeeting;
   getUsersWithPermission: Array<User>;
   getVehicleExpenseStatuses: Array<VehicleExpenseStatus>;
   getVehicleExpenseTypeSuggestions: Array<Scalars['JSON']['output']>;
@@ -2075,7 +2072,7 @@ export type Query = {
   paginatedSubscriptions: PaginatedSubscriptions;
   paginatedTrashedWarehouses: PaginatedWarehouse;
   paginatedUsers: PaginatedUsers;
-  paginatedVehicleExpense: PaginatedVehicleExpense; 
+  paginatedVehicleExpense: PaginatedVehicleExpense;
   paginatedVehicleNotification: PaginatedNotifications;
   paginatedVehicles: PaginatedVehicles;
   paginatedWarehouses: PaginatedWarehouse;
@@ -2329,9 +2326,6 @@ export type QueryGetUpcomingMeetingsArgs = {
 };
 
 
- 
-
-
 export type QueryGetUsersWithPermissionArgs = {
   data: InputPermissionSlugDto;
 };
@@ -2533,9 +2527,6 @@ export type QueryPaginatedUsersArgs = {
 export type QueryPaginatedVehicleExpenseArgs = {
   ListInputDTO: ListInputDto;
 };
-
-
- 
 
 
 export type QueryPaginatedVehicleNotificationArgs = {
@@ -3082,7 +3073,6 @@ export type VehicleExpenseStatusDto = {
   remark: Scalars['String']['input'];
   status: Vehicle_Expense_Status;
 };
- 
 
 export enum VehicleModuleType {
   Vehicle = 'VEHICLE',
@@ -3782,6 +3772,7 @@ export type DeleteVehicleMutationVariables = Exact<{
 
 
 export type DeleteVehicleMutation = { __typename?: 'Mutation', deleteVehicle: boolean };
+
 export type ChangePackageStatusMutationVariables = Exact<{
   updatePackageStatusInput: PackageStatusDto;
 }>;

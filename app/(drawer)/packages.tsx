@@ -772,8 +772,8 @@ const PackageScreen = () => {
                         onChangeText={() => {
                             packageState({
                               variables: {
-                                data: {
-                                  ids: [Number(currentOrganization?.id)],
+                                updatePackageStatusInput: {
+                                  ids: [Number(currentPackage?.id)],
                                   status: watch("status")?.value,
                                 },
                               },
