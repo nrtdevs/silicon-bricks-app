@@ -182,6 +182,7 @@ const VehicleList = () => {
   );
 
   const renderItems = (item: any) => {
+    // 
     return (
       <VehicleCard
         brand={item?.make}
