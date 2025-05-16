@@ -69,13 +69,13 @@ const CustomSearchBar = (props: CustomSearchBarProps) => {
         value={props.searchQuery}
         containerStyle={[
           styles.containerStyle,
-          { ...props.containerStyle, backgroundColor: Colors[theme].cartBg }
+          { ...props.containerStyle, backgroundColor: Colors[theme].background }
         ]}
         inputContainerStyle={[
           styles.inputContainerStyle,
           props.inputContainerStyle,
           {
-            backgroundColor: Colors[theme].cartBg
+            backgroundColor: Colors[theme].background
           }
         ]}
         inputStyle={[styles.inputStyle, { color: Colors[theme].text }]}

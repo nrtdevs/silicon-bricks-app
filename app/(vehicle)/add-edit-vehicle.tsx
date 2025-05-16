@@ -1,5 +1,5 @@
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { SafeAreaView } from "react-native";
 import { useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
@@ -18,7 +18,7 @@ import {
   UpdateVehicleDocument,
 } from "@/graphql/generated";
 import Loader from "@/components/ui/Loader";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 
 const VehicleAdd = () => {
   const insuranceOptions = [
@@ -82,6 +82,15 @@ const VehicleAdd = () => {
   const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
     getDateTimePickerProps(false)
   );
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    if (editedData) {
+      navigation.setOptions({ title: 'Edit Vehicle' });
+    } else {
+      navigation.setOptions({ title: 'Add Vehicle' });
+    }
+  }, [editedData]);
 
   const [addVehicleApi, addVehicleStat] = useMutation<any>(
     CreateVehicleDocument,
@@ -132,6 +141,8 @@ const VehicleAdd = () => {
       });
     }
   };
+
+  
 
   if (addVehicleStat.loading || editVehicleStat.loading) return <Loader />;
   return (
