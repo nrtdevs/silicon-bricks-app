@@ -308,13 +308,13 @@ const PurchasePlaneScreen = () => {
                     </ThemedText>
                 </View>
 
-                <ThemedText
+                {item?.description && <ThemedText
                     style={[
                         styles.description,
                     ]}
                 >
                     {item?.description}
-                </ThemedText>
+                </ThemedText>}
 
                 <View style={styles.userInfo}>
                     <ThemedText type='title' style={{ fontSize: ms(22) }} >
@@ -322,7 +322,7 @@ const PurchasePlaneScreen = () => {
                             /month
                         </ThemedText>
                     </ThemedText>
-                    <ThemedText style={{ fontSize: ms(20) }}>
+                    <ThemedText style={{ fontSize: ms(18) }}>
                         20% OFF
                     </ThemedText>
                 </View>

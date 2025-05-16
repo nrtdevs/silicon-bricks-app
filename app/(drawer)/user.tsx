@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -15,6 +16,7 @@ import {
   CreateUserDocument,
   DeleteOrganizationDocument,
   DeleteUserDocument,
+  DropdownRolesDocument,
   EnableOrganizationStatusDocument,
   PaginatedOrganizationDocument,
   PaginatedRolesDocument,
@@ -43,6 +45,7 @@ import * as FileSystem from "expo-file-system";
 import debounce from "lodash.debounce";
 import { Env } from "@/constants/ApiEndpoints";
 import { useUserContext } from "@/context/RoleContext";
+import NoDataFound from "@/components/NoDataFound";
 
 const defaultValue = {
   name: "",
@@ -64,11 +67,11 @@ const userTypeData = [
 const designationData = [
   { label: "CEO", value: "CEO" },
   { label: "CTO", value: "CTO" },
-  { label: "Employee", value: "Employee" },
+  { label: "Employee", value: "EMPLOYEE" },
   { label: "HR", value: "HR" },
-  { label: "Manager", value: "Manager" },
-  { label: "Super Admin", value: "Super Admin" },
-  { label: "Team Lead", value: "Team Lead" },
+  { label: "Manager", value: "MANAGER" },
+  { label: "Super Admin", value: "SUPER_ADMIN" },
+  { label: "Team Lead", value: "TEAM_LEAD" },
 ];
 
 const pickerData = [
@@ -106,6 +109,10 @@ const UserScreen = () => {
   const [isInfoModalVisible, setInfoModalVisible] = useState(false);
   const [isHierarchyModalVisible, setHierarchyModalVisible] = useState(false);
   const [isStatusModalVisible, setStatusModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [userList, setUserLIst] = useState<any>([]);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
   const [currentUser, setCurrentUser] = useState<{
     name: string;
     email: string;
@@ -131,24 +138,20 @@ const UserScreen = () => {
   const [createUser, createUserState] = useMutation(CreateUserDocument, {
     onCompleted: (data) => {
       reset();
-      refetch();
+      fetchUser(true);
       setModalVisible(false);
     },
     onError: (error) => {
-      console.log("Error", error.message);
       Alert.alert("Error", error.message);
     },
   });
 
   const [updateUserStatus, updateUserStatusState] = useMutation(ChangeUserStatusDocument, {
     onCompleted: (data) => {
-      reset();
-      refetch();
+      fetchUser(true);
       setStatusModalVisible(false);
     },
     onError: (error) => {
-      setStatusModalVisible(false);
-      console.log("Error", error.message);
       Alert.alert("Error", error.message);
     },
   });
@@ -156,7 +159,8 @@ const UserScreen = () => {
   const [
     getUserRoles,
     { data: roleData, loading: roleLoading, error: roleError },
-  ] = useLazyQuery(PaginatedRolesDocument);
+  ] = useLazyQuery(DropdownRolesDocument);
+  // console.log('000086', roleData?.dropdownRoles?.data);
 
   const [
     organizationData,
@@ -169,19 +173,20 @@ const UserScreen = () => {
 
   const [updateUser, updateUserState] = useMutation(UpdateUserDocument, {
     onCompleted: (data) => {
-      reset()
-      refetch();
-      setEditModal(false);
+      reset();
+      fetchUser(true);
       setModalVisible(false);
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
-    }
+    },
   });
 
   const [deleteUser, deleteUserState] = useMutation(DeleteUserDocument, {
     onCompleted: (data) => {
-      refetch();
+      reset();
+      fetchUser(true);
+      setModalVisible(false);
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -196,28 +201,19 @@ const UserScreen = () => {
     setValue("phoneNo", currentUser?.phoneNo);
     setValue("roles", currentUser?.roles);
     setValue("usertype", currentUser?.usertype);
+    setValue("designation", currentUser?.designation);
   }, [currentUser]);
 
 
   useEffect(() => {
+    fetchUser();
     getInitialData();
   }, []);
 
   const getInitialData = async () => {
-    await userData({
-      variables: {
-        listInputDto: {
-          limit: 10,
-          page: 1,
-        },
-      },
-    });
     await getUserRoles({
       variables: {
-        listInputDto: {
-          limit: 10,
-          page: 1,
-        },
+        listInputDto: {},
       },
     });
     await organizationData({
@@ -227,35 +223,7 @@ const UserScreen = () => {
     });
   }
 
-  // useEffect(() => {
-  //   const params = {
-  //     id: Number(currentUser?.id),
-  //     status: watch("status")?.value
-  //   }
-  //   console.log("params", params);
-  //   if (watch("status")) {
-  //     updateUserStatus({
-  //       variables: {
-  //         data: params
-  //       },
-  //     });
-  //   }
-  // }, [watch("status")])
-
-  useEffect(() => {
-    const status = watch("status");
-    if (status && currentUser?.id) {
-      const params = {
-        ids: [Number(currentUser.id)],
-        status: status?.value,
-      };
-      updateUserStatus({ variables: { data: params } });
-    }
-  }, [watch("status")]);
-
-
   const onSubmit = (data: any) => {
-    console.log('0909', data);
     try {
       const roleIds: number[] = [];
       if (data?.roles && Array.isArray(data.roles)) {
@@ -265,6 +233,7 @@ const UserScreen = () => {
       }
 
       const params: any = {
+        designation: typeof data?.designation == 'string' ? data?.designation : data?.designation?.value,
         email: data?.email,
         mobileNo: Number(data?.phoneNo),
         name: data?.name,
@@ -272,7 +241,6 @@ const UserScreen = () => {
         userType: typeof data?.usertype == 'string' ? data?.usertype : data?.usertype?.value,
         avatar: image,
       };
-
       let updateParams = {
         id: Number(currentUser?.id),
         ...params,
@@ -323,7 +291,9 @@ const UserScreen = () => {
                   usertype: item?.userType,
                   id: item?.id,
                   imagePath: item?.avatar,
+                  designation: item?.designation,
                 });
+                setValue("status", item?.status);
                 setImage(item?.avatar)
                 setStatusModalVisible(true);
               }}
@@ -342,6 +312,8 @@ const UserScreen = () => {
                   usertype: item?.userType,
                   id: item?.id,
                   imagePath: item?.avatar,
+                  designation: item?.designation,
+
                 });
                 setInfoModalVisible(true);
               }}
@@ -361,6 +333,7 @@ const UserScreen = () => {
                   usertype: item?.userType,
                   id: item?.id,
                   imagePath: item?.avatar,
+                  designation: item?.designation,
                 });
                 setImage(item?.avatar)
                 setEditModal(true);
@@ -487,19 +460,60 @@ const UserScreen = () => {
   };
 
   const debouncedSearch = useCallback(
-    debounce((text: string) => {
-      userData({
-        variables: {
-          listInputDto: {
-            limit: 10,
-            page: 1,
-            search: text,
-          },
-        },
-      });
+    debounce((text) => {
+      fetchUser(true, text);
     }, 500),
-    []
+    [searchQuery]
   );
+
+  const fetchUser = async (isRefreshing = false, searchParams = "") => {
+    const currentPage = isRefreshing ? 1 : page;
+    console.log("ccc", currentPage);
+
+    if (isRefreshing) {
+      setRefreshing(true);
+      setPage(1);
+    }
+    const params = {
+      limit: 10,
+      page: currentPage,
+      search: searchParams,
+    };
+
+    try {
+      const res: any = await userData({
+        variables: {
+          listInputDto: params,
+        },
+        fetchPolicy: "network-only",
+      });
+
+      if (res?.data?.paginatedUsers) {
+        const data: any = res?.data?.paginatedUsers;
+        const newItems = data?.data || [];
+
+        setUserLIst((prev: any) => {
+          return isRefreshing && currentPage == 1
+            ? newItems
+            : [...prev, ...newItems];
+        });
+
+        if (isRefreshing) setRefreshing(false);
+        setPage((prev) => prev + 1);
+        setRefreshing(false);
+        const lastPage = Math.ceil(data?.meta?.totalItems / 10);
+        setHasMore(data?.meta?.currentPage < lastPage);
+      } else {
+        console.log("API call failed or returned no data:", res?.errors);
+        setRefreshing(false);
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Fetch failed:", error);
+      setRefreshing(false);
+      setHasMore(false);
+    }
+  };
   // if (true) {
   //   return <Loader />;
   // }
@@ -535,13 +549,31 @@ const UserScreen = () => {
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
-            data={data?.paginatedUsers?.data || []}
-            keyExtractor={(item, index) => index?.toString()}
-            renderItem={({ item, index }: any) => {
-              return renderItem(item, index);
-            }}
-            contentContainerStyle={{ paddingBottom: vs(40) }}
+            data={userList}
+            renderItem={({ item, index }: any) => renderItem(item, index)}
             showsVerticalScrollIndicator={false}
+            refreshing={refreshing && !loading}
+            onRefresh={() => {
+              fetchUser(true);
+            }}
+            keyExtractor={(item: any, index: number) => index.toString()}
+            contentContainerStyle={{ paddingBottom: vs(40) }}
+            ListEmptyComponent={!loading ? <NoDataFound /> : null}
+            ListFooterComponent={
+              hasMore ? (
+                <ActivityIndicator size="small" color={Colors.primary} />
+              ) : null
+            }
+            onEndReached={() => {
+              if (hasMore && !loading) {
+                fetchUser();
+              }
+            }}
+            onEndReachedThreshold={0.5}
+            initialNumToRender={8}
+            maxToRenderPerBatch={5}
+            windowSize={7}
+            removeClippedSubviews={true}
           />
         </View>
       </ThemedView>
@@ -672,7 +704,7 @@ const UserScreen = () => {
             />
 
             <CustomValidation
-              data={roleData?.paginatedRoles?.data}
+              data={roleData?.dropdownRoles?.data}
               type="picker"
               hideStar={false}
               keyToCompareData="id"
@@ -724,6 +756,7 @@ const UserScreen = () => {
         </ScrollView>
       </Modal>
 
+
       {/* user info modal */}
       <Modal
         isVisible={isInfoModalVisible}
@@ -735,7 +768,7 @@ const UserScreen = () => {
         <View
           style={{
             backgroundColor: Colors[theme].cartBg,
-            height: vs(300),
+            height: vs(350),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
@@ -783,9 +816,14 @@ const UserScreen = () => {
               <ThemedText type="subtitle">User Type</ThemedText>
               <ThemedText type="default">{currentUser?.usertype}</ThemedText>
             </View>
+            <View>
+              <ThemedText type="subtitle">Designation</ThemedText>
+              <ThemedText type="default">{currentUser?.designation}</ThemedText>
+            </View>
           </View>
         </View>
       </Modal>
+
 
       {/* status modal */}
       <Modal
@@ -833,6 +871,13 @@ const UserScreen = () => {
             inputStyle={{ height: vs(50), marginTop: 0, paddingTop: 0 }}
             inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
             containerStyle={{ marginTop: 0, paddingTop: 0 }}
+            onChangeText={() => {
+              const params = {
+                ids: [Number(currentUser.id)],
+                status: watch('status')?.value,
+              };
+              updateUserStatus({ variables: { data: params } });
+            }}
             rules={{
               required: {
                 value: true,

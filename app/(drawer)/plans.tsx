@@ -108,10 +108,6 @@ const PlanScreen = () => {
         PaginatedPlansDocument
     );
 
-    const [dropdownOfferData, offerState] = useLazyQuery(
-        DropdownOffersDocument
-    );
-
     const [dropdownCouponData, couponData] = useLazyQuery(
         PaginatedCouponsDocument
     );
@@ -216,7 +212,7 @@ const PlanScreen = () => {
         await plansData({
             variables: {
                 listInputDto: {
-                    limit: 10,
+                    limit: 12,
                     page: 1,
                 },
             },
@@ -224,14 +220,6 @@ const PlanScreen = () => {
     };
 
     const fetchDropdownData = () => {
-        dropdownOfferData({
-            variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1,
-                },
-            },
-        });
         dropdownCouponData({
             variables: {
                 listInputDto: {
@@ -258,7 +246,7 @@ const PlanScreen = () => {
                 packageId: typeof data?.package == 'string' ? Number(data?.package) : Number(data?.package?.id),
                 price: Number(data?.price),
                 // couponId: typeof data?.coupon == 'string' ? Number(data?.coupon) : Number(data?.coupon?.id),
-                description: data?.description,
+                description: data?.description ?? "",
             }
 
             let params2 = {

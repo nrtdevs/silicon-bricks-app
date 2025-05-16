@@ -65,6 +65,8 @@ const OrganizationScreen = () => {
     PaginatedOrganizationDocument
   );
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
   const [editModal, setEditModal] = useState<boolean>(false);
@@ -74,8 +76,6 @@ const OrganizationScreen = () => {
     description: string;
     id: string;
   }>(defaultValue);
-  const [page, setPage] = useState<number>(1);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [createOrganization, createOrganizationState] = useMutation(
     CreateOrganizationDocument,
     {
@@ -162,7 +162,7 @@ const OrganizationScreen = () => {
     try {
       let params = {
         name: data?.name,
-        description: data?.description,
+        description: data?.description ?? "",
       };
 
       editModal
@@ -288,7 +288,7 @@ const OrganizationScreen = () => {
       setPage(1);
     }
     const params = {
-      limit: 6,
+      limit: 10,
       page: currentPage,
       search: searchParams,
     };
@@ -314,7 +314,7 @@ const OrganizationScreen = () => {
         if (isRefreshing) setRefreshing(false);
         setPage((prev) => prev + 1);
         setRefreshing(false);
-        const lastPage = Math.ceil(data?.meta?.totalItems / 6);
+        const lastPage = Math.ceil(data?.meta?.totalItems / 10);
         setHasMore(data?.meta?.currentPage < lastPage);
       } else {
         console.log("API call failed or returned no data:", res?.errors);
@@ -334,6 +334,8 @@ const OrganizationScreen = () => {
     }, 500),
     [searchQuery]
   );
+  console.log("organizationList", organizationList?.length);
+
 
 
   if (
@@ -402,10 +404,6 @@ const OrganizationScreen = () => {
               }
             }}
             onEndReachedThreshold={0.5}
-            initialNumToRender={8}
-            maxToRenderPerBatch={5}
-            windowSize={7}
-            removeClippedSubviews={true}
           />
         </View>
       </ThemedView>
@@ -498,6 +496,7 @@ const OrganizationScreen = () => {
           />
         </View>
       </Modal>
+
 
       {/* status modal */}
       <Modal

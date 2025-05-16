@@ -88,6 +88,7 @@ const ModuleScreen = () => {
     const [createModule, createModuleState] = useMutation(CreateModuleDocument, {
         onCompleted: (data) => {
             fetchModules(true);
+            reset()
             setCurrentModule(defaultValue);
             setEditModal(false);
             setModalVisible(false);
@@ -100,9 +101,7 @@ const ModuleScreen = () => {
     const [updateModuleStatus, updateModuleStatusState] = useMutation(ChangeModuleStatusDocument, {
         onCompleted: (data) => {
             fetchModules(true);
-            setCurrentModule(defaultValue);
-            setEditModal(false);
-            setModalVisible(false);
+            setStatusModalVisible(false);
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -121,6 +120,7 @@ const ModuleScreen = () => {
     const [updateModule, updateModuleState] = useMutation(UpdateModuleDocument, {
         onCompleted: (data) => {
             fetchModules(true);
+            reset();
             setCurrentModule(defaultValue);
             setEditModal(false);
             setModalVisible(false);
@@ -147,13 +147,11 @@ const ModuleScreen = () => {
             setPage(1);
         }
         const params = {
-            limit: 6,
+            limit: 9,
             page: currentPage,
             search: searchParams,
         };
         console.log('999', currentPage);
-
-
         try {
             const res: any = await moduleData({
                 variables: {
@@ -175,7 +173,7 @@ const ModuleScreen = () => {
                 if (isRefreshing) setRefreshing(false);
                 setPage((prev) => prev + 1);
                 setRefreshing(false);
-                const lastPage = Math.ceil(data?.meta?.totalItems / 6);
+                const lastPage = Math.ceil(data?.meta?.totalItems / 9);
                 setHasMore(data?.meta?.currentPage < lastPage);
             } else {
                 console.log("API call failed or returned no data:", res?.errors);
@@ -306,20 +304,10 @@ const ModuleScreen = () => {
 
     const debouncedSearch = useCallback(
         debounce((text) => {
-            moduleData({
-                variables: {
-                    listInputDto: {
-                        limit: 10,
-                        page: 1,
-                        search: text,
-                    },
-                },
-            })
+            fetchModules(true, text);
         }, 500),
-        []
+        [searchQuery]
     );
-
-    console.log("moduleData", moduleList?.length);
 
     // if (loading) {
     //     return <Loader />
@@ -551,7 +539,6 @@ const ModuleScreen = () => {
                                 ids: [Number(currentModule?.id)],
                                 status: watch("status")?.value
                             }
-                            console.log("selected", params);
                             updateModuleStatus({
                                 variables: {
                                     updateModuleStatusInput: params
