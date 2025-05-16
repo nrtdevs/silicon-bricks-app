@@ -879,3 +879,43 @@ query DropdownRoles($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+query GetPaginatedNotesByMeetingId($meetingId: Int!, $query: ListInputDTO!) {
+  getPaginatedNotesByMeetingId(meetingId: $meetingId, query: $query) {
+    data {
+      id
+      createdByUserId
+      meetingId
+      decision
+      notes
+    }
+  }
+}
+
+query GetPaginatedMeetingTaskByMeetingId($meetingId: Int!, $query: ListInputDTO!) {
+  getPaginatedMeetingTaskByMeetingId(meetingId: $meetingId, query: $query) {
+    data {
+      id
+      ownerId
+      createdByUserId
+      assigneeId
+      meetingId
+      notesId
+      projectId
+      parentTaskId
+      ownerName
+      assigneeName
+      task
+      projectName
+      comment
+      openedDate
+      dueDate
+      completedDate
+      priority
+      status
+      completePercent
+      totalTaskComplete
+      weightType
+    }
+  }
+}

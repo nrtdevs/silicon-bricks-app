@@ -5,13 +5,14 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateNotesDocument } from "@/graphql/generated";
-import { useMutation } from "@apollo/client";
+import { CreateNotesDocument, DeleteMetingTaskDocument, DeleteNotesDocument, GetPaginatedMeetingTaskByMeetingIdDocument, GetPaginatedNotesByMeetingIdDocument } from "@/graphql/generated";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, Modal, Pressable, View } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 
 const MeetingDetails = () => {
@@ -43,6 +44,53 @@ const MeetingDetails = () => {
             },
         });
     };
+    /// fetch meeting notes data 
+    const [getMeetingNotes, { data, refetch, loading: listLoading }] = useLazyQuery(GetPaginatedNotesByMeetingIdDocument);
+    useEffect(() => {
+        getMeetingNotes({
+            variables: {
+                meetingId: Number(id),
+                query: {
+                    page: 1,
+                    limit: 10,
+                },
+            },
+        });
+    }, [])
+
+    /// fetch meeting task data
+    const [getMeetingTask, { data: fetchData, refetch: refetchData, loading: dataLoading }] = useLazyQuery(GetPaginatedMeetingTaskByMeetingIdDocument);
+    useEffect(() => {
+        getMeetingTask({
+            variables: {
+                meetingId: Number(id),
+                query: {
+                    page: 1,
+                    limit: 10,
+                },
+            },
+        });
+    }, [])
+    /// delete meeting notes api 
+    const [deleteNotes, deleteNoteState] = useMutation(DeleteNotesDocument, {
+        onCompleted: (data) => {
+            refetch();
+            Alert.alert("success", "Delete note successfully!")
+        },
+        onError: (error) => {
+            Alert.alert("error", error.message)
+        }
+    });
+    /// delete meeting task api 
+    const [deleteMeetingTask, deleteMeetingVenueState] = useMutation(DeleteMetingTaskDocument, {
+        onCompleted: (data) => {
+            refetchData();
+            Alert.alert("success", "Task deleted successfully!")
+        },
+        onError: (error) => {
+            Alert.alert("error", error.message)
+        }
+    });
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -80,62 +128,126 @@ const MeetingDetails = () => {
                             <ThemedText style={styles.meetingSubtitle}> : {reference}</ThemedText>
                             <ThemedText style={styles.meetingSubtitle}> : {url}</ThemedText>
                             <ThemedText style={styles.meetingSubtitle}> : {project}</ThemedText>
-                            <View style={{
-                                        backgroundColor: status == "active" ? "#EAFFF1" : "#F9F9F9", borderRadius: 10, paddingHorizontal: 10,
-                                        borderColor: status == "active" ? "#17C653" : "#89500E", borderWidth: 0.5,width: 80
-                                    }}>
-                                        <ThemedText style={{
-                                            color: status == "active" ? "#17C653" : "#89500E"
-                                        }}>{status}</ThemedText>
-                                    </View>
-                        </View>
-                    </View>
-                </View>
-                <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Task List</ThemedText>
-                <View style={styles.scrollContainer}>
-                    <View style={[
-                        styles.meetingDetailsCard,
-                        { backgroundColor: Colors[theme].cart },
-                    ]}>
-                        <View style={styles.meetingHeader}>
-                            <ThemedText type="subtitle" style={{ flex: 1 }}>test task</ThemedText>
-                            <View style={styles.meetingInfo}>
-                                <View style={{ width: 5 }}></View>
-                                <Feather
-                                    name="edit"
-                                    size={ms(20)}
-                                    color={Colors[theme].text}
-                                    onPress={() => { }}
-                                />
-                                <View style={{ width: 5 }}></View>
-                                <MaterialIcons
-                                    name="delete-outline"
-                                    size={ms(22)}
-                                    color={Colors[theme].text}
-                                    onPress={() => {
-                                        Alert.alert(
-                                            "Delete",
-                                            "Are you sure you want to delete?",
-                                            [
-                                                {
-                                                    text: "Yes", onPress: () => {
-                                                        // deleteMeeting({
-                                                        //     variables: {
-                                                        //         ids: Number(item?.id),
-                                                        //     }
-                                                        // });
-                                                    }
-                                                },
-                                                { text: "No", onPress: () => { } },
-                                            ]
-                                        );
-
-                                    }}
-                                />
+                            <View style={{ flexDirection: "row", alignItems: "center", }}>
+                                <ThemedText style={styles.meetingSubtitle}> : </ThemedText>
+                                <View style={{
+                                    backgroundColor: status == "active" ? "#EAFFF1" : "#F9F9F9", borderRadius: 5, paddingHorizontal: 10,
+                                    borderColor: status == "active" ? "#17C653" : "#89500E", borderWidth: 0.5, width: 80
+                                }}>
+                                    <ThemedText style={{
+                                        color: status == "active" ? "#17C653" : "#89500E"
+                                    }}>{status}</ThemedText>
+                                </View>
                             </View>
                         </View>
                     </View>
                 </View>
+                <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Notes List</ThemedText>
+
+                <FlatList
+                    data={data?.getPaginatedNotesByMeetingId.data}
+                    renderItem={({ item }) => (
+                        <View style={styles.scrollContainer}>
+                            <View style={[
+                                styles.meetingDetailsCard,
+                                { backgroundColor: Colors[theme].cart },
+                            ]}>
+                                <View style={styles.meetingHeader}>
+                                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item.notes}</ThemedText>
+                                    <View style={styles.meetingInfo}>
+                                        <View style={{ width: 5 }}></View>
+                                        <Feather
+                                            name="edit"
+                                            size={ms(20)}
+                                            color={Colors[theme].text}
+                                            onPress={() => { }}
+                                        />
+                                        <View style={{ width: 5 }}></View>
+                                        <MaterialIcons
+                                            name="delete-outline"
+                                            size={ms(22)}
+                                            color={Colors[theme].text}
+                                            onPress={() => {
+                                                Alert.alert(
+                                                    "Delete",
+                                                    "Are you sure you want to delete?",
+                                                    [
+                                                        {
+                                                            text: "Yes", onPress: () => {
+                                                                deleteNotes({
+                                                                    variables: {
+                                                                        ids: Number(item?.id),
+                                                                    }
+                                                                });
+                                                            }
+                                                        },
+                                                        { text: "No", onPress: () => { } },
+                                                    ]
+                                                );
+
+                                            }}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    )} />
+
+                <View style={{flexDirection : "row", justifyContent: "space-between", alignItems: "center", marginTop: 20}}>
+                    <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Task List</ThemedText>
+                    <Pressable
+                        onPress={() => {}}>
+                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
+                    </Pressable>
+                </View>
+
+                <FlatList
+                    data={fetchData?.getPaginatedMeetingTaskByMeetingId.data}
+                    renderItem={({ item }) => (
+                        <View style={styles.scrollContainer}>
+                            <View style={[
+                                styles.meetingDetailsCard,
+                                { backgroundColor: Colors[theme].cartBg },
+                            ]}>
+                                <View style={styles.meetingHeader}>
+                                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.task}</ThemedText>
+                                    <View style={styles.meetingInfo}>
+                                        <View style={{ width: 5 }}></View>
+                                        <Feather
+                                            name="edit"
+                                            size={ms(20)}
+                                            color={Colors[theme].text}
+                                            onPress={() => { }}
+                                        />
+                                        <View style={{ width: 5 }}></View>
+                                        <MaterialIcons
+                                            name="delete-outline"
+                                            size={ms(22)}
+                                            color={Colors[theme].text}
+                                            onPress={() => {
+                                                Alert.alert(
+                                                    "Delete",
+                                                    "Are you sure you want to delete?",
+                                                    [
+                                                        {
+                                                            text: "Yes", onPress: () => {
+                                                                deleteMeetingTask({
+                                                                    variables: {
+                                                                        ids: Number(item?.id),
+                                                                    }
+                                                                });
+                                                            }
+                                                        },
+                                                        { text: "No", onPress: () => { } },
+                                                    ]
+                                                );
+                                            }}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    )} />
             </ThemedView>
             {/* Add Note modal */}
             <Modal
@@ -199,6 +311,7 @@ const MeetingDetails = () => {
                             />
                             <CustomButton
                                 title="Submit"
+                                isLoading={createMeetingNotesState.loading}
                                 onPress={() => {
                                     handleSubmit(onSubmitNotes)();
                                 }}

@@ -20,20 +20,21 @@ const TaskScreen = () => {
     const { theme } = useTheme();
     /// serach state 
     const [searchQuery, setSearchQuery] = useState<string>("");
-    /// fetch Meeting Venue api 
+    /// fetch Meeting task api 
     const [getMeetingTaskData, { data, refetch, loading }] = useLazyQuery(PaginatedMeetingTaskDocument);
     useEffect(() => {
         getMeetingTaskData({
             variables: {
                 listInputDto: {
-                    limit: 10, page: 1
+                    limit: 10,
+                     page: 1
                 }
             }
         });
     }, [])
     /// Create and  Edit State
     const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
-    /// delete meeting venue api 
+    /// delete meeting task api 
     const [deleteMeetingTask, deleteMeetingVenueState] = useMutation(DeleteMetingTaskDocument, {
         onCompleted: (data) => {
             refetch();
