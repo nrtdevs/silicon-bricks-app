@@ -452,11 +452,7 @@ export type Group = {
   name: Scalars['String']['output'];
   permissions: Array<Permissions>;
 };
-
-export type InputPermissionSlugDto = {
-  permissionSlug: Scalars['String']['input'];
-  status: CustomStatus;
-};
+ 
 
 export type InputPermissionSlugDto = {
   permissionSlug: Scalars['String']['input'];
@@ -1623,27 +1619,7 @@ export type NotificationResponse = {
   message?: Maybe<Scalars['String']['output']>;
   success: Scalars['Boolean']['output'];
 };
-
-export type Notifications = {
-  __typename?: 'Notifications';
-  actionUrl?: Maybe<Scalars['String']['output']>;
-  createdAt: Scalars['DateTime']['output'];
-  createdBy?: Maybe<User>;
-  createdById?: Maybe<Scalars['Float']['output']>;
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  entityId?: Maybe<Scalars['Float']['output']>;
-  id: Scalars['ID']['output'];
-  isRead: Scalars['Boolean']['output'];
-  message: Scalars['String']['output'];
-  module: VehicleModuleType;
-  organizationBy: Organization;
-  organizationId: Scalars['Int']['output'];
-  readAt?: Maybe<Scalars['DateTime']['output']>;
-  title: Scalars['String']['output'];
-  userBy?: Maybe<User>;
-  userId?: Maybe<Scalars['Float']['output']>;
-};
-
+ 
 export type Notifications = {
   __typename?: 'Notifications';
   actionUrl?: Maybe<Scalars['String']['output']>;
@@ -1834,11 +1810,7 @@ export type PaginatedNotes = {
   meta: Meta;
 };
 
-export type PaginatedNotifications = {
-  __typename?: 'PaginatedNotifications';
-  data: Array<Notifications>;
-  meta: Meta;
-};
+ 
 
 export type PaginatedNotifications = {
   __typename?: 'PaginatedNotifications';
@@ -2063,8 +2035,7 @@ export type Query = {
   getPaginatedMeetingTaskByMeetingId: PaginatedMeetingTask;
   getPaginatedNotesByMeetingId: PaginatedNotes;
   getUpcomingMeetingTask: PaginatedMeetingTask;
-  getUpcomingMeetings: PaginatedMeeting;
-  getUsersWithPermission: Array<User>;
+  getUpcomingMeetings: PaginatedMeeting; 
   getUsersWithPermission: Array<User>;
   getVehicleExpenseStatuses: Array<VehicleExpenseStatus>;
   getVehicleExpenseTypeSuggestions: Array<Scalars['JSON']['output']>;
@@ -2104,8 +2075,7 @@ export type Query = {
   paginatedSubscriptions: PaginatedSubscriptions;
   paginatedTrashedWarehouses: PaginatedWarehouse;
   paginatedUsers: PaginatedUsers;
-  paginatedVehicleExpense: PaginatedVehicleExpense;
-  paginatedVehicleNotification: PaginatedNotifications;
+  paginatedVehicleExpense: PaginatedVehicleExpense; 
   paginatedVehicleNotification: PaginatedNotifications;
   paginatedVehicles: PaginatedVehicles;
   paginatedWarehouses: PaginatedWarehouse;
@@ -2359,9 +2329,7 @@ export type QueryGetUpcomingMeetingsArgs = {
 };
 
 
-export type QueryGetUsersWithPermissionArgs = {
-  data: InputPermissionSlugDto;
-};
+ 
 
 
 export type QueryGetUsersWithPermissionArgs = {
@@ -2567,9 +2535,7 @@ export type QueryPaginatedVehicleExpenseArgs = {
 };
 
 
-export type QueryPaginatedVehicleNotificationArgs = {
-  ListInputDTO: ListInputDto;
-};
+ 
 
 
 export type QueryPaginatedVehicleNotificationArgs = {
@@ -3116,12 +3082,7 @@ export type VehicleExpenseStatusDto = {
   remark: Scalars['String']['input'];
   status: Vehicle_Expense_Status;
 };
-
-export enum VehicleModuleType {
-  Vehicle = 'VEHICLE',
-  VehicleBreakdown = 'VEHICLE_BREAKDOWN',
-  VehicleExpense = 'VEHICLE_EXPENSE'
-}
+ 
 
 export enum VehicleModuleType {
   Vehicle = 'VEHICLE',
