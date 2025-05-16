@@ -9,7 +9,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { labels } from '@/constants/Labels';
 import { useTheme } from '@/context/ThemeContext';
-import { CreateMeetingDocument, CreateNotesDocument, DeleteMetingDocument, GetAllMeetingTypesDocument, PaginatedMeetingDocument, PaginatedMeetingVenueDocument, PaginatedProjectsDocument, PaginatedUsersDocument, UpdateMeetingDocument } from '@/graphql/generated';
+import { CreateMeetingDocument, CreateNotesDocument, DeleteMetingDocument, EnableMeetingStatusDocument, GetAllMeetingTypesDocument, PaginatedMeetingDocument, PaginatedMeetingVenueDocument, PaginatedProjectsDocument, PaginatedUsersDocument, UpdateMeetingDocument } from '@/graphql/generated';
 import { getDateTimePickerProps } from '@/utils/getDateTimePickerProps';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import { Entypo, Feather, Fontisto, MaterialIcons } from '@expo/vector-icons';
@@ -36,7 +36,11 @@ const defaultValue = {
     startTime: '',
     title: ''
 }
-
+const statusData = [
+    { label: "Active", value: "active" },
+    { label: "Completed", value: "completed" },
+    { label: "Inactive", value: "inactive" }
+];
 const MeetingScreen = () => {
     const { theme } = useTheme();
     /// serach state 
@@ -46,7 +50,7 @@ const MeetingScreen = () => {
     const [isViewModalVisible, setViewModalVisible] = useState(false);
     const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
     const [isNotesModalVisible, setNotesModalVisible] = useState(false);
-    const [createMeetingNotes, createMeetingNotesState] = useMutation(CreateNotesDocument, {
+    const [enableMeetingStatus, enableMeetingStatusState] = useMutation(EnableMeetingStatusDocument, {
         onCompleted: (data) => {
             reset()
             refetch();
@@ -60,14 +64,12 @@ const MeetingScreen = () => {
 
     const onSubmitNotes = (data: any) => {
         let param = {
-            "meetingId": Number(meetingId),
-            "notes": data.notes,
-            "decision": data.decision,
-            "uploadDoc": null,
+            "ids": [Number(meetingId)],
+            "status": data.status.value,
         }
-        createMeetingNotes({
+        enableMeetingStatus({
             variables: {
-                notesData: param
+                updateMeetingStatusInput: param
             },
         });
     };
@@ -355,104 +357,104 @@ const MeetingScreen = () => {
                 <FlatList
                     data={filteredData}
                     renderItem={({ item }) => (
-                        <View style={styles.scrollContainer}>
-                            <View style={[
-                                styles.organizationContainer,
-                                { backgroundColor: Colors[theme].cartBg },
-                            ]}>
-                                <View style={styles.organizationHeader}>
-                                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item.title}</ThemedText>
-                                    <View style={styles.organizationInfo}>
-                                        <MaterialIcons name="visibility" color={Colors[theme].text} size={24}
-                                            onPress={() => {
-                                                router.push({
-                                                    pathname: "/(meeting)/meetingDetails",
-                                                    params: {
-                                                        id : item.id,
-                                                        title: `${item.title}`,
-                                                        meetingDate: `${item.meetingDate}`,
-                                                        agenda: `${item.meetingAgenda}`,
-                                                        reference: `${item.meetingReference}`,
-                                                        url : `${item.meetingUrl}`,
-                                                        project : `${item.projectName}`,
-                                                        startTime: `${item.startTime}`,
-                                                        endTime: `${item.endTime}`,
-                                                        status: `${item.status}`,
-                                                    },
-                                                });
-                                            }}
-                                        />
-                                        <View style={{ width: 5 }}></View>
-                                        <Feather
-                                            name="edit"
-                                            size={ms(20)}
-                                            color={Colors[theme].text}
-                                            onPress={() => {
-                                                setAddEditModalVisible(true)
-                                                setAddEditManage(true)
-                                                setCurrentMeeting({
-                                                    id: item.id,
-                                                    title: item.title ?? "",
-                                                    startTime: item.startTime,
-                                                    endTime: item.endTime,
-                                                    meetingAgenda: item.meetingAgenda ?? "",
-                                                    meetingReference: item.meetingReference ?? "",
-                                                    projectId: `${item.projectId}`,
-                                                    meetingDate: item.meetingDate,
-                                                    meetingVenueId: `${item.meetingVenueId}`,
-                                                    meetingTypeId: "1",
-                                                    meetingUrl: `${item.meetingUrl}`,
-                                                    parentMeetingId: `${item.parentMeetingId}`,
-                                                    
-                                                })
-                                            }}
-                                        />
-                                        <View style={{ width: 5 }}></View>
-                                        <MaterialIcons
-                                            name="delete-outline"
-                                            size={ms(22)}
-                                            color={Colors[theme].text}
-                                            onPress={() => {
-                                                Alert.alert(
-                                                    "Delete",
-                                                    "Are you sure you want to delete?",
-                                                    [
-                                                        {
-                                                            text: "Yes", onPress: () => {
-                                                                deleteMeeting({
-                                                                    variables: {
-                                                                        ids: Number(item?.id),
-                                                                    }
-                                                                });
-                                                            }
-                                                        },
-                                                        { text: "No", onPress: () => { } },
-                                                    ]
-                                                );
+                        <Pressable
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/(meeting)/meetingDetails",
+                                    params: {
+                                        id: item.id,
+                                        title: `${item.title}`,
+                                        meetingDate: `${item.meetingDate}`,
+                                        agenda: `${item.meetingAgenda}`,
+                                        reference: `${item.meetingReference}`,
+                                        url: `${item.meetingUrl}`,
+                                        project: `${item.projectName}`,
+                                        startTime: `${item.startTime}`,
+                                        endTime: `${item.endTime}`,
+                                        status: `${item.status}`,
+                                    },
+                                });
+                            }}>
+                            <View style={styles.scrollContainer}>
+                                <View style={[
+                                    styles.organizationContainer,
+                                    { backgroundColor: Colors[theme].cartBg },
+                                ]}>
+                                    <View style={styles.organizationHeader}>
+                                        <ThemedText type="subtitle" style={{ flex: 1 }}>{item.title}</ThemedText>
+                                        <View style={styles.organizationInfo}>
+                                            <View style={{ width: 5 }}></View>
+                                            <Feather
+                                                name="edit"
+                                                size={ms(20)}
+                                                color={Colors[theme].text}
+                                                onPress={() => {
+                                                    setAddEditModalVisible(true)
+                                                    setAddEditManage(true)
+                                                    setCurrentMeeting({
+                                                        id: item.id,
+                                                        title: item.title ?? "",
+                                                        startTime: item.startTime,
+                                                        endTime: item.endTime,
+                                                        meetingAgenda: item.meetingAgenda ?? "",
+                                                        meetingReference: item.meetingReference ?? "",
+                                                        projectId: `${item.projectId}`,
+                                                        meetingDate: item.meetingDate,
+                                                        meetingVenueId: `${item.meetingVenueId}`,
+                                                        meetingTypeId: "1",
+                                                        meetingUrl: `${item.meetingUrl}`,
+                                                        parentMeetingId: `${item.parentMeetingId}`,
 
-                                            }}
-                                        />
+                                                    })
+                                                }}
+                                            />
+                                            <View style={{ width: 5 }}></View>
+                                            <MaterialIcons
+                                                name="delete-outline"
+                                                size={ms(22)}
+                                                color={Colors[theme].text}
+                                                onPress={() => {
+                                                    Alert.alert(
+                                                        "Delete",
+                                                        "Are you sure you want to delete?",
+                                                        [
+                                                            {
+                                                                text: "Yes", onPress: () => {
+                                                                    deleteMeeting({
+                                                                        variables: {
+                                                                            ids: Number(item?.id),
+                                                                        }
+                                                                    });
+                                                                }
+                                                            },
+                                                            { text: "No", onPress: () => { } },
+                                                        ]
+                                                    );
+
+                                                }}
+                                            />
+                                        </View>
                                     </View>
-                                </View>
-                                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                    <View style={{
-                                        backgroundColor: item.status == "active" ? "#EAFFF1" : "#F9F9F9", borderRadius: 10, paddingHorizontal: 10,
-                                        borderColor: item.status == "active" ? "#17C653" : "#89500E", borderWidth: 0.5
-                                    }}>
-                                        <ThemedText style={{
-                                            color: item.status == "active" ? "#17C653" : "#89500E"
-                                        }}>{item.status}</ThemedText>
-                                    </View>
-                                    <Pressable
-                                        onPress={() => {
-                                            setMeetingId(item.id);
-                                            setNotesModalVisible(true);
+                                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                        <View style={{
+                                            backgroundColor: item.status == "active" ? "#EAFFF1" : "#F9F9F9", borderRadius: 5, paddingHorizontal: 10,
+                                            borderColor: item.status == "active" ? "#17C653" : "#89500E", borderWidth: 0.5
                                         }}>
-                                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                                    </Pressable>
+                                            <ThemedText style={{
+                                                color: item.status == "active" ? "#17C653" : "#89500E"
+                                            }}>{item.status}</ThemedText>
+                                        </View>
+                                        <Pressable
+                                            onPress={() => {
+                                                setMeetingId(item.id);
+                                                setNotesModalVisible(true);
+                                            }}>
+                                            <Feather name="plus-square" size={24} color={Colors[theme].text} />
+                                        </Pressable>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
+                        </Pressable>
                     )}
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
                 />
@@ -777,7 +779,7 @@ const MeetingScreen = () => {
                     <View
                         style={{
                             backgroundColor: Colors[theme].cartBg,
-                            height: vs(330),
+                            height: vs(250),
                             width: s(300),
                             borderRadius: 10,
                             padding: 10,
@@ -790,7 +792,7 @@ const MeetingScreen = () => {
                                 padding: 10,
                             }}
                         >
-                            <ThemedText type="subtitle">Create</ThemedText>
+                            <ThemedText type="subtitle">Change Status</ThemedText>
                             <Pressable onPress={() => setNotesModalVisible(false)}>
                                 <Entypo
                                     name="cross"
@@ -801,24 +803,19 @@ const MeetingScreen = () => {
                         </View>
                         <View style={{ padding: 10 }}>
                             <CustomValidation
-                                type="input"
+                                data={statusData}
+                                type="picker"
+                                hideStar
                                 control={control}
-                                labelStyle={styles.label}
-                                name={"notes"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                label="Notes"
-                                rules={{ required: "enter notes" }}
-                                autoCapitalize="none"
-                            />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                labelStyle={styles.label}
-                                name={"decision"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                label="Decision"
-                                rules={{ required: "enter decision" }}
-                                autoCapitalize="none"
+                                name="status"
+                                label={`Status`}
+                                placeholder="Select status"
+                                rules={{
+                                    required: {
+                                        value: true,
+                                        message: "Select status",
+                                    },
+                                }}
                             />
                             <CustomButton
                                 title="Submit"
