@@ -26,10 +26,7 @@ const index = () => {
   useEffect(() => {
     fetchDashboardData({
       variables: {
-        filters: {
-          startDate: "2025-05-01",
-          endDate: "2025-05-31",
-        },
+        filters: {},
       },
       fetchPolicy: 'network-only',
     });
