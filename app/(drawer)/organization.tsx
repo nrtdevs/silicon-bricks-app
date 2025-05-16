@@ -416,7 +416,7 @@ const OrganizationScreen = () => {
       >
         <View
           style={{
-            backgroundColor: Colors[theme].cartBg,
+            backgroundColor: Colors[theme].cart,
             height: vs(350),
             width: s(300),
             borderRadius: 10,
@@ -503,7 +503,7 @@ const OrganizationScreen = () => {
       >
         <View
           style={{
-            backgroundColor: Colors[theme].cartBg,
+            backgroundColor: Colors[theme].cart,
             height: vs(320),
             width: s(300),
             borderRadius: 10,

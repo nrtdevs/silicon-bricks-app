@@ -234,7 +234,7 @@ const Project = () => {
         key={index}
         style={[
           styles.organizationContainer,
-          { backgroundColor: Colors[theme].cartBg },
+          { backgroundColor: Colors[theme].cart },
         ]}
       >
         <View style={styles.organizationHeader}>
@@ -394,7 +394,7 @@ const Project = () => {
         <ThemedView>
           <View
             style={{
-              backgroundColor: Colors[theme].cartBg,
+              backgroundColor: Colors[theme].cart,
               height: vs(330),
               width: s(300),
               borderRadius: 10,
@@ -470,7 +470,7 @@ const Project = () => {
       >
         <View
           style={{
-            backgroundColor: Colors[theme].cartBg,
+            backgroundColor: Colors[theme].cart,
             height: vs(320),
             width: s(300),
             borderRadius: 10,

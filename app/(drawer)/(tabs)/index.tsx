@@ -58,40 +58,42 @@ const index = () => {
             </TouchableOpacity>
             <Text style={styles.appBar}>Dashboard</Text>
           </View>
-          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
+          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cart }]}>
             <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
               <ThemedText style={styles.cardTitle}>User</ThemedText>
               <ThemedText style={styles.cardHeading}>{userCount.userCount}</ThemedText>
             </View>
           </View>
-          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <ThemedText style={styles.cardTitle}>Role</ThemedText>
-              <ThemedText style={styles.cardHeading}>{userCount.roleCount}</ThemedText>
+          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cart }]}>
+            <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cart }]}>
+              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+                <ThemedText style={styles.cardTitle}>Role</ThemedText>
+                <ThemedText style={styles.cardHeading}>{userCount.roleCount}</ThemedText>
+              </View>
             </View>
-          </View>
-          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <ThemedText style={styles.cardTitle}>Projects</ThemedText>
-              <ThemedText style={styles.cardHeading}>{userCount.projectCount}</ThemedText>
+            <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cart }]}>
+              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+                <ThemedText style={styles.cardTitle}>Projects</ThemedText>
+                <ThemedText style={styles.cardHeading}>{userCount.projectCount}</ThemedText>
+              </View>
             </View>
-          </View>
-          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <ThemedText style={styles.cardTitle}>Permission</ThemedText>
-              <ThemedText style={styles.cardHeading}>{userCount.permissionCount}</ThemedText>
+            <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cart }]}>
+              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+                <ThemedText style={styles.cardTitle}>Permission</ThemedText>
+                <ThemedText style={styles.cardHeading}>{userCount.permissionCount}</ThemedText>
+              </View>
             </View>
-          </View>
-          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <ThemedText style={styles.cardTitle}>Organization</ThemedText>
-              <ThemedText style={styles.cardHeading}>{userCount.organizationCount}</ThemedText>
+            <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cart }]}>
+              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+                <ThemedText style={styles.cardTitle}>Organization</ThemedText>
+                <ThemedText style={styles.cardHeading}>{userCount.organizationCount}</ThemedText>
+              </View>
             </View>
-          </View>
-          <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cartBg }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <ThemedText style={styles.cardTitle}>Assigned Permission</ThemedText>
-              <ThemedText style={styles.cardHeading}>{userCount.assignedPermissionCount}</ThemedText>
+            <View style={[styles.cardStyle, { backgroundColor: Colors[theme].cart }]}>
+              <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
+                <ThemedText style={styles.cardTitle}>Assigned Permission</ThemedText>
+                <ThemedText style={styles.cardHeading}>{userCount.assignedPermissionCount}</ThemedText>
+              </View>
             </View>
           </View>
         </ScrollView>

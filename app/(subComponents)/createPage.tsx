@@ -111,7 +111,7 @@ const createPage = () => {
             <ThemedView style={styles.contentContainer}>
                 <View
                     style={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                         height: '100%',
                         width: '100%',
                         borderRadius: 10,

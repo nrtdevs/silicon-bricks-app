@@ -283,7 +283,7 @@ const PlanScreen = () => {
                 key={index}
                 style={[
                     styles.organizationContainer,
-                    { backgroundColor: Colors[theme].cartBg }
+                    { backgroundColor: Colors[theme].cart }
                 ]}
             >
                 <View style={styles.organizationHeader}>
@@ -463,7 +463,7 @@ const PlanScreen = () => {
             >
                 <ScrollView
                     contentContainerStyle={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                         // height: vs(500),
                         width: '100%',
                         borderRadius: 10,
@@ -623,7 +623,7 @@ const PlanScreen = () => {
             >
                 <View
                     style={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                         height: vs(320),
                         width: s(300),
                         borderRadius: 10,

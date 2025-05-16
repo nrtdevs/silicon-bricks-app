@@ -230,7 +230,7 @@ const RolesScreen = () => {
               key={index}
               style={[
                 styles.organizationContainer,
-                { backgroundColor: Colors[theme].cartBg },
+                { backgroundColor: Colors[theme].cart },
               ]}
             >
               <View style={{ flexDirection: "row", justifyContent: "space-between" }}>

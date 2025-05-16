@@ -29,7 +29,7 @@ const CustomDrawerContent = (props: any) => {
     <>
       {
         userType === 'admin' ? (
-          <DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cartBg }}>
+          <DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cart }}>
             <DrawerItem
               icon={({ color, size }) => <MaterialCommunityIcons name="view-dashboard-edit-outline" size={ms(24)} color={Colors[theme].text} />}
               label={labels?.home}
@@ -122,7 +122,7 @@ const CustomDrawerContent = (props: any) => {
             />
 
           </DrawerContentScrollView>
-        ) : (<DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cartBg }}>
+        ) : (<DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cart }}>
           <DrawerItem
             icon={({ color, size }) => <MaterialCommunityIcons name="view-dashboard-edit-outline" size={ms(24)} color={Colors[theme].text} />}
             label={labels?.home}
@@ -172,7 +172,7 @@ const Layout = () => {
         screenOptions={{
           headerShown: false,
           drawerStyle: {
-            backgroundColor: Colors[theme].cartBg,
+            backgroundColor: Colors[theme].cart,
           },
         }}
         drawerContent={(props) => <CustomDrawerContent {...props} />} />

@@ -3,15 +3,16 @@ import React from "react";
 import SmallCart from "@/components/vehicle/SmallCart";
 import { ScaledSheet } from "react-native-size-matters";
 import { router } from "expo-router";
+import { ThemedView } from "@/components/ThemedView";
 
 const home = () => {
   return (
-    <SafeAreaView style={styles.container}>
+    <ThemedView style={styles.container}>
       <SmallCart icon={"car"} label={"Vehicle"} onPress={() => {router.navigate('/vehicle-list')}}/>
       <SmallCart icon={"hammer"} label={"Vehicle Breakdown"} />
       <SmallCart icon={"wallet-outline"} label={"Vehicle Expense"} />
       <SmallCart icon={"timelapse"} label={"Activity Logs"} />
-    </SafeAreaView>
+    </ThemedView>
   );
 };
 
@@ -23,7 +24,6 @@ const styles = ScaledSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-around", // or 'space-between'
-    paddingVertical: "16@vs",
-    marginTop:"50%"
+    paddingVertical: "16@vs", 
   },
 });

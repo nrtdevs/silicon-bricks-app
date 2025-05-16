@@ -60,8 +60,8 @@ const SettingScreen = () => {
             <Feather name="sun" size={ms(18)} color={Colors.orange} />
           }
           trackBar={{
-            activeBackgroundColor: Colors[theme].toggleBtnBackground,
-            inActiveBackgroundColor: Colors[theme].toggleBtnBackground,
+            // activeBackgroundColor: Colors[theme].toggleBtnBackground,
+            // inActiveBackgroundColor: Colors[theme].toggleBtnBackground,
             borderWidth: 1,
             borderActiveColor: Colors.black,
             borderInActiveColor: Colors.white,
@@ -179,7 +179,7 @@ const SettingScreen = () => {
                 onPress={item?.onTouchAction}
                 style={[
                   styles.container,
-                  { backgroundColor: Colors[theme].cartBg },
+                  { backgroundColor: Colors[theme].cart },
                 ]}
               >
                 {item.image ? (

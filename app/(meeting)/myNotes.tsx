@@ -135,7 +135,7 @@ const MyNotes = () => {
                         <View style={styles.scrollContainer}>
                             <View style={[
                                 styles.notesContainer,
-                                { backgroundColor: Colors[theme].cartBg },
+                                { backgroundColor: Colors[theme].cart },
                             ]}>
                                 <View style={styles.notesHeader}>
                                     <ThemedText type="subtitle" style={{ flex: 1 }}>{item.notesField}</ThemedText>
@@ -215,7 +215,7 @@ const MyNotes = () => {
                     }}
                 >
                     <View style={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                         height: vs(250),
                         width: s(300),
                         borderRadius: 10,

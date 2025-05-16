@@ -525,7 +525,7 @@ const PackageScreen = () => {
             >
                 <ScrollView
                     contentContainerStyle={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                         // height: vs(500),
                         width: s(300),
                         borderRadius: 10,
@@ -710,7 +710,7 @@ const PackageScreen = () => {
             >
                 <View
                     style={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                         height: vs(320),
                         width: s(300),
                         borderRadius: 10,
@@ -776,7 +776,7 @@ const PackageScreen = () => {
             >
                 <View
                     style={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
 
                         borderRadius: 10,
                         padding: 10,
@@ -914,7 +914,7 @@ const PackageScreen = () => {
   >
       <View
           style={{
-              backgroundColor: Colors[theme].cartBg,
+              backgroundColor: Colors[theme].cart,
               height: 380,
               width: s(300),
               borderRadius: 10,

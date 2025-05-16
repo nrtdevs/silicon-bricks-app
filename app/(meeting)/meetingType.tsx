@@ -142,7 +142,7 @@ const MeetingType = () => {
                             
                                 <View style={[
                                     styles.meetingContainer,
-                                    { backgroundColor: Colors[theme].cartBg },
+                                    { backgroundColor: Colors[theme].cart },
                                 ]}>
                                     <View style={styles.meetingHeader}>
                                        
@@ -211,7 +211,7 @@ const MeetingType = () => {
                     }}>
                     <View
                         style={{
-                            backgroundColor: Colors[theme].cartBg,
+                            backgroundColor: Colors[theme].cart,
                             height: vs(250),
                             width: s(300),
                             borderRadius: 10,

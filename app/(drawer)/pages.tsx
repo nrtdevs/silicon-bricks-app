@@ -206,7 +206,7 @@ const organization = () => {
                 key={index}
                 style={[
                     styles.organizationContainer,
-                    { backgroundColor: Colors[theme].cartBg },
+                    { backgroundColor: Colors[theme].cart },
                 ]}
             >
                 <View style={styles.organizationHeader}>
@@ -399,7 +399,7 @@ const organization = () => {
                         onPress={() => {
                             handleSubmit(onSubmit)();
                         }}
-                        style={{ backgroundColor: Colors[theme].cartBg, marginTop: vs(10) }}
+                        style={{ backgroundColor: Colors[theme].cart, marginTop: vs(10) }}
                     />
                 </View>
             </Modal>

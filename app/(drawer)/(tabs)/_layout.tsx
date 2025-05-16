@@ -19,7 +19,7 @@ const _layout = () => {
         },
         default: {
           height: vs(45),
-          backgroundColor: Colors[theme].cartBg,
+          backgroundColor: Colors[theme].cart,
           alignItems: "center",
           justifyContent: "center",
         },

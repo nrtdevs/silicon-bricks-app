@@ -18,7 +18,7 @@ const _layout = () => {
           ios: {},
           default: {
             height: vs(45),
-            backgroundColor: Colors[theme].cartBg,
+            backgroundColor: Colors[theme].background,
             alignItems: "center",
             justifyContent: "center",
           },
@@ -31,11 +31,9 @@ const _layout = () => {
           tabBarLabel: ({ focused }: any) => (
             <Text
               style={{
-                color: focused
+                color:  focused
                   ? Colors.gradient1
-                  : theme == "dark"
-                  ? Colors.white
-                  : Colors.gray,
+                  : Colors[theme].text
               }}
             >
               {labels?.home}
@@ -48,9 +46,7 @@ const _layout = () => {
               color={
                 focused
                   ? Colors.gradient1
-                  : theme == "dark"
-                  ? Colors.white
-                  : Colors.gray
+                  : Colors[theme].text
               }
             />
           ),
@@ -64,9 +60,7 @@ const _layout = () => {
               style={{
                 color: focused
                   ? Colors.gradient1
-                  : theme == "dark"
-                  ? Colors.white
-                  : Colors.gray,
+                  : Colors[theme].text
               }}
             >
               {labels?.settings}
@@ -79,9 +73,7 @@ const _layout = () => {
               color={
                 focused
                   ? Colors.gradient1
-                  : theme == "dark"
-                  ? Colors.white
-                  : Colors.gray
+                  : Colors[theme].text
               }
             />
           ),

@@ -1,13 +1,22 @@
 import React from "react";
 import { Slot, Stack, useNavigation } from "expo-router";
 import { Pressable } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
+import { Colors } from "@/constants/Colors";
 
 
 const VehicleLayout = () => {
-  const navigation = useNavigation();
+  const {theme} = useTheme();
 
   return (
-    <Stack>
+    <Stack screenOptions={{
+      statusBarStyle: theme == 'dark' ? 'light' : 'dark',
+      statusBarBackgroundColor: Colors[theme].background,
+      contentStyle: { },
+      headerStyle: { backgroundColor: Colors[theme].background,},
+      headerTitleStyle: { color: Colors[theme].text },  
+
+    }}>
       <Stack.Screen
         name="(tabs)"
         options={{ title: "Vehicle App", headerTitleAlign: "center" }}

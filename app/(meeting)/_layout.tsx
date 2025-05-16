@@ -12,7 +12,7 @@ import { ms } from 'react-native-size-matters';
 const CustomDrawerContent = (props: any) => {
   const { theme } = useTheme();
   return (
-    <DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cartBg }}>
+    <DrawerContentScrollView {...props} style={{ backgroundColor: Colors[theme].cart }}>
 
       <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color={Colors[theme].text} />}
@@ -72,7 +72,7 @@ const Layout = () => {
       screenOptions={{
         headerShown: false,
         drawerStyle: {
-          backgroundColor: Colors[theme].cartBg,
+          backgroundColor: Colors[theme].cart,
         },
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />} />

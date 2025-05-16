@@ -17,6 +17,8 @@ import { useTheme } from "@/context/ThemeContext";
 import { DeleteVehicleDocument } from "@/graphql/generated";
 import { useMutation } from "@apollo/client";
 import Loader from "@/components/ui/Loader";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
  
 
 const statusColors: Record<string, string> = {
@@ -61,28 +63,28 @@ const VehicleDetailsScreen = () => {
           uri: vehicleDetails?.avatar
             ? `${Env?.SERVER_URL}${vehicleDetails?.avatar}`
             : vehicle.imageUrl,
-        }}
+        }}  
         style={styles.image}
       />
 
       <View style={styles.content}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>
+          <ThemedText type="subtitle">
             {vehicleDetails?.make} {vehicleDetails?.model}
-          </Text>
-          <Text
+          </ThemedText>
+          <ThemedText
             style={[
               styles.status,
               { backgroundColor: statusColors[vehicleDetails.status] },
             ]}
           >
             {vehicleDetails?.status?.toUpperCase()}
-          </Text>
+          </ThemedText>
         </View>
 
-        <Text style={styles.subTitle}>
+        <ThemedText type="defaultSemiBold">
           Vehicle No: {vehicleDetails?.numberPlate}
-        </Text>
+        </ThemedText>
 
         <View style={styles.infoGroup}>
           <InfoRow label="Owner Name" value={"Admin"} />
@@ -137,8 +139,8 @@ const VehicleDetailsScreen = () => {
 
 const InfoRow = ({ label, value }: { label: string; value: string }) => (
   <View style={styles.infoRow}>
-    <Text style={styles.label}>{label}</Text>
-    <Text style={styles.value}>{value}</Text>
+    <ThemedText  type="default">{label}</ThemedText>
+    <ThemedText type="default">{value}</ThemedText>
   </View>
 );
 
@@ -146,6 +148,7 @@ export default VehicleDetailsScreen;
 
 const styles = ScaledSheet.create({
   container: {
+    flex:1,
     paddingBottom: "24@vs",
   },
   image: {
@@ -153,8 +156,7 @@ const styles = ScaledSheet.create({
     height: "220@vs",
   },
   content: {
-    padding: "16@ms",
-    backgroundColor: Colors.white,
+    padding: "16@ms", 
   },
   headerRow: {
     flexDirection: "row",
@@ -169,15 +171,8 @@ const styles = ScaledSheet.create({
     fontSize: 12,
     fontWeight: "bold",
     overflow: "hidden",
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  subTitle: {
-    fontSize: "14@ms",
-    color: "#6B7280",
+  }, 
+  subTitle: { 
     marginTop: 6,
   },
   infoGroup: {
@@ -188,15 +183,8 @@ const styles = ScaledSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  label: {
-    fontSize: "14@ms",
-    color: "#6B7280",
-  },
-  value: {
-    fontSize: "14@ms",
-    fontWeight: "500",
-    color: "#111827",
-  },
+ 
+ 
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",

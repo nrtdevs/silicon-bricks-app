@@ -82,13 +82,13 @@ const AboutScreen = () => {
                     <CustomButton
                         title={labels?.termsOfService}
                         onPress={() => { }}
-                        style={{ backgroundColor: Colors[theme].middleContainerBg }}
+                        style={{ backgroundColor: 'red' }}
                         titleStyle={{ textAlign: 'center' }}
                     />
                     <CustomButton
                         title={labels?.privacyPolicy}
                         onPress={() => { }}
-                        style={{ backgroundColor: Colors[theme].middleContainerBg }}
+                        style={{ backgroundColor: 'red' }}
                     />
                 </ThemedView>
             </ThemedView>

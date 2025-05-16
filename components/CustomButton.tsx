@@ -78,7 +78,7 @@ const CustomButton = (props: CustomButtonProps) => {
         style={[
           styles.gradient,
           {
-            backgroundColor: props.disabled ? Colors.gray : Colors[theme].cartBg
+            backgroundColor: props.disabled ? Colors.gray : Colors[theme].cart
           },
           props.style
         ]}

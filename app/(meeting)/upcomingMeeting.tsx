@@ -285,7 +285,7 @@ const UpcomingMeeting = () => {
                         <View style={styles.scrollContainer}>
                             <View style={[
                                 styles.meetingContainer,
-                                { backgroundColor: Colors[theme].cartBg },
+                                { backgroundColor: Colors[theme].cart },
                             ]}>
                                 <View style={styles.meetingHeader}>
                                     <ThemedText type="subtitle" style={{ flex: 1 }}>{item.title}</ThemedText>
@@ -385,7 +385,7 @@ const UpcomingMeeting = () => {
                 >
                     <View
                         style={{
-                            backgroundColor: Colors[theme].cartBg,
+                            backgroundColor: Colors[theme].cart,
                             height: vs(220),
                             width: s(300),
                             borderRadius: 10,
@@ -444,7 +444,7 @@ const UpcomingMeeting = () => {
                 >
                     <View
                         style={{
-                            backgroundColor: Colors[theme].cartBg,
+                            backgroundColor: Colors[theme].cart,
                             // height: vs(350),
                             width: s(300),
                             borderRadius: 10,
@@ -680,7 +680,7 @@ const UpcomingMeeting = () => {
                 >
                     <View
                         style={{
-                            backgroundColor: Colors[theme].cartBg,
+                            backgroundColor: Colors[theme].cart,
                             height: vs(330),
                             width: s(300),
                             borderRadius: 10,
