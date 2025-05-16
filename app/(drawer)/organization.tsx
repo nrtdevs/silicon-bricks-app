@@ -33,6 +33,7 @@ import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
+import OrganizationCart from "@/components/master/OrganizationList";
 
 const defaultValue = {
   name: "",
@@ -192,7 +193,7 @@ const OrganizationScreen = () => {
         key={index}
         style={[
           styles.organizationContainer,
-          { backgroundColor: Colors[theme]?.cartBg },
+          { backgroundColor: Colors[theme]?.cart },
         ]}
       >
         <View style={styles.organizationHeader}>
@@ -277,6 +278,42 @@ const OrganizationScreen = () => {
         )}
       </View>
     );
+
+
+    // return (
+    //   <OrganizationCart
+    //     name={item?.name}
+    //     status={item?.status}
+    //     email={item?.email}
+    //     mobileNo={"987655"}
+    //     description={item?.description}
+    //     onEdit={() =>
+    //       router.navigate({
+    //         pathname: "/add-edit-vehicle",
+    //         params: { data: JSON.stringify(item) },
+    //       })
+    //     }
+    //     onDelete={() =>
+    //       deleteVehicleApi({
+    //         variables: {
+    //           deleteVehicleId: Number(item?.id),
+    //         },
+    //       })
+    //     }
+    //     onChangeStatus={() => {
+    //       let find = statusArr?.find((i: any) => i.value === item?.status);
+    //       setValue("status", find);
+    //       setSelectedVehicle(item);
+    //       setIsModalVisible(true);
+    //     }}
+    //     onView={() =>
+    //       router.navigate({
+    //         pathname: "/vehicle-details",
+    //         params: { data: JSON.stringify(item) },
+    //       })
+    //     }
+    //   />
+    // );
   };
   // console.log('page',data?.paginatedOrganization?.meta?.totalItems);
 

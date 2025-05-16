@@ -3,7 +3,7 @@ import {
   Alert,
   Pressable,
   SafeAreaView,
-  StyleSheet, 
+  StyleSheet,
   FlatList
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
@@ -13,7 +13,7 @@ import {
   EnableVehicleStatusDocument,
   PaginatedVehiclesDocument,
 } from "@/graphql/generated";
-import Loader from "@/components/ui/Loader"; 
+import Loader from "@/components/ui/Loader";
 import VehicleCard from "@/components/vehicle/VehicleCart";
 import { ms } from "react-native-size-matters";
 import { FAB } from "@rneui/themed";
@@ -117,7 +117,7 @@ const VehicleList = () => {
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [vehicleList, setVehicleList] = useState<any>([]);
- 
+
 
   const fetchVehicleList = async (isRefresh = false, search = "") => {
     const currentPage = isRefresh ? 1 : page;
@@ -142,7 +142,7 @@ const VehicleList = () => {
     });
     const data = response?.data?.paginatedVehicles;
     const newItems = data?.data || [];
-    const lastPage = Math.ceil(data?.meta?.totalItems / Env.LIMIT); 
+    const lastPage = Math.ceil(data?.meta?.totalItems / Env.LIMIT);
     if (newItems.length > 0) {
       setVehicleList((prev: any) =>
         isRefresh ? newItems : [...prev, ...newItems]
@@ -221,7 +221,7 @@ const VehicleList = () => {
     );
   };
 
-  if ((loading && page==1&&!refreshing )|| deleteVehicleStat.loading || changeVehicleStatusStat.loading)
+  if ((loading && page == 1 && !refreshing) || deleteVehicleStat.loading || changeVehicleStatusStat.loading)
     return <Loader />;
 
   return (
