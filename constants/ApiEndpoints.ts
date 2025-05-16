@@ -3,4 +3,5 @@ export enum Env  {
     BASE_URL = `http://${DOMAIN}/graphql`,
     SERVER_URL = `http://${DOMAIN}`,
     SOCKET_URL = `wss://${DOMAIN}/wss2/:8090`,
+    LIMIT = 25
 }

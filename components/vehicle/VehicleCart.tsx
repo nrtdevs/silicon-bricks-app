@@ -18,7 +18,8 @@ interface VehicleCardProps {
 const statusColors = {
   active: '#10B981',
   inactive: '#EF4444',
-  pending: '#F59E0B',
+  breakdown: '#F59E0B',
+  maintenance: '#3B82F6'
 };
 
 const VehicleCard: React.FC<VehicleCardProps> = ({
@@ -82,13 +83,13 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
       {/* Details */}
       <View style={{ }}>
         <Text style={{ fontSize: 14, color: '#374151', marginBottom: 4 }}>
-          <Text style={{ fontWeight: '600' }}>Chassis:</Text> {chassisNumber}
+          <Text style={{ fontWeight: '600' }}>Chassis No:</Text> {chassisNumber}
         </Text>
         <Text style={{ fontSize: 14, color: '#374151', marginBottom: 4 }}>
-          <Text style={{ fontWeight: '600' }}>Number:</Text> {number}
+          <Text style={{ fontWeight: '600' }}>Vehicle No:</Text> {number}
         </Text>
         <Text style={{ fontSize: 14, color: '#374151' }}>
-          <Text style={{ fontWeight: '600' }}>Created:</Text> {new Date(createdAt).toLocaleDateString()}
+          <Text style={{ fontWeight: '600' }}>Reg. Date:</Text> {new Date(createdAt).toLocaleDateString()}
         </Text>
       </View>  
     </View>

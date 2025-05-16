@@ -933,3 +933,11 @@ mutation ChangePackageStatus($updatePackageStatusInput: PackageStatusDto!) {
     }
   }
 }
+
+
+
+mutation EnableVehicleStatus($data: VehicleStatusDto!) {
+  enableVehicleStatus(data: $data) {
+    id
+  }
+}
