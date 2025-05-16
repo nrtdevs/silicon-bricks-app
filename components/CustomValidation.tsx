@@ -242,7 +242,7 @@ const CustomValidation = (props: TextInputProps) => {
         const errStyle = {
           backgroundColor: props.disabled
             ? Colors.gray
-            : Colors[theme].background,
+            : Colors[theme].cart,
           borderColor: error
             ? Colors.red
             : isFocused
@@ -333,7 +333,7 @@ const CustomValidation = (props: TextInputProps) => {
                     onBlur?.();
                     setIsFocused(false);
                   }}
-                  placeholderTextColor={Colors[theme].placeholder}
+                  placeholderTextColor={Colors[theme].lightText}
                   rightIcon={
                     props.rightIcon
                       ? props.rightIcon
@@ -356,7 +356,7 @@ const CustomValidation = (props: TextInputProps) => {
                   inputStyle={[
                     styles.inputStyle,
                     {
-                      color: Colors[theme].text,
+                      color: Colors[theme].lightText,
                       left: props.countryPicker ? ms(65) : 0,
                     },
                     props.inputStyle,
@@ -407,8 +407,8 @@ const CustomValidation = (props: TextInputProps) => {
                       errStyle,
                       props.inputStyle,
                       {
-                        backgroundColor: Colors[theme].background,
-                        shadowColor: Colors[theme].background,
+                        backgroundColor: Colors[theme].cart,
+                        shadowColor: Colors[theme].cart,
                       },
                     ]}
                     placeholderStyle={styles.placeholderStyle}
@@ -420,7 +420,7 @@ const CustomValidation = (props: TextInputProps) => {
                       styles.inputSearchStyle,
                       {
                         color: Colors[theme].text,
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                       },
                     ]}
                     itemTextStyle={[
@@ -462,7 +462,7 @@ const CustomValidation = (props: TextInputProps) => {
                     activeColor={Colors.gray}
                     iconStyle={styles.iconStyle}
                     containerStyle={{
-                      backgroundColor: Colors[theme].cartBg,
+                      backgroundColor: Colors[theme].cart,
                       borderRadius: ms(8),
                       marginTop: vs(5),
                     }}
@@ -493,7 +493,7 @@ const CustomValidation = (props: TextInputProps) => {
                       styles.inputSearchStyle,
                       {
                         color: Colors[theme].text,
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                       },
                     ]}
                     itemTextStyle={[
@@ -536,7 +536,7 @@ const CustomValidation = (props: TextInputProps) => {
                     }
                     searchPlaceholder={props.searchPlaceholder ?? "Search"}
                     containerStyle={{
-                      backgroundColor: Colors[theme].cartBg,
+                      backgroundColor: Colors[theme].cart,
                       borderRadius: ms(8),
                       marginTop: vs(5),
                     }}
@@ -638,7 +638,7 @@ const CustomValidation = (props: TextInputProps) => {
                   style={[
                     styles.imgContainer,
                     {
-                      shadowColor: Colors[theme].cartBg,
+                      shadowColor: Colors[theme].cart,
                     },
                   ]}
                 >

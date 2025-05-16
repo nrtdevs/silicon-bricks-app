@@ -397,7 +397,7 @@ const SettingScreen = () => {
                 onPress={item?.onTouchAction}
                 style={[
                   styles.container,
-                  { backgroundColor: Colors[theme].cartBg },
+                  { backgroundColor: Colors[theme].cart },
                 ]}
               >
                 {item.image ? (
@@ -442,7 +442,7 @@ const SettingScreen = () => {
                 })}
                 style={[
                   styles.container,
-                  { backgroundColor: Colors[theme].cartBg },
+                  { backgroundColor: Colors[theme].cart },
                 ]}
               >
                 {item.image ? (
@@ -489,7 +489,7 @@ const SettingScreen = () => {
         >
           <View
             style={{
-              backgroundColor: Colors[theme].cartBg,
+              backgroundColor: Colors[theme].cart,
               height: vs(530),
               width: s(300),
               borderRadius: 10,

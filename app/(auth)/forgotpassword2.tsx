@@ -9,8 +9,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { useTheme } from '@/context/ThemeContext'
 import { Colors } from '@/constants/Colors'
 import { labels } from '@/constants/Labels'
-import CustomButton from '@/components/CustomButton'
-import { CustomTextInput } from '@/components/ui/CustomTextInput'
+import CustomButton from '@/components/CustomButton' 
 import CustomValidation from '@/components/CustomValidation'
 
 type Props = {}

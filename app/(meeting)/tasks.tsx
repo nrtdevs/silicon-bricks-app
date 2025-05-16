@@ -102,7 +102,7 @@ const TaskScreen = () => {
                             <View style={styles.scrollContainer}>
                                 <View style={[
                                     styles.taskContainer,
-                                    { backgroundColor: Colors[theme].cartBg },
+                                    { backgroundColor: Colors[theme].cart },
                                 ]}>
                                     <View style={styles.taskHeader}>
                                         <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.task}</ThemedText>
@@ -188,7 +188,7 @@ const TaskScreen = () => {
                     }}>
                     <View
                         style={{
-                            backgroundColor: Colors[theme].cartBg,
+                            backgroundColor: Colors[theme].cart,
                             // height: vs(250),
                             width: s(300),
                             borderRadius: 10,

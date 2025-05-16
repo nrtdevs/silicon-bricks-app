@@ -33,6 +33,7 @@ import CustomSearchBar from "@/components/CustomSearchBar";
 import debounce from "lodash.debounce";
 import { Colors } from "@/constants/Colors";
 import { Env } from "@/constants/ApiEndpoints";
+import { ThemedView } from "@/components/ThemedView";
 
 const VehicleList = () => {
   const [getVehicleListApi, { data, loading, error, refetch }] =
@@ -224,7 +225,7 @@ const VehicleList = () => {
     return <Loader />;
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <ThemedView style={{ flex: 1 }}>
       {isSearch && (
         <CustomSearchBar
           searchQuery={searchValue}
@@ -297,7 +298,7 @@ const VehicleList = () => {
           />
         }
       />
-    </SafeAreaView>
+    </ThemedView>
   );
 };
 

@@ -248,7 +248,7 @@ const CreateRoleScreen = () => {
                           <View
                             key={index}
                             style={{
-                              backgroundColor: Colors[theme].cartBg,
+                              backgroundColor: Colors[theme].cart,
                               padding: 10,
                               borderRadius: 10,
                               marginBottom: 20,

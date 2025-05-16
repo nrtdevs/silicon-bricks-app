@@ -56,8 +56,7 @@ const CustomSearchBar = (props: CustomSearchBarProps) => {
     )
   }
 // #D8D9DF #3A3B3C
-  return (
-    <View style={{ width: '100%' }}>
+  return ( 
       <SearchBar
         onSubmitEditing={props.onSubmitEditing}
         keyboardAppearance="dark"
@@ -69,13 +68,13 @@ const CustomSearchBar = (props: CustomSearchBarProps) => {
         value={props.searchQuery}
         containerStyle={[
           styles.containerStyle,
-          { ...props.containerStyle, backgroundColor: Colors[theme].background }
+          { ...props.containerStyle, backgroundColor: Colors[theme].cart }
         ]}
         inputContainerStyle={[
           styles.inputContainerStyle,
           props.inputContainerStyle,
           {
-            backgroundColor: Colors[theme].background
+            backgroundColor: Colors[theme].cart
           }
         ]}
         inputStyle={[styles.inputStyle, { color: Colors[theme].text }]}
@@ -98,19 +97,7 @@ const CustomSearchBar = (props: CustomSearchBarProps) => {
         }}
         lightTheme={false}
       />
-      {/* Suggestion List */}
-      {props.suggestionData?.length > 0 ? (
-        <FlatList
-          data={props.suggestionData}
-          keyExtractor={(item, index) => index.toString()}
-          style={[
-            styles.suggestionContainer,
-            { backgroundColor: Colors[theme].cartBg }
-          ]}
-          renderItem={({ item, index }) => renderItem(item, index)}
-        />
-      ) : null}
-    </View>
+       
   )
 }
 

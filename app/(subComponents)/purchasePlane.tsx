@@ -299,7 +299,7 @@ const PurchasePlaneScreen = () => {
                 key={index}
                 style={[
                     styles.organizationContainer,
-                    { backgroundColor: Colors[theme].cartBg }
+                    { backgroundColor: Colors[theme].cart }
                 ]}
             >
                 <View style={styles.organizationHeader}>

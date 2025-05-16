@@ -272,7 +272,7 @@ const UserScreen = () => {
         key={index}
         style={[
           styles.organizationContainer,
-          { backgroundColor: Colors[theme].cartBg },
+          { backgroundColor: Colors[theme].cart },
         ]}
       >
         <View style={styles.organizationHeader}>
@@ -592,7 +592,7 @@ const UserScreen = () => {
       >
         <ScrollView
           contentContainerStyle={{
-            backgroundColor: Colors[theme].cartBg,
+            backgroundColor: Colors[theme].cart,
             // height: vs(640),
             width: "100%",
             borderRadius: 10,
@@ -767,7 +767,7 @@ const UserScreen = () => {
       >
         <View
           style={{
-            backgroundColor: Colors[theme].cartBg,
+            backgroundColor: Colors[theme].cart,
             height: vs(350),
             width: s(300),
             borderRadius: 10,
@@ -834,7 +834,7 @@ const UserScreen = () => {
       >
         <View
           style={{
-            backgroundColor: Colors[theme].cartBg,
+            backgroundColor: Colors[theme].cart,
             height: vs(320),
             width: s(300),
             borderRadius: 10,

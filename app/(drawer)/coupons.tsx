@@ -280,7 +280,7 @@ const CouponScreen = () => {
                 key={index}
                 style={[
                     styles.organizationContainer,
-                    { backgroundColor: Colors[theme].cartBg },
+                    { backgroundColor: Colors[theme].cart },
                 ]}
             >
                 <View style={styles.organizationHeader}>
@@ -504,7 +504,7 @@ const CouponScreen = () => {
             >
                 <ScrollView
                     contentContainerStyle={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                         // height: vs(500),
                         width: s(300),
                         borderRadius: 10,
@@ -705,7 +705,7 @@ const CouponScreen = () => {
             >
                 <View
                     style={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
 
                         borderRadius: 10,
                         padding: 10,
@@ -798,7 +798,7 @@ const CouponScreen = () => {
             >
                 <View
                     style={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                         height: vs(320),
                         width: s(300),
                         borderRadius: 10,

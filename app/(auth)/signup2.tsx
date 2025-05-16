@@ -254,7 +254,7 @@ export default function signup() {
           setModalVisible(false);
         }}
       >
-        <ThemedView style={[styles.modalContainer, { backgroundColor: Colors[theme].cartBg }]}>
+        <ThemedView style={[styles.modalContainer, { backgroundColor: Colors[theme].cart }]}>
           <View style={{ flex: 1, justifyContent: "center" }}>
             <View style={{ marginVertical: vs(20) }}>
               <ThemedText style={{ textAlign: "center" }} type="title">

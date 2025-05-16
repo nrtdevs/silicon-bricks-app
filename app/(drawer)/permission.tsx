@@ -183,7 +183,7 @@ const PermissionScreen = () => {
                                 key={index}
                                 style={[
                                     styles.organizationContainer,
-                                    { backgroundColor: Colors[theme].cartBg },
+                                    { backgroundColor: Colors[theme].cart },
                                 ]}
                             >
                                 <View style={styles.organizationHeader}>
@@ -274,7 +274,7 @@ const PermissionScreen = () => {
             >
                 <View
                     style={{
-                        backgroundColor: Colors[theme].cartBg,
+                        backgroundColor: Colors[theme].cart,
                         height: vs(510),
                         width: s(300),
                         borderRadius: 10,

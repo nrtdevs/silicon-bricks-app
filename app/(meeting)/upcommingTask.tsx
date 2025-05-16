@@ -167,7 +167,7 @@ const UpcommingTask = () => {
                         <View style={styles.scrollContainer}>
                             <View style={[
                                 styles.notesContainer,
-                                { backgroundColor: Colors[theme].cartBg },
+                                { backgroundColor: Colors[theme].cart },
                             ]}>
                                 <View style={styles.notesHeader}>
                                     <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.task}</ThemedText>
@@ -241,7 +241,7 @@ const UpcommingTask = () => {
                 >
                     <ScrollView
                         style={{
-                            backgroundColor: Colors[theme].cartBg,
+                            backgroundColor: Colors[theme].cart,
                             //height: vs(650),
                             width: s(300),
                             borderRadius: 10,

@@ -1,75 +1,54 @@
-const tintColorLight = '#0a7ea4'
-const tintColorDark = '#fff'
+const tintColorLight = '#0a7ea4';
+const tintColorDark = '#ffffff';
 
 export const Colors = {
   /** 🎨 Light Theme Colors */
-  // #D8D9DF #3A3B3C
   light: {
-    text: '#333333',
-    background: '#fff',
+    text: '#1C1C1E',
+    background: '#FFFFFF',
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-    border: '#E0E0E0', // Example border color
-    shadow: 'rgba(0, 0, 0, 0.1)', // Light shadow
-    toggleBtnBackground: '#E3E3E3',
-    lightText: '#949494',
-    toggleCircleBg: '#949494',
-    middleContainerBg: '#FAFAFA',
-    countryViewBg: '#F5F5F5',
-    inputColor: '#B8B8B8',
-    cartBg: '#D8D9DF',
-    inputBg: '#F5F5F5',
-    placeholder: '#a3a3a3',
-    miniBtnBg: '#949494',
-    toogleTrack: '#E3E3E3'
+    icon: '#5C5C5C',  
+    border: '#E0E0E0',
+    shadow: 'rgba(0, 0, 0, 0.06)',  
+    lightText: '#7E7E7E',   
+    placeholder: '#A8A8A8',
+    cart: '#F4F4F6', // Light modern card background  
   },
 
   /** 🌙 Dark Theme Colors */
   dark: {
-    text: '#FCFCFC',
-    background: '#151718',
+    text: '#F5F5F7',
+    background: '#121212',
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-    border: '#303030', // Dark border
-    shadow: 'rgba(255, 255, 255, 0.1)', // Dark shadow
-    toggleBtnBackground: '#050505',
-    lightText: '#9BA1A6',
-    toggleCircleBg: '#333333',
-    middleContainerBg: '#292929',
-    countryViewBg: '#333333',
-    inputColor: '#3D3D3D',
-    cartBg: '#3A3B3C',
-    inputBg: '#333333',
-    placeholder: '#858585',
-    miniBtnBg: '#949494',
-    toogleTrack: 'black'
+    icon: '#B0B3B8',  
+    border: '#2C2C2E',
+    shadow: 'rgba(255, 255, 255, 0.05)',  
+    lightText: '#9E9E9F',  
+    inputColor: '#4D4D4D', 
+    cart: '#1C1C1E', // Elegant dark card  
   },
 
-  /** 🌎 Universal Colors (Not Theme-Specific) */
-  white: '#fff',
-  black: '#000',
-  red: 'red',
-  green: 'green',
-  gray: '#949494',
-  orange: 'orange',
+  /** 🌎 Universal Colors */
+  white: '#FFFFFF',
+  black: '#000000',
+  red: '#FF3B30',
+  green: '#34C759',
+  gray: '#8E8E93',
+  orange: '#FF9500',
   primary: '#E06557',
-  lightGray: '#9BA1A6',
+  lightGray: '#D1D1D6',
   yellow: '#FFCC00',
-  blue: '#0000FF',
+  blue: '#007AFF',
   gradient1: '#E06557',
   gradient2: '#AA6097',
-  grayText: '#969696',
-  inputBorder: '#969696',
-  inputText: '#666666',
-  primaryRed: '#E57C71',
+  grayText: '#8E8E93',
+  inputBorder: '#D1D1D6',
+  inputText: '#333333',
+  primaryRed: '#E05757',
   transparent: 'transparent',
-  info: '#66A1FF',
-  internalGray: '#C9C9C9',
-  backgroundColorPrimary: '#FDE2F3',
-  titleFooter: '#917FB3',
-  title: '#2A2F4F'
-}
+  info: '#5AC8FA',
+  internalGray: '#C7C7CC',
+  backgroundColorPrimary: '#FFF0F6',
+  titleFooter: '#7C4DFF',
+  title: '#1D1D1F',
+};
