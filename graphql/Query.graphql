@@ -675,6 +675,7 @@ query PaginatedMeeting($listInputDto: ListInputDTO!) {
       createdByUserId
       meetingVenueId
       meetingTypeId
+      projectName
       parentMeetingId
       title
       startTime
@@ -684,10 +685,8 @@ query PaginatedMeeting($listInputDto: ListInputDTO!) {
       meetingAgenda
       meetingUrl
       attendees
+      attendeesNames
       uploadDoc
-      createdAt
-      updatedAt
-      deletedAt
     }
   }
 }
@@ -791,6 +790,7 @@ query PaginatedNotePad($listInputDto: ListInputDTO!) {
     }
   }
 }
+
 query GetUpcomingMeetings($listInputDto: ListInputDTO!) {
   getUpcomingMeetings(ListInputDTO: $listInputDto) {
     data {

@@ -9,7 +9,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { labels } from '@/constants/Labels';
 import { useTheme } from '@/context/ThemeContext';
-import { CreateMeetingDocument, CreateNotesDocument, DeleteMetingDocument, GetAllMeetingTypesDocument, PaginatedMeetingDocument, PaginatedMeetingVenueDocument,PaginatedProjectsDocument,PaginatedUsersDocument, UpdateMeetingDocument } from '@/graphql/generated';
+import { CreateMeetingDocument, CreateNotesDocument, DeleteMetingDocument, GetAllMeetingTypesDocument, PaginatedMeetingDocument, PaginatedMeetingVenueDocument, PaginatedProjectsDocument, PaginatedUsersDocument, UpdateMeetingDocument } from '@/graphql/generated';
 import { getDateTimePickerProps } from '@/utils/getDateTimePickerProps';
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import { Entypo, Feather, Fontisto, MaterialIcons } from '@expo/vector-icons';
@@ -19,7 +19,8 @@ import { View, Pressable, Alert, Modal, FlatList, ScrollView, Image, Button } fr
 import { ms, s, ScaledSheet, vs } from 'react-native-size-matters';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from "expo-file-system";
-import { Env } from '@/constants/ApiEndpoints';
+import { router } from 'expo-router';
+
 
 const defaultValue = {
     endTime: '',
@@ -248,7 +249,7 @@ const MeetingScreen = () => {
                         "meetingVenueId": Number(data.meetingVenueId.value),
                         "projectId": Number(data.projectId.value),
                         "uploadDoc": image,
-                        "projectName" : data.projectName
+                        "projectName": data.projectName
                     }
                 },
             }) :
@@ -257,7 +258,7 @@ const MeetingScreen = () => {
                     data: param
                 },
             });
-            
+
     };
     const getLocalizedTime = (date: Date) => {
         return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -280,7 +281,7 @@ const MeetingScreen = () => {
                 return;
             }
 
-            const fileExtension = uri.split(".").pop() || "jpg"; 
+            const fileExtension = uri.split(".").pop() || "jpg";
             const mimeType = `image/${fileExtension}`;
 
             const formData = new FormData();
@@ -329,8 +330,6 @@ const MeetingScreen = () => {
             uploadImage(uri);
         }
     };
-    console.log('0909',image);
-    
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -366,8 +365,21 @@ const MeetingScreen = () => {
                                     <View style={styles.organizationInfo}>
                                         <MaterialIcons name="visibility" color={Colors[theme].text} size={24}
                                             onPress={() => {
-                                                setViewModalVisible(true)
-                                                setSelectedMeeting(item);
+                                                router.push({
+                                                    pathname: "/(meeting)/meetingDetails",
+                                                    params: {
+                                                        id : item.id,
+                                                        title: `${item.title}`,
+                                                        meetingDate: `${item.meetingDate}`,
+                                                        agenda: `${item.meetingAgenda}`,
+                                                        reference: `${item.meetingReference}`,
+                                                        url : `${item.meetingUrl}`,
+                                                        project : `${item.projectName}`,
+                                                        startTime: `${item.startTime}`,
+                                                        endTime: `${item.endTime}`,
+                                                        status: `${item.status}`,
+                                                    },
+                                                });
                                             }}
                                         />
                                         <View style={{ width: 5 }}></View>
@@ -391,6 +403,7 @@ const MeetingScreen = () => {
                                                     meetingTypeId: "1",
                                                     meetingUrl: `${item.meetingUrl}`,
                                                     parentMeetingId: `${item.parentMeetingId}`,
+                                                    
                                                 })
                                             }}
                                         />
@@ -421,7 +434,6 @@ const MeetingScreen = () => {
                                         />
                                     </View>
                                 </View>
-                                <ThemedText style={styles.cardTime}>{item.meetingDate} , {item.startTime} to {item.endTime}</ThemedText>
                                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                                     <View style={{
                                         backgroundColor: item.status == "active" ? "#EAFFF1" : "#F9F9F9", borderRadius: 10, paddingHorizontal: 10,
@@ -733,7 +745,7 @@ const MeetingScreen = () => {
                                     marginTop: vs(20),
                                 }}
                             />
-                            {image && <Image source={{ uri: `http://192.168.1.18:5001${image}`}} style={{ width: "100%", height: 200, marginTop: 20,justifyContent : "center" ,alignSelf : "center"}} />}
+                            {image && <Image source={{ uri: `http://192.168.1.18:5001${image}` }} style={{ width: "100%", height: 200, marginTop: 20, justifyContent: "center", alignSelf: "center" }} />}
                             <CustomButton
                                 title="Submit"
                                 onPress={() => {

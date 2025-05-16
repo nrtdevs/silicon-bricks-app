@@ -10,6 +10,7 @@ import { useTheme } from "@/context/ThemeContext"
 import { CreateMeetingVenueDocument, DeleteMetingVenueDocument, PaginatedMeetingVenueDocument, UpdateMeetingVenueDocument } from "@/graphql/generated"
 import { useLazyQuery, useMutation } from "@apollo/client"
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons"
+import { isLoading } from "expo-font"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Alert, FlatList, Modal, Pressable, View, ScrollView } from "react-native"
@@ -60,7 +61,7 @@ const MeetingVenue = () => {
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{
         name: string, contactNumber: string, address: string, contactPerson: string, description: string
     }>({ defaultValues: {} });
-    const [createMeetingVenue, createOrganizationState] = useMutation(CreateMeetingVenueDocument, {
+    const [createMeetingVenue, createMeetingState] = useMutation(CreateMeetingVenueDocument, {
         onCompleted: (data) => {
             reset()
             refetch();
@@ -124,6 +125,9 @@ const MeetingVenue = () => {
     const filteredData = data?.paginatedMeetingVenue?.data?.filter((item) =>
         item?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    // view meeting data
+    const [isViewModalVisible, setViewModalVisible] = useState(false);
+    const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -157,6 +161,13 @@ const MeetingVenue = () => {
                                     <View style={styles.meetingHeader}>
                                         <ThemedText type="subtitle" style={{ flex: 1 }}>{item.name}</ThemedText>
                                         <View style={styles.organizationInfo}>
+                                            <MaterialIcons name="visibility" color={Colors[theme].text} size={24}
+                                            onPress={() => {
+                                                setViewModalVisible(true)
+                                                setSelectedMeeting(item);
+                                            }}
+                                        />
+                                        <View style={{ width: 5 }}></View>
                                             <Feather
                                                 name="edit"
                                                 size={ms(20)}
@@ -201,7 +212,7 @@ const MeetingVenue = () => {
                                             />
                                         </View>
                                     </View>
-                                    <View style={{ width: 5 }}></View>
+
                                 </View>
                             </View>
                         )
@@ -228,7 +239,6 @@ const MeetingVenue = () => {
                     <View
                         style={{
                             backgroundColor: Colors[theme].cartBg,
-                            // height: vs(250),
                             width: s(300),
                             borderRadius: 10,
                             padding: 10,
@@ -317,17 +327,76 @@ const MeetingVenue = () => {
 
                             <CustomButton
                                 title="Submit"
+                                isLoading ={createMeetingState?.loading || updateMeetingVenueState?.loading}
                                 onPress={() => {
                                     handleSubmit(onSubmit)();
                                 }}
                                 style={{
                                     backgroundColor: Colors[theme].background,
-                                    marginTop: vs(50),
+                                    marginTop: vs(30),
                                 }}
                             />
                         </View>
                     </View>
                 </ScrollView>
+            </Modal>
+            {/* view meeting data  */}
+            <Modal
+                visible={isViewModalVisible}
+                transparent={true}
+                animationType="fade"
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    }}
+                >
+                    <View
+                        style={{
+                            backgroundColor: Colors[theme].cartBg,
+                            height: vs(220),
+                            width: s(300),
+                            borderRadius: 10,
+                            padding: 10,
+                        }}
+                    >
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                padding: 10,
+                            }}
+                        >
+                            <ThemedText type="subtitle">Venue Details</ThemedText>
+                            <Pressable onPress={() => setViewModalVisible(false)}>
+                                <Entypo
+                                    name="cross"
+                                    size={ms(20)}
+                                    color={Colors[theme].text}
+                                />
+                            </Pressable>
+                        </View>
+                        <View style={{ flexDirection: 'row', padding: 10 }}>
+                            <View style={{ width: 110 }}>
+                                <ThemedText style={styles.meetingTitle}>Name</ThemedText>
+                                <ThemedText style={styles.meetingTitle}>Address</ThemedText>
+                                <ThemedText style={styles.meetingTitle}>Contact</ThemedText>
+                                <ThemedText style={styles.meetingTitle}>Person</ThemedText>
+                                <ThemedText style={styles.meetingTitle}>Description</ThemedText>
+                            </View>
+                            <View>
+                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.name}</ThemedText>
+                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.address}</ThemedText>
+                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.contactNumber}</ThemedText>
+                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.contactPerson}</ThemedText>
+                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.description}</ThemedText>
+                            </View>
+                        </View>
+                    </View>
+                </View>
             </Modal>
         </CustomHeader>
     )
@@ -368,6 +437,12 @@ const styles = ScaledSheet.create({
         marginBottom: "5@ms",
         textAlign: "left",
         alignSelf: "flex-start",
+    },
+    meetingTitle: {
+        fontSize: "16@ms",
+        color: "black",
+        fontWeight: "500",
+
     },
 })
 export default MeetingVenue;

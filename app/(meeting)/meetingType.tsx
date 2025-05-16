@@ -36,7 +36,7 @@ const MeetingType = () => {
         name: string;
         id: string;
     }>(defaultValue);
-    const [createMeetingType, createOrganizationState] = useMutation(CreateMeetingTypeDocument, {
+    const [createMeetingType, createMeetingTypeState] = useMutation(CreateMeetingTypeDocument, {
         onCompleted: (data) => {
             reset()
             refetch();
@@ -103,6 +103,7 @@ const MeetingType = () => {
     /// delete meeting api 
     const [deleteMeetingType, deleteMeetingTypeState] = useMutation(DeleteMetingTypeDocument, {
         onCompleted: (data) => {
+            reset();
             refetch();
             Alert.alert("success", "Meeting deleted successfully!")
         },
@@ -138,19 +139,13 @@ const MeetingType = () => {
                     data={filteredData}
                     renderItem={({ item }) => (
                         <View style={styles.scrollContainer}>
-                            <LinearGradient
-                                colors={[Colors.gradient2, Colors.gradient1]}
-                                start={{ x: 0, y: 1 }}
-                                end={{ x: 1, y: 0 }}
-                                style={[styles.gradient,]}
-                            >
+                            
                                 <View style={[
                                     styles.meetingContainer,
+                                    { backgroundColor: Colors[theme].cartBg },
                                 ]}>
                                     <View style={styles.meetingHeader}>
-                                        <View style={{ borderRadius: "100%", backgroundColor: Colors[theme].cartBg, width: 40, height: 40, justifyContent: "center", alignItems: "center" }}>
-                                            <ThemedText style={styles.cardHeading}>{item.name.charAt(0).toUpperCase()}</ThemedText>
-                                        </View>
+                                       
                                         <ThemedText type="subtitle" style={{ flex: 1, }} >  {item.name}</ThemedText>
                                         <View style={styles.organizationInfo}>
                                             <Feather
@@ -195,13 +190,13 @@ const MeetingType = () => {
                                     </View>
 
                                 </View>
-                            </LinearGradient>
+                            
                         </View>
                     )}
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
                 />
             </ThemedView>
-            {/* add and edit modal */}
+            {/* Create and Edit modal */}
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -257,6 +252,7 @@ const MeetingType = () => {
                             />
                             <CustomButton
                                 title="Submit"
+                                isLoading={createMeetingTypeState?.loading || updateMeetingTypeState?.loading}
                                 onPress={() => {
                                     handleSubmit(onSubmit)();
                                 }}
