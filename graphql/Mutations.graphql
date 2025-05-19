@@ -941,3 +941,13 @@ mutation EnableMeetingStatus($updateMeetingStatusInput: MeetingStatusDto!) {
     }
   }
 }
+
+mutation UpdateNotes($updateNotesInput: UpdateNotesDto!) {
+  updateNotes(updateNotesInput: $updateNotesInput) {
+    notes
+    id
+    decision
+    meetingId
+    uploadDoc
+  }
+}

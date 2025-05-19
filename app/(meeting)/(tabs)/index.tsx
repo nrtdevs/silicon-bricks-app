@@ -15,6 +15,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import { ThemedText } from "@/components/ThemedText";
 import { useQuery } from "@apollo/client";
 import { GetMeetingDashboardDocument } from "@/graphql/generated";
+import SmallCart from "@/components/vehicle/SmallCart";
+import { router } from "expo-router";
 
 const index = () => {
   const { theme } = useTheme();
@@ -43,127 +45,20 @@ const index = () => {
             >
               <Entypo name="menu" size={34} color={Colors[theme].text} />
             </Pressable>
-            <ThemedText >Dashboard</ThemedText>
+            <ThemedText>Dashboard</ThemedText>
           </View>
 
-          <View style={[styles.cardStyle, { backgroundColor: "#5b79ab" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>AM</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Active Meetings</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.activeMeetings}</ThemedText>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.cardStyle, { backgroundColor: "#ab7f59" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>TM</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Total Meetings</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.totalMeetings}</ThemedText>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.cardStyle, { backgroundColor: "#956fc9" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>TM</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Today Meetings</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.totalMeetings}</ThemedText>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.cardStyle, { backgroundColor: "#5b79ab" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>UM</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Upcoming Meeting</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.upComingMeeting}</ThemedText>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.cardStyle, { backgroundColor: "#ab7f59" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>CM</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Complete Meetings</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.upComingMeeting}</ThemedText>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.cardStyle, { backgroundColor: "#956fc9" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>IM</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Inactive Meetings</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.inactiveMeetings}</ThemedText>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.cardStyle, { backgroundColor: "#5b79ab" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>OT</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Ongoing Task</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.ongoingTasks}</ThemedText>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.cardStyle, { backgroundColor: "#ab7f59" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>CT</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Completed Task</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.completedTasks}</ThemedText>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.cardStyle, { backgroundColor: "#956fc9" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>TT</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Total Task</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.totalTasks}</ThemedText>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.cardStyle, { backgroundColor: "#5b79ab" }]}>
-            <View style={{ flexDirection: "row", justifyContent: 'space-between' }}>
-              <View style={{ borderRadius: "100%", backgroundColor: "white", width: 50, height: 50, justifyContent: "center", alignItems: "center" }}>
-                <ThemedText style={styles.cardHeading}>IT</ThemedText>
-              </View>
-              <View >
-                <ThemedText style={styles.cardTitle}>Incomplete Task</ThemedText>
-                <ThemedText style={styles.cardSub}>{userCount.inComingTasks}</ThemedText>
-              </View>
-            </View>
+          <View style={styles.container}>
+            <SmallCart icon={"account-voice"} label={`Active Meetings (${userCount.activeMeetings})`} onPress={() => { }} />
+            <SmallCart icon={"account-voice"} label={`Total Meetings (${userCount.totalMeetings})`} onPress={() => { }} />
+            <SmallCart icon={"account-voice"} label={`Today Meetings (${userCount.todayMeeting})`} onPress={() => { }} />
+            <SmallCart icon={"account-voice"} label={`Upcoming Meetings (${userCount.upComingMeeting})`} onPress={() => { }} />
+            <SmallCart icon={"account-voice"} label={`Complete Meetings (${userCount.completedMeeting})`} onPress={() => { }} />
+            <SmallCart icon={"account-voice"} label={`Inactive Meetings (${userCount.inactiveMeetings})`} onPress={() => { }} />
+            <SmallCart icon={"note"} label={`Ongoing Tasks (${userCount.ongoingTasks})`} onPress={() => { }} />
+            <SmallCart icon={"note"} label={`Completed Tasks (${userCount.completedTasks})`} onPress={() => { }} />
+            <SmallCart icon={"note"} label={`Total Tasks (${userCount.totalTasks})`} onPress={() => { }} />
+            <SmallCart icon={"note"} label={`Incomplete Tasks (${userCount.inComingTasks})`} onPress={() => { }} />
           </View>
 
         </ScrollView>
@@ -173,6 +68,13 @@ const index = () => {
 };
 
 const styles = ScaledSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around", // or 'space-between'
+    paddingVertical: "16@vs", 
+  },
   appBar: {
     fontSize: "18@ms",
     fontWeight: "500",

@@ -41,6 +41,7 @@ const statusData = [
     { label: "Completed", value: "completed" },
     { label: "Inactive", value: "inactive" }
 ];
+
 const MeetingScreen = () => {
     const { theme } = useTheme();
     /// serach state 
@@ -354,6 +355,7 @@ const MeetingScreen = () => {
                         <Feather name="plus-square" size={24} color={Colors[theme].text} />
                     </Pressable>
                 </View>
+
                 <FlatList
                     data={filteredData}
                     renderItem={({ item }) => (
@@ -378,7 +380,7 @@ const MeetingScreen = () => {
                             <View style={styles.scrollContainer}>
                                 <View style={[
                                     styles.organizationContainer,
-                                    { backgroundColor: Colors[theme].cartBg },
+                                    { backgroundColor: Colors[theme].cart },
                                 ]}>
                                     <View style={styles.organizationHeader}>
                                         <ThemedText type="subtitle" style={{ flex: 1 }}>{item.title}</ThemedText>
@@ -404,7 +406,6 @@ const MeetingScreen = () => {
                                                         meetingTypeId: "1",
                                                         meetingUrl: `${item.meetingUrl}`,
                                                         parentMeetingId: `${item.parentMeetingId}`,
-
                                                     })
                                                 }}
                                             />
@@ -858,6 +859,19 @@ const styles = ScaledSheet.create({
     contentContainer: {
         flex: 1,
         padding: "12@ms",
+    },
+    container: {
+        borderRadius: "20@ms",
+        marginHorizontal: "16@ms",
+        marginVertical: "10@ms",
+        padding: "16@ms",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 5,
+        borderWidth: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
     searchContainer: {
         width: "100%",

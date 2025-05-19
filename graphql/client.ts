@@ -40,7 +40,7 @@ import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry'
 
 // Define the HTTP link
 const httpLink = createHttpLink({
-  uri: Env.BASE_URL
+  uri : `${Env.BASE_URL}`,
 })
 
 const getAccessToken = async () => {

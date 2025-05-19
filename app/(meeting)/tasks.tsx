@@ -27,7 +27,7 @@ const TaskScreen = () => {
             variables: {
                 listInputDto: {
                     limit: 10,
-                     page: 1
+                    page: 1
                 }
             }
         });
@@ -73,7 +73,9 @@ const TaskScreen = () => {
         });
 
     };
-
+    const filteredData = data?.paginatedMeetingTask?.data?.filter((item) =>
+        item?.task?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -97,7 +99,7 @@ const TaskScreen = () => {
                     </Pressable>
                 </View>
                 <FlatList
-                    data={data?.paginatedMeetingTask?.data}
+                    data={filteredData}
                     renderItem={({ item }) => {
                         return (
                             <View style={styles.scrollContainer}>
@@ -112,10 +114,10 @@ const TaskScreen = () => {
                                                 name="edit"
                                                 size={ms(20)}
                                                 color={Colors[theme].text}
-                                               onPress={() => {
+                                                onPress={() => {
                                                     router.push({
                                                         pathname: "/(meeting)/addTask",
-                                                        params: { task: `${item.task}`,comment : `${item.comment}` },
+                                                        params: { task: `${item.task}`, comment: `${item.comment}` },
                                                     });
                                                 }}
                                             />

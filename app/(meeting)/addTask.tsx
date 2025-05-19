@@ -10,11 +10,11 @@ import { CreateMeetingTaskDocument, PaginatedMeetingDocument, PaginatedNotesDocu
 import { formatTimeForAPI } from "@/utils/formatDateTime";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useMutation, useQuery } from "@apollo/client";
-import { Fontisto } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { Fontisto, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, ScrollView, View } from "react-native";
+import { Alert, Button, ScrollView, View } from "react-native";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
 
 const pickerData = [
@@ -28,11 +28,11 @@ const weightData = [
 ];
 const defaultValue = {
     task: '',
-    comment : ""
+    comment: ""
 }
 
 const AddTask = () => {
-    const { task,comment } = useLocalSearchParams();
+    const { task, comment } = useLocalSearchParams();
     const { theme } = useTheme();
     /// create and edit user state
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{
@@ -159,7 +159,7 @@ const AddTask = () => {
 
     const [currentMeeting, setCurrentMeeting] = useState<{
         task: string;
-        comment : string;
+        comment: string;
     }>(defaultValue);
     useEffect(() => {
         setValue('task', task as string);
@@ -168,8 +168,16 @@ const AddTask = () => {
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
-                <ThemedText style={{ fontSize: 20, fontWeight: "600", margin: 5 }}>Add Task</ThemedText>
-                <ScrollView style={{ paddingHorizontal: 10, backgroundColor: '#959b9e' }}>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
+                     <MaterialCommunityIcons
+                        name="arrow-left"
+                        size={ms(20)}
+                        color={Colors[theme]?.text}
+                        onPress={() => router.back()}
+                        style={{left : 10}} />
+                    <ThemedText style={{ fontSize: 20, fontWeight: "600",right : 10 }}>Add Task</ThemedText>
+                </View>
+                <ScrollView style={{ paddingHorizontal: 10, }}>
                     <CustomValidation
                         type="input"
                         control={control}
@@ -258,12 +266,12 @@ const AddTask = () => {
                         label='Note Name'
                         placeholder={meetingLoading ? "Loading..." : "Select note"}
                         inputStyle={{ height: vs(50) }}
-                        rules={{
-                            required: {
-                                value: true,
-                                message: "Select Note",
-                            },
-                        }}
+                    // rules={{
+                    //     required: {
+                    //         value: true,
+                    //         message: "Select Note",
+                    //     },
+                    // }}
                     />
                     <CustomValidation
                         data={weightData}

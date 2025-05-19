@@ -138,7 +138,7 @@ const MyNotes = () => {
                                 { backgroundColor: Colors[theme].cart },
                             ]}>
                                 <View style={styles.notesHeader}>
-                                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item.notesField}</ThemedText>
+                                    <ThemedText type="subtitle" style={{flex: 1}}>{item.notesField}</ThemedText>
                                     <View style={styles.notesInfo}>
                                         <Feather
                                             name="edit"

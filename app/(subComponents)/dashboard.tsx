@@ -190,7 +190,7 @@ const dashboard = () => {
         <ThemedView style={styles.container}>
             {userType === "admin" && <SmallCart icon={"family-tree"} label={"Admin"} onPress={() => { router.navigate('/(drawer)/(tabs)') }} />}
             <SmallCart icon={"shield-car"} label={"Vehicle"} onPress={() => { router.navigate("/(vehicle)/(tabs)/home") }} />
-            <SmallCart icon={"handshake"} label={"Meeting"} onPress={() => { router.navigate('/vehicleList') }} />
+            <SmallCart icon={"handshake"} label={"Meeting"} onPress={() => { router.navigate('/(meeting)/(tabs)') }} />
             {/* <SmallCart icon={"timelapse"} label={"Activity Logs"} /> */}
         </ThemedView>
     )
