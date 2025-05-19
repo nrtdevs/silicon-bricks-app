@@ -173,8 +173,6 @@ const CouponScreen = () => {
     }, []);
 
     useEffect(() => {
-        console.log('9999', currentCoupon?.id);
-
         if (watch("status")) {
             updateCouponStatus({
                 variables: {
@@ -211,10 +209,7 @@ const CouponScreen = () => {
 
         await couponData({
             variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1,
-                },
+                listInputDto: {},
             },
         });
     };
@@ -255,8 +250,6 @@ const CouponScreen = () => {
                 id: Number(currentCoupon?.id),
                 ...params,
             };
-            console.log('params2', params2);
-            console.log('params', editModal);
 
             editModal ?
                 updateCoupon({
@@ -428,8 +421,6 @@ const CouponScreen = () => {
         }, 500),
         [searchQuery]
     );
-
-    console.log('09', currentCoupon?.end_date);
 
     // if (loading) {
     //   return <Loader />
@@ -683,9 +674,7 @@ const CouponScreen = () => {
 
                         <CustomButton
                             title="Submit"
-                            onPress={() => {
-                                handleSubmit(onSubmit)();
-                            }}
+                            onPress={handleSubmit(onSubmit)}
                             style={{
                                 backgroundColor: Colors[theme].background,
                                 marginTop: vs(50),
@@ -847,10 +836,10 @@ const CouponScreen = () => {
 
             {/* date time picker modal */}
             <DateTimePickerModal
+                mode='date'
                 dateTimePickerProps={dateTimePickerProps}
                 setDateTimePickerProps={setDateTimePickerProps}
                 onDateTimeSelection={(event: any, selectedDate: any) => {
-                    console.log("selectedDate", selectedDate)
                     if (event.type != "dismissed") {
                         setValue(
                             dateModal.start ? "start_date" : "end_date",

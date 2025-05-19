@@ -33,6 +33,7 @@ import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
+import OrganizationCart from "@/components/master/OrganizationList";
 
 const defaultValue = {
   name: "",
@@ -192,7 +193,7 @@ const OrganizationScreen = () => {
         key={index}
         style={[
           styles.organizationContainer,
-          { backgroundColor: Colors[theme]?.cartBg },
+          { backgroundColor: Colors[theme]?.cart },
         ]}
       >
         <View style={styles.organizationHeader}>
@@ -277,16 +278,53 @@ const OrganizationScreen = () => {
         )}
       </View>
     );
-  };
 
+
+    // return (
+    //   <OrganizationCart
+    //     name={item?.name}
+    //     status={item?.status}
+    //     email={item?.email}
+    //     mobileNo={"987655"}
+    //     description={item?.description}
+    //     onEdit={() =>
+    //       router.navigate({
+    //         pathname: "/add-edit-vehicle",
+    //         params: { data: JSON.stringify(item) },
+    //       })
+    //     }
+    //     onDelete={() =>
+    //       deleteVehicleApi({
+    //         variables: {
+    //           deleteVehicleId: Number(item?.id),
+    //         },
+    //       })
+    //     }
+    //     onChangeStatus={() => {
+    //       let find = statusArr?.find((i: any) => i.value === item?.status);
+    //       setValue("status", find);
+    //       setSelectedVehicle(item);
+    //       setIsModalVisible(true);
+    //     }}
+    //     onView={() =>
+    //       router.navigate({
+    //         pathname: "/vehicle-details",
+    //         params: { data: JSON.stringify(item) },
+    //       })
+    //     }
+    //   />
+    // );
+  };
+  // console.log('page',data?.paginatedOrganization?.meta?.totalItems);
 
   const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
-    const currentPage = isRefreshing ? 1 : page;
+    let currentPage = isRefreshing ? 1 : page;
 
     if (isRefreshing) {
-      setRefreshing(true);
-      setPage(1);
+      setRefreshing(true)
+      setPage(1)
     }
+
     const params = {
       limit: 10,
       page: currentPage,
@@ -310,12 +348,10 @@ const OrganizationScreen = () => {
             ? newItems
             : [...prev, ...newItems];
         });
-
-        if (isRefreshing) setRefreshing(false);
-        setPage((prev) => prev + 1);
-        setRefreshing(false);
         const lastPage = Math.ceil(data?.meta?.totalItems / 10);
-        setHasMore(data?.meta?.currentPage < lastPage);
+        (currentPage < lastPage) && setPage(currentPage + 1);
+        setHasMore(currentPage < lastPage);
+        setRefreshing(false);
       } else {
         console.log("API call failed or returned no data:", res?.errors);
         setRefreshing(false);
@@ -328,25 +364,22 @@ const OrganizationScreen = () => {
     }
   };
 
+
   const debouncedSearch = useCallback(
     debounce((text) => {
       fetchOrganization(true, text);
     }, 500),
     [searchQuery]
   );
-  console.log("organizationList", organizationList?.length);
-
-
 
   if (
-    (loading ||
+    ((loading && page == 1 && !refreshing) ||
       deleteOrganizationState.loading ||
-      updateOrganizationStatusState?.loading) &&
-    page == 1 &&
-    !refreshing
+      updateOrganizationStatusState?.loading)
   ) {
     return <Loader />;
   }
+
 
   return (
     <CustomHeader>
@@ -542,12 +575,13 @@ const OrganizationScreen = () => {
             inputContainerStyle={{ marginTop: 0, paddingTop: 0 }}
             containerStyle={{ marginTop: 0, paddingTop: 0 }}
             onChangeText={() => {
-              updateOrganizationStatus({
+              const params = {
+                ids: [Number(currentOrganization?.id)],
+                status: watch("status")?.value,
+              };
+              watch("status")?.value && updateOrganizationStatus({
                 variables: {
-                  data: {
-                    ids: [Number(currentOrganization?.id)],
-                    status: watch("status")?.value,
-                  },
+                  data: params,
                 },
               });
             }}
@@ -560,6 +594,7 @@ const OrganizationScreen = () => {
           />
         </View>
       </Modal>
+
     </CustomHeader>
   );
 };

@@ -1,4 +1,4 @@
- 
+
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
@@ -14,9 +14,9 @@ interface SmallCartProps {
 }
 
 const SmallCart: React.FC<SmallCartProps> = ({ icon, label, onPress }) => {
-  const {theme} = useTheme()
+  const { theme } = useTheme()
   return (
-    <Pressable style={[styles.container,{backgroundColor:Colors[theme].cart}]} onPress={onPress}>
+    <Pressable style={[styles.container, { backgroundColor: Colors[theme].cart }]} onPress={onPress}>
       <View style={styles.iconWrapper}>
         <Icon name={icon} size={30} color={Colors.primary} />
       </View>
@@ -29,7 +29,7 @@ const SmallCart: React.FC<SmallCartProps> = ({ icon, label, onPress }) => {
 const styles = ScaledSheet.create({
   container: {
     width: '45%', // Change this from 80 to 45%
-    height: "100@vs", 
+    height: "100@vs",
     borderRadius: "16@ms",
     elevation: 3,
     shadowColor: '#000',
@@ -44,7 +44,7 @@ const styles = ScaledSheet.create({
   },
   label: {
     fontSize: "14@ms",
-    textAlign: 'center', 
+    textAlign: 'center',
   },
 });
 

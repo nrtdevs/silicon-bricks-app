@@ -67,7 +67,7 @@ const PackageScreen = () => {
         name: string;
         description: string;
         offerDescription: string;
-        status: string;
+        status: any;
         price: string;
         discountedPrice: string;
         module: any;
@@ -103,14 +103,14 @@ const PackageScreen = () => {
         },
     ] = useLazyQuery(PaginatedModulesDocument);
 
+
     const findModule = (data, ids) => {
 
         const matchedModuleNames = data
             ?.filter((item) => ids?.includes(item?.id))
-            ?.map((item) => item.name); // Only extract 'name'
+            ?.map((item) => item.name);
 
         setSelectedModules(matchedModuleNames);
-
     };
 
     const [deletePackage, deletePackageState] = useMutation(
@@ -208,29 +208,16 @@ const PackageScreen = () => {
     }, [currentPackage]);
 
     useEffect(() => {
-        fetchPackage()
+        fetchPackage();
+        moduleDataApi({
+            variables: {
+                listInputDto:{
+                    page: 1,
+                    limit: 20
+                }
+            },
+        });
     }, []);
-
-    // useEffect(() => {
-    //     if (watch('price')) {
-    //         setValue('discountedPrice', "");
-    //     }
-    // }, [watch('price')]);
-
-    // useEffect(() => {
-    //     if (watch('price').length > 0) {
-    //         let discount = 0;
-    //         let amt = Number(watch('price'));
-    //         if (watch('offer')?.discountType === 'PERCENTAGE') {
-    //             discount = (amt * watch('offer')?.discountValue) / 100;
-    //         } else if (watch('offer')?.discountType === 'FIXED_AMOUNT') {
-    //             discount = watch('offer')?.discountValue;
-    //         }
-    //         setValue('discountedPrice', String(amt - discount));
-    //         // console.log('99999', typeof watch('price'));
-    //         // console.log('0099', watch('offer')?.discountType);
-    //     }
-    // }, [watch('offer')]);
 
     const debouncedSearch = useCallback(
         debounce((text) => {
@@ -268,7 +255,6 @@ const PackageScreen = () => {
                 id: Number(currentPackage?.id),
                 ...params,
             };
-            console.log("params2", params2);
 
             editModal
                 ? updatePackage({
@@ -319,7 +305,6 @@ const PackageScreen = () => {
             if (res?.data?.paginatedPackages) {
                 const data: any = res?.data?.paginatedPackages;
                 const newItems = data?.data || [];
-                console.log('000012', data?.meta?.totalItems);
 
                 setPackageList((prev: any) => {
                     return isRefreshing && currentPage == 1
@@ -343,9 +328,6 @@ const PackageScreen = () => {
             setHasMore(false);
         }
     };
-
-    console.log("packageList", packageList?.length);
-
 
     const renderData = ({ item, index }: any) => {
         let ids = item?.modules?.map((item: any) => item.id);
@@ -770,15 +752,16 @@ const PackageScreen = () => {
                         }}
                         // packageState
                         onChangeText={() => {
+                            const params = {
+                                ids: [Number(currentPackage?.id)],
+                                status: watch("status")?.value,
+                            }
                             packageState({
-                              variables: {
-                                data: {
-                                  ids: [Number(currentOrganization?.id)],
-                                  status: watch("status")?.value,
+                                variables: {
+                                    updatePackageStatusInput: params,
                                 },
-                              },
                             });
-                          }}
+                        }}
                     />
                 </View>
             </Modal>
@@ -856,8 +839,8 @@ const PackageScreen = () => {
                         <View>
                             <ThemedText type="subtitle">Module</ThemedText>
                             <View style={{ flexDirection: "row", gap: ms(15) }}>
-                                {selectedModules?.map((item) => {
-                                    return <ThemedText type="default">
+                                {selectedModules?.map((item,index) => {
+                                    return <ThemedText type="default" key={index} >
                                         {item}
                                     </ThemedText>
                                 })}
@@ -906,7 +889,6 @@ const PackageScreen = () => {
                 dateTimePickerProps={dateTimePickerProps}
                 setDateTimePickerProps={setDateTimePickerProps}
                 onDateTimeSelection={(event: any, selectedDate: any) => {
-                    console.log("selectedDate", selectedDate);
                     if (event.type != "dismissed") {
                         setValue(
                             dateModal.start ? "endDate" : "endDate",

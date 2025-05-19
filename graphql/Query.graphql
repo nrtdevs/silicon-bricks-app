@@ -215,9 +215,18 @@ query DashboardCount($filters: ReportFilters!) {
     userCount
     roleCount
     permissionCount
+    assignedPermissionCount
     projectCount
     organizationCount
-    assignedPermissionCount
+    couponCount
+    offerCount
+    moduleCount
+    packageCount
+    planCount
+    subscriptionCount
+    packageModuleCount
+    subscriptionPlanCount
+    pageCount
   }
 }
 
