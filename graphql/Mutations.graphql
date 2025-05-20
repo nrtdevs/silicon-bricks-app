@@ -12,9 +12,9 @@ mutation Login($loginData: ValidateDto!) {
     user {
       id
       email
-      name
+      name 
       userType
-    }
+    } 
     accessToken
   }
 }

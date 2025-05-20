@@ -46,6 +46,7 @@ import debounce from "lodash.debounce";
 import { Env } from "@/constants/ApiEndpoints";
 import { useUserContext } from "@/context/RoleContext";
 import NoDataFound from "@/components/NoDataFound";
+import CustomUserCard from "@/components/master/CustomUserCard";
 
 const defaultValue = {
   name: "",
@@ -127,6 +128,7 @@ const UserScreen = () => {
   const { can, hasAny } = useUserContext();
 
   const deletePermission = can("MasterApp:User:Delete");
+  const readPermission = can("MasterApp:User:Read");
   const updatePermission = can("MasterApp:User:Update");
   const createPermission = can("MasterApp:User:Create");
   const statusUpdatePermission = can("MasterApp:User:Action");
@@ -156,10 +158,7 @@ const UserScreen = () => {
     },
   });
 
-  const [
-    getUserRoles,
-    { data: roleData, loading: roleLoading, error: roleError },
-  ] = useLazyQuery(DropdownRolesDocument);
+
   // console.log('000086', roleData?.dropdownRoles?.data);
 
   const [
@@ -211,11 +210,6 @@ const UserScreen = () => {
   }, []);
 
   const getInitialData = async () => {
-    await getUserRoles({
-      variables: {
-        listInputDto: {},
-      },
-    });
     await organizationData({
       variables: {
         listInputDto: {},
@@ -263,143 +257,208 @@ const UserScreen = () => {
     }
   };
 
-  const renderItem = (item: any, index: number) => {
+  // const renderItem = (item: any, index: number) => {
+  //   let rolesId = item?.roles?.map((item: any) => {
+  //     return item?.id
+  //   })
+  //   return (
+  //     <View
+  //       key={index}
+  //       style={[
+  //         styles.organizationContainer,
+  //         { backgroundColor: Colors[theme].cart },
+  //       ]}
+  //     >
+  //       <View style={styles.organizationHeader}>
+  //         <ThemedText type="subtitle">{item?.name}</ThemedText>
+  //         <View style={styles.organizationInfo}>
+  //           {statusUpdatePermission && <MaterialIcons
+  //             name="attractions"
+  //             size={ms(22)}
+  //             color={Colors[theme].text}
+  //             onPress={() => {
+  //               setCurrentUser({
+  //                 name: item?.name,
+  //                 email: item?.email,
+  //                 phoneNo: item.mobileNo.toString(),
+  //                 roles: rolesId,
+  //                 usertype: item?.userType,
+  //                 id: item?.id,
+  //                 imagePath: item?.avatar,
+  //                 designation: item?.designation,
+  //               });
+  //               setValue("status", item?.status);
+  //               setImage(item?.avatar)
+  //               setStatusModalVisible(true);
+  //             }}
+  //           />}
+
+  //           <AntDesign
+  //             name="eyeo"
+  //             size={ms(22)}
+  //             color={Colors[theme].text}
+  //             onPress={() => {
+  //               setCurrentUser({
+  //                 name: item?.name,
+  //                 email: item?.email,
+  //                 phoneNo: item.mobileNo.toString(),
+  //                 roles: rolesId,
+  //                 usertype: item?.userType,
+  //                 id: item?.id,
+  //                 imagePath: item?.avatar,
+  //                 designation: item?.designation,
+
+  //               });
+  //               setInfoModalVisible(true);
+  //             }}
+  //           />
+
+
+  //           {updatePermission && <Feather
+  //             name="edit"
+  //             size={ms(22)}
+  //             color={Colors[theme].text}
+  //             onPress={() => {
+  //               setCurrentUser({
+  //                 name: item?.name,
+  //                 email: item?.email,
+  //                 phoneNo: item?.mobileNo.toString(),
+  //                 roles: rolesId,
+  //                 usertype: item?.userType,
+  //                 id: item?.id,
+  //                 imagePath: item?.avatar,
+  //                 designation: item?.designation,
+  //               });
+  //               setImage(item?.avatar)
+  //               setEditModal(true);
+  //               setModalVisible(true);
+  //             }}
+  //           />}
+
+  //           {deletePermission && <MaterialIcons
+  //             name="delete-outline"
+  //             size={ms(22)}
+  //             color={Colors[theme].text}
+  //             onPress={() => {
+
+  //               Alert.alert(
+  //                 "Delete",
+  //                 "Are you sure you want to delete?",
+  //                 [
+  //                   {
+  //                     text: "Yes",
+  //                     onPress: () => {
+  //                       deleteUser({
+  //                         variables: {
+  //                           ids: [Number(item?.id)],
+  //                         }
+
+  //                       });
+  //                     },
+  //                   },
+  //                   { text: "No", onPress: () => { } },
+  //                 ]
+  //               );
+  //             }}
+  //           />}
+  //         </View>
+  //       </View>
+
+  //       <ThemedText
+  //         style={[
+  //           styles.status,
+  //           {
+  //             // color:
+  //             //   item.status == "active" ? Colors?.green : "#6d6d1b",
+  //             backgroundColor:
+  //               theme == "dark" ? Colors?.white : "#e6e2e2",
+  //           },
+  //         ]}
+  //       >
+  //         {item?.status}
+  //       </ThemedText>
+
+  //       <View style={styles.userInfo}>
+  //         <ThemedText
+  //           style={{ fontSize: ms(14), lineHeight: ms(18) }}
+  //         >
+  //           {item?.email}
+  //         </ThemedText>
+  //         <ThemedText
+  //           style={{ fontSize: ms(14), lineHeight: ms(18) }}
+  //         >
+  //           {item?.mobileNo}
+  //         </ThemedText>
+  //       </View>
+
+  //     </View>
+  //   );
+  // }
+
+  const renderItem = ({ item, index }: any) => {
     let rolesId = item?.roles?.map((item: any) => {
       return item?.id
     })
     return (
-      <View
-        key={index}
-        style={[
-          styles.organizationContainer,
-          { backgroundColor: Colors[theme].cart },
-        ]}
-      >
-        <View style={styles.organizationHeader}>
-          <ThemedText type="subtitle">{item?.name}</ThemedText>
-          <View style={styles.organizationInfo}>
-            {statusUpdatePermission && <MaterialIcons
-              name="attractions"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentUser({
-                  name: item?.name,
-                  email: item?.email,
-                  phoneNo: item.mobileNo.toString(),
-                  roles: rolesId,
-                  usertype: item?.userType,
-                  id: item?.id,
-                  imagePath: item?.avatar,
-                  designation: item?.designation,
-                });
-                setValue("status", item?.status);
-                setImage(item?.avatar)
-                setStatusModalVisible(true);
-              }}
-            />}
-
-            <AntDesign
-              name="eyeo"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentUser({
-                  name: item?.name,
-                  email: item?.email,
-                  phoneNo: item.mobileNo.toString(),
-                  roles: rolesId,
-                  usertype: item?.userType,
-                  id: item?.id,
-                  imagePath: item?.avatar,
-                  designation: item?.designation,
-
-                });
-                setInfoModalVisible(true);
-              }}
-            />
-
-
-            {updatePermission && <Feather
-              name="edit"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentUser({
-                  name: item?.name,
-                  email: item?.email,
-                  phoneNo: item?.mobileNo.toString(),
-                  roles: rolesId,
-                  usertype: item?.userType,
-                  id: item?.id,
-                  imagePath: item?.avatar,
-                  designation: item?.designation,
-                });
-                setImage(item?.avatar)
-                setEditModal(true);
-                setModalVisible(true);
-              }}
-            />}
-
-            {deletePermission && <MaterialIcons
-              name="delete-outline"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-
-                Alert.alert(
-                  "Delete",
-                  "Are you sure you want to delete?",
-                  [
-                    {
-                      text: "Yes",
-                      onPress: () => {
-                        deleteUser({
-                          variables: {
-                            ids: [Number(item?.id)],
-                          }
-
-                        });
-                      },
-                    },
-                    { text: "No", onPress: () => { } },
-                  ]
-                );
-              }}
-            />}
-          </View>
-        </View>
-
-        <ThemedText
-          style={[
-            styles.status,
+      <CustomUserCard
+        name={item?.name}
+        status={item?.status}
+        email={item?.email}
+        mobileNo={item?.mobileNo.toString()}
+        readPermission={readPermission}
+        editPermission={updatePermission}
+        deletePermission={deletePermission}
+        statusPermission={statusUpdatePermission}
+        onEdit={() => {
+          
+        }}
+        onDelete={() =>
+          Alert.alert("Delete", "Are you sure you want to delete?", [
             {
-              // color:
-              //   item.status == "active" ? Colors?.green : "#6d6d1b",
-              backgroundColor:
-                theme == "dark" ? Colors?.white : "#e6e2e2",
+              text: "Yes",
+              onPress: () => {
+                deleteUser({
+                  variables: {
+                    ids: [Number(item?.id)],
+                  }
+                });
+              },
             },
-          ]}
-        >
-          {item?.status}
-        </ThemedText>
+            { text: "No", onPress: () => { } },
+          ])
+        }
+        onChangeStatus={() => {
+          setCurrentUser({
+            name: item?.name,
+            email: item?.email,
+            phoneNo: item.mobileNo.toString(),
+            roles: rolesId,
+            usertype: item?.userType,
+            id: item?.id,
+            imagePath: item?.avatar,
+            designation: item?.designation,
+          });
+          setValue("status", item?.status);
+          setImage(item?.avatar)
+          setStatusModalVisible(true);
+        }}
+        onView={() => {
+          setCurrentUser({
+            name: item?.name,
+            email: item?.email,
+            phoneNo: item.mobileNo.toString(),
+            roles: rolesId,
+            usertype: item?.userType,
+            id: item?.id,
+            imagePath: item?.avatar,
+            designation: item?.designation,
 
-        <View style={styles.userInfo}>
-          <ThemedText
-            style={{ fontSize: ms(14), lineHeight: ms(18) }}
-          >
-            {item?.email}
-          </ThemedText>
-          <ThemedText
-            style={{ fontSize: ms(14), lineHeight: ms(18) }}
-          >
-            {item?.mobileNo}
-          </ThemedText>
-        </View>
-
-      </View>
+          });
+          setInfoModalVisible(true);
+        }}
+      />
     );
-  }
+  };
 
   const handleImagePickerPress = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -514,6 +573,7 @@ const UserScreen = () => {
       setHasMore(false);
     }
   };
+
   // if (true) {
   //   return <Loader />;
   // }
@@ -550,7 +610,7 @@ const UserScreen = () => {
         <View style={styles.organizationParentContainer}>
           <FlatList
             data={userList}
-            renderItem={({ item, index }: any) => renderItem(item, index)}
+            renderItem={renderItem}
             showsVerticalScrollIndicator={false}
             refreshing={refreshing && !loading}
             onRefresh={() => {
@@ -703,7 +763,7 @@ const UserScreen = () => {
               }}
             />
 
-            <CustomValidation
+            {/* <CustomValidation
               data={roleData?.dropdownRoles?.data}
               type="picker"
               hideStar={false}
@@ -722,7 +782,7 @@ const UserScreen = () => {
                   message: "Select a role",
                 },
               }}
-            />
+            /> */}
 
             <CustomValidation
               data={userTypeData}
@@ -899,7 +959,6 @@ const styles = ScaledSheet.create({
     flexGrow: 1,
   },
   selectedContainer: {
-    width: "100%",
     position: "absolute",
     top: "60@vs",
     alignSelf: "center",
@@ -911,10 +970,9 @@ const styles = ScaledSheet.create({
   },
   contentContainer: {
     flex: 1,
-    padding: "12@ms",
   },
   searchContainer: {
-    width: "100%",
+    marginHorizontal: '12@s',
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -922,7 +980,6 @@ const styles = ScaledSheet.create({
   },
   buttonContainer: { marginLeft: "12@ms" },
   organizationParentContainer: {
-    marginTop: "12@ms",
   },
   organizationContainer: {
     width: "100%",
