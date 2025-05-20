@@ -942,12 +942,28 @@ mutation EnableMeetingStatus($updateMeetingStatusInput: MeetingStatusDto!) {
   }
 }
 
-mutation UpdateNotes($updateNotesInput: UpdateNotesDto!) {
-  updateNotes(updateNotesInput: $updateNotesInput) {
-    notes
+
+
+mutation EnableVehicleStatus($data: VehicleStatusDto!) {
+  enableVehicleStatus(data: $data) {
     id
-    decision
-    meetingId
-    uploadDoc
+    make
+    model
+    year
+    color
+    chassisNumber
+    numberPlate
+    maintenanceHistory
+    avatar
+    insurance
+    insuranceValidTill
+    status
+    latitude
+    longitude
+    createdById 
+    organizationId 
+    createdAt
+    updatedAt
+    deletedAt
   }
 }
