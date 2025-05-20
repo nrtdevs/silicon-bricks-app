@@ -941,3 +941,29 @@ mutation EnableMeetingStatus($updateMeetingStatusInput: MeetingStatusDto!) {
     }
   }
 }
+
+
+
+mutation EnableVehicleStatus($data: VehicleStatusDto!) {
+  enableVehicleStatus(data: $data) {
+    id
+    make
+    model
+    year
+    color
+    chassisNumber
+    numberPlate
+    maintenanceHistory
+    avatar
+    insurance
+    insuranceValidTill
+    status
+    latitude
+    longitude
+    createdById 
+    organizationId 
+    createdAt
+    updatedAt
+    deletedAt
+  }
+}

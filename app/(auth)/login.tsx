@@ -202,18 +202,7 @@ export default function LoginScreen() {
               </Pressable>
             </View>
 
-            <Pressable
-              onPress={() => router.push("/(subComponents)/purchasePlane")}
-            >
-              <LinearGradient
-                colors={[Colors.gradient2, Colors.gradient1]}
-                start={{ x: 0, y: 1 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.gradient,]}
-              >
-                <ThemedText type="subtitle">Purchase Plans</ThemedText>
-              </LinearGradient>
-            </Pressable>
+      
           </View>
         </View>
       </ScrollView>

@@ -63,6 +63,8 @@ export type Breakdown = {
   latitude: Scalars['String']['output'];
   longitude: Scalars['String']['output'];
   media: Array<BreakdownMedia>;
+  organizationBy: Organization;
+  organizationId: Scalars['Int']['output'];
   status: Scalars['String']['output'];
   statuses: Array<BreakdownStatus>;
   updatedAt: Scalars['DateTime']['output'];
@@ -451,6 +453,11 @@ export type Group = {
   permissions: Array<Permissions>;
 };
 
+export type InputPermissionSlugDto = {
+  permissionSlug: Scalars['String']['input'];
+  status?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Inventory = {
   __typename?: 'Inventory';
   batchNumber?: Maybe<Scalars['String']['output']>;
@@ -475,6 +482,23 @@ export type LoginRes = {
   __typename?: 'LoginRes';
   accessToken: Scalars['String']['output'];
   user: User;
+};
+
+export type Logs = {
+  __typename?: 'Logs';
+  action: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  ipAddress: Scalars['String']['output'];
+  module: Scalars['String']['output'];
+  organization: Organization;
+  organizationId: Scalars['Int']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  user: User;
+  userAgent: Scalars['String']['output'];
+  userId: Scalars['Int']['output'];
 };
 
 export type Material = {
@@ -538,26 +562,6 @@ export type MeetingAttendeeDto = {
 export type MeetingFiltersDto = {
   endDate?: InputMaybe<Scalars['DateTime']['input']>;
   startDate?: InputMaybe<Scalars['DateTime']['input']>;
-};
-
-export type MeetingMultipleDeviceNotificationDto = {
-  body: Scalars['String']['input'];
-  icon: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  tokens: Array<Scalars['String']['input']>;
-};
-
-export type MeetingNotificationDto = {
-  body: Scalars['String']['input'];
-  icon: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-};
-
-export type MeetingNotificationResponse = {
-  __typename?: 'MeetingNotificationResponse';
-  message?: Maybe<Scalars['String']['output']>;
-  success: Scalars['Boolean']['output'];
 };
 
 export type MeetingOrMeetings = Meeting | MeetingArray;
@@ -627,16 +631,9 @@ export enum MeetingTaskStatus {
 }
 
 export type MeetingTaskStatusDto = {
+  completePercent?: InputMaybe<Scalars['Float']['input']>;
   ids: Array<Scalars['Float']['input']>;
   status: MeetingTaskStatus;
-  totalTaskComplete?: InputMaybe<Scalars['Float']['input']>;
-};
-
-export type MeetingTopicNotificationDto = {
-  body: Scalars['String']['input'];
-  icon: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  topic: Scalars['String']['input'];
 };
 
 export type MeetingType = {
@@ -779,9 +776,6 @@ export type Mutation = {
   hardDeleteWarehouse: Scalars['Boolean']['output'];
   login: LoginRes;
   logout: Scalars['Boolean']['output'];
-  meetingSendMultiplePushNotification: MeetingNotificationResponse;
-  meetingSendPushNotification: MeetingNotificationResponse;
-  meetingSendTopicNotification: MeetingNotificationResponse;
   register: LoginRes;
   requestOtp: OtpRes;
   resetPassword: Scalars['Boolean']['output'];
@@ -1308,21 +1302,6 @@ export type MutationLoginArgs = {
 };
 
 
-export type MutationMeetingSendMultiplePushNotificationArgs = {
-  data: MeetingMultipleDeviceNotificationDto;
-};
-
-
-export type MutationMeetingSendPushNotificationArgs = {
-  data: MeetingNotificationDto;
-};
-
-
-export type MutationMeetingSendTopicNotificationArgs = {
-  data: MeetingTopicNotificationDto;
-};
-
-
 export type MutationRegisterArgs = {
   registerData: RegisterDto;
 };
@@ -1788,6 +1767,12 @@ export type PaginatedFollowUp = {
   meta: Meta;
 };
 
+export type PaginatedLogs = {
+  __typename?: 'PaginatedLogs';
+  data: Array<Logs>;
+  meta: Meta;
+};
+
 export type PaginatedMeeting = {
   __typename?: 'PaginatedMeeting';
   data: Array<Meeting>;
@@ -1821,6 +1806,12 @@ export type PaginatedNotePad = {
 export type PaginatedNotes = {
   __typename?: 'PaginatedNotes';
   data: Array<Notes>;
+  meta: Meta;
+};
+
+export type PaginatedNotifications = {
+  __typename?: 'PaginatedNotifications';
+  data: Array<Notifications>;
   meta: Meta;
 };
 
@@ -2042,15 +2033,14 @@ export type Query = {
   getPaginatedNotesByMeetingId: PaginatedNotes;
   getUpcomingMeetingTask: PaginatedMeetingTask;
   getUpcomingMeetings: PaginatedMeeting;
+  getUsersWithPermission: Array<User>;
   getVehicleExpenseStatuses: Array<VehicleExpenseStatus>;
   getVehicleExpenseTypeSuggestions: Array<Scalars['JSON']['output']>;
-  listTrashedChildMeting: PaginatedMeeting;
   listTrashedFollowUp: PaginatedFollowUp;
   listTrashedMeeting: PaginatedMeeting;
   listTrashedMeetingTask: PaginatedMeetingTask;
   listTrashedMeetingType: PaginatedMeetingType;
   listTrashedMeetingVenue: PaginatedMeetingVenue;
-  listTrashedMetingSubTasks: PaginatedMeetingTask;
   listTrashedNotePad: PaginatedNotePad;
   listTrashedNotes: PaginatedNotes;
   listTrashedOrganizations: PaginatedOrganizations;
@@ -2060,6 +2050,7 @@ export type Query = {
   paginatedBreakdowns: PaginatedBreakdowns;
   paginatedCoupons: PaginatedCoupons;
   paginatedFollowUp: PaginatedFollowUp;
+  paginatedLogs: PaginatedLogs;
   paginatedMeeting: PaginatedMeeting;
   paginatedMeetingParentId: PaginatedMeeting;
   paginatedMeetingSubTask: PaginatedMeetingTask;
@@ -2082,6 +2073,7 @@ export type Query = {
   paginatedTrashedWarehouses: PaginatedWarehouse;
   paginatedUsers: PaginatedUsers;
   paginatedVehicleExpense: PaginatedVehicleExpense;
+  paginatedVehicleNotification: PaginatedNotifications;
   paginatedVehicles: PaginatedVehicles;
   paginatedWarehouses: PaginatedWarehouse;
   permissionGroup: PermissionGroup;
@@ -2334,6 +2326,11 @@ export type QueryGetUpcomingMeetingsArgs = {
 };
 
 
+export type QueryGetUsersWithPermissionArgs = {
+  data: InputPermissionSlugDto;
+};
+
+
 export type QueryGetVehicleExpenseStatusesArgs = {
   expenseId: Scalars['Int']['input'];
 };
@@ -2341,11 +2338,6 @@ export type QueryGetVehicleExpenseStatusesArgs = {
 
 export type QueryGetVehicleExpenseTypeSuggestionsArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type QueryListTrashedChildMetingArgs = {
-  listInputDTO: ListInputDto;
 };
 
 
@@ -2371,11 +2363,6 @@ export type QueryListTrashedMeetingTypeArgs = {
 
 export type QueryListTrashedMeetingVenueArgs = {
   ListInputDTO: ListInputDto;
-};
-
-
-export type QueryListTrashedMetingSubTasksArgs = {
-  listInputDTO: ListInputDto;
 };
 
 
@@ -2420,6 +2407,11 @@ export type QueryPaginatedCouponsArgs = {
 
 
 export type QueryPaginatedFollowUpArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedLogsArgs = {
   ListInputDTO: ListInputDto;
 };
 
@@ -2533,6 +2525,11 @@ export type QueryPaginatedUsersArgs = {
 
 
 export type QueryPaginatedVehicleExpenseArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedVehicleNotificationArgs = {
   ListInputDTO: ListInputDto;
 };
 
@@ -2739,6 +2736,7 @@ export type UpdateBreakdownDto = {
   latitude: Scalars['String']['input'];
   longitude: Scalars['String']['input'];
   mediaUrl?: InputMaybe<Array<MediaDto>>;
+  removedFileIds?: InputMaybe<Array<Scalars['String']['input']>>;
   vehicleId: Scalars['Float']['input'];
 };
 
@@ -3033,8 +3031,8 @@ export type VehicleDashboardCount = {
 
 export type VehicleExpense = {
   __typename?: 'VehicleExpense';
-  BreakDown?: Maybe<Breakdown>;
   amount: Scalars['Float']['output'];
+  breakDown?: Maybe<Breakdown>;
   breakDownId?: Maybe<Scalars['Float']['output']>;
   createdAt: Scalars['DateTime']['output'];
   createdBy: User;
@@ -3044,6 +3042,8 @@ export type VehicleExpense = {
   expenseDate?: Maybe<Scalars['DateTime']['output']>;
   expenseType: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  organizationBy: Organization;
+  organizationId: Scalars['Int']['output'];
   status: Scalars['String']['output'];
   statuses?: Maybe<Array<VehicleExpenseStatus>>;
   updatedAt: Scalars['DateTime']['output'];
@@ -3125,12 +3125,11 @@ export enum Breakdown_Status {
   Approved = 'approved',
   Assigned = 'assigned',
   Cancelled = 'cancelled',
-  Closed = 'closed',
-  Completed = 'completed',
-  InProgress = 'in_progress',
   InService = 'in_service',
   Pending = 'pending',
   Rejected = 'rejected',
+  RepairFailed = 'repair_failed',
+  Repaired = 'repaired',
   ServiceScheduled = 'service_scheduled',
   UnderReview = 'under_review'
 }
@@ -3782,6 +3781,13 @@ export type EnableMeetingStatusMutationVariables = Exact<{
 
 export type EnableMeetingStatusMutation = { __typename?: 'Mutation', enableMeetingStatus: { __typename?: 'Meeting', id: string, status: string } | { __typename?: 'MeetingArray' } };
 
+export type EnableVehicleStatusMutationVariables = Exact<{
+  data: VehicleStatusDto;
+}>;
+
+
+export type EnableVehicleStatusMutation = { __typename?: 'Mutation', enableVehicleStatus: { __typename?: 'Vehicle', id: string, make: string, model: string, year: string, color: string, chassisNumber: string, numberPlate: string, maintenanceHistory?: string | null, avatar?: string | null, insurance: boolean, insuranceValidTill?: any | null, status: string, latitude?: number | null, longitude?: number | null, createdById: number, organizationId: number, createdAt: any, updatedAt: any, deletedAt?: any | null } };
+
 export type PaginatedRolesQueryVariables = Exact<{
   listInputDto: ListInputDto;
 }>;
@@ -4206,6 +4212,7 @@ export const UpdateVehicleDocument = {"kind":"Document","definitions":[{"kind":"
 export const DeleteVehicleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteVehicle"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"deleteVehicleId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteVehicle"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"deleteVehicleId"}}}]}]}}]} as unknown as DocumentNode<DeleteVehicleMutation, DeleteVehicleMutationVariables>;
 export const ChangePackageStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ChangePackageStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updatePackageStatusInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PackageStatusDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"changePackageStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updatePackageStatusInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updatePackageStatusInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Package"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"discountedPrice"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"offerType"}},{"kind":"Field","name":{"kind":"Name","value":"offerDescription"}},{"kind":"Field","name":{"kind":"Name","value":"offerExpiryDate"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PackageArray"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"discountedPrice"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"offerType"}},{"kind":"Field","name":{"kind":"Name","value":"offerDescription"}},{"kind":"Field","name":{"kind":"Name","value":"offerExpiryDate"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ChangePackageStatusMutation, ChangePackageStatusMutationVariables>;
 export const EnableMeetingStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"EnableMeetingStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updateMeetingStatusInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MeetingStatusDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"enableMeetingStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updateMeetingStatusInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updateMeetingStatusInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Meeting"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]}}]} as unknown as DocumentNode<EnableMeetingStatusMutation, EnableMeetingStatusMutationVariables>;
+export const EnableVehicleStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"EnableVehicleStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"data"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"VehicleStatusDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"enableVehicleStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"Variable","name":{"kind":"Name","value":"data"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"make"}},{"kind":"Field","name":{"kind":"Name","value":"model"}},{"kind":"Field","name":{"kind":"Name","value":"year"}},{"kind":"Field","name":{"kind":"Name","value":"color"}},{"kind":"Field","name":{"kind":"Name","value":"chassisNumber"}},{"kind":"Field","name":{"kind":"Name","value":"numberPlate"}},{"kind":"Field","name":{"kind":"Name","value":"maintenanceHistory"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"insurance"}},{"kind":"Field","name":{"kind":"Name","value":"insuranceValidTill"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"latitude"}},{"kind":"Field","name":{"kind":"Name","value":"longitude"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"organizationId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]}}]} as unknown as DocumentNode<EnableVehicleStatusMutation, EnableVehicleStatusMutationVariables>;
 export const PaginatedRolesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaginatedRoles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paginatedRoles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"meta"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}}]}},{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"roleType"}},{"kind":"Field","name":{"kind":"Name","value":"permissionCount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]}}]} as unknown as DocumentNode<PaginatedRolesQuery, PaginatedRolesQueryVariables>;
 export const ListTrashedRolesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListTrashedRoles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listTrashedRoles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"organization"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}},{"kind":"Field","name":{"kind":"Name","value":"permissionCount"}},{"kind":"Field","name":{"kind":"Name","value":"roleType"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}},{"kind":"Field","name":{"kind":"Name","value":"meta"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]}}]}}]} as unknown as DocumentNode<ListTrashedRolesQuery, ListTrashedRolesQueryVariables>;
 export const FindRoleByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindRoleById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"findRoleByIdId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findRoleById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"findRoleByIdId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<FindRoleByIdQuery, FindRoleByIdQueryVariables>;
