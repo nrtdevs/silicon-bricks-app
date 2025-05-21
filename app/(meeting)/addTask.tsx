@@ -177,7 +177,7 @@ const AddTask = () => {
                         style={{left : 10}} />
                     <ThemedText style={{ fontSize: 20, fontWeight: "600",right : 10 }}>Add Task</ThemedText>
                 </View>
-                <ScrollView style={{ paddingHorizontal: 10, }}>
+                <ScrollView style={{ paddingHorizontal: 10}}>
                     <CustomValidation
                         type="input"
                         control={control}
@@ -266,12 +266,6 @@ const AddTask = () => {
                         label='Note Name'
                         placeholder={meetingLoading ? "Loading..." : "Select note"}
                         inputStyle={{ height: vs(50) }}
-                    // rules={{
-                    //     required: {
-                    //         value: true,
-                    //         message: "Select Note",
-                    //     },
-                    // }}
                     />
                     <CustomValidation
                         data={weightData}
@@ -374,7 +368,6 @@ const styles = ScaledSheet.create({
     contentContainer: {
         flex: 1,
         padding: "12@ms",
-
     },
     label: {
         fontSize: "16@ms",
