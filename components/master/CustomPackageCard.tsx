@@ -7,11 +7,11 @@ import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
 import { ThemedText } from '../ThemedText';
 
-interface CustomUserProps {
+interface PackageProps {
     name: string;
-    status: 'active' | 'inactive' | 'pending' | 'blocked';
-    email: string;
-    mobileNo: string;
+    status: 'active' | 'inactive' | 'expired';
+    discountedPrice: string;
+    price: string;
     editPermission: boolean;
     statusPermission: boolean;
     deletePermission: boolean;
@@ -25,15 +25,14 @@ interface CustomUserProps {
 const statusColors = {
     active: '#10B981',
     inactive: '#EF4444',
-    pending: '#F59E0B',
-    blocked: 'black'
+    expired: '#F59E0B'
 };
 
-const CustomUserCard: React.FC<CustomUserProps> = ({
+const CustomPackageCard: React.FC<PackageProps> = ({
     name,
     status,
-    email,
-    mobileNo,
+    discountedPrice,
+    price,
     editPermission,
     statusPermission,
     deletePermission,
@@ -74,10 +73,10 @@ const CustomUserCard: React.FC<CustomUserProps> = ({
                 {/* Details */}
                 <View style={{}}>
                     <ThemedText type='defaultSemiBold' style={{ marginBottom: 4, width: 300, }}>
-                        <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Email:</ThemedText> {email}
+                        <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Price:</ThemedText> {price}
                     </ThemedText>
                     <ThemedText type='defaultSemiBold' style={{ marginBottom: 4, width: 300, }}>
-                        <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Mobile No:</ThemedText> {mobileNo}
+                        <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Discounted Price:</ThemedText> {discountedPrice}
                     </ThemedText>
                 </View>
             </View>
@@ -126,7 +125,7 @@ const ActionButton = ({
     );
 };
 
-export default CustomUserCard;
+export default CustomPackageCard;
 
 const styles = ScaledSheet.create({
     container: {

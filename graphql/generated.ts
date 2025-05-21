@@ -29,23 +29,6 @@ export type About = {
   title: Scalars['String']['output'];
 };
 
-export type Activity = {
-  __typename?: 'Activity';
-  activity: Scalars['String']['output'];
-  createdAt: Scalars['DateTime']['output'];
-  createdBy: User;
-  createdByUserId: Scalars['Int']['output'];
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  ipAddress: Scalars['String']['output'];
-  module: Scalars['String']['output'];
-  moduleId?: Maybe<Scalars['Int']['output']>;
-  organization: Organization;
-  updatedAt: Scalars['DateTime']['output'];
-  userAgent: Scalars['String']['output'];
-};
-
 export type AppPermissionsDto = {
   __typename?: 'AppPermissionsDto';
   appName: Scalars['String']['output'];
@@ -127,15 +110,6 @@ export type BreakdownStatusDto = {
   id: Scalars['Float']['input'];
   remark: Scalars['String']['input'];
   status: Breakdown_Status;
-};
-
-export type Category = {
-  __typename?: 'Category';
-  createdAt: Scalars['DateTime']['output'];
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
 };
 
 export type ChangePasswordDto = {
@@ -397,15 +371,6 @@ export type CreateVehicleExpenseDto = {
   vehicleId: Scalars['Float']['input'];
 };
 
-export type CreateWarehouseDto = {
-  capacity: Scalars['Float']['input'];
-  contactPerson?: InputMaybe<Scalars['String']['input']>;
-  email: Scalars['String']['input'];
-  location: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  phone: Scalars['Float']['input'];
-};
-
 /** Custom Status */
 export enum CustomStatus {
   Active = 'active',
@@ -493,18 +458,6 @@ export type InputPermissionSlugDto = {
   status?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type Inventory = {
-  __typename?: 'Inventory';
-  batchNumber?: Maybe<Scalars['String']['output']>;
-  currentStock: Scalars['Float']['output'];
-  expiryDate?: Maybe<Scalars['DateTime']['output']>;
-  id: Scalars['String']['output'];
-  minStockLevel: Scalars['Float']['output'];
-  openingStock: Scalars['Float']['output'];
-  status: Scalars['String']['output'];
-  warehouse: Warehouse;
-};
-
 export type ListInputDto = {
   filter?: InputMaybe<Scalars['JSON']['input']>;
   limit?: InputMaybe<Scalars['Float']['input']>;
@@ -536,14 +489,13 @@ export type Logs = {
   userId: Scalars['Int']['output'];
 };
 
-export type Material = {
-  __typename?: 'Material';
-  barcode?: Maybe<Scalars['String']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  sku: Scalars['String']['output'];
-  status: Scalars['String']['output'];
+export type MarkAllAsReadResponse = {
+  __typename?: 'MarkAllAsReadResponse';
+  affected: Scalars['Float']['output'];
+};
+
+export type MarkAsReadInput = {
+  id: Scalars['Float']['input'];
 };
 
 export type MediaDto = {
@@ -571,7 +523,6 @@ export type Meeting = {
   meetingVenue?: Maybe<MeetingVenue>;
   meetingVenueId?: Maybe<Scalars['Float']['output']>;
   notes?: Maybe<Array<Notes>>;
-  organization: Organization;
   parentMeeting?: Maybe<Meeting>;
   parentMeetingId?: Maybe<Scalars['Float']['output']>;
   projectId?: Maybe<Scalars['Float']['output']>;
@@ -600,24 +551,24 @@ export type MeetingFiltersDto = {
   startDate?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-export type MeetingNotification = {
-  __typename?: 'MeetingNotification';
-  actionUrl?: Maybe<Scalars['String']['output']>;
-  createdAt: Scalars['DateTime']['output'];
-  createdBy?: Maybe<User>;
-  createdByUserId?: Maybe<Scalars['Float']['output']>;
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  entityId?: Maybe<Scalars['Float']['output']>;
-  id: Scalars['ID']['output'];
-  isRead: Scalars['Boolean']['output'];
-  message: Scalars['String']['output'];
-  module: Scalars['String']['output'];
-  organizationBy: Organization;
-  organizationId: Scalars['Int']['output'];
-  readAt?: Maybe<Scalars['DateTime']['output']>;
-  title: Scalars['String']['output'];
-  userBy?: Maybe<User>;
-  userId?: Maybe<Scalars['Float']['output']>;
+export type MeetingMultipleDeviceNotificationDto = {
+  body: Scalars['String']['input'];
+  icon: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  tokens: Array<Scalars['String']['input']>;
+};
+
+export type MeetingNotificationDto = {
+  body: Scalars['String']['input'];
+  icon: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  token: Scalars['String']['input'];
+};
+
+export type MeetingNotificationResponse = {
+  __typename?: 'MeetingNotificationResponse';
+  message?: Maybe<Scalars['String']['output']>;
+  success: Scalars['Boolean']['output'];
 };
 
 export type MeetingOrMeetings = Meeting | MeetingArray;
@@ -687,19 +638,23 @@ export enum MeetingTaskStatus {
 }
 
 export type MeetingTaskStatusDto = {
+  completePercent?: InputMaybe<Scalars['Float']['input']>;
   ids: Array<Scalars['Float']['input']>;
   status: MeetingTaskStatus;
-  totalTaskComplete?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type MeetingTopicNotificationDto = {
+  body: Scalars['String']['input'];
+  icon: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  topic: Scalars['String']['input'];
 };
 
 export type MeetingType = {
   __typename?: 'MeetingType';
   createdAt: Scalars['DateTime']['output'];
-  createdBy: User;
-  createdByUserId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
-  organization: Organization;
 };
 
 export type MeetingVenue = {
@@ -708,12 +663,9 @@ export type MeetingVenue = {
   contactNumber?: Maybe<Scalars['Float']['output']>;
   contactPerson?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
-  createdBy: User;
-  createdByUserId: Scalars['ID']['output'];
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
-  organization: Organization;
 };
 
 export type Meta = {
@@ -761,7 +713,6 @@ export type Mutation = {
   changeSubscriptionStatus: SubscriptionsUnion;
   changeUserStatus: UserUnion;
   changeVehicleExpenseStatus: VehicleExpenseStatus;
-  changeWarehouseStatus: Warehouse;
   createBreakdown: Breakdown;
   createContact: Contact;
   createCoupon: Coupon;
@@ -788,7 +739,6 @@ export type Mutation = {
   createUser: User;
   createVehicle: Vehicle;
   createVehicleExpense: VehicleExpense;
-  createWarehouse: Warehouse;
   deleteBreakdown: Scalars['Boolean']['output'];
   deleteContact: Scalars['Boolean']['output'];
   deleteCoupon: Scalars['Boolean']['output'];
@@ -812,7 +762,6 @@ export type Mutation = {
   deleteUser: Scalars['Boolean']['output'];
   deleteVehicle: Scalars['Boolean']['output'];
   deleteVehicleExpense: Scalars['Boolean']['output'];
-  deleteWarehouse: Scalars['Boolean']['output'];
   enableMeetingStatus: MeetingOrMeetings;
   enableMeetingTaskStatus: MeetingTaskOrMeetingTasks;
   enableNotePad: NotePadOrNotePads;
@@ -837,9 +786,13 @@ export type Mutation = {
   hardDeleteRole: Scalars['Boolean']['output'];
   hardDeleteSubscription: Scalars['Boolean']['output'];
   hardDeleteUser: Scalars['Boolean']['output'];
-  hardDeleteWarehouse: Scalars['Boolean']['output'];
   login: LoginRes;
   logout: Scalars['Boolean']['output'];
+  markAllVehicleNotificationsAsRead: MarkAllAsReadResponse;
+  markVehicleNotificationAsRead: Notifications;
+  meetingSendMultiplePushNotification: MeetingNotificationResponse;
+  meetingSendPushNotification: MeetingNotificationResponse;
+  meetingSendTopicNotification: MeetingNotificationResponse;
   register: LoginRes;
   requestOtp: OtpRes;
   resetPassword: Scalars['Boolean']['output'];
@@ -862,7 +815,6 @@ export type Mutation = {
   restoreVehicle: Scalars['Boolean']['output'];
   restoreVehicleBreakdown: Scalars['Boolean']['output'];
   restoreVehicleExpense: Scalars['Boolean']['output'];
-  restoreWarehouse: Scalars['Boolean']['output'];
   sendMultiplePushNotification: NotificationResponse;
   sendPushNotification: NotificationResponse;
   sendRegistrationOtp: OtpRes;
@@ -890,7 +842,6 @@ export type Mutation = {
   updateUser: User;
   updateVehicle: Vehicle;
   updateVehicleExpense: VehicleExpense;
-  updateWarehouse: Warehouse;
   verifyPayment: Array<Subscriptions>;
 };
 
@@ -982,11 +933,6 @@ export type MutationChangeUserStatusArgs = {
 
 export type MutationChangeVehicleExpenseStatusArgs = {
   data: VehicleExpenseStatusDto;
-};
-
-
-export type MutationChangeWarehouseStatusArgs = {
-  data: WarehouseStatusDto;
 };
 
 
@@ -1121,11 +1067,6 @@ export type MutationCreateVehicleExpenseArgs = {
 };
 
 
-export type MutationCreateWarehouseArgs = {
-  CreateWarehouseDto: CreateWarehouseDto;
-};
-
-
 export type MutationDeleteBreakdownArgs = {
   id: Scalars['Int']['input'];
 };
@@ -1238,11 +1179,6 @@ export type MutationDeleteVehicleArgs = {
 
 export type MutationDeleteVehicleExpenseArgs = {
   id: Scalars['Int']['input'];
-};
-
-
-export type MutationDeleteWarehouseArgs = {
-  id: Scalars['Float']['input'];
 };
 
 
@@ -1366,13 +1302,28 @@ export type MutationHardDeleteUserArgs = {
 };
 
 
-export type MutationHardDeleteWarehouseArgs = {
-  id: Scalars['Float']['input'];
+export type MutationLoginArgs = {
+  loginData: ValidateDto;
 };
 
 
-export type MutationLoginArgs = {
-  loginData: ValidateDto;
+export type MutationMarkVehicleNotificationAsReadArgs = {
+  input: MarkAsReadInput;
+};
+
+
+export type MutationMeetingSendMultiplePushNotificationArgs = {
+  data: MeetingMultipleDeviceNotificationDto;
+};
+
+
+export type MutationMeetingSendPushNotificationArgs = {
+  data: MeetingNotificationDto;
+};
+
+
+export type MutationMeetingSendTopicNotificationArgs = {
+  data: MeetingTopicNotificationDto;
 };
 
 
@@ -1483,11 +1434,6 @@ export type MutationRestoreVehicleBreakdownArgs = {
 
 
 export type MutationRestoreVehicleExpenseArgs = {
-  id: Scalars['Float']['input'];
-};
-
-
-export type MutationRestoreWarehouseArgs = {
   id: Scalars['Float']['input'];
 };
 
@@ -1627,11 +1573,6 @@ export type MutationUpdateVehicleExpenseArgs = {
 };
 
 
-export type MutationUpdateWarehouseArgs = {
-  UpdateWarehouseDto: UpdateWarehouseDto;
-};
-
-
 export type MutationVerifyPaymentArgs = {
   input: VerifyPaymentInput;
 };
@@ -1676,7 +1617,6 @@ export type Notes = {
   meeting?: Maybe<Meeting>;
   meetingId?: Maybe<Scalars['Float']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
-  organization: Organization;
   task?: Maybe<Array<MeetingTask>>;
   uploadDoc?: Maybe<Scalars['String']['output']>;
 };
@@ -1815,12 +1755,6 @@ export type PackageUnion = Package | PackageArray;
 export type PaginatedAbout = {
   __typename?: 'PaginatedAbout';
   data: Array<About>;
-  meta: Meta;
-};
-
-export type PaginatedActivity = {
-  __typename?: 'PaginatedActivity';
-  data: Array<Activity>;
   meta: Meta;
 };
 
@@ -1968,12 +1902,6 @@ export type PaginatedVehicles = {
   meta: Meta;
 };
 
-export type PaginatedWarehouse = {
-  __typename?: 'PaginatedWarehouse';
-  data: Array<Warehouse>;
-  meta: Meta;
-};
-
 export type PermissionDto = {
   __typename?: 'PermissionDto';
   action: Scalars['String']['output'];
@@ -2038,14 +1966,6 @@ export type PlanStatusDto = {
   status: PlanStatus;
 };
 
-export type Post = {
-  __typename?: 'Post';
-  authorId: Scalars['Int']['output'];
-  id: Scalars['ID']['output'];
-  title: Scalars['String']['output'];
-  user: User;
-};
-
 export type Project = {
   __typename?: 'Project';
   createdBy?: Maybe<User>;
@@ -2101,7 +2021,6 @@ export type Query = {
   findUserById: User;
   findVehicleById: Vehicle;
   findVehicleExpenseById: VehicleExpense;
-  findWarehouseById: Warehouse;
   getAllDynamicPage: PaginatedAbout;
   getAllMeetingTypes: Array<MeetingType>;
   getAllNotePad: Array<NotePad>;
@@ -2124,20 +2043,17 @@ export type Query = {
   getUsersWithPermission: Array<User>;
   getVehicleExpenseStatuses: Array<VehicleExpenseStatus>;
   getVehicleExpenseTypeSuggestions: Array<Scalars['JSON']['output']>;
-  listTrashedChildMeting: PaginatedMeeting;
   listTrashedFollowUp: PaginatedFollowUp;
   listTrashedMeeting: PaginatedMeeting;
   listTrashedMeetingTask: PaginatedMeetingTask;
   listTrashedMeetingType: PaginatedMeetingType;
   listTrashedMeetingVenue: PaginatedMeetingVenue;
-  listTrashedMetingSubTasks: PaginatedMeetingTask;
   listTrashedNotePad: PaginatedNotePad;
   listTrashedNotes: PaginatedNotes;
   listTrashedOrganizations: PaginatedOrganizations;
   listTrashedProjects: PaginatedProjects;
   listTrashedRoles: PaginatedRoles;
   packagesDropdown: PaginatedPackages;
-  paginatedActivityLogMeeting: PaginatedActivity;
   paginatedBreakdowns: PaginatedBreakdowns;
   paginatedContact: PaginatedContact;
   paginatedCoupons: PaginatedCoupons;
@@ -2162,15 +2078,11 @@ export type Query = {
   paginatedProjects: PaginatedProjects;
   paginatedRoles: PaginatedRoles;
   paginatedSubscriptions: PaginatedSubscriptions;
-  paginatedTrashedWarehouses: PaginatedWarehouse;
   paginatedUsers: PaginatedUsers;
   paginatedVehicleExpense: PaginatedVehicleExpense;
   paginatedVehicleNotification: PaginatedNotifications;
   paginatedVehicles: PaginatedVehicles;
-  paginatedWarehouses: PaginatedWarehouse;
   permissionGroup: PermissionGroup;
-  post: Post;
-  posts: Array<Post>;
   project: Project;
   trashedCoupons: PaginatedCoupons;
   trashedModules: PaginatedApplicationModules;
@@ -2180,6 +2092,7 @@ export type Query = {
   trashedSubscriptions: PaginatedSubscriptions;
   trashedUsers: PaginatedUsers;
   userHierarchy: Array<User>;
+  vehicleUnreadNotificationByUser: Scalars['Float']['output'];
   vehiclesDropdown: PaginatedVehicles;
 };
 
@@ -2331,11 +2244,6 @@ export type QueryFindVehicleExpenseByIdArgs = {
 };
 
 
-export type QueryFindWarehouseByIdArgs = {
-  id: Scalars['Float']['input'];
-};
-
-
 export type QueryGetAllDynamicPageArgs = {
   ListInputDTO: ListInputDto;
 };
@@ -2438,11 +2346,6 @@ export type QueryGetVehicleExpenseTypeSuggestionsArgs = {
 };
 
 
-export type QueryListTrashedChildMetingArgs = {
-  listInputDTO: ListInputDto;
-};
-
-
 export type QueryListTrashedFollowUpArgs = {
   ListInputDto: ListInputDto;
 };
@@ -2465,11 +2368,6 @@ export type QueryListTrashedMeetingTypeArgs = {
 
 export type QueryListTrashedMeetingVenueArgs = {
   ListInputDTO: ListInputDto;
-};
-
-
-export type QueryListTrashedMetingSubTasksArgs = {
-  listInputDTO: ListInputDto;
 };
 
 
@@ -2499,11 +2397,6 @@ export type QueryListTrashedRolesArgs = {
 
 
 export type QueryPackagesDropdownArgs = {
-  ListInputDTO: ListInputDto;
-};
-
-
-export type QueryPaginatedActivityLogMeetingArgs = {
   ListInputDTO: ListInputDto;
 };
 
@@ -2631,11 +2524,6 @@ export type QueryPaginatedSubscriptionsArgs = {
 };
 
 
-export type QueryPaginatedTrashedWarehousesArgs = {
-  ListInputDTO: ListInputDto;
-};
-
-
 export type QueryPaginatedUsersArgs = {
   ListInputDTO: ListInputDto;
 };
@@ -2653,16 +2541,6 @@ export type QueryPaginatedVehicleNotificationArgs = {
 
 export type QueryPaginatedVehiclesArgs = {
   ListInputDTO: ListInputDto;
-};
-
-
-export type QueryPaginatedWarehousesArgs = {
-  ListInputDTO: ListInputDto;
-};
-
-
-export type QueryPostArgs = {
-  id: Scalars['ID']['input'];
 };
 
 
@@ -2793,48 +2671,12 @@ export type SubscriptionsArray = {
 
 export type SubscriptionsUnion = Subscriptions | SubscriptionsArray;
 
-export type Supplier = {
-  __typename?: 'Supplier';
-  address?: Maybe<Scalars['String']['output']>;
-  contactPerson?: Maybe<Scalars['String']['output']>;
-  email: Scalars['String']['output'];
-  gstNumber?: Maybe<Scalars['String']['output']>;
-  id: Scalars['Float']['output'];
-  name: Scalars['String']['output'];
-  phone?: Maybe<Scalars['String']['output']>;
-  status: Scalars['String']['output'];
-};
-
 export type TopicNotificationDto = {
   body: Scalars['String']['input'];
   icon: Scalars['String']['input'];
   title: Scalars['String']['input'];
   topic: Scalars['String']['input'];
 };
-
-export type Unit = {
-  __typename?: 'Unit';
-  conversionFactor?: Maybe<Scalars['Float']['output']>;
-  createdAt: Scalars['DateTime']['output'];
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-  parentUnit?: Maybe<Unit>;
-  parentUnitId?: Maybe<Scalars['Int']['output']>;
-  symbol: Scalars['String']['output'];
-  type: UnitType;
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-/** UnitType */
-export enum UnitType {
-  Area = 'area',
-  Density = 'density',
-  Length = 'length',
-  Time = 'time',
-  Volume = 'volume',
-  Weight = 'weight'
-}
 
 export type UpdateAboutDto = {
   content: Scalars['String']['input'];
@@ -3054,16 +2896,6 @@ export type UpdateVehicleExpenseDto = {
   vehicleId?: InputMaybe<Scalars['Float']['input']>;
 };
 
-export type UpdateWarehouseDto = {
-  capacity?: InputMaybe<Scalars['Float']['input']>;
-  contactPerson?: InputMaybe<Scalars['String']['input']>;
-  email?: InputMaybe<Scalars['String']['input']>;
-  id: Scalars['Float']['input'];
-  location?: InputMaybe<Scalars['String']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
-  phone?: InputMaybe<Scalars['Float']['input']>;
-};
-
 export type User = {
   __typename?: 'User';
   avatar?: Maybe<Scalars['String']['output']>;
@@ -3078,7 +2910,6 @@ export type User = {
   organizationId?: Maybe<Scalars['Float']['output']>;
   parent?: Maybe<User>;
   parentId?: Maybe<Scalars['Float']['output']>;
-  posts: Array<Post>;
   roles?: Maybe<Array<Role>>;
   status: Scalars['String']['output'];
   subordinates?: Maybe<Array<User>>;
@@ -3205,31 +3036,6 @@ export type VerifyPaymentInput = {
   razorpayOrderId: Scalars['String']['input'];
   razorpayPaymentId: Scalars['String']['input'];
   razorpaySignature: Scalars['String']['input'];
-};
-
-export type Warehouse = {
-  __typename?: 'Warehouse';
-  capacity: Scalars['Float']['output'];
-  contactPerson?: Maybe<Scalars['String']['output']>;
-  email?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  location: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  phone?: Maybe<Scalars['Float']['output']>;
-  status: Scalars['String']['output'];
-};
-
-/** Warehouse Status */
-export enum WarehouseStatus {
-  Active = 'active',
-  Full = 'full',
-  Inactive = 'inactive',
-  OutOfStock = 'outOfStock'
-}
-
-export type WarehouseStatusDto = {
-  id: Scalars['Float']['input'];
-  status: WarehouseStatus;
 };
 
 export enum AppName {

@@ -307,7 +307,7 @@ mutation UpdateProject($updateProjectInput: UpdateProjectDto!) {
 
 #delete project
 mutation DeleteProject($ids: [Int!]!) {
-  deleteProject(ids: $ids)
+  deleteProject(ids: $ids) 
 }
 
 #ennable project status

@@ -11,11 +11,12 @@ import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useTheme } from "@/context/ThemeContext";
 import DateTimePickerModal from "@/components/DateTimePickerModal";
 import { formatTimeForAPI } from "@/utils/formatDateTime";
-import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
+    CreateUserDocument,
     CreateVehicleDocument,
     DropdownRolesDocument,
+    UpdateUserDocument,
     UpdateVehicleDocument,
 } from "@/graphql/generated";
 import Loader from "@/components/ui/Loader";
@@ -23,6 +24,9 @@ import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { Env } from "@/constants/ApiEndpoints";
 import * as ImagePicker from "expo-image-picker";
+import CustomHeader from "@/components/CustomHeader";
+import * as FileSystem from "expo-file-system";
+
 
 const designationData = [
     { label: "CEO", value: "CEO" },
@@ -82,41 +86,34 @@ const VehicleAdd = () => {
         reset,
         watch,
         setValue,
-    } = useForm<any>({
-        defaultValues: {
-            make: "",
-            model: "",
-            chassisNumber: "",
-            numberPlate: "",
-            year: "",
-            insurance: { label: "No", value: false },
-            color: "",
-            avatar: "",
-            insuranceValidTill: null,
-        },
+    } = useForm<{
+        name: string;
+        email: string;
+        phoneNo: string;
+        roles: any[];
+        usertype: any;
+        status: any;
+        designation: any;
+    }>({
+        defaultValues: {},
     });
-
     const { theme } = useTheme();
     const { data: editedData } = useLocalSearchParams<any>();
 
     useEffect(() => {
         if (editedData) {
             const parsedData = JSON.parse(editedData);
-            const yearValue = years?.find(
-                (item: any) => item.value === parsedData?.year
-            );
-            const insuranceValue = insuranceOptions?.find(
-                (item) => item.value === parsedData?.insurance
-            );
-            setValue("make", parsedData?.make);
-            setValue("model", parsedData?.model);
-            setValue("chassisNumber", parsedData?.chassisNumber);
-            setValue("numberPlate", parsedData?.numberPlate);
-            setValue("year", yearValue);
-            setValue("insurance", insuranceValue);
-            setValue("insuranceExpiry", parsedData?.insuranceExpiry);
-            setValue("color", parsedData?.color);
-            setValue("avatar", parsedData?.avatar);
+            let rolesId = parsedData?.roles?.map((item: any) => {
+                return item?.id
+            })
+            setValue("name", parsedData?.name);
+            setValue("email", parsedData?.email);
+            setValue("phoneNo", parsedData?.mobileNo.toString());
+            setValue("roles", rolesId);
+            setValue("usertype", parsedData?.userType);
+            // setValue("id", parsedData?.id);
+            // setValue("imagePath", parsedData?.avatar);
+            setValue("designation", parsedData?.designation);
         }
     }, [editedData]);
 
@@ -133,55 +130,69 @@ const VehicleAdd = () => {
         }
     }, [editedData]);
 
-    const [addVehicleApi, addVehicleStat] = useMutation<any>(
-        CreateVehicleDocument,
-        {
-            onCompleted: (data) => {
-                reset();
-                router.back();
-            },
-            onError: (error) => {
-                console.log(error);
-                Alert.alert("Error", error.message);
-            },
-        }
-    );
+    const [updateUser, updateUserState] = useMutation(UpdateUserDocument, {
+        onCompleted: (data) => {
+            router.back();
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        },
+    });
 
-    const [editVehicleApi, editVehicleStat] = useMutation<any>(
-        UpdateVehicleDocument,
-        {
-            onCompleted: (data) => {
-                reset();
-                router.back();
-            },
-            onError: (error) => {
-                console.log(error);
-                Alert.alert("Error", error.message);
-            },
-        }
-    );
-    const onSubmit = (data: any) => {
-        let params = {
-            ...data,
-            year: data?.year?.value,
-            insurance: data?.insurance?.value,
-            ...(editedData ? { id: Number(JSON.parse(editedData)?.id) } : {}),
-        };
+    const [createUser, createUserState] = useMutation(CreateUserDocument, {
+        onCompleted: (data) => {
+            router.back();
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        },
+    });
 
-        if (editedData) {
-            editVehicleApi({
-                variables: {
-                    updateVehicleInput: params,
+    const uploadImage = async (uri: string) => {
+        try {
+            const fileInfo = await FileSystem.getInfoAsync(uri);
+            if (!fileInfo.exists) {
+                console.error("File does not exist:", uri);
+                return;
+            }
+
+            const fileExtension = uri.split(".").pop() || "jpg"; // Default to jpg if no extension
+            const mimeType = `image/${fileExtension}`;
+
+            const formData = new FormData();
+
+            formData.append("file", {
+                uri,
+                name: `upload.${fileExtension}`,
+                type: mimeType,
+            } as unknown as Blob);
+
+            // formData.append("file", {
+            //   uri: uri,
+            //   name: `upload.${fileExtension}`,
+            //   type: mimeType,
+            // } as any); 
+
+            const uploadResponse = await fetch(`${Env.SERVER_URL}/api/files/upload`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "multipart/form-data",
                 },
+                body: formData,
             });
-        } else {
-            addVehicleApi({
-                variables: {
-                    createVehicleInput: params,
-                },
-            });
+            if (!uploadResponse.ok) {
+                const err = await uploadResponse.text();
+                throw new Error(`Upload failed: ${err}`);
+            }
+            const responseData = await uploadResponse.json();
+            // console.log("Upload successful:", responseData?.files[0]);
+            setImage(responseData?.files[0]);
+        } catch (error) {
+            console.error("Upload failed:", error);
         }
     };
+
+
 
     const handleImagePickerPress = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -197,27 +208,68 @@ const VehicleAdd = () => {
         }
     };
 
-    if (addVehicleStat.loading || editVehicleStat.loading) return <Loader />;
+    const onSubmit = (data: any) => {
+        try {
+            const roleIds: number[] = [];
+            if (data?.roles && Array.isArray(data.roles)) {
+                for (let i = 0; i < data.roles.length; i++) {
+                    roleIds.push(Number(data.roles[i]));
+                }
+            }
+
+            const params: any = {
+                designation: typeof data?.designation == 'string' ? data?.designation : data?.designation?.value,
+                email: data?.email,
+                mobileNo: Number(data?.phoneNo),
+                name: data?.name,
+                roleIds: roleIds,
+                userType: typeof data?.usertype == 'string' ? data?.usertype : data?.usertype?.value,
+                avatar: image,
+            };
+            //   let updateParams = {
+            //     id: Number(parse?.id),
+            //     ...params,
+            //   }
+            console.log("updateParams", params);
+            if (editedData) {
+                const parsedData = JSON.parse(editedData);
+                updateUser({
+                    variables: {
+                        data: {
+                            ...params,
+                            id: Number(parsedData?.id),
+                        }
+                    },
+                })
+                return;
+            }
+            createUser({
+                variables: {
+                    data: params,
+                },
+            });
+        } catch (error) {
+            console.log("onSubmit error", error);
+        }
+    };
+
+    if (createUserState.loading || updateUserState.loading) return <Loader />;
 
     return (
-        <SafeAreaView
-            style={{
-                padding: ms(12),
-                alignItems: "center",
-                backgroundColor: Colors[theme].background,
-            }}
-        >
+        <CustomHeader>
             <ScrollView
+                showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
-                    backgroundColor: Colors[theme].cart,
-                    // height: vs(640),
+                    // backgroundColor: Colors[theme].cart,
                     width: "100%",
                     borderRadius: 10,
                     alignSelf: "center",
                     paddingHorizontal: 10,
                     paddingVertical: 22,
                     justifyContent: "flex-start",
-                }}
+                    paddingBottom: 20,
+                }
+                }
             >
                 <View
                     style={{
@@ -227,11 +279,11 @@ const VehicleAdd = () => {
                     }}
                 >
                     <ThemedText type="subtitle">
-                        {editModal ? "Edit User" : "Create User"}
+                        User
                     </ThemedText>
                 </View>
 
-                <View style={{ padding: 10, position: "relative" }}>
+                <View style={{ padding: 10, position: "relative", paddingBottom: 30 }}>
                     <Pressable
                         style={styles.imageContainer}
                     >
@@ -242,12 +294,11 @@ const VehicleAdd = () => {
                             style={styles.image}
                         />
                     </Pressable>
-
-                    {<Pressable
+                    <Pressable
                         onPress={handleImagePickerPress}
                         style={styles?.editImage}>
-                        <Feather name="edit-2" size={ms(18)} color='black' style={{ fontWeight: 'bold', }} />
-                    </Pressable>}
+                        <Feather name="edit-2" size={ms(20)} color='black' style={{ fontWeight: 'bold', }} />
+                    </Pressable>
 
                     <CustomValidation
                         type="input"
@@ -354,7 +405,7 @@ const VehicleAdd = () => {
                     }}
                 />
             </ScrollView>
-        </SafeAreaView>
+        </CustomHeader>
     );
 };
 
@@ -362,8 +413,8 @@ export default VehicleAdd;
 
 const styles = ScaledSheet.create({
     imageContainer: {
-        width: '70@ms',
-        height: '70@ms',
+        width: '90@ms',
+        height: '90@ms',
         borderRadius: '70@ms',
         marginBottom: '12@ms',
         backgroundColor: Colors.gray,
@@ -382,7 +433,7 @@ const styles = ScaledSheet.create({
     editImage: {
         position: 'absolute',
         top: 3,
-        left: 50,
+        left: 55,
         width: 35,
         height: 35,
         borderRadius: 100,

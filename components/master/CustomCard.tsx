@@ -7,7 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
 import { ThemedText } from '../ThemedText';
 
-interface OrganizationCardProps {
+interface CustomCardProps {
     name: string;
     status: 'active' | 'inactive' | 'pending' | 'blocked';
     description: string;
@@ -26,7 +26,7 @@ const statusColors = {
     blocked: 'black'
 };
 
-const CustomCard: React.FC<OrganizationCardProps> = ({
+const CustomCard: React.FC<CustomCardProps> = ({
     name,
     status,
     description,
