@@ -4,7 +4,8 @@ import {
   Pressable,
   SafeAreaView,
   StyleSheet,
-  FlatList
+  FlatList,
+  RefreshControl
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
@@ -79,7 +80,7 @@ const VehicleList = () => {
     DeleteVehicleDocument,
     {
       onCompleted: (data) => {
-        fetchVehicleList(true);
+        fetchVehicleList();
       },
       onError: (error) => {
         console.log(error);
@@ -93,7 +94,7 @@ const VehicleList = () => {
     {
       onCompleted: (data) => {
         setIsModalVisible(false);
-        fetchVehicleList(true);
+        fetchVehicleList();
       },
       onError: (error) => {
         console.log(error);
@@ -118,6 +119,7 @@ const VehicleList = () => {
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [vehicleList, setVehicleList] = useState<any>([]);
+console.log("vehicleList", vehicleList.length);
 
 
   const fetchVehicleList = async (isRefresh = false, search = "") => {
@@ -127,7 +129,7 @@ const VehicleList = () => {
       setRefreshing(true);
       setPage(1);
     }
-
+  setIsLoading(true)
     const params = {
       limit: Env.LIMIT,
       page: currentPage,
@@ -146,9 +148,11 @@ const VehicleList = () => {
     const lastPage = Math.ceil(data?.meta?.totalItems / Env.LIMIT);
     if (newItems.length > 0) {
       setVehicleList((prev: any) =>
-        isRefresh ? newItems : [...prev, ...newItems]
+        isRefresh && currentPage == 1 ? newItems : [...prev, ...newItems]
       );
       setPage(currentPage + 1);
+      if (isRefresh) setRefreshing(false); 
+      setIsLoading(false)
       setHasMore(currentPage < lastPage);
     } else {
       if (isRefresh) setVehicleList([]);
@@ -159,9 +163,11 @@ const VehicleList = () => {
 
   const [isSearch, setIsSearch] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
+  const [isLoading,setIsLoading] = useState<boolean>(false)
+
   useFocusEffect(
-    useCallback(() => {
-      fetchVehicleList(true);
+    useCallback(() => { 
+      fetchVehicleList();
       navigation.setOptions({
         headerRight: () => (
           <Pressable
@@ -178,13 +184,13 @@ const VehicleList = () => {
 
   const debounceSearch = useCallback(
     debounce((text: string) => {
-      fetchVehicleList(true, text);
+      fetchVehicleList(false, text);
     }, 1000),
     [searchValue]
   );
 
   const renderItems = (item: any) => {
-    // 
+ 
     return (
       <VehicleCard
         brand={item?.make}
@@ -222,6 +228,11 @@ const VehicleList = () => {
     );
   };
 
+  // console.log('loading',loading);
+  // console.log('page',page);
+  // console.log('refreshing',refreshing);
+
+
   if ((loading && page == 1 && !refreshing) || deleteVehicleStat.loading || changeVehicleStatusStat.loading)
     return <Loader />;
 
@@ -242,25 +253,28 @@ const VehicleList = () => {
       )}
       <FlatList
         data={vehicleList}
-        keyExtractor={(item, index) => index?.toString()}
+        keyExtractor={(item, index) =>item?.id?.toString()}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={<NoDataFound />}
+        ListEmptyComponent={!isLoading ? <NoDataFound onPress={()=>fetchVehicleList(true)}/>:null}
         renderItem={({ item }: any) => renderItems(item)}
         contentContainerStyle={{ paddingVertical: ms(10) }}
-        refreshing={refreshing && !loading}
-        onRefresh={() => { 
-          fetchVehicleList(true);
-        }}
+    
         ListFooterComponent={
           hasMore ? (
             <ActivityIndicator size="small" color={Colors.primary} />
           ) : null
         }
         onEndReached={() => {
-          if (hasMore && !loading) {
-            fetchVehicleList();
+          if (hasMore && !isLoading) {
+            fetchVehicleList(false, searchValue);
           }
         }}
+           refreshControl={
+            <RefreshControl
+              refreshing={refreshing && !isLoading}
+              onRefresh={() => fetchVehicleList(true)}
+            />
+          }
         onEndReachedThreshold={0.5}
         initialNumToRender={8}
         maxToRenderPerBatch={5}

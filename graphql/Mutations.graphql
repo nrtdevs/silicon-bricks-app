@@ -941,39 +941,3 @@ mutation EnableMeetingStatus($updateMeetingStatusInput: MeetingStatusDto!) {
     }
   }
 }
-
-mutation UpdateNotes($updateNotesInput: UpdateNotesDto!) {
-  updateNotes(updateNotesInput: $updateNotesInput) {
-    notes
-    id
-    decision
-    meetingId
-    uploadDoc
-  }
-}
-
-mutation UpdateMeetingTask($updateMeetingTaskInput: UpdateMeetingTaskDto!) {
-  updateMeetingTask(updateMeetingTaskInput: $updateMeetingTaskInput) {
-    id
-    ownerId
-    createdByUserId
-    assigneeId
-    meetingId
-    notesId
-    projectId
-    parentTaskId
-    ownerName
-    assigneeName
-    task
-    projectName
-    comment
-    openedDate
-    dueDate
-    completedDate
-    priority
-    status
-    completePercent
-    totalTaskComplete
-    weightType
-  }
-}
