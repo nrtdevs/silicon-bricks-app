@@ -12,7 +12,7 @@ export const Colors = {
     shadow: 'rgba(0, 0, 0, 0.06)',  
     lightText: '#7E7E7E',   
     placeholder: '#A8A8A8',
-    cart: '#F4F4F6', // Light modern card background  
+    cart: '#F2F2F2', // Light modern card background  
   },
 
   /** 🌙 Dark Theme Colors */
@@ -25,7 +25,7 @@ export const Colors = {
     shadow: 'rgba(255, 255, 255, 0.05)',  
     lightText: '#9E9E9F',  
     inputColor: '#4D4D4D', 
-    cart: '#1C1C1E', // Elegant dark card  
+    cart: '#444444', // Elegant dark card  
   },
 
   /** 🌎 Universal Colors */

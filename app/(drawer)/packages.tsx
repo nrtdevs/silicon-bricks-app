@@ -42,6 +42,8 @@ import { useUserContext } from "@/context/RoleContext";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import DateTimePickerModal from "@/components/DateTimePickerModal";
 import { formatTimeForAPI } from "@/utils/formatDateTime";
+import CustomPackageCard from "@/components/master/CustomPackageCard";
+import { router } from "expo-router";
 
 const defaultValue = {
     name: "",
@@ -84,6 +86,7 @@ const PackageScreen = () => {
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [page, setPage] = useState<number>(1);
+    const readPermission = can("MasterApp:Package:Read");
     const deletePermission = can("MasterApp:Package:Delete");
     const updatePermission = can("MasterApp:Package:Update");
     const createPermission = can("MasterApp:Package:Create");
@@ -211,7 +214,7 @@ const PackageScreen = () => {
         fetchPackage();
         moduleDataApi({
             variables: {
-                listInputDto:{
+                listInputDto: {
                     page: 1,
                     limit: 20
                 }
@@ -329,125 +332,192 @@ const PackageScreen = () => {
         }
     };
 
+    // const renderData = ({ item, index }: any) => {
+    //     let ids = item?.modules?.map((item: any) => item.id);
+    //     return (
+    //         <View
+    //             key={index}
+    //             style={[
+    //                 styles.organizationContainer,
+    //                 { backgroundColor: Colors[theme]?.cart },
+    //             ]}
+    //         >
+    //             <View style={styles.organizationHeader}>
+    //                 <ThemedText type="subtitle" style={{ flex: 1 }}>
+    //                     {item?.name}
+    //                 </ThemedText>
+    //                 <View style={styles.organizationInfo}>
+    //                     {statusUpdatePermission && (
+    //                         <MaterialIcons
+    //                             name="attractions"
+    //                             size={ms(26)}
+    //                             color={Colors[theme].text}
+    //                             onPress={() => {
+    //                                 setStatusModalVisible(true);
+    //                                 setValue('status', item?.status);
+    //                             }}
+    //                         />
+    //                     )}
+
+    //                     {updatePermission && (
+    //                         <Feather
+    //                             name="edit"
+    //                             size={ms(26)}
+    //                             color={Colors[theme].text}
+    //                             onPress={() => {
+    //                                 setCurrentPackage({
+    //                                     name: item?.name,
+    //                                     discountedPrice: String(item?.discountedPrice),
+    //                                     description: item?.description,
+    //                                     id: item?.id,
+    //                                     price: String(item?.price),
+    //                                     moduleIds: ids,
+    //                                     endDate: item?.offerExpiryDate,
+    //                                     offerDescription: item?.offerDescription,
+    //                                 });
+    //                                 setModalVisible(true);
+    //                                 setEditModal(true);
+    //                             }}
+    //                         />
+    //                     )}
+
+    //                     {updatePermission && (
+    //                         <Feather
+    //                             name="eye"
+    //                             size={ms(26)}
+    //                             color={Colors[theme].text}
+    //                             onPress={() => {
+    //                                 setCurrentPackage({
+    //                                     name: item?.name,
+    //                                     discountedPrice: String(item?.discountedPrice),
+    //                                     description: item?.description,
+    //                                     id: item?.id,
+    //                                     price: String(item?.price),
+    //                                     moduleIds: ids,
+    //                                     endDate: item?.offerExpiryDate,
+    //                                     offerDescription: item?.offerDescription,
+    //                                 });
+    //                                 findModule(item.modules, ids);
+    //                                 setInfoModalVisible(true);
+    //                             }}
+    //                         />
+    //                     )}
+
+    //                     {deletePermission && (
+    //                         <MaterialIcons
+    //                             name="delete-outline"
+    //                             size={ms(26)}
+    //                             color={Colors[theme].text}
+    //                             onPress={() => {
+    //                                 Alert.alert("Delete", "Are you sure you want to delete?", [
+    //                                     {
+    //                                         text: "Yes",
+    //                                         onPress: () => {
+    //                                             deletePackage({
+    //                                                 variables: {
+    //                                                     ids: [Number(item?.id)],
+    //                                                 },
+    //                                             });
+    //                                         },
+    //                                     },
+    //                                     { text: "No", onPress: () => { } },
+    //                                 ]);
+    //                             }}
+    //                         />
+    //                     )}
+    //                 </View>
+    //             </View>
+
+    //             <View style={styles.userInfo}>
+    //                 <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+    //                     ${item?.price}
+    //                 </ThemedText>
+    //                 <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
+    //                     ${item?.discountedPrice} (after discount)
+    //                 </ThemedText>
+    //             </View>
+
+    //             <ThemedText
+    //                 style={[
+    //                     styles.status,
+    //                     {
+    //                         // color:
+    //                         //   item.status == "active" ? Colors?.green : "#6d6d1b",
+    //                         backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
+    //                         fontSize: ms(14),
+    //                     },
+    //                 ]}
+    //             >
+    //                 {item?.status}
+    //             </ThemedText>
+    //         </View>
+    //     );
+    // };
+
     const renderData = ({ item, index }: any) => {
         let ids = item?.modules?.map((item: any) => item.id);
         return (
-            <View
-                key={index}
-                style={[
-                    styles.organizationContainer,
-                    { backgroundColor: Colors[theme]?.cartBg },
-                ]}
-            >
-                <View style={styles.organizationHeader}>
-                    <ThemedText type="subtitle" style={{ flex: 1 }}>
-                        {item?.name}
-                    </ThemedText>
-                    <View style={styles.organizationInfo}>
-                        {statusUpdatePermission && (
-                            <MaterialIcons
-                                name="attractions"
-                                size={ms(26)}
-                                color={Colors[theme].text}
-                                onPress={() => {
-                                    setStatusModalVisible(true);
-                                    setValue('status', item?.status);
-                                }}
-                            />
-                        )}
-
-                        {updatePermission && (
-                            <Feather
-                                name="edit"
-                                size={ms(26)}
-                                color={Colors[theme].text}
-                                onPress={() => {
-                                    setCurrentPackage({
-                                        name: item?.name,
-                                        discountedPrice: String(item?.discountedPrice),
-                                        description: item?.description,
-                                        id: item?.id,
-                                        price: String(item?.price),
-                                        moduleIds: ids,
-                                        endDate: item?.offerExpiryDate,
-                                        offerDescription: item?.offerDescription,
-                                    });
-                                    setModalVisible(true);
-                                    setEditModal(true);
-                                }}
-                            />
-                        )}
-
-                        {updatePermission && (
-                            <Feather
-                                name="eye"
-                                size={ms(26)}
-                                color={Colors[theme].text}
-                                onPress={() => {
-                                    setCurrentPackage({
-                                        name: item?.name,
-                                        discountedPrice: String(item?.discountedPrice),
-                                        description: item?.description,
-                                        id: item?.id,
-                                        price: String(item?.price),
-                                        moduleIds: ids,
-                                        endDate: item?.offerExpiryDate,
-                                        offerDescription: item?.offerDescription,
-                                    });
-                                    findModule(item.modules, ids);
-                                    setInfoModalVisible(true);
-                                }}
-                            />
-                        )}
-
-                        {deletePermission && (
-                            <MaterialIcons
-                                name="delete-outline"
-                                size={ms(26)}
-                                color={Colors[theme].text}
-                                onPress={() => {
-                                    Alert.alert("Delete", "Are you sure you want to delete?", [
-                                        {
-                                            text: "Yes",
-                                            onPress: () => {
-                                                deletePackage({
-                                                    variables: {
-                                                        ids: [Number(item?.id)],
-                                                    },
-                                                });
-                                            },
-                                        },
-                                        { text: "No", onPress: () => { } },
-                                    ]);
-                                }}
-                            />
-                        )}
-                    </View>
-                </View>
-
-                <View style={styles.userInfo}>
-                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                        ${item?.price}
-                    </ThemedText>
-                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                        ${item?.discountedPrice} (after discount)
-                    </ThemedText>
-                </View>
-
-                <ThemedText
-                    style={[
-                        styles.status,
-                        {
-                            // color:
-                            //   item.status == "active" ? Colors?.green : "#6d6d1b",
-                            backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
-                            fontSize: ms(14),
+            <CustomPackageCard
+                name={item?.name}
+                status={item?.status}
+                price={item?.price.toString()}
+                discountedPrice={item?.discountedPrice.toString()}
+                readPermission={readPermission}
+                editPermission={updatePermission}
+                deletePermission={deletePermission}
+                statusPermission={statusUpdatePermission}
+                onEdit={() => {
+                    router.navigate({
+                        pathname: "/addEditUser",
+                        params: {
+                            data: JSON.stringify(item),
                         },
-                    ]}
-                >
-                    {item?.status}
-                </ThemedText>
-            </View>
+                    })
+                }}
+                onDelete={() =>
+                    Alert.alert("Delete", "Are you sure you want to delete?", [
+                        {
+                            text: "Yes",
+                            onPress: () => {
+                                deletePackage({
+                                    variables: {
+                                        ids: [Number(item?.id)],
+                                    },
+                                });
+                            },
+                        },
+                        { text: "No", onPress: () => { } },
+                    ])
+                }
+                onChangeStatus={() => {
+                    setCurrentPackage({
+                        name: item?.name,
+                        discountedPrice: String(item?.discountedPrice),
+                        description: item?.description,
+                        id: item?.id,
+                        price: String(item?.price),
+                        moduleIds: ids,
+                        endDate: item?.offerExpiryDate,
+                        offerDescription: item?.offerDescription,
+                    });
+                    setStatusModalVisible(true);
+                    setValue('status', item?.status);
+                }}
+                onView={() => {
+                    setCurrentPackage({
+                        name: item?.name,
+                        discountedPrice: String(item?.discountedPrice),
+                        description: item?.description,
+                        id: item?.id,
+                        price: String(item?.price),
+                        moduleIds: ids,
+                        endDate: item?.offerExpiryDate,
+                        offerDescription: item?.offerDescription,
+                    });
+                    findModule(item.modules, ids);
+                    setInfoModalVisible(true);
+                }}
+            />
         );
     };
 
@@ -492,7 +562,7 @@ const PackageScreen = () => {
                             fetchPackage(true);
                         }}
                         keyExtractor={(item: any, index: number) => index.toString()}
-                        contentContainerStyle={{ paddingBottom: vs(40) }}
+                        contentContainerStyle={{ paddingBottom: vs(60) }}
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
                         ListFooterComponent={
                             hasMore ? (
@@ -756,6 +826,8 @@ const PackageScreen = () => {
                                 ids: [Number(currentPackage?.id)],
                                 status: watch("status")?.value,
                             }
+                            console.log('00', params);
+
                             packageState({
                                 variables: {
                                     updatePackageStatusInput: params,
@@ -839,7 +911,7 @@ const PackageScreen = () => {
                         <View>
                             <ThemedText type="subtitle">Module</ThemedText>
                             <View style={{ flexDirection: "row", gap: ms(15) }}>
-                                {selectedModules?.map((item,index) => {
+                                {selectedModules?.map((item, index) => {
                                     return <ThemedText type="default" key={index} >
                                         {item}
                                     </ThemedText>
@@ -902,45 +974,6 @@ const PackageScreen = () => {
     );
 };
 
-{
-    /* status modal */
-}
-{
-    /* <Modal
-      isVisible={isStatusModalVisible}
-      onBackdropPress={() => {
-          setStatusModalVisible(false);
-      }}
-  >
-      <View
-          style={{
-              backgroundColor: Colors[theme].cart,
-              height: 380,
-              width: s(300),
-              borderRadius: 10,
-              alignSelf: "center",
-              padding: 10,
-          }}
-      >
-          <CustomValidation
-              data={pickerData}
-              type="picker"
-              hideStar
-              control={control}
-              name="status"
-              placeholder="Select Status"
-              inputStyle={{ height: vs(50) }}
-              rules={{
-                  required: {
-                      value: true,
-                      message: "Select status",
-                  },
-              }}
-          />
-      </View>
-  </Modal> */
-}
-
 export default PackageScreen;
 
 const styles = ScaledSheet.create({
@@ -948,7 +981,7 @@ const styles = ScaledSheet.create({
         flexGrow: 1,
     },
     selectedContainer: {
-        width: "100%",
+
         position: "absolute",
         top: "60@vs",
         alignSelf: "center",
@@ -960,14 +993,14 @@ const styles = ScaledSheet.create({
     },
     contentContainer: {
         flex: 1,
-        padding: "12@ms",
+        // padding: "12@ms",
     },
     searchContainer: {
-        width: "100%",
+        // width: "100%",
+        marginHorizontal: "12@s",
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: "12@ms",
     },
     buttonContainer: { marginLeft: "12@ms" },
     organizationParentContainer: {

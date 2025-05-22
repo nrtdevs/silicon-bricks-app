@@ -35,7 +35,7 @@ const index = () => {
   console.log('Dashboard Data:', error);
 
   // if (loading) return <ThemedText>Loading...</ThemedText>;
-  // if (error) return <ThemedText>Error: {error.message}</ThemedText>;
+  // if (error) return <ThemedText>Error: {error.message}</ThemedText>; jkj
   const userCount = data?.dashboardCount || {};
 
   return (
@@ -48,7 +48,7 @@ const index = () => {
               flexDirection: "row",
               justifyContent: "space-between",
               paddingHorizontal: 15,
-              paddingVertical: 10,
+              paddingVertical: 10,  
             }}
           >
             <TouchableOpacity

@@ -36,6 +36,8 @@ import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
+import CustomCard from "@/components/master/CustomCard";
+import { Env } from "@/constants/ApiEndpoints";
 
 const defaultValue = {
     name: "",
@@ -146,12 +148,13 @@ const ModuleScreen = () => {
             setRefreshing(true);
             setPage(1);
         }
+
         const params = {
-            limit: 9,
+            limit: Env?.LIMIT as number,
             page: currentPage,
             search: searchParams,
         };
-        console.log('999', currentPage);
+
         try {
             const res: any = await moduleData({
                 variables: {
@@ -169,12 +172,10 @@ const ModuleScreen = () => {
                         ? newItems
                         : [...prev, ...newItems];
                 });
-
-                if (isRefreshing) setRefreshing(false);
-                setPage((prev) => prev + 1);
+                const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+                setPage(currentPage + 1);
+                setHasMore(currentPage < lastPage);
                 setRefreshing(false);
-                const lastPage = Math.ceil(data?.meta?.totalItems / 9);
-                setHasMore(data?.meta?.currentPage < lastPage);
             } else {
                 console.log("API call failed or returned no data:", res?.errors);
                 setRefreshing(false);
@@ -212,95 +213,57 @@ const ModuleScreen = () => {
         }
     };
 
-    const renderItem = (item, index) => (<View
-        key={index}
-        style={[
-            styles.organizationContainer,
-            { backgroundColor: Colors[theme].cart },
-        ]}
-    >
-        <View style={styles.organizationHeader}>
-            <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.name}</ThemedText>
-            <View style={styles.organizationInfo}>
-                {statusUpdatePermission && <MaterialIcons
-                    name="attractions"
-                    size={ms(22)}
-                    color={Colors[theme].text}
-                    onPress={() => {
-                        setCurrentModule({
-                            name: item?.name,
-                            description: item?.description,
-                            id: item?.id,
-                        });
-                        setValue("status", item?.status)
-                        setStatusModalVisible(true);
-                    }}
-                />}
-                {updatePermission && <Feather
-                    name="edit"
-                    size={ms(22)}
-                    color={Colors[theme].text}
-                    onPress={() => {
-                        setCurrentModule({
-                            name: item?.name,
-                            description: item?.description,
-                            id: item?.id,
-                        });
-                        setValue("name", item?.name)
-                        setValue("description", item?.description)
-                        setEditModal(true);
-                        setModalVisible(true);
-                    }}
-                />}
-                {deletePermission && <MaterialIcons
-                    name="delete-outline"
-                    size={ms(22)}
-                    color={Colors[theme].text}
-                    onPress={() => {
-                        console.log(item?.id);
-
-                        Alert.alert(
-                            "Delete",
-                            "Are you sure you want to delete?",
-                            [
-                                {
-                                    text: "Yes",
-                                    onPress: () => {
-                                        deleteModule({
-                                            variables: {
-                                                ids: [Number(item?.id)],
-                                            }
-                                        });
-                                    },
+    const renderItem = ({ item, index }: any) => {
+        return (
+            <CustomCard
+                name={item?.name}
+                status={item?.status}
+                description={item?.description}
+                editPermission={updatePermission}
+                deletePermission={deletePermission}
+                statusPermission={statusUpdatePermission}
+                onEdit={() => {
+                    setCurrentModule({
+                        name: item?.name,
+                        description: item?.description,
+                        id: item?.id,
+                    });
+                    setValue("name", item?.name)
+                    setValue("description", item?.description)
+                    setEditModal(true);
+                    setModalVisible(true);
+                }}
+                onDelete={() =>
+                    Alert.alert(
+                        "Delete",
+                        "Are you sure you want to delete?",
+                        [
+                            {
+                                text: "Yes",
+                                onPress: () => {
+                                    deleteModule({
+                                        variables: {
+                                            ids: [Number(item?.id)],
+                                        }
+                                    });
                                 },
-                                { text: "No", onPress: () => { } },
-                            ]
-                        );
-                    }}
-                />}
-            </View>
-        </View>
-
-        <ThemedText
-            style={[
-                styles.status,
-                {
-                    color:
-                        item.status == "active" ? Colors?.green : "#6d6d1b",
-                    backgroundColor:
-                        theme == "dark" ? Colors?.white : "#e6e2e2",
-                },
-            ]}
-        >
-            {item?.status}
-        </ThemedText>
-
-        {item?.description && <View style={styles.userInfo}>
-            <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                {item?.description}
-            </ThemedText>
-        </View>}
-    </View>)
+                            },
+                            { text: "No", onPress: () => { } },
+                        ]
+                    )
+                }
+                onChangeStatus={() => {
+                    setCurrentModule({
+                        name: item?.name,
+                        description: item?.description,
+                        id: item?.id,
+                    });
+                    setValue("status", item?.status)
+                    setStatusModalVisible(true);
+                }}
+            />
+        );
+    };
 
     const debouncedSearch = useCallback(
         debounce((text) => {
@@ -309,9 +272,13 @@ const ModuleScreen = () => {
         [searchQuery]
     );
 
-    // if (loading) {
-    //     return <Loader />
-    // }
+    if (
+        ((loading && page == 1 && !refreshing) ||
+            deleteModuleState.loading ||
+            updateModuleState?.loading)
+    ) {
+        return <Loader />;
+    }
 
     return (
         <CustomHeader>
@@ -370,14 +337,14 @@ const ModuleScreen = () => {
                         // onEndReachedThreshold={0.5}
 
                         data={moduleList || []}
-                        renderItem={({ item, index }: any) => renderItem(item, index)}
+                        renderItem={renderItem}
                         showsVerticalScrollIndicator={false}
                         refreshing={refreshing && !loading}
                         onRefresh={() => {
                             fetchModules(true);
                         }}
                         keyExtractor={(item: any, index: number) => index.toString()}
-                        contentContainerStyle={{ paddingBottom: vs(40) }}
+                        contentContainerStyle={{ paddingBottom: vs(60) }}
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
                         ListFooterComponent={
                             hasMore ? (
@@ -573,10 +540,9 @@ const styles = ScaledSheet.create({
     },
     contentContainer: {
         flex: 1,
-        padding: "12@ms",
     },
     searchContainer: {
-        width: "100%",
+        marginHorizontal: "12@ms",
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
@@ -584,7 +550,6 @@ const styles = ScaledSheet.create({
     },
     buttonContainer: { marginLeft: "12@ms" },
     organizationParentContainer: {
-        marginTop: "12@ms",
     },
     organizationContainer: {
         width: "100%",

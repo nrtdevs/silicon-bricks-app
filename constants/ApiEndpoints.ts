@@ -1,4 +1,4 @@
-export enum Env  {
+export enum Env {
     DOMAIN = '192.168.1.22:5001',
     BASE_URL = `http://${DOMAIN}/graphql`,
     SERVER_URL = `http://${DOMAIN}`,

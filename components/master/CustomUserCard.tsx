@@ -7,35 +7,41 @@ import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
 import { ThemedText } from '../ThemedText';
 
-interface OrganizationCardProps {
+interface CustomUserProps {
     name: string;
+    status: 'active' | 'inactive' | 'pending' | 'blocked';
     email: string;
     mobileNo: string;
-    status: 'active' | 'inactive' | 'pending' | 'blocked';
-    description:string;
+    editPermission: boolean;
+    statusPermission: boolean;
+    deletePermission: boolean;
+    readPermission: boolean;
+    onView: () => void;
     onEdit: () => void;
     onDelete: () => void;
     onChangeStatus: () => void;
-    onView: () => void;
 }
 
 const statusColors = {
     active: '#10B981',
     inactive: '#EF4444',
-    breakdown: '#F59E0B',
-    maintenance: '#3B82F6'
+    pending: '#F59E0B',
+    blocked: 'black'
 };
 
-const OrganizationCart: React.FC<OrganizationCardProps > = ({
+const CustomUserCard: React.FC<CustomUserProps> = ({
     name,
+    status,
     email,
     mobileNo,
-    status,
-    description,
+    editPermission,
+    statusPermission,
+    deletePermission,
+    readPermission,
+    onView,
     onEdit,
     onDelete,
     onChangeStatus,
-    onView,
 }) => {
     const { theme } = useTheme()
     return (
@@ -43,16 +49,15 @@ const OrganizationCart: React.FC<OrganizationCardProps > = ({
             style={[styles.container, {
                 borderColor: Colors[theme].border,
                 shadowColor: Colors[theme].shadow,
-                backgroundColor: Colors[theme].cart
+                backgroundColor: Colors[theme].cart,
 
             }]}
         >
-            <View>
+            <View style={{}}>
                 {/* Header */}
-                <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6, width: 300 }}>
                     <View>
                         <ThemedText type='subtitle'>{name}</ThemedText>
-                        <ThemedText type='default'>{email}</ThemedText>
                     </View>
                     <View
                         style={{
@@ -62,38 +67,27 @@ const OrganizationCart: React.FC<OrganizationCardProps > = ({
                             borderRadius: ms(14),
                         }}
                     >
-                        <ThemedText style={{ fontSize: ms(10), color: Colors.white }} type='default'>{status.toUpperCase()}</ThemedText>
+                        <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{status.toUpperCase()}</ThemedText>
                     </View>
                 </View>
 
-                <View style={{
-
-                    // show the dotted line
-                    borderStyle: 'dotted',
-                    borderWidth: 1,
-                    borderColor: Colors[theme].border,
-                    marginVertical: 10,
-                }} />
                 {/* Details */}
                 <View style={{}}>
-                    <ThemedText type='defaultSemiBold' style={{ marginBottom: 4 }}>
-                        <ThemedText type='default'>Chassis No:</ThemedText> {mobileNo}
+                    <ThemedText type='defaultSemiBold' style={{ marginBottom: 4, width: 300, }}>
+                        <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Email:</ThemedText> {email}
                     </ThemedText>
-                    <ThemedText type='defaultSemiBold' style={{ marginBottom: 4 }}>
-                        <ThemedText type='default'>Vehicle No:</ThemedText> {description}
+                    <ThemedText type='defaultSemiBold' style={{ marginBottom: 4, width: 300, }}>
+                        <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Mobile No:</ThemedText> {mobileNo}
                     </ThemedText>
-                    {/* <ThemedText type='defaultSemiBold' style={{ marginBottom: 4 }}>
-                        <ThemedText type='default'>Reg. Date:</ThemedText> {new Date(createdAt).toLocaleDateString()}
-                    </ThemedText> */}
                 </View>
             </View>
 
             {/* Action Buttons */}
-            <View style={{ gap: 10 }}>
-                <ActionButton icon={<FontAwesome5 name="eye" size={14} color="#10B981" />} text="View" bgColor="#10B981" onPress={onView} />
-                <ActionButton icon={<Feather name="edit" size={16} color="#3B82F6" />} text="Edit" bgColor="#3B82F6" onPress={onEdit} />
-                <ActionButton icon={<MaterialIcons name="autorenew" size={18} color="#8B5CF6" />} bgColor="#8B5CF6" text="Status" onPress={onChangeStatus} />
-                <ActionButton icon={<FontAwesome5 name="trash" size={14} color="#EF4444" />} bgColor="#EF4444" text="Delete" onPress={onDelete} />
+            <View style={{ gap: 20, flexDirection: 'row', marginTop: 15 }}>
+                {readPermission && <ActionButton icon={<FontAwesome5 name="eye" size={14} color="#10B981" />} text="View" bgColor="#10B981" onPress={onView} />}
+                {editPermission && <ActionButton icon={<Feather name="edit" size={16} color="#3B82F6" />} text="Edit" bgColor="#3B82F6" onPress={onEdit} />}
+                {statusPermission && <ActionButton icon={<MaterialIcons name="autorenew" size={18} color="#8B5CF6" />} bgColor="#8B5CF6" text="Status" onPress={onChangeStatus} />}
+                {deletePermission && <ActionButton icon={<FontAwesome5 name="trash" size={14} color="#EF4444" />} bgColor="#EF4444" text="Delete" onPress={onDelete} />}
             </View>
 
         </View>
@@ -132,12 +126,12 @@ const ActionButton = ({
     );
 };
 
-export default OrganizationCart;
+export default CustomUserCard;
 
 const styles = ScaledSheet.create({
     container: {
         borderRadius: "20@ms",
-        marginHorizontal: "16@ms",
+        marginHorizontal: "12@ms",
         marginVertical: "10@ms",
         padding: "16@ms",
         shadowOffset: { width: 0, height: 4 },
@@ -145,7 +139,7 @@ const styles = ScaledSheet.create({
         shadowRadius: 6,
         elevation: 5,
         borderWidth: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        gap: 10,
     }
 })

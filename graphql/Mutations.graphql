@@ -12,9 +12,9 @@ mutation Login($loginData: ValidateDto!) {
     user {
       id
       email
-      name
+      name 
       userType
-    }
+    } 
     accessToken
   }
 }
@@ -307,7 +307,7 @@ mutation UpdateProject($updateProjectInput: UpdateProjectDto!) {
 
 #delete project
 mutation DeleteProject($ids: [Int!]!) {
-  deleteProject(ids: $ids)
+  deleteProject(ids: $ids) 
 }
 
 #ennable project status
@@ -939,5 +939,57 @@ mutation EnableMeetingStatus($updateMeetingStatusInput: MeetingStatusDto!) {
       id
       status
     }
+  }
+}
+
+
+
+mutation EnableVehicleStatus($data: VehicleStatusDto!) {
+  enableVehicleStatus(data: $data) {
+    id
+    make
+    model
+    year
+    color
+    chassisNumber
+    numberPlate
+    maintenanceHistory
+    avatar
+    insurance
+    insuranceValidTill
+    status
+    latitude
+    longitude
+    createdById 
+    organizationId 
+    createdAt
+    updatedAt
+    deletedAt
+  }
+}
+
+mutation UpdateMeetingTask($updateMeetingTaskInput: UpdateMeetingTaskDto!) {
+  updateMeetingTask(updateMeetingTaskInput: $updateMeetingTaskInput) {
+    id
+    ownerId
+    createdByUserId
+    assigneeId
+    meetingId
+    notesId
+    projectId
+    parentTaskId
+    ownerName
+    assigneeName
+    task
+    projectName
+    comment
+    openedDate
+    dueDate
+    completedDate
+    priority
+    status
+    completePercent
+    totalTaskComplete
+    weightType
   }
 }

@@ -33,7 +33,9 @@ import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
-import OrganizationCart from "@/components/master/OrganizationList";
+import { router } from "expo-router"; 
+import CustomCard from "@/components/master/CustomCard";
+import { Env } from "@/constants/ApiEndpoints";
 
 const defaultValue = {
   name: "",
@@ -99,8 +101,8 @@ const OrganizationScreen = () => {
   const statusUpdatePermission = can("MasterApp:Organization:Action");
 
   //   const ckeckall = hasAny(['MasterApp:Organization:Create', 'MasterApp:Organization:Update', 'MasterApp:Organization:Delete'])
-
   //  console.log('9999',ckeckall);
+
 
   const [updateOrganization, updateOrganizationState] = useMutation(
     UpdateOrganizationDocument,
@@ -165,6 +167,8 @@ const OrganizationScreen = () => {
         name: data?.name,
         description: data?.description ?? "",
       };
+      console.log('000', data);
+      // return;
 
       editModal
         ? updateOrganization({
@@ -189,131 +193,49 @@ const OrganizationScreen = () => {
 
   const renderItem = ({ item, index }: any) => {
     return (
-      <View
-        key={index}
-        style={[
-          styles.organizationContainer,
-          { backgroundColor: Colors[theme]?.cart },
-        ]}
-      >
-        <View style={styles.organizationHeader}>
-          <ThemedText type="subtitle" style={{ flex: 1 }}>
-            {item?.name}
-          </ThemedText>
-          <View style={styles.organizationInfo}>
-            {statusUpdatePermission && (
-              <MaterialIcons
-                name="attractions"
-                size={ms(26)}
-                color={Colors[theme].text}
-                onPress={() => {
-                  setCurrentOrganization({
-                    name: item?.name,
-                    description: item?.description,
-                    id: item?.id,
-                  });
-                  setValue("status", item?.status);
-                  setStatusModalVisible(true);
-                }}
-              />
-            )}
-
-            {updatePermission && (
-              <Feather
-                name="edit"
-                size={ms(26)}
-                color={Colors[theme].text}
-                onPress={() => {
-                  setCurrentOrganization({
-                    name: item?.name,
-                    description: item?.description,
-                    id: item?.id,
-                  });
-                  // setCurrentOrganizationData();
-                  setModalVisible(true);
-                  setEditModal(true);
-                }}
-              />
-            )}
-
-            {deletePermission && (
-              <MaterialIcons
-                name="delete-outline"
-                size={ms(26)}
-                color={Colors[theme].text}
-                onPress={() => {
-                  Alert.alert("Delete", "Are you sure you want to delete?", [
-                    {
-                      text: "Yes",
-                      onPress: () => {
-                        deleteOrganization({
-                          variables: {
-                            ids: [Number(item?.id)],
-                          },
-                        });
-                      },
-                    },
-                    { text: "No", onPress: () => { } },
-                  ]);
-                }}
-              />
-            )}
-          </View>
-        </View>
-        <ThemedText
-          style={[
-            styles.status,
+      <CustomCard
+        name={item?.name}
+        status={item?.status}
+        description={item?.description}
+        editPermission={updatePermission}
+        deletePermission={deletePermission}
+        statusPermission={statusUpdatePermission}
+        onEdit={() => {
+          setCurrentOrganization({
+            name: item?.name,
+            description: item?.description,
+            id: item?.id,
+          });
+          // setCurrentOrganizationData();
+          setModalVisible(true);
+          setEditModal(true);
+        }}
+        onDelete={() =>
+          Alert.alert("Delete", "Are you sure you want to delete?", [
             {
-              color: item.status == "active" ? Colors?.green : "#6d6d1b",
-              backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
+              text: "Yes",
+              onPress: () => {
+                deleteOrganization({
+                  variables: {
+                    ids: [Number(item?.id)],
+                  },
+                });
+              },
             },
-          ]}
-        >
-          {item?.status}
-        </ThemedText>
-        {item?.description && (
-          <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-            {item?.description}
-          </ThemedText>
-        )}
-      </View>
+            { text: "No", onPress: () => { } },
+          ])
+        }
+        onChangeStatus={() => {
+          setCurrentOrganization({
+            name: item?.name,
+            description: item?.description,
+            id: item?.id,
+          });
+          setValue("status", item?.status);
+          setStatusModalVisible(true);
+        }}
+      />
     );
-
-
-    // return (
-    //   <OrganizationCart
-    //     name={item?.name}
-    //     status={item?.status}
-    //     email={item?.email}
-    //     mobileNo={"987655"}
-    //     description={item?.description}
-    //     onEdit={() =>
-    //       router.navigate({
-    //         pathname: "/add-edit-vehicle",
-    //         params: { data: JSON.stringify(item) },
-    //       })
-    //     }
-    //     onDelete={() =>
-    //       deleteVehicleApi({
-    //         variables: {
-    //           deleteVehicleId: Number(item?.id),
-    //         },
-    //       })
-    //     }
-    //     onChangeStatus={() => {
-    //       let find = statusArr?.find((i: any) => i.value === item?.status);
-    //       setValue("status", find);
-    //       setSelectedVehicle(item);
-    //       setIsModalVisible(true);
-    //     }}
-    //     onView={() =>
-    //       router.navigate({
-    //         pathname: "/vehicle-details",
-    //         params: { data: JSON.stringify(item) },
-    //       })
-    //     }
-    //   />
-    // );
   };
   // console.log('page',data?.paginatedOrganization?.meta?.totalItems);
 
@@ -321,12 +243,12 @@ const OrganizationScreen = () => {
     let currentPage = isRefreshing ? 1 : page;
 
     if (isRefreshing) {
-      setRefreshing(true)
+      setRefreshing(true);
       setPage(1)
     }
 
     const params = {
-      limit: 10,
+      limit: Env?.LIMIT as number,
       page: currentPage,
       search: searchParams,
     };
@@ -338,7 +260,7 @@ const OrganizationScreen = () => {
         },
         fetchPolicy: "network-only",
       });
-
+      
       if (res?.data?.paginatedOrganization) {
         const data: any = res?.data?.paginatedOrganization;
         const newItems = data?.data || [];
@@ -348,8 +270,8 @@ const OrganizationScreen = () => {
             ? newItems
             : [...prev, ...newItems];
         });
-        const lastPage = Math.ceil(data?.meta?.totalItems / 10);
-        (currentPage < lastPage) && setPage(currentPage + 1);
+        const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT );
+        setPage(currentPage + 1);
         setHasMore(currentPage < lastPage);
         setRefreshing(false);
       } else {
@@ -424,7 +346,7 @@ const OrganizationScreen = () => {
               fetchOrganization(true);
             }}
             keyExtractor={(item: any, index: number) => index.toString()}
-            contentContainerStyle={{ paddingBottom: vs(40) }}
+            contentContainerStyle={{ paddingBottom: vs(60) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
             ListFooterComponent={
               hasMore ? (
@@ -594,7 +516,6 @@ const OrganizationScreen = () => {
           />
         </View>
       </Modal>
-
     </CustomHeader>
   );
 };
@@ -607,7 +528,7 @@ const styles = ScaledSheet.create({
   },
   contentContainer: {
     flex: 1,
-    padding: "12@ms",
+    // padding: "12@ms",
   },
   selectedContainer: {},
   searchedResult: {
@@ -616,7 +537,7 @@ const styles = ScaledSheet.create({
     padding: "8@ms",
   },
   searchContainer: {
-    width: "100%",
+    marginHorizontal: "12@s",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -624,7 +545,7 @@ const styles = ScaledSheet.create({
   },
   buttonContainer: { marginLeft: "12@ms" },
   organizationParentContainer: {
-    marginTop: "12@ms",
+    // marginTop: "12@ms",
   },
   organizationContainer: {
     width: "100%",

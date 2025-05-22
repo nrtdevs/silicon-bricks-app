@@ -33,6 +33,9 @@ import {
 } from "@/graphql/generated";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
+import CustomCard from "@/components/master/CustomCard";
+import { Env } from "@/constants/ApiEndpoints";
+import Loader from "@/components/ui/Loader";
 
 interface ProjectData {
   id: number;
@@ -103,8 +106,9 @@ const Project = () => {
     },
   });
 
-  const [updateProjectStatus] = useMutation(EnableProjectStatusDocument, {
+  const [updateProjectStatus, updateProjectStatusState] = useMutation(EnableProjectStatusDocument, {
     onCompleted: (data) => {
+      reset();
       refetch();
       setStatusModalVisible(false);
       fetchProject(true);
@@ -115,7 +119,7 @@ const Project = () => {
     },
   });
 
-  const [deleteProject, deleteOrganizationState] = useMutation(
+  const [deleteProject, deleteProjectState] = useMutation(
     DeleteProjectDocument,
     {
       onCompleted: (data) => {
@@ -184,7 +188,7 @@ const Project = () => {
       setPage(1);
     }
     const params = {
-      limit: 10,
+      limit: Env?.LIMIT as number,
       page: currentPage,
       search: searchParams,
     };
@@ -206,12 +210,11 @@ const Project = () => {
             ? newItems
             : [...prev, ...newItems];
         });
-
+        const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+        setPage(currentPage + 1);
         if (isRefreshing) setRefreshing(false);
-        setPage((prev) => prev + 1);
+        setHasMore(currentPage < lastPage);
         setRefreshing(false);
-        const lastPage = Math.ceil(data?.meta?.totalItems / 10);
-        setHasMore(data?.meta?.currentPage < lastPage);
       } else {
         console.log("API call failed or returned no data:", res?.errors);
         setRefreshing(false);
@@ -224,96 +227,54 @@ const Project = () => {
     }
   };
 
-  console.log('09', projectList?.length);
-
-
   const renderItem = ({ item, index }: any) => {
-    // console.log('9999', item);
     return (
-      <View
-        key={index}
-        style={[
-          styles.organizationContainer,
-          { backgroundColor: Colors[theme].cart },
-        ]}
-      >
-        <View style={styles.organizationHeader}>
-          <ThemedText type="subtitle" style={{ flex: 1 }}>
-            {item?.name}
-          </ThemedText>
-          <View style={styles.organizationInfo}>
-            {statusUpdatePermission && (
-              <MaterialIcons
-                name="attractions"
-                size={ms(22)}
-                color={Colors[theme].text}
-                onPress={() => {
-                  setProjectId(item.id);
-                  setValue('status', item?.status);
-                  setStatusModalVisible(true);
-                }}
-              />
-            )}
-            {updatePermission && (
-              <Feather
-                name="edit"
-                size={ms(22)}
-                color={Colors[theme].text}
-                onPress={() => {
-                  setCurrentProject({
-                    id: String(item.id),
-                    project_name: item?.name,
-                    description: item?.description,
-                  });
-                  setModalVisible(true), setEditVisible(true);
-                }}
-              />
-            )}
-
-            {deletePermission && (
-              <MaterialIcons
-                name="delete-outline"
-                size={ms(22)}
-                color={Colors[theme].text}
-                onPress={() => {
-                  Alert.alert("Delete", "Are you sure you want to delete?", [
-                    {
-                      text: "Yes",
-                      onPress: () => {
-                        console.log("908", item?.id);
-                        deleteProject({
-                          variables: {
-                            ids: [Number(item?.id)],
-                          },
-                        });
-                      },
-                    },
-                    { text: "No", onPress: () => { } },
-                  ]);
-                }}
-              />
-            )}
-          </View>
-        </View>
-        <ThemedText
-          style={[
-            styles.status,
+      <CustomCard
+        name={item?.name}
+        status={item?.status}
+        description={item?.description}
+        editPermission={updatePermission}
+        deletePermission={deletePermission}
+        statusPermission={statusUpdatePermission}
+        onEdit={() => {
+          setCurrentProject({
+            id: String(item.id),
+            project_name: item?.name,
+            description: item?.description,
+          });
+          setModalVisible(true);
+        }}
+        onDelete={() =>
+          Alert.alert("Delete", "Are you sure you want to delete?", [
             {
-              color: item.status == "active" ? Colors?.green : "#6d6d1b",
-              backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
+              text: "Yes",
+              onPress: () => {
+                deleteProject({
+                  variables: {
+                    ids: [Number(item?.id)],
+                  },
+                });
+              },
             },
-          ]}
-        >
-          {item?.status}
-        </ThemedText>
-        {item?.description && (
-          <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-            {item?.description}
-          </ThemedText>
-        )}
-      </View>
+            { text: "No", onPress: () => { } },
+          ])
+        }
+        onChangeStatus={() => {
+          setProjectId(item.id);
+          setValue('status', item?.status);
+          setStatusModalVisible(true);
+        }}
+      />
     );
   };
+
+  if (
+    ((loading && page == 1 && !refreshing) ||
+      deleteProjectState.loading ||
+      updateProjectStatusState?.loading)
+  ) {
+    return <Loader />;
+  }
 
   return (
     <CustomHeader>
@@ -532,7 +493,6 @@ export default Project;
 const styles = ScaledSheet.create({
   contentContainer: {
     flex: 1,
-    padding: "12@ms",
   },
   organizationContainer: {
     width: "100%",
@@ -551,7 +511,7 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
   },
   searchContainer: {
-    width: "100%",
+    marginHorizontal: '12@ms',
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -559,7 +519,6 @@ const styles = ScaledSheet.create({
   },
   buttonContainer: { marginLeft: "12@ms" },
   organizationParentContainer: {
-    marginTop: "12@ms",
   },
   deleteButton: {
     backgroundColor: "#ee0b0b",
@@ -577,7 +536,6 @@ const styles = ScaledSheet.create({
     backgroundColor: "#F1F4FF",
   },
   scrollContainer: {
-    marginTop: "12@ms",
   },
   card: {
     marginHorizontal: 10,

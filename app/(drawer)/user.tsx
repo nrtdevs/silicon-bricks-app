@@ -9,28 +9,17 @@ import {
   View,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   ChangeUserStatusDocument,
-  CreateOrganizationDocument,
-  CreateUserDocument,
-  DeleteOrganizationDocument,
   DeleteUserDocument,
-  DropdownRolesDocument,
-  EnableOrganizationStatusDocument,
-  PaginatedOrganizationDocument,
-  PaginatedRolesDocument,
   PaginatedUsersDocument,
-  UpdateOrganizationDocument,
-  UpdateUserDocument,
-  UserType,
 } from "@/graphql/generated";
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
-import { ScrollView } from "react-native";
-import { AntDesign, Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -38,14 +27,14 @@ import { labels } from "@/constants/Labels";
 import Modal from "react-native-modal";
 import { set, useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
-import CustomButton from "@/components/CustomButton";
-import Loader from "@/components/ui/Loader";
-import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import debounce from "lodash.debounce";
 import { Env } from "@/constants/ApiEndpoints";
 import { useUserContext } from "@/context/RoleContext";
 import NoDataFound from "@/components/NoDataFound";
+import CustomUserCard from "@/components/master/CustomUserCard";
+import { router, useFocusEffect } from "expo-router";
+import { FAB } from "@rneui/themed";
 
 const defaultValue = {
   name: "",
@@ -127,6 +116,7 @@ const UserScreen = () => {
   const { can, hasAny } = useUserContext();
 
   const deletePermission = can("MasterApp:User:Delete");
+  const readPermission = can("MasterApp:User:Read");
   const updatePermission = can("MasterApp:User:Update");
   const createPermission = can("MasterApp:User:Create");
   const statusUpdatePermission = can("MasterApp:User:Action");
@@ -135,47 +125,10 @@ const UserScreen = () => {
     PaginatedUsersDocument
   );
 
-  const [createUser, createUserState] = useMutation(CreateUserDocument, {
-    onCompleted: (data) => {
-      reset();
-      fetchUser(true);
-      setModalVisible(false);
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    },
-  });
-
   const [updateUserStatus, updateUserStatusState] = useMutation(ChangeUserStatusDocument, {
     onCompleted: (data) => {
       fetchUser(true);
       setStatusModalVisible(false);
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    },
-  });
-
-  const [
-    getUserRoles,
-    { data: roleData, loading: roleLoading, error: roleError },
-  ] = useLazyQuery(DropdownRolesDocument);
-  // console.log('000086', roleData?.dropdownRoles?.data);
-
-  const [
-    organizationData,
-    {
-      error: organizationError,
-      data: organizationInfo,
-      loading: OrganizationLoading,
-    },
-  ] = useLazyQuery(PaginatedOrganizationDocument);
-
-  const [updateUser, updateUserState] = useMutation(UpdateUserDocument, {
-    onCompleted: (data) => {
-      reset();
-      fetchUser(true);
-      setModalVisible(false);
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
@@ -205,258 +158,80 @@ const UserScreen = () => {
   }, [currentUser]);
 
 
-  useEffect(() => {
-    fetchUser();
-    getInitialData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchUser();
+    }, [])
+  );
 
-  const getInitialData = async () => {
-    await getUserRoles({
-      variables: {
-        listInputDto: {},
-      },
-    });
-    await organizationData({
-      variables: {
-        listInputDto: {},
-      },
-    });
-  }
-
-  const onSubmit = (data: any) => {
-    try {
-      const roleIds: number[] = [];
-      if (data?.roles && Array.isArray(data.roles)) {
-        for (let i = 0; i < data.roles.length; i++) {
-          roleIds.push(Number(data.roles[i]));
-        }
-      }
-
-      const params: any = {
-        designation: typeof data?.designation == 'string' ? data?.designation : data?.designation?.value,
-        email: data?.email,
-        mobileNo: Number(data?.phoneNo),
-        name: data?.name,
-        roleIds: roleIds,
-        userType: typeof data?.usertype == 'string' ? data?.usertype : data?.usertype?.value,
-        avatar: image,
-      };
-      let updateParams = {
-        id: Number(currentUser?.id),
-        ...params,
-      }
-      console.log("updateParams", updateParams);
-
-      editModal
-        ? updateUser({
-          variables: {
-            data: updateParams,
-          },
-        })
-        : createUser({
-          variables: {
-            data: params,
-          },
-        });
-    } catch (error) {
-      console.log("onSubmit error", error);
-    }
-  };
-
-  const renderItem = (item: any, index: number) => {
+  const renderItem = ({ item, index }: any) => {
     let rolesId = item?.roles?.map((item: any) => {
       return item?.id
     })
     return (
-      <View
-        key={index}
-        style={[
-          styles.organizationContainer,
-          { backgroundColor: Colors[theme].cart },
-        ]}
-      >
-        <View style={styles.organizationHeader}>
-          <ThemedText type="subtitle">{item?.name}</ThemedText>
-          <View style={styles.organizationInfo}>
-            {statusUpdatePermission && <MaterialIcons
-              name="attractions"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentUser({
-                  name: item?.name,
-                  email: item?.email,
-                  phoneNo: item.mobileNo.toString(),
-                  roles: rolesId,
-                  usertype: item?.userType,
-                  id: item?.id,
-                  imagePath: item?.avatar,
-                  designation: item?.designation,
-                });
-                setValue("status", item?.status);
-                setImage(item?.avatar)
-                setStatusModalVisible(true);
-              }}
-            />}
-
-            <AntDesign
-              name="eyeo"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentUser({
-                  name: item?.name,
-                  email: item?.email,
-                  phoneNo: item.mobileNo.toString(),
-                  roles: rolesId,
-                  usertype: item?.userType,
-                  id: item?.id,
-                  imagePath: item?.avatar,
-                  designation: item?.designation,
-
-                });
-                setInfoModalVisible(true);
-              }}
-            />
-
-
-            {updatePermission && <Feather
-              name="edit"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-                setCurrentUser({
-                  name: item?.name,
-                  email: item?.email,
-                  phoneNo: item?.mobileNo.toString(),
-                  roles: rolesId,
-                  usertype: item?.userType,
-                  id: item?.id,
-                  imagePath: item?.avatar,
-                  designation: item?.designation,
-                });
-                setImage(item?.avatar)
-                setEditModal(true);
-                setModalVisible(true);
-              }}
-            />}
-
-            {deletePermission && <MaterialIcons
-              name="delete-outline"
-              size={ms(22)}
-              color={Colors[theme].text}
-              onPress={() => {
-
-                Alert.alert(
-                  "Delete",
-                  "Are you sure you want to delete?",
-                  [
-                    {
-                      text: "Yes",
-                      onPress: () => {
-                        deleteUser({
-                          variables: {
-                            ids: [Number(item?.id)],
-                          }
-
-                        });
-                      },
-                    },
-                    { text: "No", onPress: () => { } },
-                  ]
-                );
-              }}
-            />}
-          </View>
-        </View>
-
-        <ThemedText
-          style={[
-            styles.status,
-            {
-              // color:
-              //   item.status == "active" ? Colors?.green : "#6d6d1b",
-              backgroundColor:
-                theme == "dark" ? Colors?.white : "#e6e2e2",
+      <CustomUserCard
+        name={item?.name}
+        status={item?.status}
+        email={item?.email}
+        mobileNo={item?.mobileNo.toString()}
+        readPermission={readPermission}
+        editPermission={updatePermission}
+        deletePermission={deletePermission}
+        statusPermission={statusUpdatePermission}
+        onEdit={() => {
+          router.navigate({
+            pathname: "/addEditUser",
+            params: {
+              data: JSON.stringify(item),
             },
-          ]}
-        >
-          {item?.status}
-        </ThemedText>
+          })
+        }}
+        onDelete={() =>
+          Alert.alert("Delete", "Are you sure you want to delete?", [
+            {
+              text: "Yes",
+              onPress: () => {
+                deleteUser({
+                  variables: {
+                    ids: [Number(item?.id)],
+                  }
+                });
+              },
+            },
+            { text: "No", onPress: () => { } },
+          ])
+        }
+        onChangeStatus={() => {
+          setCurrentUser({
+            name: item?.name,
+            email: item?.email,
+            phoneNo: item.mobileNo.toString(),
+            roles: rolesId,
+            usertype: item?.userType,
+            id: item?.id,
+            imagePath: item?.avatar,
+            designation: item?.designation,
+          });
+          setValue("status", item?.status);
+          setImage(item?.avatar)
+          setStatusModalVisible(true);
+        }}
+        onView={() => {
+          setCurrentUser({
+            name: item?.name,
+            email: item?.email,
+            phoneNo: item.mobileNo.toString(),
+            roles: rolesId,
+            usertype: item?.userType,
+            id: item?.id,
+            imagePath: item?.avatar,
+            designation: item?.designation,
 
-        <View style={styles.userInfo}>
-          <ThemedText
-            style={{ fontSize: ms(14), lineHeight: ms(18) }}
-          >
-            {item?.email}
-          </ThemedText>
-          <ThemedText
-            style={{ fontSize: ms(14), lineHeight: ms(18) }}
-          >
-            {item?.mobileNo}
-          </ThemedText>
-        </View>
-
-      </View>
+          });
+          setInfoModalVisible(true);
+        }}
+      />
     );
-  }
-
-  const handleImagePickerPress = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets?.length > 0) {
-      const uri = result.assets[0].uri;
-      uploadImage(uri);
-    }
-  };
-
-  const uploadImage = async (uri: string) => {
-    try {
-      const fileInfo = await FileSystem.getInfoAsync(uri);
-      if (!fileInfo.exists) {
-        console.error("File does not exist:", uri);
-        return;
-      }
-
-      const fileExtension = uri.split(".").pop() || "jpg"; // Default to jpg if no extension
-      const mimeType = `image/${fileExtension}`;
-
-      const formData = new FormData();
-
-      formData.append("file", {
-        uri,
-        name: `upload.${fileExtension}`,
-        type: mimeType,
-      } as unknown as Blob);
-
-      // formData.append("file", {
-      //   uri: uri,
-      //   name: `upload.${fileExtension}`,
-      //   type: mimeType,
-      // } as any);
-
-      const uploadResponse = await fetch(`${Env.SERVER_URL}/api/files/upload`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        body: formData,
-      });
-      if (!uploadResponse.ok) {
-        const err = await uploadResponse.text();
-        throw new Error(`Upload failed: ${err}`);
-      }
-      const responseData = await uploadResponse.json();
-      // console.log("Upload successful:", responseData?.files[0]);
-      setImage(responseData?.files[0]);
-    } catch (error) {
-      console.error("Upload failed:", error);
-    }
   };
 
   const debouncedSearch = useCallback(
@@ -468,14 +243,12 @@ const UserScreen = () => {
 
   const fetchUser = async (isRefreshing = false, searchParams = "") => {
     const currentPage = isRefreshing ? 1 : page;
-    console.log("ccc", currentPage);
-
     if (isRefreshing) {
       setRefreshing(true);
       setPage(1);
     }
     const params = {
-      limit: 10,
+      limit: Env?.LIMIT,
       page: currentPage,
       search: searchParams,
     };
@@ -498,11 +271,10 @@ const UserScreen = () => {
             : [...prev, ...newItems];
         });
 
-        if (isRefreshing) setRefreshing(false);
-        setPage((prev) => prev + 1);
+        const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+        setPage(currentPage + 1);
+        setHasMore(currentPage < lastPage);
         setRefreshing(false);
-        const lastPage = Math.ceil(data?.meta?.totalItems / 10);
-        setHasMore(data?.meta?.currentPage < lastPage);
       } else {
         console.log("API call failed or returned no data:", res?.errors);
         setRefreshing(false);
@@ -514,6 +286,10 @@ const UserScreen = () => {
       setHasMore(false);
     }
   };
+
+  console.log('000', userList.length);
+
+
   // if (true) {
   //   return <Loader />;
   // }
@@ -537,27 +313,18 @@ const UserScreen = () => {
               }}
             />
           </View>
-          <Pressable
-            style={styles.buttonContainer}
-            onPress={() => {
-              setModalVisible(true);
-              // setCurrentOrganization(defaultValue);
-            }}
-          >
-            <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
-          </Pressable>
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
             data={userList}
-            renderItem={({ item, index }: any) => renderItem(item, index)}
+            renderItem={renderItem}
             showsVerticalScrollIndicator={false}
             refreshing={refreshing && !loading}
             onRefresh={() => {
               fetchUser(true);
             }}
             keyExtractor={(item: any, index: number) => index.toString()}
-            contentContainerStyle={{ paddingBottom: vs(40) }}
+            contentContainerStyle={{ paddingBottom: vs(60) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
             ListFooterComponent={
               hasMore ? (
@@ -577,184 +344,6 @@ const UserScreen = () => {
           />
         </View>
       </ThemedView>
-
-
-      {/* Create and Edit modal */}
-      <Modal
-        isVisible={isModalVisible}
-        onBackdropPress={() => {
-          reset();
-          setCurrentUser(defaultValue);
-          setEditModal(false);
-          setImage("");
-          setModalVisible(false);
-        }}
-      >
-        <ScrollView
-          contentContainerStyle={{
-            backgroundColor: Colors[theme].cart,
-            // height: vs(640),
-            width: "100%",
-            borderRadius: 10,
-            alignSelf: "center",
-            paddingHorizontal: 10,
-            paddingVertical: 22,
-            justifyContent: "flex-start",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingHorizontal: 10,
-            }}
-          >
-            <ThemedText type="subtitle">
-              {editModal ? "Edit User" : "Create User"}
-            </ThemedText>
-            <Pressable
-              onPress={() => {
-                reset();
-                setEditModal(false);
-                setCurrentUser(defaultValue);
-                setImage("");
-                setModalVisible(false);
-              }}
-            >
-              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
-            </Pressable>
-          </View>
-
-          <View style={{ padding: 10, position: "relative" }}>
-            <Pressable
-              style={styles.imageContainer}
-            >
-              <Image
-                source={{
-                  uri: `${Env?.SERVER_URL}${image}`,
-                }}
-                style={styles.image}
-              />
-            </Pressable>
-
-            {<Pressable
-              onPress={handleImagePickerPress}
-              style={styles?.editImage}>
-              <Feather name="edit-2" size={ms(18)} color='black' style={{ fontWeight: 'bold', }} />
-            </Pressable>}
-
-            {/* <Pressable
-              onPress={handleImagePickerPress}
-              style={styles.imageContainer}
-            >
-              {image && <Image source={{ uri: currentUser?.imagePath.length > 0 ? `http://192.168.1.62:5001${currentUser?.imagePath}` : image }} style={styles.image} />}
-            </Pressable> */}
-            <CustomValidation
-              type="input"
-              control={control}
-              labelStyle={styles.label}
-              name={"name"}
-              inputStyle={[{ lineHeight: ms(20) }]}
-              label={"Name"}
-              rules={{
-                required: "Name is required",
-              }}
-              autoCapitalize="none"
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              name={"email"}
-              label={"Email"}
-              labelStyle={styles.label}
-              rules={{
-                required: "User email is required",
-              }}
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              name={"phoneNo"}
-              // keyboardType="phone-pad"
-              label={"Phone No"}
-              labelStyle={styles.label}
-              rules={{
-                required: "User phoneNo is required",
-              }}
-            />
-
-            <CustomValidation
-              data={designationData}
-              type="picker"
-              hideStar={false}
-              control={control}
-              name="designation"
-              label="Designation"
-              labelStyle={styles.label}
-              placeholder="Select Designation"
-              inputStyle={{ height: vs(50) }}
-              rules={{
-                required: {
-                  value: true,
-                  message: "Select a designation",
-                },
-              }}
-            />
-
-            <CustomValidation
-              data={roleData?.dropdownRoles?.data}
-              type="picker"
-              hideStar={false}
-              keyToCompareData="id"
-              keyToShowData="name"
-              control={control}
-              name="roles"
-              label="Role"
-              labelStyle={styles.label}
-              multiSelect
-              placeholder="Select role name"
-              inputStyle={{ height: vs(50) }}
-              rules={{
-                required: {
-                  value: true,
-                  message: "Select a role",
-                },
-              }}
-            />
-
-            <CustomValidation
-              data={userTypeData}
-              type="picker"
-              hideStar={false}
-              control={control}
-              keyToCompareData="value"
-              keyToShowData="label"
-              label="User Type"
-              labelStyle={styles.label}
-              name="usertype"
-              placeholder="Select UserType"
-              inputStyle={{ height: vs(50) }}
-              rules={{
-                required: {
-                  value: true,
-                  message: "Select a User Type",
-                },
-              }}
-            />
-          </View>
-
-          <CustomButton
-            title="Submit"
-            onPress={handleSubmit(onSubmit)}
-            style={{
-              backgroundColor: Colors[theme].background,
-              marginTop: vs(10),
-            }}
-          />
-        </ScrollView>
-      </Modal>
 
 
       {/* user info modal */}
@@ -888,6 +477,22 @@ const UserScreen = () => {
         </View>
       </Modal>
 
+      <FAB
+        size="large"
+        title="Add User"
+        style={{
+          position: "absolute",
+          margin: 16,
+          right: 0,
+          bottom: 0,
+        }}
+        icon={{
+          name: "add",
+          color: "white",
+        }}
+        onPress={() => router.navigate("/addEditUser")}
+      />
+
     </CustomHeader>
   );
 };
@@ -899,7 +504,6 @@ const styles = ScaledSheet.create({
     flexGrow: 1,
   },
   selectedContainer: {
-    width: "100%",
     position: "absolute",
     top: "60@vs",
     alignSelf: "center",
@@ -911,10 +515,9 @@ const styles = ScaledSheet.create({
   },
   contentContainer: {
     flex: 1,
-    padding: "12@ms",
   },
   searchContainer: {
-    width: "100%",
+    marginHorizontal: '12@s',
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -922,7 +525,6 @@ const styles = ScaledSheet.create({
   },
   buttonContainer: { marginLeft: "12@ms" },
   organizationParentContainer: {
-    marginTop: "12@ms",
   },
   organizationContainer: {
     width: "100%",

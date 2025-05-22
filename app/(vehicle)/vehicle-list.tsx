@@ -42,7 +42,7 @@ const VehicleList = () => {
     useLazyQuery<any>(PaginatedVehiclesDocument);
 
   const navigation = useNavigation();
-  const {theme} = useTheme()
+  const { theme } = useTheme()
   const statusArr = [
     {
       label: "Active",
@@ -119,7 +119,7 @@ const VehicleList = () => {
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [vehicleList, setVehicleList] = useState<any>([]);
-console.log("vehicleList", vehicleList.length);
+  console.log("vehicleList", vehicleList.length);
 
 
   const fetchVehicleList = async (isRefresh = false, search = "") => {
@@ -129,7 +129,7 @@ console.log("vehicleList", vehicleList.length);
       setRefreshing(true);
       setPage(1);
     }
-  setIsLoading(true)
+    setIsLoading(true)
     const params = {
       limit: Env.LIMIT,
       page: currentPage,
@@ -151,7 +151,7 @@ console.log("vehicleList", vehicleList.length);
         isRefresh && currentPage == 1 ? newItems : [...prev, ...newItems]
       );
       setPage(currentPage + 1);
-      if (isRefresh) setRefreshing(false); 
+      if (isRefresh) setRefreshing(false);
       setIsLoading(false)
       setHasMore(currentPage < lastPage);
     } else {
@@ -163,10 +163,10 @@ console.log("vehicleList", vehicleList.length);
 
   const [isSearch, setIsSearch] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [isLoading,setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   useFocusEffect(
-    useCallback(() => { 
+    useCallback(() => {
       fetchVehicleList();
       navigation.setOptions({
         headerRight: () => (
@@ -190,7 +190,7 @@ console.log("vehicleList", vehicleList.length);
   );
 
   const renderItems = (item: any) => {
- 
+
     return (
       <VehicleCard
         brand={item?.make}
@@ -253,12 +253,12 @@ console.log("vehicleList", vehicleList.length);
       )}
       <FlatList
         data={vehicleList}
-        keyExtractor={(item, index) =>item?.id?.toString()}
+        keyExtractor={(item, index) => item?.id?.toString()}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={!isLoading ? <NoDataFound onPress={()=>fetchVehicleList(true)}/>:null}
+        ListEmptyComponent={!isLoading ? <NoDataFound onPress={() => fetchVehicleList(true)} /> : null}
         renderItem={({ item }: any) => renderItems(item)}
         contentContainerStyle={{ paddingVertical: ms(10) }}
-    
+
         ListFooterComponent={
           hasMore ? (
             <ActivityIndicator size="small" color={Colors.primary} />
@@ -269,12 +269,12 @@ console.log("vehicleList", vehicleList.length);
             fetchVehicleList(false, searchValue);
           }
         }}
-           refreshControl={
-            <RefreshControl
-              refreshing={refreshing && !isLoading}
-              onRefresh={() => fetchVehicleList(true)}
-            />
-          }
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing && !isLoading}
+            onRefresh={() => fetchVehicleList(true)}
+          />
+        }
         onEndReachedThreshold={0.5}
         initialNumToRender={8}
         maxToRenderPerBatch={5}
