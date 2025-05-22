@@ -22,6 +22,7 @@ const TaskScreen = () => {
     const [searchQuery, setSearchQuery] = useState<string>("");
     /// fetch Meeting task api 
     const [getMeetingTaskData, { data, refetch, loading }] = useLazyQuery(PaginatedMeetingTaskDocument);
+
     useEffect(() => {
         getMeetingTaskData({
             variables: {
@@ -91,9 +92,12 @@ const TaskScreen = () => {
                     </View>
                     <Pressable
                         onPress={() => {
-                            router.push("/(meeting)/addTask")
-                            // setAddEditModalVisible(true)
-                            //setAddEditManage(false)
+                            router.push({
+                                pathname: "/(meeting)/addTask",
+                                params: {
+                                    isCreate: "true",
+                                },
+                            });
                         }}>
                         <Feather name="plus-square" size={24} color={Colors[theme].text} />
                     </Pressable>
@@ -117,7 +121,12 @@ const TaskScreen = () => {
                                                 onPress={() => {
                                                     router.push({
                                                         pathname: "/(meeting)/addTask",
-                                                        params: { task: `${item.task}`, comment: `${item.comment}` },
+                                                        params: {
+                                                            isCreate: "false",
+                                                            task: `${item.task}`,
+                                                            comment: `${item.comment}`,
+                                                            id : `${item.id}`
+                                                        },
                                                     });
                                                 }}
                                             />

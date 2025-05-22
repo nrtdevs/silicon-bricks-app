@@ -29,6 +29,23 @@ export type About = {
   title: Scalars['String']['output'];
 };
 
+export type Activity = {
+  __typename?: 'Activity';
+  activity: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  createdBy: User;
+  createdByUserId: Scalars['Int']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  ipAddress: Scalars['String']['output'];
+  module: Scalars['String']['output'];
+  moduleId?: Maybe<Scalars['Int']['output']>;
+  organization: Organization;
+  updatedAt: Scalars['DateTime']['output'];
+  userAgent: Scalars['String']['output'];
+};
+
 export type AppPermissionsDto = {
   __typename?: 'AppPermissionsDto';
   appName: Scalars['String']['output'];
@@ -63,6 +80,8 @@ export type Breakdown = {
   latitude: Scalars['String']['output'];
   longitude: Scalars['String']['output'];
   media: Array<BreakdownMedia>;
+  organizationBy: Organization;
+  organizationId: Scalars['Int']['output'];
   status: Scalars['String']['output'];
   statuses: Array<BreakdownStatus>;
   updatedAt: Scalars['DateTime']['output'];
@@ -185,6 +204,14 @@ export type CreateBreakdownDto = {
   longitude: Scalars['String']['input'];
   mediaUrl?: InputMaybe<Array<MediaDto>>;
   vehicleId: Scalars['Float']['input'];
+};
+
+export type CreateContactDto = {
+  email: Scalars['String']['input'];
+  message?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  phoneNo: Scalars['Float']['input'];
+  subject: Scalars['String']['input'];
 };
 
 export type CreateCouponDto = {
@@ -461,6 +488,11 @@ export type Group = {
   permissions: Array<Permissions>;
 };
 
+export type InputPermissionSlugDto = {
+  permissionSlug: Scalars['String']['input'];
+  status?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Inventory = {
   __typename?: 'Inventory';
   batchNumber?: Maybe<Scalars['String']['output']>;
@@ -485,6 +517,23 @@ export type LoginRes = {
   __typename?: 'LoginRes';
   accessToken: Scalars['String']['output'];
   user: User;
+};
+
+export type Logs = {
+  __typename?: 'Logs';
+  action: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  ipAddress: Scalars['String']['output'];
+  module: Scalars['String']['output'];
+  organization: Organization;
+  organizationId: Scalars['Int']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  user: User;
+  userAgent: Scalars['String']['output'];
+  userId: Scalars['Int']['output'];
 };
 
 export type Material = {
@@ -522,6 +571,7 @@ export type Meeting = {
   meetingVenue?: Maybe<MeetingVenue>;
   meetingVenueId?: Maybe<Scalars['Float']['output']>;
   notes?: Maybe<Array<Notes>>;
+  organization: Organization;
   parentMeeting?: Maybe<Meeting>;
   parentMeetingId?: Maybe<Scalars['Float']['output']>;
   projectId?: Maybe<Scalars['Float']['output']>;
@@ -550,24 +600,24 @@ export type MeetingFiltersDto = {
   startDate?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-export type MeetingMultipleDeviceNotificationDto = {
-  body: Scalars['String']['input'];
-  icon: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  tokens: Array<Scalars['String']['input']>;
-};
-
-export type MeetingNotificationDto = {
-  body: Scalars['String']['input'];
-  icon: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-};
-
-export type MeetingNotificationResponse = {
-  __typename?: 'MeetingNotificationResponse';
-  message?: Maybe<Scalars['String']['output']>;
-  success: Scalars['Boolean']['output'];
+export type MeetingNotification = {
+  __typename?: 'MeetingNotification';
+  actionUrl?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<User>;
+  createdByUserId?: Maybe<Scalars['Float']['output']>;
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  entityId?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  message: Scalars['String']['output'];
+  module: Scalars['String']['output'];
+  organization: Organization;
+  organizationId: Scalars['Int']['output'];
+  readAt?: Maybe<Scalars['DateTime']['output']>;
+  title: Scalars['String']['output'];
+  userBy?: Maybe<User>;
+  userId?: Maybe<Scalars['Float']['output']>;
 };
 
 export type MeetingOrMeetings = Meeting | MeetingArray;
@@ -642,13 +692,6 @@ export type MeetingTaskStatusDto = {
   totalTaskComplete?: InputMaybe<Scalars['Float']['input']>;
 };
 
-export type MeetingTopicNotificationDto = {
-  body: Scalars['String']['input'];
-  icon: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  topic: Scalars['String']['input'];
-};
-
 export type MeetingType = {
   __typename?: 'MeetingType';
   createdAt: Scalars['DateTime']['output'];
@@ -720,6 +763,7 @@ export type Mutation = {
   changeVehicleExpenseStatus: VehicleExpenseStatus;
   changeWarehouseStatus: Warehouse;
   createBreakdown: Breakdown;
+  createContact: Contact;
   createCoupon: Coupon;
   createDynamicPage: About;
   createFollowUp: FollowUp;
@@ -746,6 +790,7 @@ export type Mutation = {
   createVehicleExpense: VehicleExpense;
   createWarehouse: Warehouse;
   deleteBreakdown: Scalars['Boolean']['output'];
+  deleteContact: Scalars['Boolean']['output'];
   deleteCoupon: Scalars['Boolean']['output'];
   deleteDynamicPage: Scalars['Boolean']['output'];
   deleteFollowUp: Scalars['Boolean']['output'];
@@ -795,9 +840,6 @@ export type Mutation = {
   hardDeleteWarehouse: Scalars['Boolean']['output'];
   login: LoginRes;
   logout: Scalars['Boolean']['output'];
-  meetingSendMultiplePushNotification: MeetingNotificationResponse;
-  meetingSendPushNotification: MeetingNotificationResponse;
-  meetingSendTopicNotification: MeetingNotificationResponse;
   register: LoginRes;
   requestOtp: OtpRes;
   resetPassword: Scalars['Boolean']['output'];
@@ -953,6 +995,11 @@ export type MutationCreateBreakdownArgs = {
 };
 
 
+export type MutationCreateContactArgs = {
+  data: CreateContactDto;
+};
+
+
 export type MutationCreateCouponArgs = {
   createCouponInput: CreateCouponDto;
 };
@@ -1081,6 +1128,11 @@ export type MutationCreateWarehouseArgs = {
 
 export type MutationDeleteBreakdownArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteContactArgs = {
+  ids: Array<Scalars['Int']['input']>;
 };
 
 
@@ -1321,21 +1373,6 @@ export type MutationHardDeleteWarehouseArgs = {
 
 export type MutationLoginArgs = {
   loginData: ValidateDto;
-};
-
-
-export type MutationMeetingSendMultiplePushNotificationArgs = {
-  data: MeetingMultipleDeviceNotificationDto;
-};
-
-
-export type MutationMeetingSendPushNotificationArgs = {
-  data: MeetingNotificationDto;
-};
-
-
-export type MutationMeetingSendTopicNotificationArgs = {
-  data: MeetingTopicNotificationDto;
 };
 
 
@@ -1639,6 +1676,7 @@ export type Notes = {
   meeting?: Maybe<Meeting>;
   meetingId?: Maybe<Scalars['Float']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
+  organization: Organization;
   task?: Maybe<Array<MeetingTask>>;
   uploadDoc?: Maybe<Scalars['String']['output']>;
 };
@@ -1654,6 +1692,26 @@ export type NotificationResponse = {
   __typename?: 'NotificationResponse';
   message?: Maybe<Scalars['String']['output']>;
   success: Scalars['Boolean']['output'];
+};
+
+export type Notifications = {
+  __typename?: 'Notifications';
+  actionUrl?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<User>;
+  createdById?: Maybe<Scalars['Float']['output']>;
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  entityId?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  message: Scalars['String']['output'];
+  module: Scalars['String']['output'];
+  organizationBy: Organization;
+  organizationId: Scalars['Int']['output'];
+  readAt?: Maybe<Scalars['DateTime']['output']>;
+  title: Scalars['String']['output'];
+  userBy?: Maybe<User>;
+  userId?: Maybe<Scalars['Float']['output']>;
 };
 
 export type Offer = {
@@ -1760,6 +1818,12 @@ export type PaginatedAbout = {
   meta: Meta;
 };
 
+export type PaginatedActivity = {
+  __typename?: 'PaginatedActivity';
+  data: Array<Activity>;
+  meta: Meta;
+};
+
 export type PaginatedApplicationModules = {
   __typename?: 'PaginatedApplicationModules';
   data: Array<ApplicationModule>;
@@ -1769,6 +1833,12 @@ export type PaginatedApplicationModules = {
 export type PaginatedBreakdowns = {
   __typename?: 'PaginatedBreakdowns';
   data: Array<Breakdown>;
+  meta: Meta;
+};
+
+export type PaginatedContact = {
+  __typename?: 'PaginatedContact';
+  data: Array<Contact>;
   meta: Meta;
 };
 
@@ -1784,9 +1854,21 @@ export type PaginatedFollowUp = {
   meta: Meta;
 };
 
+export type PaginatedLogs = {
+  __typename?: 'PaginatedLogs';
+  data: Array<Logs>;
+  meta: Meta;
+};
+
 export type PaginatedMeeting = {
   __typename?: 'PaginatedMeeting';
   data: Array<Meeting>;
+  meta: Meta;
+};
+
+export type PaginatedMeetingNotification = {
+  __typename?: 'PaginatedMeetingNotification';
+  data: Array<MeetingNotification>;
   meta: Meta;
 };
 
@@ -1817,6 +1899,12 @@ export type PaginatedNotePad = {
 export type PaginatedNotes = {
   __typename?: 'PaginatedNotes';
   data: Array<Notes>;
+  meta: Meta;
+};
+
+export type PaginatedNotifications = {
+  __typename?: 'PaginatedNotifications';
+  data: Array<Notifications>;
   meta: Meta;
 };
 
@@ -2020,11 +2108,13 @@ export type Query = {
   findVehicleById: Vehicle;
   findVehicleExpenseById: VehicleExpense;
   findWarehouseById: Warehouse;
+  getActivityIdMeeting: Activity;
   getAllDynamicPage: PaginatedAbout;
   getAllMeetingTypes: Array<MeetingType>;
   getAllNotePad: Array<NotePad>;
   getBreakdownStatuses: Array<BreakdownStatus>;
   getBreakdownTypeSuggestions: Array<Scalars['JSON']['output']>;
+  getContactById: Contact;
   getDynamicPageById: About;
   getFollowUpById: FollowUp;
   getMeetingDashboard: Dashboard;
@@ -2038,6 +2128,7 @@ export type Query = {
   getPaginatedNotesByMeetingId: PaginatedNotes;
   getUpcomingMeetingTask: PaginatedMeetingTask;
   getUpcomingMeetings: PaginatedMeeting;
+  getUsersWithPermission: Array<User>;
   getVehicleExpenseStatuses: Array<VehicleExpenseStatus>;
   getVehicleExpenseTypeSuggestions: Array<Scalars['JSON']['output']>;
   listTrashedChildMeting: PaginatedMeeting;
@@ -2053,9 +2144,12 @@ export type Query = {
   listTrashedProjects: PaginatedProjects;
   listTrashedRoles: PaginatedRoles;
   packagesDropdown: PaginatedPackages;
+  paginatedActivityLogMeeting: PaginatedActivity;
   paginatedBreakdowns: PaginatedBreakdowns;
+  paginatedContact: PaginatedContact;
   paginatedCoupons: PaginatedCoupons;
   paginatedFollowUp: PaginatedFollowUp;
+  paginatedLogs: PaginatedLogs;
   paginatedMeeting: PaginatedMeeting;
   paginatedMeetingParentId: PaginatedMeeting;
   paginatedMeetingSubTask: PaginatedMeetingTask;
@@ -2063,6 +2157,8 @@ export type Query = {
   paginatedMeetingType: PaginatedMeetingType;
   paginatedMeetingVenue: PaginatedMeetingVenue;
   paginatedMeetingsForUserId: PaginatedMeeting;
+  paginatedMeetingsNotification: PaginatedMeetingNotification;
+  paginatedMeetingsUserNotification: PaginatedMeetingNotification;
   paginatedModules: PaginatedApplicationModules;
   paginatedNotePad: PaginatedNotePad;
   paginatedNotes: PaginatedNotes;
@@ -2078,6 +2174,7 @@ export type Query = {
   paginatedTrashedWarehouses: PaginatedWarehouse;
   paginatedUsers: PaginatedUsers;
   paginatedVehicleExpense: PaginatedVehicleExpense;
+  paginatedVehicleNotification: PaginatedNotifications;
   paginatedVehicles: PaginatedVehicles;
   paginatedWarehouses: PaginatedWarehouse;
   permissionGroup: PermissionGroup;
@@ -2248,6 +2345,11 @@ export type QueryFindWarehouseByIdArgs = {
 };
 
 
+export type QueryGetActivityIdMeetingArgs = {
+  id: Scalars['Float']['input'];
+};
+
+
 export type QueryGetAllDynamicPageArgs = {
   ListInputDTO: ListInputDto;
 };
@@ -2260,6 +2362,11 @@ export type QueryGetBreakdownStatusesArgs = {
 
 export type QueryGetBreakdownTypeSuggestionsArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryGetContactByIdArgs = {
+  id: Scalars['Float']['input'];
 };
 
 
@@ -2327,6 +2434,11 @@ export type QueryGetUpcomingMeetingTaskArgs = {
 
 export type QueryGetUpcomingMeetingsArgs = {
   ListInputDTO: ListInputDto;
+};
+
+
+export type QueryGetUsersWithPermissionArgs = {
+  data: InputPermissionSlugDto;
 };
 
 
@@ -2405,7 +2517,17 @@ export type QueryPackagesDropdownArgs = {
 };
 
 
+export type QueryPaginatedActivityLogMeetingArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
 export type QueryPaginatedBreakdownsArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedContactArgs = {
   ListInputDTO: ListInputDto;
 };
 
@@ -2416,6 +2538,11 @@ export type QueryPaginatedCouponsArgs = {
 
 
 export type QueryPaginatedFollowUpArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedLogsArgs = {
   ListInputDTO: ListInputDto;
 };
 
@@ -2455,6 +2582,16 @@ export type QueryPaginatedMeetingVenueArgs = {
 export type QueryPaginatedMeetingsForUserIdArgs = {
   query: ListInputDto;
   userId: Scalars['Int']['input'];
+};
+
+
+export type QueryPaginatedMeetingsNotificationArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedMeetingsUserNotificationArgs = {
+  ListInputDTO: ListInputDto;
 };
 
 
@@ -2529,6 +2666,11 @@ export type QueryPaginatedUsersArgs = {
 
 
 export type QueryPaginatedVehicleExpenseArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedVehicleNotificationArgs = {
   ListInputDTO: ListInputDto;
 };
 
@@ -2662,6 +2804,7 @@ export type Subscriptions = {
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   paymentId?: Maybe<Scalars['String']['output']>;
+  pdfUrl: Scalars['String']['output'];
   plans: Array<Plan>;
   price: Scalars['Float']['output'];
   status: Scalars['String']['output'];
@@ -2735,6 +2878,7 @@ export type UpdateBreakdownDto = {
   latitude: Scalars['String']['input'];
   longitude: Scalars['String']['input'];
   mediaUrl?: InputMaybe<Array<MediaDto>>;
+  removedFileIds?: InputMaybe<Array<Scalars['String']['input']>>;
   vehicleId: Scalars['Float']['input'];
 };
 
@@ -3029,8 +3173,8 @@ export type VehicleDashboardCount = {
 
 export type VehicleExpense = {
   __typename?: 'VehicleExpense';
-  BreakDown?: Maybe<Breakdown>;
   amount: Scalars['Float']['output'];
+  breakDown?: Maybe<Breakdown>;
   breakDownId?: Maybe<Scalars['Float']['output']>;
   createdAt: Scalars['DateTime']['output'];
   createdBy: User;
@@ -3040,6 +3184,8 @@ export type VehicleExpense = {
   expenseDate?: Maybe<Scalars['DateTime']['output']>;
   expenseType: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  organizationBy: Organization;
+  organizationId: Scalars['Int']['output'];
   status: Scalars['String']['output'];
   statuses?: Maybe<Array<VehicleExpenseStatus>>;
   updatedAt: Scalars['DateTime']['output'];
@@ -3121,12 +3267,11 @@ export enum Breakdown_Status {
   Approved = 'approved',
   Assigned = 'assigned',
   Cancelled = 'cancelled',
-  Closed = 'closed',
-  Completed = 'completed',
-  InProgress = 'in_progress',
   InService = 'in_service',
   Pending = 'pending',
   Rejected = 'rejected',
+  RepairFailed = 'repair_failed',
+  Repaired = 'repaired',
   ServiceScheduled = 'service_scheduled',
   UnderReview = 'under_review'
 }
@@ -3785,6 +3930,13 @@ export type UpdateNotesMutationVariables = Exact<{
 
 export type UpdateNotesMutation = { __typename?: 'Mutation', updateNotes: { __typename?: 'Notes', notes?: string | null, id: string, decision?: string | null, meetingId?: number | null, uploadDoc?: string | null } };
 
+export type UpdateMeetingTaskMutationVariables = Exact<{
+  updateMeetingTaskInput: UpdateMeetingTaskDto;
+}>;
+
+
+export type UpdateMeetingTaskMutation = { __typename?: 'Mutation', updateMeetingTask: { __typename?: 'MeetingTask', id: string, ownerId?: number | null, createdByUserId: string, assigneeId?: number | null, meetingId?: number | null, notesId?: number | null, projectId?: number | null, parentTaskId?: number | null, ownerName?: string | null, assigneeName?: string | null, task?: string | null, projectName?: string | null, comment?: string | null, openedDate: any, dueDate: any, completedDate?: any | null, priority: string, status: string, completePercent?: number | null, totalTaskComplete?: number | null, weightType?: string | null } };
+
 export type PaginatedRolesQueryVariables = Exact<{
   listInputDto: ListInputDto;
 }>;
@@ -4210,6 +4362,7 @@ export const DeleteVehicleDocument = {"kind":"Document","definitions":[{"kind":"
 export const ChangePackageStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ChangePackageStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updatePackageStatusInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PackageStatusDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"changePackageStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updatePackageStatusInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updatePackageStatusInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Package"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"discountedPrice"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"offerType"}},{"kind":"Field","name":{"kind":"Name","value":"offerDescription"}},{"kind":"Field","name":{"kind":"Name","value":"offerExpiryDate"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PackageArray"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"price"}},{"kind":"Field","name":{"kind":"Name","value":"discountedPrice"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"offerType"}},{"kind":"Field","name":{"kind":"Name","value":"offerDescription"}},{"kind":"Field","name":{"kind":"Name","value":"offerExpiryDate"}}]}}]}}]}}]}}]} as unknown as DocumentNode<ChangePackageStatusMutation, ChangePackageStatusMutationVariables>;
 export const EnableMeetingStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"EnableMeetingStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updateMeetingStatusInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MeetingStatusDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"enableMeetingStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updateMeetingStatusInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updateMeetingStatusInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Meeting"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]}}]} as unknown as DocumentNode<EnableMeetingStatusMutation, EnableMeetingStatusMutationVariables>;
 export const UpdateNotesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateNotes"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updateNotesInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateNotesDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateNotes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updateNotesInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updateNotesInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"decision"}},{"kind":"Field","name":{"kind":"Name","value":"meetingId"}},{"kind":"Field","name":{"kind":"Name","value":"uploadDoc"}}]}}]}}]} as unknown as DocumentNode<UpdateNotesMutation, UpdateNotesMutationVariables>;
+export const UpdateMeetingTaskDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateMeetingTask"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updateMeetingTaskInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateMeetingTaskDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateMeetingTask"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updateMeetingTaskInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updateMeetingTaskInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdByUserId"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeId"}},{"kind":"Field","name":{"kind":"Name","value":"meetingId"}},{"kind":"Field","name":{"kind":"Name","value":"notesId"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"parentTaskId"}},{"kind":"Field","name":{"kind":"Name","value":"ownerName"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeName"}},{"kind":"Field","name":{"kind":"Name","value":"task"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"comment"}},{"kind":"Field","name":{"kind":"Name","value":"openedDate"}},{"kind":"Field","name":{"kind":"Name","value":"dueDate"}},{"kind":"Field","name":{"kind":"Name","value":"completedDate"}},{"kind":"Field","name":{"kind":"Name","value":"priority"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"completePercent"}},{"kind":"Field","name":{"kind":"Name","value":"totalTaskComplete"}},{"kind":"Field","name":{"kind":"Name","value":"weightType"}}]}}]}}]} as unknown as DocumentNode<UpdateMeetingTaskMutation, UpdateMeetingTaskMutationVariables>;
 export const PaginatedRolesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaginatedRoles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paginatedRoles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"meta"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}},{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}}]}},{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"roleType"}},{"kind":"Field","name":{"kind":"Name","value":"permissionCount"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]}}]} as unknown as DocumentNode<PaginatedRolesQuery, PaginatedRolesQueryVariables>;
 export const ListTrashedRolesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListTrashedRoles"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listTrashedRoles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"organization"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}},{"kind":"Field","name":{"kind":"Name","value":"permissionCount"}},{"kind":"Field","name":{"kind":"Name","value":"roleType"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}},{"kind":"Field","name":{"kind":"Name","value":"meta"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"currentPage"}},{"kind":"Field","name":{"kind":"Name","value":"limit"}},{"kind":"Field","name":{"kind":"Name","value":"totalItems"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]}}]}}]} as unknown as DocumentNode<ListTrashedRolesQuery, ListTrashedRolesQueryVariables>;
 export const FindRoleByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindRoleById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"findRoleByIdId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Float"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findRoleById"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"findRoleByIdId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"permissions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<FindRoleByIdQuery, FindRoleByIdQueryVariables>;

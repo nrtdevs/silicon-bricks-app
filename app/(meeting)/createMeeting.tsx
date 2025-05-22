@@ -18,20 +18,6 @@ import { ms, ScaledSheet, vs } from "react-native-size-matters";
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from "expo-file-system";
 
-const defaultValue = {
-    id: '',
-    meetingAgenda: '',
-    meetingDate: '',
-    meetingReference: '',
-    meetingTypeId: '',
-    meetingUrl: '',
-    meetingVenueId: '',
-    parentMeetingId: '',
-    projectId: '',
-    startTime: '',
-    endTime: '',
-    title: ''
-}
 const CreateMeeting = () => {
     const { theme } = useTheme();
     const {
@@ -46,7 +32,7 @@ const CreateMeeting = () => {
         meetingTypeId,
         projectId,
         meetingVenueId,
-     } = useLocalSearchParams();
+    } = useLocalSearchParams();
     /// create and edit state
     const [activeDateField, setActiveDateField] = useState<string | null>(null);
     const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
@@ -67,6 +53,7 @@ const CreateMeeting = () => {
         onCompleted: (data) => {
             reset()
             Alert.alert("success", "Meeting updated successfully!");
+            router.back();
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
@@ -76,13 +63,13 @@ const CreateMeeting = () => {
         onCompleted: (data) => {
             reset()
             Alert.alert("success", "Meeting create successfully!");
+            router.back();
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
         }
     });
     const onSubmit = (data: any) => {
-        console.log(`${isCreate}---------status`);
         console.log(data);
         let param = {
             "title": data.title,
@@ -98,8 +85,6 @@ const CreateMeeting = () => {
             "projectId": Number(data.projectId.value),
             "uploadDoc": image
         }
-        console.log(`${param}----------param`);
-        return;
         isCreate == "true" ?
             createMeeting({
                 variables: {
@@ -127,43 +112,23 @@ const CreateMeeting = () => {
                 },
             });
     };
-    const [currentMeeting, setCurrentMeeting] = useState<{
-        startTime: string;
-        endTime: string;
-        title: string;
-        meetingDate: string;
-        meetingAgenda: string;
-        meetingUrl: string;
-        meetingTypeId: string;
-        meetingVenueId: string;
-        projectId: string;
-    }>(defaultValue);
+    
     useEffect(() => {
         if (isCreate == "true") {
-            setCurrentMeeting(defaultValue);
+            reset();
         } else {
-            setCurrentMeeting({
-                startTime: startTime as string,
-                endTime: endTime as string,
-                title: title as string,
-                meetingDate: meetingDate as string,
-                meetingAgenda: meetingAgenda as string,
-                meetingUrl: meetingUrl as string,
-                meetingTypeId : meetingTypeId as string,
-                meetingVenueId: meetingVenueId as string,
-                projectId: projectId as string,
-            });
+            setValue('startTime', startTime as string);
+            setValue('endTime', endTime as string);
+            setValue('title', title as string);
+            setValue('meetingDate', meetingDate as string);
+            setValue('meetingAgenda', meetingAgenda as string);
+            setValue('meetingUrl', meetingUrl as string);
+            setValue('meetingTypeId', meetingTypeId as string);
+            setValue('meetingVenueId', meetingVenueId as string);
+            setValue('projectId', projectId as string);
         }
-        setValue('startTime', startTime as string);
-        setValue('endTime', endTime as string);
-        setValue('title', title as string);
-        setValue('meetingDate', meetingDate as string);
-        setValue('meetingAgenda', meetingAgenda as string);
-        setValue('meetingUrl', meetingUrl as string);
-        setValue('meetingTypeId', meetingTypeId as string);
-        setValue('meetingVenueId', meetingVenueId as string);
-        setValue('projectId', projectId as string);
-    }, [currentMeeting])
+
+    }, [isCreate])
     /// fetch project data
     const { data: projectData, loading: packageLoading, error: packageError, } = useQuery(PaginatedProjectsDocument, {
         variables: {
@@ -238,7 +203,7 @@ const CreateMeeting = () => {
                 name: `upload.${fileExtension}`,
                 type: mimeType,
             } as unknown as Blob);
-            const uploadResponse = await fetch(`http://192.168.1.50:5001/api/files/upload`, {
+            const uploadResponse = await fetch(`http://192.168.1.5:5001/api/files/upload`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -468,7 +433,7 @@ const CreateMeeting = () => {
                             marginTop: vs(20),
                         }}
                     />
-                    {image && <Image source={{ uri: `http://192.168.1.50:5001${image}` }} style={{ width: "100%", height: 200, marginTop: 20, justifyContent: "center", alignSelf: "center" }}
+                    {image && <Image source={{ uri: `http://192.168.1.5:5001${image}` }} style={{ width: "100%", height: 200, marginTop: 20, justifyContent: "center", alignSelf: "center" }}
                     />}
                     <CustomButton
                         title="Submit"
