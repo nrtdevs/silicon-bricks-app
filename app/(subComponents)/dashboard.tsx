@@ -51,7 +51,7 @@ const dashboard = () => {
           icon={"handshake"}
           label={"Meeting"}
           onPress={() => {
-            router.navigate("/vehicle-list");
+            router.navigate("/(meeting)/(tabs)");
           }}
         /> 
        

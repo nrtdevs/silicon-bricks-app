@@ -5,13 +5,21 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateNotesDocument, DeleteMetingTaskDocument, DeleteNotesDocument, GetPaginatedMeetingTaskByMeetingIdDocument, GetPaginatedNotesByMeetingIdDocument, UpdateNotesDocument } from "@/graphql/generated";
+import {
+    CreateNotesDocument,
+    DeleteMetingTaskDocument,
+    DeleteNotesDocument,
+    GetPaginatedMeetingTaskByMeetingIdDocument,
+    GetPaginatedNotesByMeetingIdDocument,
+    UpdateNotesDocument
+} from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { FAB } from "@rneui/themed";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, Modal, Pressable, View } from "react-native";
+import { Alert, Modal, Pressable, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 
@@ -55,7 +63,7 @@ const MeetingDetails = () => {
             reset()
             refetch();
             setAddEditManage(false);
-            
+
             Alert.alert("Success", "Note updated successfully!");
         },
         onError: (error) => {
@@ -139,17 +147,14 @@ const MeetingDetails = () => {
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
                     <ThemedText style={{ fontSize: 20, fontWeight: "700" }}> Details</ThemedText>
-                    <Pressable
-                        onPress={() => {
-                            setNotesModalVisible(true);
-                            setCurrentMeetingNote(defaultValue)
-                        }}>
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                    </Pressable>
                 </View>
                 <View style={[
                     styles.meetingDetailsCard,
-                    { backgroundColor: Colors[theme].cart },
+                    {
+                        borderColor: Colors[theme].border,
+                        shadowColor: Colors[theme].shadow,
+                        backgroundColor: Colors[theme].cart
+                    },
                 ]}>
                     <View style={{ flexDirection: 'row', padding: 10 }}>
                         <View style={{ width: 130 }}>
@@ -175,72 +180,108 @@ const MeetingDetails = () => {
                             <View style={{ flexDirection: "row", alignItems: "center", }}>
                                 <ThemedText style={styles.meetingSubtitle}> : </ThemedText>
                                 <View style={{
-                                    backgroundColor: status == "active" ? "#EAFFF1" : "#F9F9F9", borderRadius: 5, paddingHorizontal: 10,
-                                    borderColor: status == "active" ? "#17C653" : "#89500E", borderWidth: 0.5, width: 80
+                                    paddingHorizontal: ms(10),
+                                    padding: vs(2),
+                                    borderRadius: ms(14),
+                                    backgroundColor: status == "active" ? "#10B981" : status == "completed" ? "#F59E0B" : "#EF4444",
                                 }}>
-                                    <ThemedText style={{
-                                        color: status == "active" ? "#17C653" : "#89500E"
-                                    }}>{status}</ThemedText>
+                                    <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{status}</ThemedText>
                                 </View>
                             </View>
                         </View>
                     </View>
                 </View>
-                <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Notes List</ThemedText>
-
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
+                    <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Notes List</ThemedText>
+                    <FAB
+                        size="small"
+                        style={{
+                            margin: 1,
+                            right: 0,
+                            bottom: 0,
+                        }}
+                        icon={{
+                            name: "add",
+                            color: "white",
+                        }}
+                        onPress={() => {
+                            setNotesModalVisible(true);
+                            setCurrentMeetingNote(defaultValue)
+                        }}
+                    />
+                </View>
                 <FlatList
                     data={data?.getPaginatedNotesByMeetingId.data}
                     renderItem={({ item }) => (
                         <View style={styles.scrollContainer}>
                             <View style={[
                                 styles.meetingDetailsCard,
-                                { backgroundColor: Colors[theme].cart },
+                                {
+                                    borderColor: Colors[theme].border,
+                                    shadowColor: Colors[theme].shadow,
+                                    backgroundColor: Colors[theme].cart
+                                },
                             ]}>
-                                <View style={styles.meetingHeader}>
-                                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item.notes}</ThemedText>
-                                    <View style={styles.meetingInfo}>
-                                        <View style={{ width: 5 }}></View>
-                                        <Feather
-                                            name="edit"
-                                            size={ms(20)}
-                                            color={Colors[theme].text}
-                                            onPress={() => {
-                                                setAddEditManage(true);
-                                                setNotesModalVisible(true);
-                                                setCurrentMeetingNote({
-                                                    id: item?.id,
-                                                    notes: item.notes ?? "",
-                                                    decision: item.decision ?? "",
-                                                    meetingId: item.meetingId != null ? String(item.meetingId) : "",
-                                                });
-                                            }}
-                                        />
-                                        <View style={{ width: 5 }}></View>
-                                        <MaterialIcons
-                                            name="delete-outline"
-                                            size={ms(22)}
-                                            color={Colors[theme].text}
-                                            onPress={() => {
-                                                Alert.alert(
-                                                    "Delete",
-                                                    "Are you sure you want to delete?",
-                                                    [
-                                                        {
-                                                            text: "Yes", onPress: () => {
-                                                                deleteNotes({
-                                                                    variables: {
-                                                                        ids: Number(item?.id),
-                                                                    }
-                                                                });
-                                                            }
-                                                        },
-                                                        { text: "No", onPress: () => { } },
-                                                    ]
-                                                );
-
-                                            }}
-                                        />
-                                    </View>
+                                <ThemedText type='subtitle'>{item.notes}</ThemedText>
+                                <View style={{ gap: 10, flexDirection: 'row', marginTop: 10 }}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setAddEditManage(true);
+                                            setNotesModalVisible(true);
+                                            setCurrentMeetingNote({
+                                                id: item?.id,
+                                                notes: item.notes ?? "",
+                                                decision: item.decision ?? "",
+                                                meetingId: item.meetingId != null ? String(item.meetingId) : "",
+                                            });
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            borderWidth: 0.5,
+                                            borderColor: "#3B82F6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <Feather name="edit" size={16} color="#3B82F6" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            Alert.alert(
+                                                "Delete",
+                                                "Are you sure you want to delete?",
+                                                [
+                                                    {
+                                                        text: "Yes", onPress: () => {
+                                                            deleteNotes({
+                                                                variables: {
+                                                                    ids: Number(item?.id),
+                                                                }
+                                                            });
+                                                        }
+                                                    },
+                                                    { text: "No", onPress: () => { } },
+                                                ]
+                                            );
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            borderWidth: 0.5,
+                                            borderColor: "#EF4444",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -248,12 +289,26 @@ const MeetingDetails = () => {
 
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
                     <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Task List</ThemedText>
-                    <Pressable
-                        onPress={() => {
-                            router.push("/(meeting)/addTask")
-                        }}>
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                    </Pressable>
+                    <FAB
+                        size="small"
+                        style={{
+                            margin: 1,
+                            right: 0,
+                            bottom: 0,
+                        }}
+                        icon={{
+                            name: "add",
+                            color: "white",
+                        }}
+                         onPress={() => {
+                            router.push({
+                                pathname: "/(meeting)/addTask",
+                                params: {
+                                    isCreate: "true",
+                                },
+                            });
+                        }}
+                    />
                 </View>
 
                 <FlatList
@@ -262,45 +317,73 @@ const MeetingDetails = () => {
                         <View style={styles.scrollContainer}>
                             <View style={[
                                 styles.meetingDetailsCard,
-                                { backgroundColor: Colors[theme].cart },
+                                {
+                                    borderColor: Colors[theme].border,
+                                    shadowColor: Colors[theme].shadow,
+                                    backgroundColor: Colors[theme].cart
+                                },
                             ]}>
-                                <View style={styles.meetingHeader}>
-                                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.task}</ThemedText>
-                                    <View style={styles.meetingInfo}>
-                                        <View style={{ width: 5 }}></View>
-                                        <Feather
-                                            name="edit"
-                                            size={ms(20)}
-                                            color={Colors[theme].text}
-                                            onPress={() => { 
-                                                router.push("/(meeting)/addTask")
-                                            }}
-                                        />
-                                        <View style={{ width: 5 }}></View>
-                                        <MaterialIcons
-                                            name="delete-outline"
-                                            size={ms(22)}
-                                            color={Colors[theme].text}
-                                            onPress={() => {
-                                                Alert.alert(
-                                                    "Delete",
-                                                    "Are you sure you want to delete?",
-                                                    [
-                                                        {
-                                                            text: "Yes", onPress: () => {
-                                                                deleteMeetingTask({
-                                                                    variables: {
-                                                                        ids: Number(item?.id),
-                                                                    }
-                                                                });
-                                                            }
+                                <ThemedText type='subtitle'>{item?.task}</ThemedText>
+                                <View style={{ gap: 10, flexDirection: 'row', marginTop: 10 }}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                                    router.push({
+                                                        pathname: "/(meeting)/addTask",
+                                                        params: {
+                                                            isCreate: "false",
+                                                            task: `${item.task}`,
+                                                            comment: `${item.comment}`,
+                                                            id : `${item.id}`
                                                         },
-                                                        { text: "No", onPress: () => { } },
-                                                    ]
-                                                );
-                                            }}
-                                        />
-                                    </View>
+                                                    });
+                                                }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            borderWidth: 0.5,
+                                            borderColor: "#3B82F6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <Feather name="edit" size={16} color="#3B82F6" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            Alert.alert(
+                                                "Delete",
+                                                "Are you sure you want to delete?",
+                                                [
+                                                    {
+                                                        text: "Yes", onPress: () => {
+                                                            deleteMeetingTask({
+                                                                variables: {
+                                                                    ids: Number(item?.id),
+                                                                }
+                                                            });
+                                                        }
+                                                    },
+                                                    { text: "No", onPress: () => { } },
+                                                ]
+                                            );
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            borderWidth: 0.5,
+                                            borderColor: "#EF4444",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -397,11 +480,17 @@ const styles = ScaledSheet.create({
         marginBottom: "12@ms",
     },
     meetingDetailsCard: {
-        width: "100%",
-        padding: "12@ms",
-        borderRadius: "8@ms",
-        marginBottom: "16@ms",
-        gap: "8@ms",
+        borderRadius: "20@ms",
+        marginHorizontal: "10@ms",
+        marginVertical: "8@ms",
+        padding: "16@ms",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 5,
+        borderWidth: 1,
+        justifyContent: 'space-between',
+        gap: 10,
     },
     meetingTitle: {
         fontSize: "16@ms",
@@ -413,15 +502,6 @@ const styles = ScaledSheet.create({
     },
     scrollContainer: {
         marginTop: "5@ms",
-    },
-    meetingHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "10@ms",
-    },
-    meetingInfo: {
-        flexDirection: "row",
     },
     label: {
         fontSize: "16@ms",

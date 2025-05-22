@@ -993,3 +993,13 @@ mutation UpdateMeetingTask($updateMeetingTaskInput: UpdateMeetingTaskDto!) {
     weightType
   }
 }
+mutation UpdateNotes($updateNotesInput: UpdateNotesDto!) {
+  updateNotes(updateNotesInput: $updateNotesInput) {
+    id
+    createdByUserId
+    meetingId
+    decision
+    notes
+    uploadDoc
+  }
+}
