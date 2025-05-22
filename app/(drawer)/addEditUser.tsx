@@ -1,5 +1,5 @@
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { SafeAreaView } from "react-native";
 import { useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
@@ -20,7 +20,7 @@ import {
     UpdateVehicleDocument,
 } from "@/graphql/generated";
 import Loader from "@/components/ui/Loader";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams, useNavigation } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { Env } from "@/constants/ApiEndpoints";
 import * as ImagePicker from "expo-image-picker";
@@ -52,7 +52,7 @@ const userTypeData = [
     { label: "organizationEmployee", value: "organizationEmployee" },
 ];
 
-const VehicleAdd = () => {
+const AddEditUser = () => {
     const insuranceOptions = [
         { label: "Yes", value: true },
         { label: "No", value: false },
@@ -62,6 +62,8 @@ const VehicleAdd = () => {
         getUserRoles,
         { data: roleData, loading: roleLoading, error: roleError },
     ] = useLazyQuery(DropdownRolesDocument);
+    // console.log('data', roleData);
+
 
     useEffect(() => {
         getUserRoles({
@@ -100,38 +102,37 @@ const VehicleAdd = () => {
     const { theme } = useTheme();
     const { data: editedData } = useLocalSearchParams<any>();
 
-    useEffect(() => {
-        if (editedData) {
-            const parsedData = JSON.parse(editedData);
-            let rolesId = parsedData?.roles?.map((item: any) => {
-                return item?.id
-            })
-            setValue("name", parsedData?.name);
-            setValue("email", parsedData?.email);
-            setValue("phoneNo", parsedData?.mobileNo.toString());
-            setValue("roles", rolesId);
-            setValue("usertype", parsedData?.userType);
-            // setValue("id", parsedData?.id);
-            // setValue("imagePath", parsedData?.avatar);
-            setValue("designation", parsedData?.designation);
-        }
-    }, [editedData]);
+
 
     const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
         getDateTimePickerProps(false)
     );
-    const navigation = useNavigation();
 
-    useLayoutEffect(() => {
-        if (editedData) {
-            navigation.setOptions({ title: 'Edit Vehicle' });
-        } else {
-            navigation.setOptions({ title: 'Add Vehicle' });
-        }
-    }, [editedData]);
+
+    useFocusEffect(
+        useCallback(() => {
+            if (editedData) {
+                const parsedData = JSON.parse(editedData);
+                let rolesId = parsedData?.roles?.map((item: any) => {
+                    return item?.id
+                })
+                setImage(parsedData?.avatar);
+                setValue("name", parsedData?.name);
+                setValue("email", parsedData?.email);
+                setValue("phoneNo", parsedData?.mobileNo.toString());
+                setValue("roles", rolesId);
+                setValue("usertype", parsedData?.userType);
+                // setValue("id", parsedData?.id);
+                // setValue("imagePath", parsedData?.avatar);
+                setValue("designation", parsedData?.designation);
+            }
+        }, [editedData])
+    );
 
     const [updateUser, updateUserState] = useMutation(UpdateUserDocument, {
         onCompleted: (data) => {
+            setImage("");
+            reset();
             router.back();
         },
         onError: (error) => {
@@ -141,6 +142,8 @@ const VehicleAdd = () => {
 
     const [createUser, createUserState] = useMutation(CreateUserDocument, {
         onCompleted: (data) => {
+            setImage("");
+            reset();
             router.back();
         },
         onError: (error) => {
@@ -230,7 +233,6 @@ const VehicleAdd = () => {
             //     id: Number(parse?.id),
             //     ...params,
             //   }
-            console.log("updateParams", params);
             if (editedData) {
                 const parsedData = JSON.parse(editedData);
                 updateUser({
@@ -243,7 +245,7 @@ const VehicleAdd = () => {
                 })
                 return;
             }
-            createUser({
+            createUser({                
                 variables: {
                     data: params,
                 },
@@ -409,7 +411,7 @@ const VehicleAdd = () => {
     );
 };
 
-export default VehicleAdd;
+export default AddEditUser;
 
 const styles = ScaledSheet.create({
     imageContainer: {

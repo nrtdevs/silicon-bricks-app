@@ -3,12 +3,12 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  RefreshControl
+  RefreshControl,
+  FlatList
 } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { LinearGradient } from "expo-linear-gradient";
 import { useLazyQuery } from '@apollo/client'
-import { FlatList } from 'react-native-gesture-handler'
 import { Feather, MaterialIcons, } from '@expo/vector-icons'
 import { useScrollToTop } from '@react-navigation/native'
 import { gql, useMutation } from "@apollo/client";
@@ -29,44 +29,32 @@ import { Colors } from '@/constants/Colors';
 import debounce from "lodash.debounce";
 import { DeleteRoleDocument, PaginatedRolesDocument } from '@/graphql/generated';
 import { useUserContext } from '@/context/RoleContext';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import NoDataFound from '@/components/NoDataFound';
+import CustomRole from '@/components/master/CustomRole';
+import { FAB } from '@rneui/themed';
+import { Env } from '@/constants/ApiEndpoints';
+import Loader from '@/components/ui/Loader';
 
 const RolesScreen = () => {
   const { theme } = useTheme();
-  /// fetch Roles data
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [rolesData, { error, data, loading, refetch }] = useLazyQuery(
     PaginatedRolesDocument
   );
-  const [hasMore, setHasMore] = useState<boolean>(false);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [rolesList, setRolesList] = useState<any[]>([]);
   const fetchRoles = async (isRefreshing = false, searchParams = "") => {
-    // if (isRefreshing) {
-    //   setPage(1);
-    //   setRefreshing(true);
-    // }
-    // const params = {
-    //   per_page_record: 10,
-    //   page: isRefreshing ? 1 : page,
-    // };
+    let currentPage = isRefreshing ? 1 : page;
 
-    // await rolesData({
-    //   variables: {
-    //     listInputDto: {},
-    //   },
-    //   fetchPolicy: "network-only",
-    // });
-    // if (isRefreshing) {
-    //   setPage(1);
-    //   setRefreshing(true);
-    // }
-
-    const currentPage = isRefreshing ? 1 : page;
+    if (isRefreshing) {
+      setRefreshing(true);
+      setPage(1);
+    }
 
     const params = {
-      limit: 8,
+      limit: Env?.LIMIT as number,
       page: currentPage,
       search: searchParams,
     };
@@ -79,35 +67,19 @@ const RolesScreen = () => {
         fetchPolicy: "network-only",
       });
 
-      // console.log("Roles Data:00", res?.data?.paginatedRoles?.data);
-
-      if (res?.data?.paginatedRoles?.data) {
-        const data: any = res?.data?.paginatedRoles?.data;
-        const newItems = data || [];
+      if (res?.data?.paginatedRoles) {
+        const data: any = res?.data?.paginatedRoles;
+        const newItems = data?.data || [];
 
         setRolesList((prev: any) => {
-          if (isRefreshing) {
-            return newItems;
-          } else {
-            // Avoid duplicates by comparing item IDs
-            const existingIds = new Set(prev.map((item: any) => item.id));
-            const filteredNewItems = newItems.filter(
-              (item: any) => !existingIds.has(item.id)
-            );
-            return [...prev, ...filteredNewItems];
-          }
+          return isRefreshing && currentPage == 1
+            ? newItems
+            : [...prev, ...newItems];
         });
-
-        setRefreshing(false);
-
-        // Update page number only if we received new items
-        // if (!isRefreshing) {
+        const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
         setPage(currentPage + 1);
-        // }
-        const lastPage = Math.ceil(res?.data?.paginatedRoles?.meta?.totalItems / 8);
-        setHasMore(res?.data?.paginatedRoles?.meta?.currentPage < lastPage);
-        console.log('currentPage', currentPage);
-        console.log('lastPage', res?.data?.paginatedRoles?.meta);
+        setHasMore(currentPage < lastPage);
+        setRefreshing(false);
       } else {
         console.log("API call failed or returned no data:", res?.errors);
         setRefreshing(false);
@@ -120,9 +92,11 @@ const RolesScreen = () => {
     }
   };
 
-  useEffect(() => {
-    fetchRoles();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchRoles(true);
+    }, [])
+  );
 
   /// search state 
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -137,7 +111,8 @@ const RolesScreen = () => {
     setDeletePopupVisible(false);
     setSelectedProjectId(null);
   };
-  const [deleteRole,] = useMutation(DeleteRoleDocument, {
+
+  const [deleteRole, deleteRoleState] = useMutation(DeleteRoleDocument, {
     onCompleted: (data) => {
       fetchRoles(true);
       refetch();
@@ -146,9 +121,9 @@ const RolesScreen = () => {
       //   setModalVisible(false);
     },
     onError: (error) => {
+      console.log('Error', error);
     }
   });
-
 
   const [visible, setVisible] = useState(false);
   const showDialogue = () => setVisible(true);
@@ -169,8 +144,42 @@ const RolesScreen = () => {
     resolver: zodResolver(schema),
   });
 
-  const hideDialogue = () => {
-    setVisible(false);
+  const renderItem = ({ item, index }: any) => {
+    return (
+      <CustomRole
+        name={item?.name ?? ""}
+        permissions={item?.permissionCount?.toString() ?? ""}
+        description={item?.description ?? ""}
+        onEdit={() => {
+          router.push({
+            pathname: "/(subComponents)/createRole",
+            params: {
+              editable: "true",
+              id: item.id,
+              name: item.name,
+            }
+          })
+        }}
+        onDelete={() =>
+          Alert.alert("Delete", "Are you sure you want to delete?", [
+            {
+              text: "Yes",
+              onPress: () => {
+                deleteRole({
+                  variables: {
+                    ids: Number(item?.id),
+                  },
+                  fetchPolicy: "network-only",
+                });
+              },
+            },
+            { text: "No", onPress: () => { } },
+          ])
+        }
+        editPermission={checkUpdatePermission}
+        deletePermission={deletePermission}
+      />
+    );
   };
 
   const debouncedSearch = useCallback(
@@ -188,7 +197,13 @@ const RolesScreen = () => {
     }, 500),
     [searchQuery]
   );
-  // console.log('00', rolesList);
+
+  if (
+    ((loading && page == 1 && !refreshing) ||
+      deleteRoleState?.loading)
+  ) {
+    return <Loader />;
+  }
 
   return (
     <CustomHeader>
@@ -208,107 +223,18 @@ const RolesScreen = () => {
               }}
             />
           </View>
-          <Pressable
-            style={styles.buttonContainer}
-            // onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
-            onPress={() => {
-              router.push({
-                pathname: "/(subComponents)/createRole",
-                params: {
-                  editable: "false",
-                }
-              })
-            }}          >
-            <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
-          </Pressable>
         </View>
 
         <FlatList
           data={rolesList}
-          renderItem={({ item, index }: any) => {
-            return <View
-              key={index}
-              style={[
-                styles.organizationContainer,
-                { backgroundColor: Colors[theme].cart },
-              ]}
-            >
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <ThemedText type='subtitle' style={styles.name}>{item.name}</ThemedText>
-                <View style={styles.organizationInfo}>
-                  <Feather
-                    name="edit"
-                    size={ms(22)}
-                    color={Colors[theme].text}
-                    onPress={() => {
-                      router.push({
-                        pathname: "/(subComponents)/createRole",
-                        params: {
-                          editable: "true",
-                          id: item.id,
-                          name: item.name,
-                        }
-                      })
-                    }}
-                  />
-                  <View style={{ width: 5 }}></View>
-                  <MaterialIcons
-                    name="delete-outline"
-                    size={ms(22)}
-                    color={Colors[theme].text}
-                    onPress={() => {
-                      Alert.alert(
-                        "Delete",
-                        "Are you sure you want to delete?",
-                        [
-                          {
-                            text: "Yes", onPress: () => {
-                              deleteRole({
-                                variables: {
-                                  ids: Number(item?.id),
-                                },
-                                fetchPolicy: "network-only",
-                              });
-                            }
-                          },
-                          { text: "No", onPress: () => { } },
-                        ]
-                      );
-
-                    }}
-                  />
-                </View>
-
-              </View>
-              <ThemedText
-                style={[
-                  styles.permission,
-                  {
-                    // color:
-                    // item.status == "active" ? Colors?.green : "#6d6d1b",
-                    backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
-                  },
-                ]}
-              >
-                {item?.permissionCount} Permissions
-              </ThemedText>
-              {item?.description && <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                {item?.description}
-              </ThemedText>}
-            </View>
-          }
-          }
+          renderItem={({ item, index }: any) => renderItem({ item, index })}
           showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={async () => {
-                fetchRoles(true);
-              }}
-            />
-          }
+          refreshing={refreshing && !loading}
+          onRefresh={() => {
+            fetchRoles(true);
+          }}
           keyExtractor={(item: any, index: number) => index.toString()}
-          contentContainerStyle={{ paddingBottom: vs(20), paddingTop: vs(15) }}
+          contentContainerStyle={{ paddingBottom: vs(60) }}
           ListEmptyComponent={!loading ? <NoDataFound /> : null}
           ListFooterComponent={
             hasMore ? (
@@ -316,13 +242,29 @@ const RolesScreen = () => {
             ) : null
           }
           onEndReached={() => {
-            if (hasMore) {
+            if (hasMore && !loading) {
               fetchRoles();
             }
           }}
           onEndReachedThreshold={0.5}
         />
       </ThemedView>
+
+      {createPermission && <FAB
+        size="large"
+        title="Add Role"
+        style={{
+          position: "absolute",
+          margin: 16,
+          right: 0,
+          bottom: 0,
+        }}
+        icon={{
+          name: "add",
+          color: "white",
+        }}
+        onPress={() => router.push("/(subComponents)/createRole")}
+      />}
     </CustomHeader >
   )
 }
@@ -332,21 +274,18 @@ export default RolesScreen
 const styles = ScaledSheet.create({
   contentContainer: {
     flex: 1,
-    padding: "12@ms",
   },
   innerContainer: {
     paddingVertical: 10
   },
   buttonContainer: { marginLeft: "12@ms" },
   searchContainer: {
-    width: "100%",
+    marginHorizontal: "12@s",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "12@ms",
   },
   organizationParentContainer: {
-    marginTop: "12@ms",
   },
   loadingContainer: {
     flex: 1,

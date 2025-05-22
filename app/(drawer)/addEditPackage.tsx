@@ -1,9 +1,9 @@
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { SafeAreaView } from "react-native";
 import { useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
-import { ms, ScaledSheet, vs } from "react-native-size-matters";
+import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import CustomButton from "@/components/CustomButton";
 import { Feather, Fontisto } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
@@ -14,58 +14,65 @@ import { formatTimeForAPI } from "@/utils/formatDateTime";
 import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
+    CreatePackageDocument,
     CreateUserDocument,
     CreateVehicleDocument,
     DropdownRolesDocument,
+    PaginatedModulesDocument,
+    UpdatePackageDocument,
     UpdateUserDocument,
     UpdateVehicleDocument,
 } from "@/graphql/generated";
 import Loader from "@/components/ui/Loader";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams, useNavigation } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { Env } from "@/constants/ApiEndpoints";
 import * as ImagePicker from "expo-image-picker";
 import CustomHeader from "@/components/CustomHeader";
 
-const designationData = [
-    { label: "CEO", value: "CEO" },
-    { label: "CTO", value: "CTO" },
-    { label: "Employee", value: "EMPLOYEE" },
-    { label: "HR", value: "HR" },
-    { label: "Manager", value: "MANAGER" },
-    { label: "Super Admin", value: "SUPER_ADMIN" },
-    { label: "Team Lead", value: "TEAM_LEAD" },
-];
-
-const pickerData = [
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inactive" },
-    { label: "Blocked", value: "blocked" },
-    { label: "Pending", value: "pending" },
-];
-
-const userTypeData = [
-    { label: "admin", value: "admin" },
-    { label: "adminEmployee", value: "adminEmployee" },
-    { label: "organization", value: "organization" },
-    { label: "organizationEmployee", value: "organizationEmployee" },
-];
 
 const VehicleAdd = () => {
-    const insuranceOptions = [
-        { label: "Yes", value: true },
-        { label: "No", value: false },
-    ];
+
+    const [updatePackage, updatePackageState] = useMutation(
+        UpdatePackageDocument,
+        {
+            onCompleted: (data) => {
+                reset();
+                router.back();
+            },
+            onError: (error) => {
+                Alert.alert("Error", error.message);
+            },
+        }
+    );
+
+    const [createPackage, createPackageState] = useMutation(
+        CreatePackageDocument,
+        {
+            onCompleted: (data) => {
+                reset();
+                router.back();
+            },
+            onError: (error) => {
+                Alert.alert("Error", error.message);
+            },
+        }
+    );
 
     const [
-        getUserRoles,
-        { data: roleData, loading: roleLoading, error: roleError },
-    ] = useLazyQuery(DropdownRolesDocument);
+        moduleDataApi,
+        {
+            error: moduleError,
+            data: moduleData,
+            loading: moduleLoading,
+            refetch: moduleRefetch,
+        },
+    ] = useLazyQuery(PaginatedModulesDocument);
 
     useEffect(() => {
-        getUserRoles({
+        moduleDataApi({
             variables: {
-                listInputDto: {},
+                listInputDto: {}
             },
         });
     }, [])
@@ -77,7 +84,7 @@ const VehicleAdd = () => {
             value: (1997 + index).toString(),
         }));
     }, []);
-    const [image, setImage] = useState<string>("");
+
     const {
         control,
         handleSubmit,
@@ -87,110 +94,75 @@ const VehicleAdd = () => {
         setValue,
     } = useForm<{
         name: string;
-        email: string;
-        phoneNo: string;
-        roles: any[];
-        usertype: any;
+        description: string;
+        offerDescription: string;
         status: any;
-        designation: any;
+        price: string;
+        discountedPrice: string;
+        module: any;
+        endDate: string;
+        offer;
     }>({
         defaultValues: {},
     });
+
+    const [dateModal, setDateModal] = useState({
+        start: false,
+        end: false,
+    });
+
     const { theme } = useTheme();
     const { data: editedData } = useLocalSearchParams<any>();
-
-    useEffect(() => {
-        if (editedData) {
-            const parsedData = JSON.parse(editedData);
-            let rolesId = parsedData?.roles?.map((item: any) => {
-                return item?.id
-            })
-            setValue("name", parsedData?.name);
-            setValue("email", parsedData?.email);
-            setValue("phoneNo", parsedData?.mobileNo.toString());
-            setValue("roles", rolesId);
-            setValue("usertype", parsedData?.userType);
-            // setValue("id", parsedData?.id);
-            // setValue("imagePath", parsedData?.avatar);
-            setValue("designation", parsedData?.designation);
-        }
-    }, [editedData]);
 
     const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
         getDateTimePickerProps(false)
     );
     const navigation = useNavigation();
 
-    useLayoutEffect(() => {
-        if (editedData) {
-            navigation.setOptions({ title: 'Edit Vehicle' });
-        } else {
-            navigation.setOptions({ title: 'Add Vehicle' });
-        }
-    }, [editedData]);
-
-    const [updateUser, updateUserState] = useMutation(UpdateUserDocument, {
-        onCompleted: (data) => {
-            router.back();
-        },
-        onError: (error) => {
-            Alert.alert("Error", error.message);
-        },
-    });
-
-    const [createUser, createUserState] = useMutation(CreateUserDocument, {
-        onCompleted: (data) => {
-            router.back();
-        },
-        onError: (error) => {
-            Alert.alert("Error", error.message);
-        },
-    });
-
-
-
-    const handleImagePickerPress = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: 'images',
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1,
-        });
-
-        if (!result.canceled && result.assets?.length > 0) {
-            const uri = result.assets[0].uri;
-            uploadImage(uri);
-        }
-    };
+    useFocusEffect(
+        useCallback(() => {
+            if (editedData) {
+                const parsedData = JSON.parse(editedData);
+                let ids = parsedData?.modules?.map((item: any) => item.id);
+                console.log('parsedData', parsedData);
+                setValue("name", parsedData?.name);
+                setValue("description", parsedData?.description);
+                setValue("offerDescription", parsedData?.offerDescription);
+                setValue("price", parsedData?.price.toString());
+                setValue("module", ids);
+                setValue(
+                    "endDate",
+                    formatTimeForAPI(parsedData?.offerExpiryDate, "yyyy-mm-dd") || ""
+                );
+                // setValue("start_date", formatTimeForAPI(currentCoupon?.start_date, "yyyy-mm-dd") || "");
+                setValue("discountedPrice", parsedData?.discountedPrice.toString());
+            }
+        }, [editedData])
+    );
 
     const onSubmit = (data: any) => {
         try {
-            const roleIds: number[] = [];
-            if (data?.roles && Array.isArray(data.roles)) {
-                for (let i = 0; i < data.roles.length; i++) {
-                    roleIds.push(Number(data.roles[i]));
-                }
+            const moduleIds = data?.module?.map(Number);
+            if (Number(data?.price) < Number(data?.discountedPrice)) {
+                console.log("Price should be greater than discounted price date.");
+                Alert.alert("Error", "Price should be greater than discounted price.");
+                return;
             }
-
-            const params: any = {
-                designation: typeof data?.designation == 'string' ? data?.designation : data?.designation?.value,
-                email: data?.email,
-                mobileNo: Number(data?.phoneNo),
+            let params = {
                 name: data?.name,
-                roleIds: roleIds,
-                userType: typeof data?.usertype == 'string' ? data?.usertype : data?.usertype?.value,
-                avatar: image,
+                offerExpiryDate: data?.endDate,
+                price: Number(data?.price),
+                discountedPrice: Number(data?.discountedPrice),
+                moduleIds: moduleIds,
+                description: data?.description ?? "",
+                offerDescription: data?.offerDescription ?? "",
             };
-            //   let updateParams = {
-            //     id: Number(parse?.id),
-            //     ...params,
-            //   }
-            console.log("updateParams", params);
+
             if (editedData) {
                 const parsedData = JSON.parse(editedData);
-                updateUser({
+                updatePackage({
                     variables: {
-                        data: {
+                        updatePackageInput: {
                             ...params,
                             id: Number(parsedData?.id),
                         }
@@ -198,64 +170,41 @@ const VehicleAdd = () => {
                 })
                 return;
             }
-            createUser({
+            console.log("params", params);
+            createPackage({
                 variables: {
-                    data: params,
+                    createPackageInput: params,
                 },
-            });
+            })
         } catch (error) {
-            console.log("onSubmit error", error);
+            console.log("error in onSubmit", error);
         }
     };
 
-    if (createUserState.loading || updateUserState.loading) return <Loader />;
+    if (createPackageState.loading || updatePackageState.loading) return <Loader />;
 
     return (
         <CustomHeader>
             <ScrollView
-                showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
                     // backgroundColor: Colors[theme].cart,
-                    width: "100%",
                     borderRadius: 10,
-                    alignSelf: "center",
-                    paddingHorizontal: 10,
-                    paddingVertical: 22,
-                    justifyContent: "flex-start",
-                    paddingBottom: 20,
-                }
-                }
+                    padding: 10,
+                }}
             >
                 <View
                     style={{
                         flexDirection: "row",
                         justifyContent: "space-between",
-                        paddingHorizontal: 10,
+                        paddingTop: 20,
                     }}
                 >
                     <ThemedText type="subtitle">
-                        User
+                        Package
                     </ThemedText>
                 </View>
 
-                <View style={{ padding: 10, position: "relative", paddingBottom: 30 }}>
-                    <Pressable
-                        style={styles.imageContainer}
-                    >
-                        <Image
-                            source={{
-                                uri: `${Env?.SERVER_URL}${image}`,
-                            }}
-                            style={styles.image}
-                        />
-                    </Pressable>
-
-                    {<Pressable
-                        onPress={handleImagePickerPress}
-                        style={styles?.editImage}>
-                        <Feather name="edit-2" size={ms(18)} color='black' style={{ fontWeight: 'bold', }} />
-                    </Pressable>}
-
+                <View style={{ padding: 10 }}>
                     <CustomValidation
                         type="input"
                         control={control}
@@ -263,104 +212,156 @@ const VehicleAdd = () => {
                         name={"name"}
                         inputStyle={[{ lineHeight: ms(20) }]}
                         label={"Name"}
+                        placeholder={"Enter Name"}
                         rules={{
-                            required: "Name is required",
-                        }}
-                        autoCapitalize="none"
-                    />
-
-                    <CustomValidation
-                        type="input"
-                        control={control}
-                        name={"email"}
-                        label={"Email"}
-                        labelStyle={styles.label}
-                        rules={{
-                            required: "User email is required",
+                            required: "name is required",
                         }}
                     />
 
                     <CustomValidation
                         type="input"
                         control={control}
-                        name={"phoneNo"}
-                        // keyboardType="phone-pad"
-                        label={"Phone No"}
+                        placeholder="End Date"
+                        name="endDate"
+                        label="End Date"
                         labelStyle={styles.label}
+                        editable={false}
+                        rightIcon={
+                            <Fontisto
+                                name="date"
+                                size={ms(20)}
+                                color={Colors[theme]?.text}
+                            />
+                        }
+                        onPress={() => {
+                            setDateModal({
+                                start: !dateModal.start,
+                                end: false,
+                            });
+                            setDateTimePickerProps(getDateTimePickerProps(true));
+                        }}
+                        pointerEvents="none"
                         rules={{
-                            required: "User phoneNo is required",
+                            required: "End date is required",
                         }}
                     />
 
                     <CustomValidation
-                        data={designationData}
-                        type="picker"
-                        hideStar={false}
+                        type="input"
                         control={control}
-                        name="designation"
-                        label="Designation"
+                        name={"price"}
+                        label={"Price"}
+                        rightIcon={null}
+                        placeholder={"Enter Price"}
+                        keyboardType="number-pad"
                         labelStyle={styles.label}
-                        placeholder="Select Designation"
-                        inputStyle={{ height: vs(50) }}
                         rules={{
-                            required: {
-                                value: true,
-                                message: "Select a designation",
-                            },
+                            required: "Price is required",
                         }}
                     />
 
                     <CustomValidation
-                        data={roleData?.dropdownRoles?.data}
+                        type="input"
+                        control={control}
+                        name={"discountedPrice"}
+                        keyboardType="number-pad"
+                        label={"Discounted Price"}
+                        placeholder={"Discounted Price"}
+                        labelStyle={styles.label}
+                        rules={{
+                            required: "Discounted price is required",
+                        }}
+                    />
+
+                    <CustomValidation
+                        data={moduleData?.paginatedModules?.data}
                         type="picker"
-                        hideStar={false}
+                        control={control}
                         keyToCompareData="id"
                         keyToShowData="name"
-                        control={control}
-                        name="roles"
-                        label="Role"
+                        label="Module"
                         labelStyle={styles.label}
-                        multiSelect
-                        placeholder="Select role name"
+                        multiSelect={true}
+                        name="module"
+                        placeholder="Select Module"
                         inputStyle={{ height: vs(50) }}
                         rules={{
                             required: {
                                 value: true,
-                                message: "Select a role",
+                                message: "Select Module",
                             },
                         }}
                     />
 
                     <CustomValidation
-                        data={userTypeData}
-                        type="picker"
-                        hideStar={false}
+                        type="input"
                         control={control}
-                        keyToCompareData="value"
-                        keyToShowData="label"
-                        label="User Type"
+                        name={"offerDescription"}
+                        multiline
+                        label={"Offer Description"}
+                        // placeholder={editModal ? "Test organization Offer Description" : "Enter Offer Description"}
                         labelStyle={styles.label}
-                        name="usertype"
-                        placeholder="Select UserType"
-                        inputStyle={{ height: vs(50) }}
-                        rules={{
-                            required: {
-                                value: true,
-                                message: "Select a User Type",
-                            },
+                        inputContainerStyle={{
+                            height: vs(100),
+                        }}
+                        inputStyle={{
+                            height: vs(100),
+                        }}
+                        containerStyle={{
+                            height: vs(100),
+                        }}
+                    />
+
+                    <CustomValidation
+                        type="input"
+                        control={control}
+                        name={"description"}
+                        multiline
+                        label={"Description"}
+                        // placeholder={editModal ? "Test organization description" : "Enter description"}
+                        labelStyle={[styles.label, { marginTop: vs(30) }]}
+                        inputContainerStyle={{
+                            height: vs(100),
+                        }}
+                        inputStyle={{
+                            height: vs(100),
+                        }}
+                        containerStyle={{
+                            height: vs(100),
+                        }}
+                    />
+
+                    <CustomButton
+                        title="Submit"
+                        onPress={() => {
+                            handleSubmit(onSubmit)();
+                        }}
+                        isLoading={
+                            updatePackageState.loading || createPackageState.loading
+                        }
+                        style={{
+                            backgroundColor: Colors[theme].background,
+                            marginTop: vs(90),
                         }}
                     />
                 </View>
-
-                <CustomButton
-                    title="Submit"
-                    onPress={handleSubmit(onSubmit)}
-                    style={{
-                        backgroundColor: Colors[theme].background,
-                        marginTop: vs(10),
-                    }}
-                />
             </ScrollView>
+
+            {/* date time picker modal */}
+            <DateTimePickerModal
+                mode="date"
+                dateTimePickerProps={dateTimePickerProps}
+                setDateTimePickerProps={setDateTimePickerProps}
+                onDateTimeSelection={(event: any, selectedDate: any) => {
+                    if (event.type != "dismissed") {
+                        setValue(
+                            dateModal.start ? "endDate" : "endDate",
+                            formatTimeForAPI(selectedDate, "yyyy-mm-dd") || ""
+                        );
+                    }
+                    setDateTimePickerProps(getDateTimePickerProps(false));
+                }}
+            />
         </CustomHeader>
     );
 };

@@ -164,6 +164,13 @@ const CreateRoleScreen = () => {
       permissionIds: selectedRoles,
     };
 
+    if (selectedRoles.length ==0) {
+      console.log("Select at least 1 permission");
+      Alert.alert("Error", "Select at least 1 permission.");
+      return;
+  }
+    
+
     editable == "true"
       ? updateRole({
           variables: {
@@ -327,7 +334,7 @@ const CreateRoleScreen = () => {
                                 // width: "25%",
                               }}
                             >
-                              {item.permissions?.map(
+                              {item?.permissions?.map(
                                 (item: any, index: number) => {
                                   return (
                                     <View

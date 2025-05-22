@@ -43,7 +43,9 @@ import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import DateTimePickerModal from "@/components/DateTimePickerModal";
 import { formatTimeForAPI } from "@/utils/formatDateTime";
 import CustomPackageCard from "@/components/master/CustomPackageCard";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { FAB } from "@rneui/themed";
+import { Env } from "@/constants/ApiEndpoints";
 
 const defaultValue = {
     name: "",
@@ -96,19 +98,8 @@ const PackageScreen = () => {
         PaginatedPackagesDocument
     );
 
-    const [
-        moduleDataApi,
-        {
-            error: moduleError,
-            data: moduleData,
-            loading: moduleLoading,
-            refetch: moduleRefetch,
-        },
-    ] = useLazyQuery(PaginatedModulesDocument);
-
 
     const findModule = (data, ids) => {
-
         const matchedModuleNames = data
             ?.filter((item) => ids?.includes(item?.id))
             ?.map((item) => item.name);
@@ -122,7 +113,6 @@ const PackageScreen = () => {
             onCompleted: (data) => {
                 reset();
                 fetchPackage(true);
-                setModalVisible(false);
             },
             onError: (error) => {
                 Alert.alert("Error", error.message);
@@ -143,38 +133,6 @@ const PackageScreen = () => {
             },
         }
     );
-
-    const [updatePackage, updatePackageState] = useMutation(
-        UpdatePackageDocument,
-        {
-            onCompleted: (data) => {
-                reset();
-                fetchPackage(true);
-                setModalVisible(false);
-            },
-            onError: (error) => {
-                Alert.alert("Error", error.message);
-            },
-        }
-    );
-
-    const [createPackage, createPackageState] = useMutation(
-        CreatePackageDocument,
-        {
-            onCompleted: (data) => {
-                reset();
-                fetchPackage(true);
-                setModalVisible(false);
-            },
-            onError: (error) => {
-                Alert.alert("Error", error.message);
-            },
-        }
-    );
-
-    const [isModalVisible, setModalVisible] = useState(false);
-    const [isFocused, setIsFocused] = useState("");
-    const [editModal, setEditModal] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
     const [infoModalVisible, setInfoModalVisible] = useState(false);
     const [currentPackage, setCurrentPackage] = useState<{
@@ -210,17 +168,12 @@ const PackageScreen = () => {
         }
     }, [currentPackage]);
 
-    useEffect(() => {
-        fetchPackage();
-        moduleDataApi({
-            variables: {
-                listInputDto: {
-                    page: 1,
-                    limit: 20
-                }
-            },
-        });
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            fetchPackage(true);
+        }, [])
+    );
+
 
     const debouncedSearch = useCallback(
         debounce((text) => {
@@ -237,44 +190,6 @@ const PackageScreen = () => {
         [searchQuery]
     );
 
-    const onSubmit = (data: any) => {
-        try {
-            const moduleIds = data?.module?.map(Number);
-            if (Number(data?.price) < Number(data?.discountedPrice)) {
-                console.log("Price should be greater than discounted price date.");
-                Alert.alert("Error", "Price should be greater than discounted price.");
-                return;
-            }
-            let params = {
-                name: data?.name,
-                offerExpiryDate: data?.endDate,
-                price: Number(data?.price),
-                discountedPrice: Number(data?.discountedPrice),
-                moduleIds: moduleIds,
-                description: data?.description,
-                offerDescription: data?.offerDescription,
-            };
-            let params2 = {
-                id: Number(currentPackage?.id),
-                ...params,
-            };
-
-            editModal
-                ? updatePackage({
-                    variables: {
-                        updatePackageInput: params2,
-                    },
-                })
-                : createPackage({
-                    variables: {
-                        createPackageInput: params,
-                    },
-                });
-        } catch (error) {
-            console.log("error in onSubmit", error);
-        }
-    };
-
     const [dateModal, setDateModal] = useState({
         start: false,
         end: false,
@@ -285,14 +200,15 @@ const PackageScreen = () => {
     );
 
     const fetchPackage = async (isRefreshing = false, searchParams = "") => {
-        const currentPage = isRefreshing ? 1 : page;
+        let currentPage = isRefreshing ? 1 : page;
 
         if (isRefreshing) {
             setRefreshing(true);
             setPage(1);
         }
+
         const params = {
-            limit: 8,
+            limit: Env?.LIMIT as number,
             page: currentPage,
             search: searchParams,
         };
@@ -314,12 +230,10 @@ const PackageScreen = () => {
                         ? newItems
                         : [...prev, ...newItems];
                 });
-
-                if (isRefreshing) setRefreshing(false);
-                setPage((prev) => prev + 1);
+                const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+                setPage(currentPage + 1);
+                setHasMore(currentPage < lastPage);
                 setRefreshing(false);
-                const lastPage = Math.ceil(data?.meta?.totalItems / 8);
-                setHasMore(data?.meta?.currentPage < lastPage);
             } else {
                 console.log("API call failed or returned no data:", res?.errors);
                 setRefreshing(false);
@@ -331,129 +245,6 @@ const PackageScreen = () => {
             setHasMore(false);
         }
     };
-
-    // const renderData = ({ item, index }: any) => {
-    //     let ids = item?.modules?.map((item: any) => item.id);
-    //     return (
-    //         <View
-    //             key={index}
-    //             style={[
-    //                 styles.organizationContainer,
-    //                 { backgroundColor: Colors[theme]?.cart },
-    //             ]}
-    //         >
-    //             <View style={styles.organizationHeader}>
-    //                 <ThemedText type="subtitle" style={{ flex: 1 }}>
-    //                     {item?.name}
-    //                 </ThemedText>
-    //                 <View style={styles.organizationInfo}>
-    //                     {statusUpdatePermission && (
-    //                         <MaterialIcons
-    //                             name="attractions"
-    //                             size={ms(26)}
-    //                             color={Colors[theme].text}
-    //                             onPress={() => {
-    //                                 setStatusModalVisible(true);
-    //                                 setValue('status', item?.status);
-    //                             }}
-    //                         />
-    //                     )}
-
-    //                     {updatePermission && (
-    //                         <Feather
-    //                             name="edit"
-    //                             size={ms(26)}
-    //                             color={Colors[theme].text}
-    //                             onPress={() => {
-    //                                 setCurrentPackage({
-    //                                     name: item?.name,
-    //                                     discountedPrice: String(item?.discountedPrice),
-    //                                     description: item?.description,
-    //                                     id: item?.id,
-    //                                     price: String(item?.price),
-    //                                     moduleIds: ids,
-    //                                     endDate: item?.offerExpiryDate,
-    //                                     offerDescription: item?.offerDescription,
-    //                                 });
-    //                                 setModalVisible(true);
-    //                                 setEditModal(true);
-    //                             }}
-    //                         />
-    //                     )}
-
-    //                     {updatePermission && (
-    //                         <Feather
-    //                             name="eye"
-    //                             size={ms(26)}
-    //                             color={Colors[theme].text}
-    //                             onPress={() => {
-    //                                 setCurrentPackage({
-    //                                     name: item?.name,
-    //                                     discountedPrice: String(item?.discountedPrice),
-    //                                     description: item?.description,
-    //                                     id: item?.id,
-    //                                     price: String(item?.price),
-    //                                     moduleIds: ids,
-    //                                     endDate: item?.offerExpiryDate,
-    //                                     offerDescription: item?.offerDescription,
-    //                                 });
-    //                                 findModule(item.modules, ids);
-    //                                 setInfoModalVisible(true);
-    //                             }}
-    //                         />
-    //                     )}
-
-    //                     {deletePermission && (
-    //                         <MaterialIcons
-    //                             name="delete-outline"
-    //                             size={ms(26)}
-    //                             color={Colors[theme].text}
-    //                             onPress={() => {
-    //                                 Alert.alert("Delete", "Are you sure you want to delete?", [
-    //                                     {
-    //                                         text: "Yes",
-    //                                         onPress: () => {
-    //                                             deletePackage({
-    //                                                 variables: {
-    //                                                     ids: [Number(item?.id)],
-    //                                                 },
-    //                                             });
-    //                                         },
-    //                                     },
-    //                                     { text: "No", onPress: () => { } },
-    //                                 ]);
-    //                             }}
-    //                         />
-    //                     )}
-    //                 </View>
-    //             </View>
-
-    //             <View style={styles.userInfo}>
-    //                 <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-    //                     ${item?.price}
-    //                 </ThemedText>
-    //                 <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-    //                     ${item?.discountedPrice} (after discount)
-    //                 </ThemedText>
-    //             </View>
-
-    //             <ThemedText
-    //                 style={[
-    //                     styles.status,
-    //                     {
-    //                         // color:
-    //                         //   item.status == "active" ? Colors?.green : "#6d6d1b",
-    //                         backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
-    //                         fontSize: ms(14),
-    //                     },
-    //                 ]}
-    //             >
-    //                 {item?.status}
-    //             </ThemedText>
-    //         </View>
-    //     );
-    // };
-
     const renderData = ({ item, index }: any) => {
         let ids = item?.modules?.map((item: any) => item.id);
         return (
@@ -467,8 +258,8 @@ const PackageScreen = () => {
                 deletePermission={deletePermission}
                 statusPermission={statusUpdatePermission}
                 onEdit={() => {
-                    router.navigate({
-                        pathname: "/addEditUser",
+                    router.push({
+                        pathname: "/addEditPackage",
                         params: {
                             data: JSON.stringify(item),
                         },
@@ -538,18 +329,6 @@ const PackageScreen = () => {
                             }}
                         />
                     </View>
-                    <Pressable
-                        style={styles.buttonContainer}
-                        onPress={() => {
-                            setModalVisible(true), setCurrentPackage(defaultValue);
-                        }}
-                    >
-                        <Feather
-                            name="plus-square"
-                            size={ms(25)}
-                            color={Colors[theme].text}
-                        />
-                    </Pressable>
                 </View>
 
                 <View style={styles.organizationParentContainer}>
@@ -575,201 +354,9 @@ const PackageScreen = () => {
                             }
                         }}
                         onEndReachedThreshold={0.5}
-                    // initialNumToRender={8}
-                    // maxToRenderPerBatch={5}
-                    // windowSize={7}
-                    // removeClippedSubviews={true}
                     />
                 </View>
             </ThemedView>
-
-            {/* CREATE AND EDIT MODAL */}
-            <Modal
-                isVisible={isModalVisible}
-                onBackdropPress={() => {
-                    reset();
-                    setCurrentPackage(defaultValue);
-                    setEditModal(false);
-                    setModalVisible(false);
-                }}
-            >
-                <ScrollView
-                    contentContainerStyle={{
-                        backgroundColor: Colors[theme].cart,
-                        // height: vs(500),
-                        width: s(300),
-                        borderRadius: 10,
-                        alignSelf: "center",
-                        padding: 10,
-                    }}
-                >
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            paddingTop: 20,
-                        }}
-                    >
-                        <ThemedText type="subtitle">
-                            {editModal ? "Edit" : "Create Package"}
-                        </ThemedText>
-
-                        <Pressable
-                            onPress={() => {
-                                reset();
-                                setEditModal(false);
-                                setCurrentPackage(defaultValue);
-                                setModalVisible(false);
-                            }}
-                        >
-                            <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
-                        </Pressable>
-                    </View>
-
-                    <View style={{ padding: 10 }}>
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            labelStyle={styles.label}
-                            name={"name"}
-                            inputStyle={[{ lineHeight: ms(20) }]}
-                            label={"Name"}
-                            placeholder={"Enter Name"}
-                            rules={{
-                                required: "name is required",
-                            }}
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            placeholder="End Date"
-                            name="endDate"
-                            label="End Date"
-                            labelStyle={styles.label}
-                            editable={false}
-                            rightIcon={
-                                <Fontisto
-                                    name="date"
-                                    size={ms(20)}
-                                    color={Colors[theme]?.text}
-                                />
-                            }
-                            onPress={() => {
-                                setDateModal({
-                                    start: !dateModal.start,
-                                    end: false,
-                                });
-                                setDateTimePickerProps(getDateTimePickerProps(true));
-                            }}
-                            pointerEvents="none"
-                            rules={{
-                                required: "End date is required",
-                            }}
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            name={"price"}
-                            label={"Price"}
-                            rightIcon={null}
-                            placeholder={"Enter Price"}
-                            keyboardType="number-pad"
-                            labelStyle={styles.label}
-                            rules={{
-                                required: "Price is required",
-                            }}
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            name={"discountedPrice"}
-                            keyboardType="number-pad"
-                            label={"Discounted Price"}
-                            placeholder={"Discounted Price"}
-                            labelStyle={styles.label}
-                            rules={{
-                                required: "Discounted price is required",
-                            }}
-                        />
-
-                        <CustomValidation
-                            data={moduleData?.paginatedModules?.data}
-                            type="picker"
-                            control={control}
-                            keyToCompareData="id"
-                            keyToShowData="name"
-                            label="Module"
-                            labelStyle={styles.label}
-                            multiSelect={true}
-                            name="module"
-                            placeholder="Select Module"
-                            inputStyle={{ height: vs(50) }}
-                            rules={{
-                                required: {
-                                    value: true,
-                                    message: "Select Module",
-                                },
-                            }}
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            name={"offerDescription"}
-                            multiline
-                            label={"Offer Description"}
-                            // placeholder={editModal ? "Test organization Offer Description" : "Enter Offer Description"}
-                            labelStyle={styles.label}
-                            inputContainerStyle={{
-                                height: vs(100),
-                            }}
-                            inputStyle={{
-                                height: vs(100),
-                            }}
-                            containerStyle={{
-                                height: vs(100),
-                            }}
-                        />
-
-                        <CustomValidation
-                            type="input"
-                            control={control}
-                            name={"description"}
-                            multiline
-                            label={"Description"}
-                            // placeholder={editModal ? "Test organization description" : "Enter description"}
-                            labelStyle={[styles.label, { marginTop: vs(30) }]}
-                            inputContainerStyle={{
-                                height: vs(100),
-                            }}
-                            inputStyle={{
-                                height: vs(100),
-                            }}
-                            containerStyle={{
-                                height: vs(100),
-                            }}
-                        />
-
-                        <CustomButton
-                            title="Submit"
-                            onPress={() => {
-                                handleSubmit(onSubmit)();
-                            }}
-                            isLoading={
-                                updatePackageState.loading || createPackageState.loading
-                            }
-                            style={{
-                                backgroundColor: Colors[theme].background,
-                                marginTop: vs(90),
-                            }}
-                        />
-                    </View>
-                </ScrollView>
-            </Modal>
-
 
             {/* status modal */}
             <Modal
@@ -970,6 +557,22 @@ const PackageScreen = () => {
                     setDateTimePickerProps(getDateTimePickerProps(false));
                 }}
             />
+
+            {createPermission && <FAB
+                size="large"
+                title="Add User"
+                style={{
+                    position: "absolute",
+                    margin: 16,
+                    right: 0,
+                    bottom: 0,
+                }}
+                icon={{
+                    name: "add",
+                    color: "white",
+                }}
+                onPress={() => router.push("/addEditPackage")}
+            />}
         </CustomHeader>
     );
 };

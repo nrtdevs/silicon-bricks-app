@@ -885,6 +885,12 @@ query DropdownRoles($listInputDto: ListInputDTO!) {
       roleType
       status
       permissionCount
+      organization {
+        id
+        name
+        description
+        status
+      }
     }
   }
 }
@@ -901,7 +907,10 @@ query GetPaginatedNotesByMeetingId($meetingId: Int!, $query: ListInputDTO!) {
   }
 }
 
-query GetPaginatedMeetingTaskByMeetingId($meetingId: Int!, $query: ListInputDTO!) {
+query GetPaginatedMeetingTaskByMeetingId(
+  $meetingId: Int!
+  $query: ListInputDTO!
+) {
   getPaginatedMeetingTaskByMeetingId(meetingId: $meetingId, query: $query) {
     data {
       id

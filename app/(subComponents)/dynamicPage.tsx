@@ -9,7 +9,6 @@ import { ThemedText } from '@/components/ThemedText';
 const DynamicPage = () => {
   const { data } = useLocalSearchParams();
   const pageData = JSON.parse(data as string);
-  console.log('000', data);
   const stripHtmlTags = (html: string) => {
     return html.replace(/<[^>]*>/g, '');
   };

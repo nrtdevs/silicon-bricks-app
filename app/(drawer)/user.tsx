@@ -160,7 +160,7 @@ const UserScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
-      fetchUser();
+      fetchUser(true);
     }, [])
   );
 
@@ -179,7 +179,7 @@ const UserScreen = () => {
         deletePermission={deletePermission}
         statusPermission={statusUpdatePermission}
         onEdit={() => {
-          router.navigate({
+          router.push({
             pathname: "/addEditUser",
             params: {
               data: JSON.stringify(item),
@@ -286,9 +286,6 @@ const UserScreen = () => {
       setHasMore(false);
     }
   };
-
-  console.log('000', userList.length);
-
 
   // if (true) {
   //   return <Loader />;
@@ -477,21 +474,21 @@ const UserScreen = () => {
         </View>
       </Modal>
 
-      <FAB
-        size="large"
-        title="Add User"
-        style={{
-          position: "absolute",
-          margin: 16,
-          right: 0,
-          bottom: 0,
-        }}
-        icon={{
-          name: "add",
-          color: "white",
-        }}
-        onPress={() => router.navigate("/addEditUser")}
-      />
+    {createPermission && <FAB
+      size="large"
+      title="Add User"
+      style={{
+        position: "absolute",
+        margin: 16,
+        right: 0,
+        bottom: 0,
+      }}
+      icon={{
+        name: "add",
+        color: "white",
+      }}
+      onPress={() => router.push("/addEditUser")}
+    />}
 
     </CustomHeader>
   );

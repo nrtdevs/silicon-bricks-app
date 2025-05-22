@@ -38,6 +38,8 @@ import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
 import CustomCard from "@/components/master/CustomCard";
 import { Env } from "@/constants/ApiEndpoints";
+import { FAB } from "@rneui/themed";
+import { router } from "expo-router";
 
 const defaultValue = {
     name: "",
@@ -298,14 +300,6 @@ const ModuleScreen = () => {
                             }}
                         />
                     </View>
-                    {createPermission && <Pressable
-                        style={styles.buttonContainer}
-                        onPress={() => {
-                            setModalVisible(true)
-                        }}
-                    >
-                        <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
-                    </Pressable>}
                 </View>
                 <View style={styles.organizationParentContainer}>
                     <FlatList
@@ -517,6 +511,22 @@ const ModuleScreen = () => {
                     />
                 </View>
             </Modal>
+
+            {createPermission && <FAB
+                size="large"
+                title="Add Module"
+                style={{
+                    position: "absolute",
+                    margin: 16,
+                    right: 0,
+                    bottom: 0,
+                }}
+                icon={{
+                    name: "add",
+                    color: "white",
+                }}
+                onPress={() => setModalVisible(true)}
+            />}
         </CustomHeader>
     );
 };
