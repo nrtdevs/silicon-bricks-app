@@ -967,3 +967,29 @@ mutation EnableVehicleStatus($data: VehicleStatusDto!) {
     deletedAt
   }
 }
+
+mutation UpdateMeetingTask($updateMeetingTaskInput: UpdateMeetingTaskDto!) {
+  updateMeetingTask(updateMeetingTaskInput: $updateMeetingTaskInput) {
+    id
+    ownerId
+    createdByUserId
+    assigneeId
+    meetingId
+    notesId
+    projectId
+    parentTaskId
+    ownerName
+    assigneeName
+    task
+    projectName
+    comment
+    openedDate
+    dueDate
+    completedDate
+    priority
+    status
+    completePercent
+    totalTaskComplete
+    weightType
+  }
+}

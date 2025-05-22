@@ -272,7 +272,9 @@ const MeetingDetails = () => {
                                             name="edit"
                                             size={ms(20)}
                                             color={Colors[theme].text}
-                                            onPress={() => { }}
+                                            onPress={() => { 
+                                                router.push("/(meeting)/addTask")
+                                            }}
                                         />
                                         <View style={{ width: 5 }}></View>
                                         <MaterialIcons

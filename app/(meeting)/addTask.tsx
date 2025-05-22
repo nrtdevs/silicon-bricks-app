@@ -6,13 +6,13 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateMeetingTaskDocument, PaginatedMeetingDocument, PaginatedNotesDocument, PaginatedProjectsDocument, PaginatedUsersDocument } from "@/graphql/generated";
+import { CreateMeetingTaskDocument, PaginatedMeetingDocument, PaginatedNotesDocument, PaginatedProjectsDocument, PaginatedUsersDocument, UpdateMeetingTaskDocument } from "@/graphql/generated";
 import { formatTimeForAPI } from "@/utils/formatDateTime";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useMutation, useQuery } from "@apollo/client";
 import { Fontisto, MaterialCommunityIcons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, Button, ScrollView, View } from "react-native";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
@@ -26,13 +26,9 @@ const weightData = [
     { label: "Automated", value: "automated" },
     { label: "Manual", value: "manual" },
 ];
-const defaultValue = {
-    task: '',
-    comment: ""
-}
 
 const AddTask = () => {
-    const { task, comment } = useLocalSearchParams();
+    const { isCreate, task, comment, id } = useLocalSearchParams<any>();
     const { theme } = useTheme();
     /// create and edit user state
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{
@@ -115,19 +111,30 @@ const AddTask = () => {
         onCompleted: (data) => {
             reset()
             Alert.alert("success", "Task create successfully!");
+            router.back();
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
+    const [updateMeetingTask, updateMeetingTaskState] = useMutation(UpdateMeetingTaskDocument, {
+        onCompleted: (data) => {
+            reset()
+            Alert.alert("success", "Task updated successfully!");
+            router.back();
         },
         onError: (error) => {
             Alert.alert("Error", error.message);
         }
     });
     const [activeDateField, setActiveDateField] = useState<string | null>(null);
+
     const onSubmit = (data: any) => {
         let param = {
             "assigneeId": Number(data.owner?.value),
             "comment": data.comment,
             "completePercent": 10,
             "dueDate": data.dueDate,
-            // "meetingId": Number(data.meeting?.value),
             "meetingId": null,
             "notesId": null,
             "openedDate": data.openedDate,
@@ -137,47 +144,59 @@ const AddTask = () => {
             "task": data.task,
             "weightType": data.weight.value,
         }
-
-        // addEditManage ?
-        //     updateMeetingType({
-        //         variables: {
-        //             updateMeetingTypeInput: {
-        //                 id: Number(currentMeetingType?.id),
-        //                 name: param.name
-        //             }
-        //         },
-        //     })
-        //     :
-        createMeetingTask({
-            variables: {
-                input: {
-                    ...param
+        isCreate == "true" ?
+            createMeetingTask({
+                variables: {
+                    input: {
+                        ...param
+                    },
                 },
-            },
-        });
+            }) :
+            updateMeetingTask({
+                variables: {
+                    updateMeetingTaskInput: {
+                        id: Number(id),
+                        assigneeId: Number(data.owner?.value),
+                        comment: data.comment,
+                        completePercent: 10,
+                        dueDate: data.dueDate,
+                        meetingId: null,
+                        notesId: null,
+                        openedDate: data.openedDate,
+                        parentTaskId: null,
+                        priority: data.priority?.value,
+                        projectId: Number(data.project?.value),
+                        task: data.task,
+                        weightType: data.weight.value,
+                    }
+                },
+            });
     };
 
-    const [currentMeeting, setCurrentMeeting] = useState<{
-        task: string;
-        comment: string;
-    }>(defaultValue);
     useEffect(() => {
-        setValue('task', task as string);
-        setValue('comment', comment as string);
-    }, [currentMeeting])
+        // console.log('ooo',isCreate);
+
+        if (isCreate == "true") {
+            reset()
+        } else {
+            setValue('task', task as string);
+            setValue('comment', comment as string);
+        }
+    }, [isCreate])
+
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
-                     <MaterialCommunityIcons
+                    <MaterialCommunityIcons
                         name="arrow-left"
                         size={ms(20)}
                         color={Colors[theme]?.text}
                         onPress={() => router.back()}
-                        style={{left : 10}} />
-                    <ThemedText style={{ fontSize: 20, fontWeight: "600",right : 10 }}>Add Task</ThemedText>
+                        style={{ left: 10 }} />
+                    <ThemedText style={{ fontSize: 20, fontWeight: "600", right: 10 }}>{isCreate == "true" ? "Add Task" : "Update Task"}</ThemedText>
                 </View>
-                <ScrollView style={{ paddingHorizontal: 10}}>
+                <ScrollView style={{ paddingHorizontal: 10 }}>
                     <CustomValidation
                         type="input"
                         control={control}
@@ -340,6 +359,7 @@ const AddTask = () => {
                     </View>
                     <CustomButton
                         title="Submit"
+                        isLoading={createMeetingTaskState?.loading || updateMeetingTaskState.loading}
                         onPress={handleSubmit(onSubmit)}
                         isGradient
                     />
