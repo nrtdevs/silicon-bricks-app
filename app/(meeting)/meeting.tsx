@@ -29,8 +29,6 @@ const MeetingScreen = () => {
     const [searchQuery, setSearchQuery] = useState<string>("");
     /// View meeting data 
     const [meetingId, setMeetingId] = useState<string>("");
-    const [isViewModalVisible, setViewModalVisible] = useState(false);
-    const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
     const [isNotesModalVisible, setNotesModalVisible] = useState(false);
     const [enableMeetingStatus, enableMeetingStatusState] = useMutation(EnableMeetingStatusDocument, {
         onCompleted: (data) => {
@@ -86,16 +84,21 @@ const MeetingScreen = () => {
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
-                <View style={{ width: "100%", marginBottom: 10}}>
-                    <CustomSearchBar
-                        searchQuery={searchQuery}
-                        placeholder="Search Meeting"
-                        onChangeText={(text) => {
-                            setSearchQuery(text);
-                        }}
-                    />
+                <View style={styles.searchContainer}>
+                    <View style={{ width: "90%" }}>
+                        <CustomSearchBar
+                            searchQuery={searchQuery}
+                            placeholder="Search Meeting"
+                            onChangeText={(text) => {
+                                setSearchQuery(text);
+                            }}
+                        />
+                    </View>
+                    <Pressable
+                        onPress={() => router.push("/(meeting)/deletedMeeting")}>
+                        <FontAwesome5 name="trash" size={20} color="#EF4444" />
+                    </Pressable>
                 </View>
-
                 <FlatList
                     data={filteredData}
                     renderItem={({ item }) => (
@@ -125,7 +128,7 @@ const MeetingScreen = () => {
                                     backgroundColor: Colors[theme].cart
                                 },
                             ]}>
-                                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6, width: 300 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6 }}>
                                     <ThemedText type='subtitle'>{item.title}</ThemedText>
                                     <View
                                         style={{
@@ -231,63 +234,7 @@ const MeetingScreen = () => {
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
                 />
             </ThemedView>
-            {/* view meeting data  */}
-            <Modal
-                visible={isViewModalVisible}
-                transparent={true}
-                animationType="fade"
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    }}
-                >
-                    <View
-                        style={{
-                            backgroundColor: Colors[theme].cart,
-                            height: vs(220),
-                            width: s(300),
-                            borderRadius: 10,
-                            padding: 10,
-                        }}
-                    >
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                padding: 10,
-                            }}
-                        >
-                            <ThemedText type="subtitle">Meeting Details</ThemedText>
-                            <Pressable onPress={() => setViewModalVisible(false)}>
-                                <Entypo
-                                    name="cross"
-                                    size={ms(20)}
-                                    color={Colors[theme].text}
-                                />
-                            </Pressable>
-                        </View>
-                        <View style={{ flexDirection: 'row', padding: 10 }}>
-                            <View style={{ width: 110 }}>
-                                <ThemedText style={styles.meetingTitle}>Title</ThemedText>
-                                <ThemedText style={styles.meetingTitle}>Time</ThemedText>
-                                <ThemedText style={styles.meetingTitle}>Date</ThemedText>
-                                <ThemedText style={styles.meetingTitle}>Meeting Agenda</ThemedText>
-                            </View>
-                            <View>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.title}</ThemedText>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.startTime} to {selectedMeeting?.endTime}</ThemedText>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.meetingDate}</ThemedText>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.meetingAgenda}</ThemedText>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-            {/* Add Note modal */}
+            {/* Add Status modal */}
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -397,6 +344,13 @@ const styles = ScaledSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
+     searchContainer: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "12@ms",
+    },
     meetingContainer: {
         borderRadius: "20@ms",
         marginHorizontal: "10@ms",
@@ -410,7 +364,6 @@ const styles = ScaledSheet.create({
         justifyContent: 'space-between',
         gap: 10,
     },
-
     organizationHeader: {
         width: "100%",
         flexDirection: "row",
