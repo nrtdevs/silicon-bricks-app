@@ -75,9 +75,9 @@ const CustomCard: React.FC<CustomCardProps> = ({
 
             {/* Action Buttons */}
             <View style={{ gap: 20, flexDirection: 'row', marginTop: 15 }}>
-                {editPermission && <ActionButton icon={<Feather name="edit" size={16} color="#3B82F6" />} text="Edit" bgColor="#3B82F6" onPress={onEdit} />}
-                {statusPermission && <ActionButton icon={<MaterialIcons name="autorenew" size={18} color="#8B5CF6" />} bgColor="#8B5CF6" text="Status" onPress={onChangeStatus} />}
-                {deletePermission && <ActionButton icon={<FontAwesome5 name="trash" size={14} color="#EF4444" />} bgColor="#EF4444" text="Delete" onPress={onDelete} />}
+                {editPermission && <ActionButton icon={<Feather name="edit" size={ms(18)} color={Colors.white} />} text="Edit" bgColor="#3B82F6" onPress={onEdit} />}
+                {statusPermission && <ActionButton icon={<MaterialIcons name="autorenew" size={ms(18)} color={Colors.white} />} bgColor="#8B5CF6" text="Status" onPress={onChangeStatus} />}
+                {deletePermission && <ActionButton icon={<FontAwesome5 name="trash" size={ms(16)} color={Colors.white} />} bgColor="#EF4444" text="Delete" onPress={onDelete} />}
             </View>
 
         </View>
@@ -106,7 +106,8 @@ const ActionButton = ({
                 paddingHorizontal: ms(12),
                 borderRadius: 10,
                 borderWidth: 0.5,
-                borderColor: bgColor,
+                borderColor: Colors.white,
+                backgroundColor: bgColor,
                 opacity: 0.8
             }}
         >

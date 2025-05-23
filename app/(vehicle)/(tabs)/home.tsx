@@ -9,7 +9,7 @@ const home = () => {
   return (
     <ThemedView style={styles.container}>
       <SmallCart icon={"car"} label={"Vehicle"} onPress={() => {router.navigate('/vehicle-list')}}/>
-      <SmallCart icon={"hammer"} label={"Vehicle Breakdown"} />
+      <SmallCart icon={"hammer"} label={"Vehicle Breakdown"} onPress={()=>router.navigate("/vehicle-breakdown-list")}/>
       <SmallCart icon={"wallet-outline"} label={"Vehicle Expense"} />
       <SmallCart icon={"timelapse"} label={"Activity Logs"} />
     </ThemedView>
