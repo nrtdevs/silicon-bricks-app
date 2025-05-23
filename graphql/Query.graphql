@@ -938,8 +938,7 @@ query GetPaginatedMeetingTaskByMeetingId(
   }
 }
 
-
- query PaginatedBreakdowns($listInputDto: ListInputDTO!) {
+query PaginatedBreakdowns($listInputDto: ListInputDTO!) {
   paginatedBreakdowns(ListInputDTO: $listInputDto) {
     data {
       id
@@ -959,8 +958,8 @@ query GetPaginatedMeetingTaskByMeetingId(
         status
         latitude
         longitude
-        createdById 
-        organizationId 
+        createdById
+        organizationId
         createdAt
         updatedAt
         deletedAt
@@ -971,9 +970,9 @@ query GetPaginatedMeetingTaskByMeetingId(
       breakdownLocation
       latitude
       longitude
-      status  
-      organizationId 
-      createdById 
+      status
+      organizationId
+      createdById
       createdAt
       updatedAt
     }

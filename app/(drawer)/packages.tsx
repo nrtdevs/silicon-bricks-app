@@ -245,6 +245,7 @@ const PackageScreen = () => {
             setHasMore(false);
         }
     };
+    
     const renderData = ({ item, index }: any) => {
         let ids = item?.modules?.map((item: any) => item.id);
         return (

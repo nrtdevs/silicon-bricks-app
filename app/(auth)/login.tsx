@@ -185,6 +185,14 @@ export default function LoginScreen() {
               isGradient
             />
 
+            {/* Login Button */}
+            <CustomButton
+              title="Choose plane"
+              isLoading={createRequestState?.loading}
+              onPress={() => router.push("/(subComponents)/purchasePlane")}
+              isGradient
+            />
+
             {/* Footer */}
             <View style={styles.footerText}>
               <ThemedText type="defaultSemiBold" style={styles.footerText}>

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } fro
 import { SafeAreaView } from "react-native";
 import { useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
-import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
+import { ms, ScaledSheet, vs } from "react-native-size-matters";
 import CustomButton from "@/components/CustomButton";
 import { Feather, Fontisto } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
@@ -11,15 +11,15 @@ import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useTheme } from "@/context/ThemeContext";
 import DateTimePickerModal from "@/components/DateTimePickerModal";
 import { formatTimeForAPI } from "@/utils/formatDateTime";
-import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
-    CreatePackageDocument,
+    CreatePlanDocument,
     CreateUserDocument,
     CreateVehicleDocument,
     DropdownRolesDocument,
-    PaginatedModulesDocument,
-    UpdatePackageDocument,
+    PaginatedCouponsDocument,
+    PaginatedPackagesDocument,
+    UpdatePlanDocument,
     UpdateUserDocument,
     UpdateVehicleDocument,
 } from "@/graphql/generated";
@@ -29,50 +29,55 @@ import { ThemedText } from "@/components/ThemedText";
 import { Env } from "@/constants/ApiEndpoints";
 import * as ImagePicker from "expo-image-picker";
 import CustomHeader from "@/components/CustomHeader";
+import * as FileSystem from "expo-file-system";
 
 
-const AddEditPackage = () => {
+const designationData = [
+    { label: "CEO", value: "CEO" },
+    { label: "CTO", value: "CTO" },
+    { label: "Employee", value: "EMPLOYEE" },
+    { label: "HR", value: "HR" },
+    { label: "Manager", value: "MANAGER" },
+    { label: "Super Admin", value: "SUPER_ADMIN" },
+    { label: "Team Lead", value: "TEAM_LEAD" },
+];
 
-    const [updatePackage, updatePackageState] = useMutation(
-        UpdatePackageDocument,
-        {
-            onCompleted: (data) => {
-                reset();
-                router.back();
-            },
-            onError: (error) => {
-                Alert.alert("Error", error.message);
-            },
-        }
-    );
+const pickerData = [
+    { label: "Active", value: "active" },
+    { label: "Inactive", value: "inactive" },
+    { label: "Blocked", value: "blocked" },
+    { label: "Pending", value: "pending" },
+];
 
-    const [createPackage, createPackageState] = useMutation(
-        CreatePackageDocument,
-        {
-            onCompleted: (data) => {
-                reset();
-                router.back();
-            },
-            onError: (error) => {
-                Alert.alert("Error", error.message);
-            },
-        }
-    );
+const userTypeData = [
+    { label: "admin", value: "admin" },
+    { label: "adminEmployee", value: "adminEmployee" },
+    { label: "organization", value: "organization" },
+    { label: "organizationEmployee", value: "organizationEmployee" },
+];
 
-    const [
-        moduleDataApi,
-        {
-            error: moduleError,
-            data: moduleData,
-            loading: moduleLoading,
-            refetch: moduleRefetch,
-        },
-    ] = useLazyQuery(PaginatedModulesDocument);
+const AddEditPlan = () => {
+    const insuranceOptions = [
+        { label: "Yes", value: true },
+        { label: "No", value: false },
+    ];
+
 
     useEffect(() => {
-        moduleDataApi({
+        dropdownCouponData({
             variables: {
-                listInputDto: {}
+                listInputDto: {
+                    limit: 10,
+                    page: 1,
+                },
+            },
+        });
+        dropdownPackageData({
+            variables: {
+                listInputDto: {
+                    limit: 10,
+                    page: 1,
+                },
             },
         });
     }, [])
@@ -84,7 +89,7 @@ const AddEditPackage = () => {
             value: (1997 + index).toString(),
         }));
     }, []);
-
+    const [image, setImage] = useState<string>("");
     const {
         control,
         handleSubmit,
@@ -94,75 +99,95 @@ const AddEditPackage = () => {
         setValue,
     } = useForm<{
         name: string;
-        description: string;
-        offerDescription: string;
-        status: any;
+        discountPrice: string;
+        duration: string;
         price: string;
-        discountedPrice: string;
-        module: any;
-        endDate: string;
-        offer;
+        package: any;
+        coupon: any;
+        description: string;
+        status: any;
     }>({
         defaultValues: {},
     });
-
-    const [dateModal, setDateModal] = useState({
-        start: false,
-        end: false,
-    });
-
     const { theme } = useTheme();
     const { data: editedData } = useLocalSearchParams<any>();
+
+
 
     const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
         getDateTimePickerProps(false)
     );
-    const navigation = useNavigation();
+
 
     useFocusEffect(
         useCallback(() => {
             if (editedData) {
+
                 const parsedData = JSON.parse(editedData);
-                let ids = parsedData?.modules?.map((item: any) => item.id);
-                console.log('parsedData', parsedData);
+                console.log("editedData", parsedData);
                 setValue("name", parsedData?.name);
+                setValue("duration", parsedData?.duration?.toString());
+                setValue("package", Number(parsedData?.package?.id));
+                setValue("price", parsedData?.price);
+                setValue("coupon", parsedData?.coupon?.id);
                 setValue("description", parsedData?.description);
-                setValue("offerDescription", parsedData?.offerDescription);
-                setValue("price", parsedData?.price.toString());
-                setValue("module", ids);
-                setValue(
-                    "endDate",
-                    formatTimeForAPI(parsedData?.offerExpiryDate, "yyyy-mm-dd") || ""
-                );
-                // setValue("start_date", formatTimeForAPI(currentCoupon?.start_date, "yyyy-mm-dd") || "");
-                setValue("discountedPrice", parsedData?.discountedPrice.toString());
             }
         }, [editedData])
     );
 
+    useEffect(() => {
+        if (watch("package")) {
+            console.log('00000', watch('package'));
+            setValue("price", watch("package")?.price.toString());
+        }
+    }, [watch("package")])
+
+    const [createPlan, createPlanState] = useMutation<any>(CreatePlanDocument, {
+        onCompleted: (data) => {
+            reset();
+            router.back();
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        },
+    });
+
+    const [updatePlan, updatePlanState] = useMutation(UpdatePlanDocument, {
+        onCompleted: (data) => {
+            reset()
+            router.back();
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
+
+    const [dropdownCouponData, couponData] = useLazyQuery(
+        PaginatedCouponsDocument
+    );
+
+    const [dropdownPackageData, packageData] = useLazyQuery(
+        PaginatedPackagesDocument
+    );
     const onSubmit = (data: any) => {
         try {
-            const moduleIds = data?.module?.map(Number);
-            if (Number(data?.price) < Number(data?.discountedPrice)) {
-                console.log("Price should be greater than discounted price date.");
-                Alert.alert("Error", "Price should be greater than discounted price.");
-                return;
-            }
             let params = {
                 name: data?.name,
-                offerExpiryDate: data?.endDate,
+                duration: Number(data?.duration),
+                // designation: typeof data?.designation == 'string' ? data?.designation : data?.designation?.value,
+                packageId: typeof data?.package == 'string' ? data?.package : Number(data?.package?.id),
                 price: Number(data?.price),
-                discountedPrice: Number(data?.discountedPrice),
-                moduleIds: moduleIds,
+                // couponId: typeof data?.coupon == 'string' ? Number(data?.coupon) : Number(data?.coupon?.id),
                 description: data?.description ?? "",
-                offerDescription: data?.offerDescription ?? "",
-            };
+            }
+            console.log('params22', typeof data?.package);
+            console.log('params', typeof params?.packageId);
 
             if (editedData) {
                 const parsedData = JSON.parse(editedData);
-                updatePackage({
+                updatePlan({
                     variables: {
-                        updatePackageInput: {
+                        updatePlanInput: {
                             ...params,
                             id: Number(parsedData?.id),
                         }
@@ -170,27 +195,30 @@ const AddEditPackage = () => {
                 })
                 return;
             }
-            console.log("params", params);
-            createPackage({
+            createPlan({
                 variables: {
-                    createPackageInput: params,
+                    createPlanInput: params,
                 },
-            })
+            });
         } catch (error) {
-            console.log("error in onSubmit", error);
+            console.log('error in onSubmit', error);
         }
     };
 
-    if (createPackageState.loading || updatePackageState.loading) return <Loader />;
+    if (createPlanState.loading || updatePlanState.loading) return <Loader />;
 
     return (
         <CustomHeader>
             <ScrollView
                 contentContainerStyle={{
-                    // backgroundColor: Colors[theme].cart,
+                    backgroundColor: Colors[theme].cart,
+                    // height: vs(500),
+                    width: '100%',
                     borderRadius: 10,
+                    alignSelf: "center",
                     padding: 10,
                 }}
+                showsVerticalScrollIndicator={false}
             >
                 <View
                     style={{
@@ -200,7 +228,7 @@ const AddEditPackage = () => {
                     }}
                 >
                     <ThemedText type="subtitle">
-                        Package
+                        Plan
                     </ThemedText>
                 </View>
 
@@ -212,104 +240,82 @@ const AddEditPackage = () => {
                         name={"name"}
                         inputStyle={[{ lineHeight: ms(20) }]}
                         label={"Name"}
-                        placeholder={"Enter Name"}
+                        placeholder={"Provide Name"}
                         rules={{
-                            required: "name is required",
+                            required: "Name is required",
                         }}
+                        autoCapitalize="none"
                     />
 
                     <CustomValidation
                         type="input"
                         control={control}
-                        placeholder="End Date"
-                        name="endDate"
-                        label="End Date"
                         labelStyle={styles.label}
-                        editable={false}
-                        rightIcon={
-                            <Fontisto
-                                name="date"
-                                size={ms(20)}
-                                color={Colors[theme]?.text}
-                            />
-                        }
-                        onPress={() => {
-                            setDateModal({
-                                start: !dateModal.start,
-                                end: false,
-                            });
-                            setDateTimePickerProps(getDateTimePickerProps(true));
-                        }}
-                        pointerEvents="none"
+                        name={"duration"}
+                        inputStyle={[{ lineHeight: ms(20) }]}
+                        label={"Duration (in month)"}
+                        placeholder={"Provide Duration"}
                         rules={{
-                            required: "End date is required",
+                            required: "Duration is required",
                         }}
+                        autoCapitalize="none"
+                        keyboardType="numeric"
                     />
 
                     <CustomValidation
-                        type="input"
-                        control={control}
-                        name={"price"}
-                        label={"Price"}
-                        rightIcon={null}
-                        placeholder={"Enter Price"}
-                        keyboardType="number-pad"
-                        labelStyle={styles.label}
-                        rules={{
-                            required: "Price is required",
-                        }}
-                    />
-
-                    <CustomValidation
-                        type="input"
-                        control={control}
-                        name={"discountedPrice"}
-                        keyboardType="number-pad"
-                        label={"Discounted Price"}
-                        placeholder={"Discounted Price"}
-                        labelStyle={styles.label}
-                        rules={{
-                            required: "Discounted price is required",
-                        }}
-                    />
-
-                    <CustomValidation
-                        data={moduleData?.paginatedModules?.data}
+                        data={packageData?.data?.paginatedPackages?.data}
                         type="picker"
                         control={control}
                         keyToCompareData="id"
                         keyToShowData="name"
-                        label="Module"
+                        label="Package"
                         labelStyle={styles.label}
-                        multiSelect={true}
-                        name="module"
-                        placeholder="Select Module"
+                        name="package"
+                        placeholder="Select Package"
                         inputStyle={{ height: vs(50) }}
                         rules={{
                             required: {
                                 value: true,
-                                message: "Select Module",
+                                message: "Select PackageType",
                             },
                         }}
+                        isSearch
                     />
 
                     <CustomValidation
                         type="input"
                         control={control}
-                        name={"offerDescription"}
-                        multiline
-                        label={"Offer Description"}
-                        // placeholder={editModal ? "Test organization Offer Description" : "Enter Offer Description"}
                         labelStyle={styles.label}
-                        inputContainerStyle={{
-                            height: vs(100),
+                        name={"price"}
+                        inputStyle={[{ lineHeight: ms(20) }]}
+                        editable={false}
+                        label={"Price"}
+                        placeholder={"Provide Price"}
+                        rules={{
+                            required: "Price is required",
                         }}
-                        inputStyle={{
-                            height: vs(100),
+                        autoCapitalize="none"
+                        keyboardType="numeric"
+                    />
+
+                    <CustomValidation
+                        data={couponData?.data?.paginatedCoupons?.data}
+                        type="picker"
+                        keyToCompareData="id"
+                        keyToShowData="couponCode"
+                        control={control}
+                        label="Coupon"
+                        labelStyle={styles.label}
+                        name="coupon"
+                        placeholder="Select Coupon"
+                        inputStyle={{ height: vs(50) }}
+                        rules={{
+                            required: {
+                                value: true,
+                                message: "Select CouponType",
+                            },
                         }}
-                        containerStyle={{
-                            height: vs(100),
-                        }}
+                        isSearch
                     />
 
                     <CustomValidation
@@ -319,7 +325,7 @@ const AddEditPackage = () => {
                         multiline
                         label={"Description"}
                         // placeholder={editModal ? "Test organization description" : "Enter description"}
-                        labelStyle={[styles.label, { marginTop: vs(30) }]}
+                        labelStyle={styles.label}
                         inputContainerStyle={{
                             height: vs(100),
                         }}
@@ -329,6 +335,7 @@ const AddEditPackage = () => {
                         containerStyle={{
                             height: vs(100),
                         }}
+                        autoCapitalize="none"
                     />
 
                     <CustomButton
@@ -336,42 +343,23 @@ const AddEditPackage = () => {
                         onPress={() => {
                             handleSubmit(onSubmit)();
                         }}
-                        isLoading={
-                            updatePackageState.loading || createPackageState.loading
-                        }
                         style={{
                             backgroundColor: Colors[theme].background,
-                            marginTop: vs(90),
+                            marginTop: vs(50),
                         }}
                     />
                 </View>
             </ScrollView>
-
-            {/* date time picker modal */}
-            <DateTimePickerModal
-                mode="date"
-                dateTimePickerProps={dateTimePickerProps}
-                setDateTimePickerProps={setDateTimePickerProps}
-                onDateTimeSelection={(event: any, selectedDate: any) => {
-                    if (event.type != "dismissed") {
-                        setValue(
-                            dateModal.start ? "endDate" : "endDate",
-                            formatTimeForAPI(selectedDate, "yyyy-mm-dd") || ""
-                        );
-                    }
-                    setDateTimePickerProps(getDateTimePickerProps(false));
-                }}
-            />
         </CustomHeader>
     );
 };
 
-export default AddEditPackage;
+export default AddEditPlan;
 
 const styles = ScaledSheet.create({
     imageContainer: {
-        width: '70@ms',
-        height: '70@ms',
+        width: '90@ms',
+        height: '90@ms',
         borderRadius: '70@ms',
         marginBottom: '12@ms',
         backgroundColor: Colors.gray,
@@ -390,7 +378,7 @@ const styles = ScaledSheet.create({
     editImage: {
         position: 'absolute',
         top: 3,
-        left: 50,
+        left: 55,
         width: 35,
         height: 35,
         borderRadius: 100,

@@ -195,8 +195,6 @@ const AddEditUser = () => {
         }
     };
 
-
-
     const handleImagePickerPress = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: 'images',

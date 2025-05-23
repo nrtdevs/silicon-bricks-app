@@ -3,9 +3,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   ChangePlanStatusDocument,
+  CreateMultipleOrderDocument,
   CreatePlanDocument,
   DeletePlanDocument,
   DropdownOffersDocument,
+  FindPlanByIdDocument,
   PaginatedCouponsDocument,
   PaginatedPackagesDocument,
   PaginatedPlansDocument,
@@ -97,16 +99,12 @@ const PurchasePlaneScreen = () => {
 
   const { can, hasAny } = useUserContext();
 
-  const deletePermission = can("MasterApp:Plan:Delete");
-  const updatePermission = can("MasterApp:Plan:Update");
-  const createPermission = can("MasterApp:Plan:Create");
-  const statusUpdatePermission = can("MasterApp:Plan:Action");
-
-  const [plansData, { error, data, loading, refetch }] = useLazyQuery(
+  const [plansData, { error, data: planData, loading, refetch }] = useLazyQuery(
     PaginatedPlansDocument
-  ); 
-
+  );
+  const [FindPlanById, { data }] = useLazyQuery(FindPlanByIdDocument);
   const [dropdownOfferData, offerState] = useLazyQuery(DropdownOffersDocument);
+  const [CreatePayment] = useMutation(CreateMultipleOrderDocument)
 
   const [dropdownCouponData, couponData] = useLazyQuery(
     PaginatedCouponsDocument
@@ -274,23 +272,92 @@ const PurchasePlaneScreen = () => {
 
       editModal
         ? updatePlan({
-            variables: {
-              updatePlanInput: params2,
-            },
-          })
+          variables: {
+            updatePlanInput: params2,
+          },
+        })
         : createPlan({
-            variables: {
-              createPlanInput: params,
-            },
-          });
+          variables: {
+            createPlanInput: params,
+          },
+        });
     } catch (error) {
       console.log("error in onSubmit", error);
     }
   };
 
-  const renderItem = ({ item, index }: any) => {
-    // console.log('0987654321', item);
+  const Pay = async (formData) => {
+    const planIdRes = await FindPlanById({ variables: { findPlanByIdId: Number(formData.id) } });
+    // console.log('planIdRes22', planIdRes?.data?.findPlanById?.name);
+    // return;
 
+    const response = await CreatePayment({
+      variables: {
+        input: {
+          planIds: [Number(formData.id)],
+          duration: Number(formData.duration),
+          couponCode: formData.couponCode ?? '',
+          amount: 1000,
+        }
+      }
+    })
+    const order = response?.data?.createMultipleOrder
+
+    // const options = {
+    //   key: RAZORPAYKEY,
+    //   amount: finalTotal,
+    //   currency: order.currency,
+    //   duration: formData.duration,
+    //   order_id: order.id,
+    //   Image: 'https://example.com/your_logo',
+    //   handlePaymentSuccess,
+    //   name: data?.findPlanById?.name,
+    // handler: function (response: any) {
+    //   handlePaymentSuccess(response)
+    // },
+    //   theme: { color: '#3399cc' },
+    // }
+
+    // rzp_test_yrANCWqt1Qye8M
+
+    const options: any = {
+      description: "Credits towards consultation",
+      image: "https://i.imgur.com/3g7nmJC.png",
+      currency: order.currency ?? "inr",
+      duration: formData.duration,
+      key: "rzp_test_yrANCWqt1Qye8M",
+      amount: 409 * 100,
+      name: planIdRes?.data?.findPlanById?.name,
+      order_id: order.id,
+      prefill: {
+        email: "sidhdadatri@gmail.com",
+        contact: "9999999999",
+        name: "Sidhdadatri",
+      },
+      // handler: function (response: any) {
+      //   handlePaymentSuccess(response)
+      // },
+      theme: { color: Colors.primary },
+      remember_customer: true,
+    };
+
+    console.log("options", options);
+
+    try {
+      const data = await RazorpayCheckout?.open(options);
+      console.log('00099', data?.razorpay_payment_id);
+      if (data?.razorpay_payment_id) {
+        console.log("098778", data);
+      } else {
+        Alert.alert(alertMsg.error, "Something went wrong");
+      }
+    } catch (error: any) {
+      console.log("Razorpay Error:", error);
+      Alert.alert(alertMsg.error, "Error during payment");
+    }
+  };
+
+  const renderItem = ({ item, index }: any) => {
     return (
       <View
         key={index}
@@ -323,7 +390,7 @@ const PurchasePlaneScreen = () => {
 
         <CustomButton
           title="Choose Plan"
-          onPress={() => Pay()}
+          onPress={() => Pay(item)}
           style={{
             backgroundColor: Colors[theme].background,
             marginTop: vs(10),
@@ -333,51 +400,36 @@ const PurchasePlaneScreen = () => {
     );
   };
 
-  const Pay = async () => {
-    const options: any = {
-      description: "Credits towards consultation",
-      image: "https://i.imgur.com/3g7nmJC.png",
-      currency: "inr",
-      key: "rzp_test_yrANCWqt1Qye8M",
-      amount: 409 * 100,
-      name: "Silicon Bricks",
-      order_id: "2454",
-      prefill: {
-        email: "sidhdadatri@gmail.com",
-        contact: "9999999999",
-        name: "Sidhdadatri",
-      },
-      theme: { color: Colors.primary },
-      remember_customer: true,
-    };
-
-    try {
-      const data = await RazorpayCheckout.open(options);
-      if (data?.razorpay_payment_id) {
-        console.log("098778", data);
-      } else {
-        Alert.alert(alertMsg.error, "Something went wrong");
-      }
-    } catch (error: any) {
-      console.log("Razorpay Error:", error);
-      Alert.alert(alertMsg.error, "Error during payment");
-    }
-  };
-
-  const debouncedSearch = useCallback(
-    debounce((text) => {
-      plansData({
-        variables: {
-          listInputDto: {
-            limit: 10,
-            page: 1,
-            search: text,
-          },
-        },
-      });
-    }, 500),
-    [searchQuery]
-  );
+  // const handlePaymentSuccess = async ({ razorpay_order_id, razorpay_payment_id, razorpay_signature }: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+  //   try {
+  //   const planIdRes = await FindPlanById({ variables: { findPlanByIdId: Number(formData.id) } });
+  //     const reponse = await verifyPayment({
+  //       variables: {
+  //         input: {
+  //           planIds: [Number(id)],
+  //           amount: 409 * 100,
+  //           duration: Number(watch('duration')),
+  //           couponCode: watch('couponCode') ?? '',
+  //           razorpayOrderId: razorpay_order_id,
+  //           razorpayPaymentId: razorpay_payment_id,
+  //           razorpaySignature: razorpay_signature,
+  //         },
+  //       },
+  //     });
+  //     if (reponse?.data?.verifyPayment) {
+  //       toast.success(FM('PAYMENT_SUCCESSFUL'));
+  //       navigate('/dashboard');
+  //     } else {
+  //       toast.error(
+  //         FM('PAYMENT_FAILED')
+  //       );
+  //     }
+  //   }
+  //   catch (error) {
+  //     const apolloError = error as ApolloError;
+  //     toast.error(apolloError?.message || FM('FAILED_DUE_TO_ERROR'));
+  //   }
+  // }
 
   // if (loading) {
   //   return <Loader />
@@ -388,7 +440,7 @@ const PurchasePlaneScreen = () => {
       <ThemedView style={styles.contentContainer}>
         <View style={styles.organizationParentContainer}>
           <FlatList
-            data={data?.paginatedPlans?.data}
+            data={planData?.paginatedPlans?.data}
             renderItem={renderItem}
             // refreshControl={
             //     <RefreshControl
@@ -401,17 +453,17 @@ const PurchasePlaneScreen = () => {
             contentContainerStyle={{
               paddingBottom: 50,
             }}
-            // ListFooterComponent={
-            //     hasMore ? (
-            //         <ActivityIndicator size="small" color={Colors.primary} />
-            //     ) : null
-            // }
-            // onEndReached={() => {
-            //     if (hasMore && !isLoading) {
-            //         fetchNotification();
-            //     }
-            // }}
-            // onEndReachedThreshold={0.5}
+          // ListFooterComponent={
+          //     hasMore ? (
+          //         <ActivityIndicator size="small" color={Colors.primary} />
+          //     ) : null
+          // }
+          // onEndReached={() => {
+          //     if (hasMore && !isLoading) {
+          //         fetchNotification();
+          //     }
+          // }}
+          // onEndReachedThreshold={0.5}
           />
         </View>
       </ThemedView>

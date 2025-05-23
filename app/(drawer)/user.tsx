@@ -35,6 +35,7 @@ import NoDataFound from "@/components/NoDataFound";
 import CustomUserCard from "@/components/master/CustomUserCard";
 import { router, useFocusEffect } from "expo-router";
 import { FAB } from "@rneui/themed";
+import Loader from "@/components/ui/Loader";
 
 const defaultValue = {
   name: "",
@@ -287,10 +288,13 @@ const UserScreen = () => {
     }
   };
 
-  // if (true) {
-  //   return <Loader />;
-  // }
-
+  if (
+    ((loading && page == 1 && !refreshing) ||
+      deleteUserState.loading ||
+      updateUserStatusState?.loading)
+  ) {
+    return <Loader />;
+  }
 
   return (
     <CustomHeader>
@@ -474,21 +478,21 @@ const UserScreen = () => {
         </View>
       </Modal>
 
-    {createPermission && <FAB
-      size="large"
-      title="Add User"
-      style={{
-        position: "absolute",
-        margin: 16,
-        right: 0,
-        bottom: 0,
-      }}
-      icon={{
-        name: "add",
-        color: "white",
-      }}
-      onPress={() => router.push("/addEditUser")}
-    />}
+      {createPermission && <FAB
+        size="large"
+        title="Add User"
+        style={{
+          position: "absolute",
+          margin: 16,
+          right: 0,
+          bottom: 0,
+        }}
+        icon={{
+          name: "add",
+          color: "white",
+        }}
+        onPress={() => router.push("/addEditUser")}
+      />}
 
     </CustomHeader>
   );

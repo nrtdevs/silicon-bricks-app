@@ -14,11 +14,13 @@ import { formatTimeForAPI } from "@/utils/formatDateTime";
 import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
+    CreateCouponDocument,
     CreatePackageDocument,
     CreateUserDocument,
     CreateVehicleDocument,
     DropdownRolesDocument,
     PaginatedModulesDocument,
+    UpdateCouponDocument,
     UpdatePackageDocument,
     UpdateUserDocument,
     UpdateVehicleDocument,
@@ -31,51 +33,27 @@ import * as ImagePicker from "expo-image-picker";
 import CustomHeader from "@/components/CustomHeader";
 
 
-const AddEditPackage = () => {
+const AddEditCoupon = () => {
 
-    const [updatePackage, updatePackageState] = useMutation(
-        UpdatePackageDocument,
-        {
-            onCompleted: (data) => {
-                reset();
-                router.back();
-            },
-            onError: (error) => {
-                Alert.alert("Error", error.message);
-            },
-        }
-    );
-
-    const [createPackage, createPackageState] = useMutation(
-        CreatePackageDocument,
-        {
-            onCompleted: (data) => {
-                reset();
-                router.back();
-            },
-            onError: (error) => {
-                Alert.alert("Error", error.message);
-            },
-        }
-    );
-
-    const [
-        moduleDataApi,
-        {
-            error: moduleError,
-            data: moduleData,
-            loading: moduleLoading,
-            refetch: moduleRefetch,
+    const [createCoupon, createCouponState] = useMutation<any>(CreateCouponDocument, {
+        onCompleted: (data) => {
+            reset();
+            router.back();
         },
-    ] = useLazyQuery(PaginatedModulesDocument);
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        },
+    });
 
-    useEffect(() => {
-        moduleDataApi({
-            variables: {
-                listInputDto: {}
-            },
-        });
-    }, [])
+    const [updateCoupon, updateCouponState] = useMutation(UpdateCouponDocument, {
+        onCompleted: (data) => {
+            reset();
+            router.back();
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
 
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -93,15 +71,14 @@ const AddEditPackage = () => {
         watch,
         setValue,
     } = useForm<{
-        name: string;
+        couponCode: any;
+        usageLimit: string;
         description: string;
-        offerDescription: string;
+        discountValue: string;
+        minOrderAmount: string;
+        start_date: string;
+        end_date: string;
         status: any;
-        price: string;
-        discountedPrice: string;
-        module: any;
-        endDate: string;
-        offer;
     }>({
         defaultValues: {},
     });
@@ -122,47 +99,67 @@ const AddEditPackage = () => {
     useFocusEffect(
         useCallback(() => {
             if (editedData) {
+                // couponCode: item?.couponCode,
+                // usageLimit: item?.usageLimit,
+                // description: item?.description,
+                // discountValue: item?.discountValue,
+                // minOrderAmount: item?.minOrderAmount,
+                // start_date: item?.startDate,
+                // end_date: item?.endDate,
+                // status: item?.status,
+                // id: item?.id,
                 const parsedData = JSON.parse(editedData);
-                let ids = parsedData?.modules?.map((item: any) => item.id);
-                console.log('parsedData', parsedData);
-                setValue("name", parsedData?.name);
-                setValue("description", parsedData?.description);
-                setValue("offerDescription", parsedData?.offerDescription);
-                setValue("price", parsedData?.price.toString());
-                setValue("module", ids);
-                setValue(
-                    "endDate",
-                    formatTimeForAPI(parsedData?.offerExpiryDate, "yyyy-mm-dd") || ""
-                );
-                // setValue("start_date", formatTimeForAPI(currentCoupon?.start_date, "yyyy-mm-dd") || "");
-                setValue("discountedPrice", parsedData?.discountedPrice.toString());
+                setValue("couponCode", parsedData?.couponCode || "");
+                setValue("usageLimit", parsedData?.usageLimit?.toString() || "");
+                setValue("description", parsedData?.description || "");
+                setValue("discountValue", parsedData?.discountValue?.toString() || "");
+                setValue("minOrderAmount", parsedData?.minOrderAmount?.toString() || "");
+                setValue("start_date", formatTimeForAPI(parsedData?.startDate, "yyyy-mm-dd") || "");
+                setValue("end_date", formatTimeForAPI(parsedData?.endDate, "yyyy-mm-dd") || "");
             }
         }, [editedData])
     );
 
+    const parseDate = (dateStr: string) => {
+        const [month, day, year] = dateStr.split('/');
+        return new Date(+year, +month - 1, +day);
+    };
+
     const onSubmit = (data: any) => {
         try {
-            const moduleIds = data?.module?.map(Number);
-            if (Number(data?.price) < Number(data?.discountedPrice)) {
-                console.log("Price should be greater than discounted price date.");
-                Alert.alert("Error", "Price should be greater than discounted price.");
+            const startDate = parseDate(data?.start_date);
+            const endDate = parseDate(data?.end_date);
+
+            if (endDate < startDate) {
+                console.log("End date should be greater than or equal to start date.");
+                Alert.alert("Error", "End date should be greater than or equal to start date.");
                 return;
             }
+
+            if (Number(data?.minOrderAmount) < Number(data?.discountValue)) {
+                console.log("Min Order should be greater than discount value date.");
+                Alert.alert("Error", "Min Order should be greater than or equal to discount value.");
+                return;
+            }
+
             let params = {
-                name: data?.name,
-                offerExpiryDate: data?.endDate,
-                price: Number(data?.price),
-                discountedPrice: Number(data?.discountedPrice),
-                moduleIds: moduleIds,
+                couponCode: data?.couponCode,
+                minOrderAmount: Number(data?.minOrderAmount),
+                discountValue: Number(data?.discountValue),
+                // discountType: data?.discountType?.value,
+                usageLimit: Number(data?.usageLimit),
+                startDate: data?.start_date,
+                endDate: data?.end_date,
                 description: data?.description ?? "",
-                offerDescription: data?.offerDescription ?? "",
             };
+            console.log('params', params);
+
 
             if (editedData) {
                 const parsedData = JSON.parse(editedData);
-                updatePackage({
+                updateCoupon({
                     variables: {
-                        updatePackageInput: {
+                        updateCouponInput: {
                             ...params,
                             id: Number(parsedData?.id),
                         }
@@ -170,27 +167,26 @@ const AddEditPackage = () => {
                 })
                 return;
             }
-            console.log("params", params);
-            createPackage({
+            createCoupon({
                 variables: {
-                    createPackageInput: params,
+                    createCouponInput: params,
                 },
-            })
+            });
         } catch (error) {
-            console.log("error in onSubmit", error);
+            console.log('error in onSubmit', error);
         }
     };
 
-    if (createPackageState.loading || updatePackageState.loading) return <Loader />;
+    if (createCouponState.loading || updateCouponState.loading) return <Loader />;
 
     return (
         <CustomHeader>
             <ScrollView
                 contentContainerStyle={{
-                    // backgroundColor: Colors[theme].cart,
                     borderRadius: 10,
                     padding: 10,
                 }}
+                showsVerticalScrollIndicator={false}
             >
                 <View
                     style={{
@@ -200,7 +196,7 @@ const AddEditPackage = () => {
                     }}
                 >
                     <ThemedText type="subtitle">
-                        Package
+                        Coupon
                     </ThemedText>
                 </View>
 
@@ -209,29 +205,65 @@ const AddEditPackage = () => {
                         type="input"
                         control={control}
                         labelStyle={styles.label}
-                        name={"name"}
+                        name={"couponCode"}
                         inputStyle={[{ lineHeight: ms(20) }]}
-                        label={"Name"}
-                        placeholder={"Enter Name"}
+                        label={"Coupon Code"}
+                        placeholder={"Provide coupon code"}
                         rules={{
-                            required: "name is required",
+                            required: "couponCode is required",
+                        }}
+                        autoCapitalize="none"
+                    />
+
+                    <CustomValidation
+                        type="input"
+                        control={control}
+                        name={"minOrderAmount"}
+                        keyboardType="number-pad"
+                        label={"Min Order Amount"}
+                        placeholder={"Enter min order amount"}
+                        labelStyle={styles.label}
+                        rules={{
+                            required: "Min order amount is required",
                         }}
                     />
 
                     <CustomValidation
                         type="input"
                         control={control}
-                        placeholder="End Date"
-                        name="endDate"
-                        label="End Date"
+                        name={"discountValue"}
+                        label={"discount Value"}
+                        placeholder={"Discount Value"}
+                        keyboardType="number-pad"
+                        labelStyle={styles.label}
+                        rules={{
+                            required: "Max discount amount is required",
+                        }}
+                    />
+
+                    <CustomValidation
+                        type="input"
+                        control={control}
+                        name={"usageLimit"}
+                        keyboardType="number-pad"
+                        label={"Usage Limit"}
+                        placeholder={"Enter usageLimit"}
+                        labelStyle={styles.label}
+                        rules={{
+                            required: "Usage limit is required",
+                        }}
+                    />
+
+                    <CustomValidation
+                        type="input"
+                        control={control}
+                        placeholder="Start Date"
+                        name="start_date"
+                        label="Start Date"
                         labelStyle={styles.label}
                         editable={false}
                         rightIcon={
-                            <Fontisto
-                                name="date"
-                                size={ms(20)}
-                                color={Colors[theme]?.text}
-                            />
+                            <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
                         }
                         onPress={() => {
                             setDateModal({
@@ -242,75 +274,56 @@ const AddEditPackage = () => {
                         }}
                         pointerEvents="none"
                         rules={{
+                            required: "Start date is required",
+                        }}
+                    />
+
+                    <CustomValidation
+                        type="input"
+                        control={control}
+                        placeholder="End Date"
+                        name="end_date"
+                        label="End Date"
+                        labelStyle={styles.label}
+                        editable={false}
+                        rightIcon={
+                            <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
+                        }
+                        onPress={() => {
+                            setDateModal({
+                                end: !dateModal.end,
+                                start: false,
+                            });
+                            setDateTimePickerProps(getDateTimePickerProps(true));
+                        }}
+                        pointerEvents="none"
+                        rules={{
                             required: "End date is required",
                         }}
                     />
 
-                    <CustomValidation
-                        type="input"
-                        control={control}
-                        name={"price"}
-                        label={"Price"}
-                        rightIcon={null}
-                        placeholder={"Enter Price"}
-                        keyboardType="number-pad"
-                        labelStyle={styles.label}
-                        rules={{
-                            required: "Price is required",
-                        }}
-                    />
-
-                    <CustomValidation
-                        type="input"
-                        control={control}
-                        name={"discountedPrice"}
-                        keyboardType="number-pad"
-                        label={"Discounted Price"}
-                        placeholder={"Discounted Price"}
-                        labelStyle={styles.label}
-                        rules={{
-                            required: "Discounted price is required",
-                        }}
-                    />
-
-                    <CustomValidation
-                        data={moduleData?.paginatedModules?.data}
-                        type="picker"
-                        control={control}
-                        keyToCompareData="id"
-                        keyToShowData="name"
-                        label="Module"
-                        labelStyle={styles.label}
-                        multiSelect={true}
-                        name="module"
-                        placeholder="Select Module"
-                        inputStyle={{ height: vs(50) }}
-                        rules={{
-                            required: {
-                                value: true,
-                                message: "Select Module",
-                            },
-                        }}
-                    />
-
-                    <CustomValidation
-                        type="input"
-                        control={control}
-                        name={"offerDescription"}
-                        multiline
-                        label={"Offer Description"}
-                        // placeholder={editModal ? "Test organization Offer Description" : "Enter Offer Description"}
-                        labelStyle={styles.label}
-                        inputContainerStyle={{
-                            height: vs(100),
-                        }}
-                        inputStyle={{
-                            height: vs(100),
-                        }}
-                        containerStyle={{
-                            height: vs(100),
-                        }}
-                    />
+                    {/* <CustomValidation
+                            type="input"
+                            control={control}
+                            placeholder="End Date"
+                            name="end_date"
+                            label="End Date"
+                            labelStyle={styles.label}
+                            rightIcon={
+                                <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
+                            }
+                            onPress={() => {
+                                setDateModal({
+                                    end: !dateModal.end,
+                                    start: false,
+                                });
+                                setDateTimePickerProps(getDateTimePickerProps(true));
+                            }}
+                            pointerEvents="none"
+                            rules={{
+                                required: "End date is required",
+                            }}
+                        /> */}
 
                     <CustomValidation
                         type="input"
@@ -319,7 +332,7 @@ const AddEditPackage = () => {
                         multiline
                         label={"Description"}
                         // placeholder={editModal ? "Test organization description" : "Enter description"}
-                        labelStyle={[styles.label, { marginTop: vs(30) }]}
+                        labelStyle={styles.label}
                         inputContainerStyle={{
                             height: vs(100),
                         }}
@@ -329,19 +342,15 @@ const AddEditPackage = () => {
                         containerStyle={{
                             height: vs(100),
                         }}
+                        autoCapitalize="none"
                     />
 
                     <CustomButton
                         title="Submit"
-                        onPress={() => {
-                            handleSubmit(onSubmit)();
-                        }}
-                        isLoading={
-                            updatePackageState.loading || createPackageState.loading
-                        }
+                        onPress={handleSubmit(onSubmit)}
                         style={{
                             backgroundColor: Colors[theme].background,
-                            marginTop: vs(90),
+                            marginTop: vs(50),
                         }}
                     />
                 </View>
@@ -349,14 +358,14 @@ const AddEditPackage = () => {
 
             {/* date time picker modal */}
             <DateTimePickerModal
-                mode="date"
+                mode='date'
                 dateTimePickerProps={dateTimePickerProps}
                 setDateTimePickerProps={setDateTimePickerProps}
                 onDateTimeSelection={(event: any, selectedDate: any) => {
                     if (event.type != "dismissed") {
                         setValue(
-                            dateModal.start ? "endDate" : "endDate",
-                            formatTimeForAPI(selectedDate, "yyyy-mm-dd") || ""
+                            dateModal.start ? "start_date" : "end_date",
+                            formatTimeForAPI(selectedDate, "yyyy-mm-dd") || "",
                         );
                     }
                     setDateTimePickerProps(getDateTimePickerProps(false));
@@ -366,7 +375,7 @@ const AddEditPackage = () => {
     );
 };
 
-export default AddEditPackage;
+export default AddEditCoupon;
 
 const styles = ScaledSheet.create({
     imageContainer: {

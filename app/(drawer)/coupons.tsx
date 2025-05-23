@@ -1,4 +1,5 @@
 import {
+    ActivityIndicator,
     Alert,
     FlatList,
     Pressable,
@@ -39,6 +40,11 @@ import { formatTimeForAPI } from "@/utils/formatDateTime";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
 import EditPromotion from "@/components/EditPromotion";
+import CustomUserCard from "@/components/master/CustomUserCard";
+import CustomCard from "@/components/master/CustomCard";
+import { router, useFocusEffect } from "expo-router";
+import { FAB } from "@rneui/themed";
+import { Env } from "@/constants/ApiEndpoints";
 
 const defaultValue = {
     couponCode: "",
@@ -68,11 +74,13 @@ const CouponScreen = () => {
     const { theme } = useTheme();
     const [isModalVisible, setModalVisible] = useState(false);
     const [isFocused, setIsFocused] = useState("");
-    const [editModal, setEditModal] = useState<boolean>(false);
-    const [page, setPage] = useState<number>(1);
+    const [hasMore, setHasMore] = useState<boolean>(true);
     const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [page, setPage] = useState<number>(1);
+    const [editModal, setEditModal] = useState<boolean>(false);
     const [isStatusModalVisible, setStatusModalVisible] = useState(false);
     const [infoModalVisible, setInfoModalVisible] = useState(false);
+    const [couponList, setCouponList] = useState<any>([]);
     const [currentCoupon, setCurrentCoupon] = useState<{
         couponCode: any;
         usageLimit: string;
@@ -109,6 +117,7 @@ const CouponScreen = () => {
     const deletePermission = can("MasterApp:Coupon:Delete");
     const updatePermission = can("MasterApp:Coupon:Update");
     const createPermission = can("MasterApp:Coupon:Create");
+    const readPermission = can("MasterApp:Coupon:Read");
     const statusUpdatePermission = can("MasterApp:Coupon:Action");
 
     const [couponData, { error, data, loading, refetch }] = useLazyQuery(
@@ -168,9 +177,11 @@ const CouponScreen = () => {
         }
     });
 
-    useEffect(() => {
-        fetchCoupons();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            fetchCoupons(true);
+        }, [])
+    );
 
     useEffect(() => {
         if (watch("status")) {
@@ -196,22 +207,68 @@ const CouponScreen = () => {
     }, [currentCoupon]);
 
 
-    const fetchCoupons = async (isRefreshing = false) => {
+    // const fetchCoupons = async (isRefreshing = false) => {
+    //     if (isRefreshing) {
+    //         setPage(1);
+    //         setRefreshing(true);
+    //     }
+    //     // Params for API
+    //     const params = {
+    //         per_page_record: 10,
+    //         page: isRefreshing ? 1 : page,
+    //     };
+
+    //     await couponData({
+    //         variables: {
+    //             listInputDto: {},
+    //         },
+    //     });
+    // };
+
+    const fetchCoupons = async (isRefreshing = false, searchParams = "") => {
+        const currentPage = isRefreshing ? 1 : page;
         if (isRefreshing) {
-            setPage(1);
             setRefreshing(true);
+            setPage(1);
         }
-        // Params for API
         const params = {
-            per_page_record: 10,
-            page: isRefreshing ? 1 : page,
+            limit: Env?.LIMIT,
+            page: currentPage,
+            search: searchParams,
         };
 
-        await couponData({
-            variables: {
-                listInputDto: {},
-            },
-        });
+        try {
+            const res: any = await couponData({
+                variables: {
+                    listInputDto: {},
+                },
+                fetchPolicy: "network-only",
+            });
+
+            if (res?.data?.paginatedCoupons) {
+                const data: any = res?.data?.paginatedCoupons;
+                const newItems = data?.data || [];
+
+                setCouponList((prev: any) => {
+                    return isRefreshing && currentPage == 1
+                        ? newItems
+                        : [...prev, ...newItems];
+                });
+
+                const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+                setPage(currentPage + 1);
+                setHasMore(currentPage < lastPage);
+                setRefreshing(false);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
     };
 
     const parseDate = (dateStr: string) => {
@@ -266,144 +323,69 @@ const CouponScreen = () => {
             console.log('error in onSubmit', error);
         }
     };
-
+    
     const renderItem = ({ item, index }: any) => {
         return (
-            <View
-                key={index}
-                style={[
-                    styles.organizationContainer,
-                    { backgroundColor: Colors[theme].cart },
-                ]}
-            >
-                <View style={styles.organizationHeader}>
-                    <ThemedText type="subtitle" style={{ flex: 1 }}>
-                        {item?.couponCode}
-                    </ThemedText>
-                    <View style={styles.organizationInfo}>
-                        {statusUpdatePermission && <MaterialIcons
-                            name="attractions"
-                            size={ms(26)}
-                            color={Colors[theme].text}
-                            onPress={() => {
-                                // setCurrentOrganization({
-                                //   name: item?.name,
-                                //   description: item?.description,
-                                //   id: item?.id,
-                                // });
-                                setCurrentCoupon({
-                                    couponCode: item?.couponCode,
-                                    usageLimit: item?.usageLimit,
-                                    description: item?.description,
-                                    discountValue: item?.discountValue,
-                                    minOrderAmount: item?.minOrderAmount,
-                                    start_date: item?.startDate,
-                                    end_date: item?.endDate,
-                                    status: item?.status,
-                                    id: item?.id,
-                                });
-                                setStatusModalVisible(true);
-                            }}
-                        />}
-
-                        {updatePermission && <Feather
-                            name="edit"
-                            size={ms(26)}
-                            color={Colors[theme].text}
-                            onPress={() => {
-                                setCurrentCoupon({
-                                    couponCode: item?.couponCode,
-                                    usageLimit: item?.usageLimit,
-                                    description: item?.description,
-                                    discountValue: item?.discountValue,
-                                    minOrderAmount: item?.minOrderAmount,
-                                    start_date: item?.startDate,
-                                    end_date: item?.endDate,
-                                    status: item?.status,
-                                    id: item?.id,
-                                });
-                                setModalVisible(true);
-                                setEditModal(true);
-                            }}
-                        />}
-
-
-                        {updatePermission && <Feather
-                            name="eye"
-                            size={ms(26)}
-                            color={Colors[theme].text}
-                            onPress={() => {
-                                setCurrentCoupon({
-                                    couponCode: item?.couponCode,
-                                    usageLimit: item?.usageLimit,
-                                    description: item?.description,
-                                    discountValue: item?.discountValue,
-                                    minOrderAmount: item?.minOrderAmount,
-                                    start_date: item?.startDate,
-                                    end_date: item?.endDate,
-                                    status: item?.status,
-                                    id: item?.id,
-                                });
-                                setInfoModalVisible(true);
-                                // setEditModal(true);
-                            }}
-                        />}
-
-                        {deletePermission && <MaterialIcons
-                            name="delete-outline"
-                            size={ms(26)}
-                            color={Colors[theme].text}
-                            onPress={() => {
-                                Alert.alert("Delete", "Are you sure you want to delete?", [
-                                    {
-                                        text: "Yes",
-                                        onPress: () => {
-                                            setCurrentCoupon({
-                                                couponCode: item?.couponCode,
-                                                usageLimit: item?.usageLimit,
-                                                description: item?.description,
-                                                discountValue: item?.discountValue,
-                                                minOrderAmount: item?.minOrderAmount,
-                                                start_date: item?.startDate,
-                                                end_date: item?.end_date,
-                                                status: item?.status,
-                                                id: item?.id,
-                                            });
-                                            deleteCoupon({
-                                                variables: {
-                                                    ids: [Number(item?.id)],
-                                                }
-                                            });
-                                        },
-                                    },
-                                    { text: "No", onPress: () => { } },
-                                ]);
-                            }}
-                        />}
-                    </View>
-                </View>
-
-                <ThemedText
-                    style={[
-                        styles.status,
-                        {
-                            // color:
-                            // item.status == "active" ? Colors?.green : "#6d6d1b",
-                            backgroundColor: theme == "dark" ? Colors?.white : "#e6e2e2",
+            <CustomCard
+                name={item?.couponCode}
+                status={item?.status}
+                description={item?.description}
+                editPermission={updatePermission}
+                deletePermission={deletePermission}
+                statusPermission={statusUpdatePermission}
+                readPermission={readPermission}
+                onView={() => {
+                    setCurrentCoupon({
+                        couponCode: item?.couponCode,
+                        usageLimit: item?.usageLimit,
+                        description: item?.description,
+                        discountValue: item?.discountValue,
+                        minOrderAmount: item?.minOrderAmount,
+                        start_date: item?.startDate,
+                        end_date: item?.endDate,
+                        status: item?.status,
+                        id: item?.id,
+                    });
+                    setInfoModalVisible(true);
+                }}
+                onEdit={() => {
+                    router.push({
+                        pathname: "/addEditCoupon",
+                        params: {
+                            data: JSON.stringify(item),
                         },
-                    ]}
-                >
-                    {item?.status}
-                </ThemedText>
-
-
-
-                {item?.description && <View style={styles.userInfo}>
-                    <ThemedText style={{ fontSize: ms(14), lineHeight: ms(18) }}>
-                        {item?.description}
-                    </ThemedText>
-                </View>}
-            </View>
+                    })
+                }}
+                onDelete={() =>
+                    Alert.alert("Delete", "Are you sure you want to delete?", [
+                        {
+                            text: "Yes",
+                            onPress: () => {
+                                deleteCoupon({
+                                    variables: {
+                                        ids: [Number(item?.id)],
+                                    }
+                                });
+                            },
+                        },
+                        { text: "No", onPress: () => { } },
+                    ])
+                }
+                onChangeStatus={() => {
+                    setCurrentCoupon({
+                        couponCode: item?.couponCode,
+                        usageLimit: item?.usageLimit,
+                        description: item?.description,
+                        discountValue: item?.discountValue,
+                        minOrderAmount: item?.minOrderAmount,
+                        start_date: item?.startDate,
+                        end_date: item?.endDate,
+                        status: item?.status,
+                        id: item?.id,
+                    });
+                    setStatusModalVisible(true);
+                }}
+            />
         );
     };
 
@@ -444,44 +426,75 @@ const CouponScreen = () => {
                             }}
                         />
                     </View>
-                    <Pressable
-                        style={styles.buttonContainer}
-                        onPress={() => {
-                            setModalVisible(true), setCurrentCoupon(defaultValue);
-                        }}
-                    >
-                        <Feather name="plus-square" size={ms(25)} color={Colors[theme].text} />
-                    </Pressable>
                 </View>
                 <View style={styles.organizationParentContainer}>
                     <FlatList
-                        data={data?.paginatedCoupons?.data}
-                        renderItem={renderItem}
+                        // data={data?.paginatedCoupons?.data}
+                        // renderItem={renderItem}
                         // refreshControl={
                         //     <RefreshControl
                         //         refreshing={refreshing}
                         //         onRefresh={() => fetchCoupons(true)}
                         //     />
                         // }
-                        ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                        // ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                        // showsVerticalScrollIndicator={false}
+                        // contentContainerStyle={{
+                        //     paddingBottom: 50,
+                        // }}
+                        // ListFooterComponent={
+                        //     hasMore ? (
+                        //         <ActivityIndicator size="small" color={Colors.primary} />
+                        //     ) : null
+                        // }
+                        // onEndReached={() => {
+                        //     if (hasMore && !isLoading) {
+                        //         fetchNotification();
+                        //     }
+                        // }}
+                        // onEndReachedThreshold={0.5}
+
+                        data={couponList}
+                        renderItem={({ item, index }: any) => renderItem({ item, index })}
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{
-                            paddingBottom: 50,
+                        refreshing={refreshing && !loading}
+                        onRefresh={() => {
+                            fetchCoupons(true);
                         }}
-                    // ListFooterComponent={
-                    //     hasMore ? (
-                    //         <ActivityIndicator size="small" color={Colors.primary} />
-                    //     ) : null
-                    // }
-                    // onEndReached={() => {
-                    //     if (hasMore && !isLoading) {
-                    //         fetchNotification();
-                    //     }
-                    // }}
-                    // onEndReachedThreshold={0.5}
+                        keyExtractor={(item: any, index: number) => index.toString()}
+                        contentContainerStyle={{ paddingBottom: vs(60) }}
+                        ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                        ListFooterComponent={
+                            hasMore ? (
+                                <ActivityIndicator size="small" color={Colors.primary} />
+                            ) : null
+                        }
+                        onEndReached={() => {
+                            if (hasMore && !loading) {
+                                fetchCoupons();
+                            }
+                        }}
+                        onEndReachedThreshold={0.5}
                     />
                 </View>
             </ThemedView>
+
+            {createPermission && <FAB
+                size="large"
+                title="Add User"
+                style={{
+                    position: "absolute",
+                    margin: 16,
+                    right: 0,
+                    bottom: 0,
+                }}
+                icon={{
+                    name: "add",
+                    color: "white",
+                }}
+                onPress={() => router.push("/addEditCoupon")}
+            />}
+
 
             {/* CREATE AND EDIT MODAL */}
             <Modal
@@ -872,14 +885,12 @@ const styles = ScaledSheet.create({
     },
     contentContainer: {
         flex: 1,
-        padding: "12@ms",
     },
     searchContainer: {
-        width: "100%",
+        marginHorizontal: "12@s",
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: "12@ms",
     },
     buttonContainer: { marginLeft: "12@ms" },
     organizationParentContainer: {
