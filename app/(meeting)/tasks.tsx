@@ -294,7 +294,7 @@ const styles = ScaledSheet.create({
         marginHorizontal: "10@ms",
         marginVertical: "8@ms",
         padding: "16@ms",
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 5,
