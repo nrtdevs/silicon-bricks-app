@@ -33,7 +33,7 @@ import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
-import { router } from "expo-router"; 
+import { router } from "expo-router";
 import CustomCard from "@/components/master/CustomCard";
 import { Env } from "@/constants/ApiEndpoints";
 
@@ -167,8 +167,6 @@ const OrganizationScreen = () => {
         name: data?.name,
         description: data?.description ?? "",
       };
-      console.log('000', data);
-      // return;
 
       editModal
         ? updateOrganization({
@@ -244,7 +242,7 @@ const OrganizationScreen = () => {
 
     if (isRefreshing) {
       setRefreshing(true);
-      setPage(1)
+      setPage(1);
     }
 
     const params = {
@@ -260,7 +258,7 @@ const OrganizationScreen = () => {
         },
         fetchPolicy: "network-only",
       });
-      
+
       if (res?.data?.paginatedOrganization) {
         const data: any = res?.data?.paginatedOrganization;
         const newItems = data?.data || [];
@@ -270,7 +268,7 @@ const OrganizationScreen = () => {
             ? newItems
             : [...prev, ...newItems];
         });
-        const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT );
+        const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
         setPage(currentPage + 1);
         setHasMore(currentPage < lastPage);
         setRefreshing(false);

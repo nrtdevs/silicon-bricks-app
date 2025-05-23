@@ -12,7 +12,7 @@ export const Colors = {
     shadow: 'rgba(0, 0, 0, 0.06)',  
     lightText: '#7E7E7E',   
     placeholder: '#A8A8A8',
-    cart: '#F2F2F2', // Light modern card background  
+    cart: '#F3F3F3', // Light modern card background  
   },
 
   /** 🌙 Dark Theme Colors */

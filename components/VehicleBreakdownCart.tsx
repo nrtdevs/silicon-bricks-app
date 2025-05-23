@@ -1,17 +1,16 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { FontAwesome5, MaterialIcons, Feather } from '@expo/vector-icons';
-import { ThemedView } from '../ThemedView';
+import { FontAwesome5, MaterialIcons, Feather } from '@expo/vector-icons'; 
 import { ms, ScaledSheet, vs } from 'react-native-size-matters';
 import { Colors } from '@/constants/Colors';
-import { useTheme } from '@/context/ThemeContext';
-import { ThemedText } from '../ThemedText';
+import { useTheme } from '@/context/ThemeContext'; 
+import { ThemedText } from './ThemedText';
+
 
 interface VehicleCardProps {
-  brand: string;
-  model: string;
-  chassisNumber: string;
-  number: string;
+  title: string;
+  subtitle: string;
+  breakDownDate: string; 
   createdAt: string;
   status: 'active' | 'inactive' | 'pending';
   onEdit: () => void;
@@ -23,25 +22,23 @@ interface VehicleCardProps {
 const statusColors = {
   active: '#10B981',
   inactive: '#EF4444',
-  breakdown: '#F59E0B',
-  maintenance: '#3B82F6'
+  pending: '#F59E0B'
 };
 
-const VehicleCard: React.FC<VehicleCardProps> = ({
-  brand,
-  model,
-  chassisNumber,
-  number,
+const VehicleBreakdownCart = ({
+  title,
+  subtitle,
+  breakDownDate, 
   createdAt,
   status,
   onEdit,
   onDelete,
   onChangeStatus,
   onView,
-}) => {
-  const { theme } = useTheme()
+}:VehicleCardProps) => {
+    const {theme} = useTheme()
   return (
-    <View
+      <View
       style={[styles.container, {
         borderColor: Colors[theme].border,
         shadowColor: Colors[theme].shadow,
@@ -53,8 +50,8 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
         {/* Header */}
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6 }}>
           <View>
-            <ThemedText type='subtitle'>{brand}</ThemedText>
-            <ThemedText type='default'>{model}</ThemedText>
+            <ThemedText type='subtitle'>{title}</ThemedText>
+            <ThemedText type='default'>{subtitle}</ThemedText>
           </View>
           <View
             style={{
@@ -79,13 +76,10 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
         {/* Details */}
         <View style={{}}>
           <ThemedText type='defaultSemiBold' style={{ marginBottom: 4 }}>
-            <ThemedText type='default'>Chassis No:</ThemedText> {chassisNumber}
-          </ThemedText>
+            <ThemedText type='default'>BreakDown Date:</ThemedText> {breakDownDate}
+          </ThemedText> 
           <ThemedText type='defaultSemiBold' style={{ marginBottom: 4 }}>
-            <ThemedText type='default'>Vehicle No:</ThemedText> {number}
-          </ThemedText>
-          <ThemedText type='defaultSemiBold' style={{ marginBottom: 4 }}>
-            <ThemedText type='default'>Reg. Date:</ThemedText> {new Date(createdAt).toLocaleDateString()}
+            <ThemedText type='default'>Created. Date:</ThemedText> {new Date(createdAt).toLocaleDateString()}
           </ThemedText>
         </View>
       </View>
@@ -99,8 +93,10 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
       </View>
 
     </View>
-  );
-};
+  )
+}
+
+export default VehicleBreakdownCart
 
 const ActionButton = ({
   icon,
@@ -134,8 +130,6 @@ const ActionButton = ({
     </TouchableOpacity>
   );
 };
-
-export default VehicleCard;
 
 const styles = ScaledSheet.create({
   container: {

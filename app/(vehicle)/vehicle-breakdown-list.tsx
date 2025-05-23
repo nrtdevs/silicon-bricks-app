@@ -1,48 +1,34 @@
 import {
   ActivityIndicator,
-  Alert,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
   FlatList,
-  RefreshControl
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
-import { useLazyQuery, useMutation } from "@apollo/client";
-import {
-  DeleteVehicleDocument,
-  EnableVehicleStatusDocument,
-  PaginatedVehiclesDocument,
-} from "@/graphql/generated";
-import Loader from "@/components/ui/Loader";
-import VehicleCard from "@/components/vehicle/VehicleCart";
+import React, { useCallback, useState } from "react";
+import { PaginatedBreakdownsDocument } from "@/graphql/generated";
+import { useLazyQuery } from "@apollo/client";
+import { router, useFocusEffect, useNavigation } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Env } from "@/constants/ApiEndpoints";
 import { ms } from "react-native-size-matters";
-import { FAB } from "@rneui/themed";
-import {
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-  useNavigation,
-} from "expo-router";
-import NoDataFound from "@/components/NoDataFound";
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/context/ThemeContext";
+import VehicleCard from "@/components/vehicle/VehicleCart";
 import StatusModal from "@/components/vehicle/StatusModal";
 import CustomValidation from "@/components/CustomValidation";
-import { useForm } from "react-hook-form";
-import { Ionicons } from "@expo/vector-icons";
+import { FAB } from "@rneui/themed";
+import NoDataFound from "@/components/NoDataFound";
 import CustomSearchBar from "@/components/CustomSearchBar";
-
-import debounce from "lodash.debounce";
-import { Colors } from "@/constants/Colors";
-import { Env } from "@/constants/ApiEndpoints";
 import { ThemedView } from "@/components/ThemedView";
-import { useTheme } from "@/context/ThemeContext";
+import { useForm } from "react-hook-form";
+import debounce from "lodash.debounce";
+import Loader from "@/components/ui/Loader";
+import VehicleBreakdownCart from "@/components/VehicleBreakdownCart";
 
-const VehicleList = () => {
-  const [getVehicleListApi, { data, loading, error, refetch }] =
-    useLazyQuery<any>(PaginatedVehiclesDocument);
-
-  const navigation = useNavigation();
-  const { theme } = useTheme()
+const VehicleBreakDownList = () => {
   const statusArr = [
     {
       label: "Active",
@@ -61,6 +47,17 @@ const VehicleList = () => {
       value: "maintenance",
     },
   ];
+ 
+  const [getVehicleBreakdownListApi, { data, loading, error, refetch }] =
+    useLazyQuery<any>(PaginatedBreakdownsDocument);
+
+  const navigation = useNavigation();
+  const { theme } = useTheme();
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [vehicleBreakdownList, setVehicleBreakdownList] = useState<any>([]);
+ 
   const {
     control,
     handleSubmit,
@@ -76,51 +73,6 @@ const VehicleList = () => {
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
-  const [deleteVehicleApi, deleteVehicleStat] = useMutation(
-    DeleteVehicleDocument,
-    {
-      onCompleted: (data) => {
-        fetchVehicleList();
-      },
-      onError: (error) => {
-        console.log(error);
-        Alert.alert("Error", error.message);
-      },
-    }
-  );
-
-  const [changeVehicleStatusApi, changeVehicleStatusStat] = useMutation(
-    EnableVehicleStatusDocument,
-    {
-      onCompleted: (data) => {
-        setIsModalVisible(false);
-        fetchVehicleList();
-      },
-      onError: (error) => {
-        console.log(error);
-        Alert.alert("Error", error.message);
-      },
-    }
-  );
-  const handleStatusUpdate = (id: string) => {
-    let params = {
-      status: watch("status")?.value,
-      id: Number(id),
-    };
-
-    changeVehicleStatusApi({
-      variables: {
-        data: params,
-      },
-    });
-  };
-
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [vehicleList, setVehicleList] = useState<any>([]); 
-
-
   const fetchVehicleList = async (isRefresh = false, search = "") => {
     const currentPage = isRefresh ? 1 : page;
 
@@ -128,33 +80,33 @@ const VehicleList = () => {
       setRefreshing(true);
       setPage(1);
     }
-    setIsLoading(true)
+    setIsLoading(true);
     const params = {
       limit: Env.LIMIT,
       page: currentPage,
-      filter: { name: search },
-      search: search,
+    //   filter: { name: search },
+    //   search: search,
     };
 
-    let response = await getVehicleListApi({
+    let response = await getVehicleBreakdownListApi({
       variables: {
         listInputDto: params,
       },
       fetchPolicy: "network-only",
-    });
-    const data = response?.data?.paginatedVehicles;
+    }); 
+    const data = response?.data?.paginatedBreakdowns;
     const newItems = data?.data || [];
     const lastPage = Math.ceil(data?.meta?.totalItems / Env.LIMIT);
     if (newItems.length > 0) {
-      setVehicleList((prev: any) =>
+      setVehicleBreakdownList((prev: any) =>
         isRefresh && currentPage == 1 ? newItems : [...prev, ...newItems]
       );
       setPage(currentPage + 1);
       if (isRefresh) setRefreshing(false);
-      setIsLoading(false)
+      setIsLoading(false);
       setHasMore(currentPage < lastPage);
     } else {
-      if (isRefresh) setVehicleList([]);
+      if (isRefresh) setVehicleBreakdownList([]);
       setHasMore(false);
     }
     setRefreshing(false);
@@ -162,12 +114,13 @@ const VehicleList = () => {
 
   const [isSearch, setIsSearch] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useFocusEffect(
     useCallback(() => {
       fetchVehicleList();
       navigation.setOptions({
+        headerTitle: "Vehicle Breakdown List",
         headerRight: () => (
           <Pressable
             onPress={() => {
@@ -180,7 +133,6 @@ const VehicleList = () => {
       });
     }, [])
   );
-
   const debounceSearch = useCallback(
     debounce((text: string) => {
       fetchVehicleList(false, text);
@@ -188,14 +140,14 @@ const VehicleList = () => {
     [searchValue]
   );
 
-  const renderItems = (item: any) => {
+  if (loading && page == 1 && !refreshing) return <Loader />;
 
+  const renderItems = (item: any) => {
     return (
-      <VehicleCard
-        brand={item?.make}
-        model={item?.model}
-        chassisNumber={item?.chassisNumber}
-        number={item?.numberPlate}
+      <VehicleBreakdownCart
+        title={item?.vehicle?.model}
+        subtitle={item?.breakdownType}
+        breakDownDate={item?.breakdownDate}
         createdAt={item?.createdAt}
         status={item?.status}
         onEdit={() =>
@@ -204,13 +156,7 @@ const VehicleList = () => {
             params: { data: JSON.stringify(item) },
           })
         }
-        onDelete={() =>
-          deleteVehicleApi({
-            variables: {
-              deleteVehicleId: Number(item?.id),
-            },
-          })
-        }
+        onDelete={() => {}}
         onChangeStatus={() => {
           let find = statusArr?.find((i: any) => i.value === item?.status);
           setValue("status", find);
@@ -226,14 +172,6 @@ const VehicleList = () => {
       />
     );
   };
-
-  // console.log('loading',loading);
-  // console.log('page',page);
-  // console.log('refreshing',refreshing);
-
-
-  if ((loading && page == 1 && !refreshing) || deleteVehicleStat.loading || changeVehicleStatusStat.loading)
-    return <Loader />;
 
   return (
     <ThemedView style={{ flex: 1 }}>
@@ -251,13 +189,16 @@ const VehicleList = () => {
         />
       )}
       <FlatList
-        data={vehicleList}
+        data={vehicleBreakdownList}
         keyExtractor={(item, index) => item?.id?.toString()}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={!isLoading ? <NoDataFound onPress={() => fetchVehicleList(true)} /> : null}
+        ListEmptyComponent={
+          !isLoading ? (
+            <NoDataFound onPress={() => fetchVehicleList(true)} />
+          ) : null
+        }
         renderItem={({ item }: any) => renderItems(item)}
         contentContainerStyle={{ paddingVertical: ms(10) }}
-
         ListFooterComponent={
           hasMore ? (
             <ActivityIndicator size="small" color={Colors.primary} />
@@ -300,7 +241,7 @@ const VehicleList = () => {
         title="Change Vehicle Status"
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
-        onSubmit={() => handleStatusUpdate(selectedVehicle?.id)}
+        onSubmit={() => {}}
         dropdown={
           <CustomValidation
             type="picker"
@@ -315,6 +256,6 @@ const VehicleList = () => {
   );
 };
 
-export default VehicleList;
+export default VehicleBreakDownList;
 
 const styles = StyleSheet.create({});

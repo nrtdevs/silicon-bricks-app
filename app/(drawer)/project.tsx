@@ -36,6 +36,7 @@ import { useUserContext } from "@/context/RoleContext";
 import CustomCard from "@/components/master/CustomCard";
 import { Env } from "@/constants/ApiEndpoints";
 import Loader from "@/components/ui/Loader";
+import { FAB } from "@rneui/themed";
 
 interface ProjectData {
   id: number;
@@ -58,8 +59,6 @@ const pickerData = [
 
 const Project = () => {
   const { theme } = useTheme();
-  const [visible, setVisible] = useState(false);
-  const showDialogue = () => setVisible(true);
   const [editVisible, setEditVisible] = useState(false);
   const [isStatusModalVisible, setStatusModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -295,24 +294,6 @@ const Project = () => {
                 }}
               />
             </View>
-            {createPermission && (
-              <Pressable
-                style={styles.buttonContainer}
-                onPress={() => {
-                  setCurrentProject(defaultValue),
-                    setModalVisible(true),
-                    showDialogue();
-                }}
-              >
-                {createPermission && (
-                  <Feather
-                    name="plus-square"
-                    size={ms(25)}
-                    color={Colors[theme].text}
-                  />
-                )}
-              </Pressable>
-            )}
           </View>
 
           <View style={styles.scrollContainer}>
@@ -484,6 +465,24 @@ const Project = () => {
           />
         </View>
       </Modal>
+      {createPermission && <FAB
+        size="large"
+        title="Add Project"
+        style={{
+          position: "absolute",
+          margin: 16,
+          right: 0,
+          bottom: 0,
+        }}
+        icon={{
+          name: "add",
+          color: "white",
+        }}
+        onPress={() => {
+          setCurrentProject(defaultValue)
+          setModalVisible(true)
+        }}
+      />}
     </CustomHeader>
   );
 };

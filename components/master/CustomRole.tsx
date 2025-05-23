@@ -7,35 +7,24 @@ import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
 import { ThemedText } from '../ThemedText';
 
-interface CustomCardProps {
+interface CustomRoleProps {
     name: string;
-    status: 'active' | 'inactive' | 'pending' | 'blocked';
+    permissions: string;
     description: string;
     editPermission: boolean;
-    statusPermission: boolean;
     deletePermission: boolean;
     onEdit: () => void;
     onDelete: () => void;
-    onChangeStatus: () => void;
 }
 
-const statusColors = {
-    active: '#10B981',
-    inactive: '#EF4444',
-    pending: '#F59E0B',
-    blocked: 'black'
-};
-
-const CustomCard: React.FC<CustomCardProps> = ({
+const CustomRole: React.FC<CustomRoleProps> = ({
     name,
-    status,
+    permissions,
     description,
     editPermission,
-    statusPermission,
     deletePermission,
     onEdit,
     onDelete,
-    onChangeStatus,
 }) => {
     const { theme } = useTheme()
     return (
@@ -53,20 +42,13 @@ const CustomCard: React.FC<CustomCardProps> = ({
                     <View>
                         <ThemedText type='subtitle'>{name}</ThemedText>
                     </View>
-                    <View
-                        style={{
-                            backgroundColor: statusColors[status],
-                            paddingHorizontal: ms(10),
-                            padding: vs(2),
-                            borderRadius: ms(14),
-                        }}
-                    >
-                        <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{status.toUpperCase()}</ThemedText>
-                    </View>
                 </View>
 
                 {/* Details */}
                 <View style={{}}>
+                    <ThemedText type='defaultSemiBold' style={{ marginBottom: 4, width: 300, }}>
+                        <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Permissions:</ThemedText> {permissions}
+                    </ThemedText>
                     {description.length > 0 && <ThemedText type='defaultSemiBold' style={{ marginBottom: 4, width: 300, }}>
                         <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Description:</ThemedText> {description}
                     </ThemedText>}
@@ -75,9 +57,8 @@ const CustomCard: React.FC<CustomCardProps> = ({
 
             {/* Action Buttons */}
             <View style={{ gap: 20, flexDirection: 'row', marginTop: 15 }}>
-                {editPermission && <ActionButton icon={<Feather name="edit" size={ms(18)} color={Colors.white} />} text="Edit" bgColor="#3B82F6" onPress={onEdit} />}
-                {statusPermission && <ActionButton icon={<MaterialIcons name="autorenew" size={ms(18)} color={Colors.white} />} bgColor="#8B5CF6" text="Status" onPress={onChangeStatus} />}
-                {deletePermission && <ActionButton icon={<FontAwesome5 name="trash" size={ms(16)} color={Colors.white} />} bgColor="#EF4444" text="Delete" onPress={onDelete} />}
+                {editPermission && <ActionButton icon={<Feather name="edit" size={16} color="#3B82F6" />} text="Edit" bgColor="#3B82F6" onPress={onEdit} />}
+                {deletePermission && <ActionButton icon={<FontAwesome5 name="trash" size={14} color="#EF4444" />} bgColor="#EF4444" text="Delete" onPress={onDelete} />}
             </View>
 
         </View>
@@ -106,8 +87,7 @@ const ActionButton = ({
                 paddingHorizontal: ms(12),
                 borderRadius: 10,
                 borderWidth: 0.5,
-                borderColor: Colors.white,
-                backgroundColor: bgColor,
+                borderColor: bgColor,
                 opacity: 0.8
             }}
         >
@@ -117,7 +97,7 @@ const ActionButton = ({
     );
 };
 
-export default CustomCard;
+export default CustomRole;
 
 const styles = ScaledSheet.create({
     container: {

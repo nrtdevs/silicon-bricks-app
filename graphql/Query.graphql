@@ -885,6 +885,12 @@ query DropdownRoles($listInputDto: ListInputDTO!) {
       roleType
       status
       permissionCount
+      organization {
+        id
+        name
+        description
+        status
+      }
     }
   }
 }
@@ -901,7 +907,10 @@ query GetPaginatedNotesByMeetingId($meetingId: Int!, $query: ListInputDTO!) {
   }
 }
 
-query GetPaginatedMeetingTaskByMeetingId($meetingId: Int!, $query: ListInputDTO!) {
+query GetPaginatedMeetingTaskByMeetingId(
+  $meetingId: Int!
+  $query: ListInputDTO!
+) {
   getPaginatedMeetingTaskByMeetingId(meetingId: $meetingId, query: $query) {
     data {
       id
@@ -925,6 +934,48 @@ query GetPaginatedMeetingTaskByMeetingId($meetingId: Int!, $query: ListInputDTO!
       completePercent
       totalTaskComplete
       weightType
+    }
+  }
+}
+
+
+ query PaginatedBreakdowns($listInputDto: ListInputDTO!) {
+  paginatedBreakdowns(ListInputDTO: $listInputDto) {
+    data {
+      id
+      vehicleId
+      vehicle {
+        id
+        make
+        model
+        year
+        color
+        chassisNumber
+        numberPlate
+        maintenanceHistory
+        avatar
+        insurance
+        insuranceValidTill
+        status
+        latitude
+        longitude
+        createdById 
+        organizationId 
+        createdAt
+        updatedAt
+        deletedAt
+      }
+      breakdownType
+      breakdownDate
+      breakdownDescription
+      breakdownLocation
+      latitude
+      longitude
+      status  
+      organizationId 
+      createdById 
+      createdAt
+      updatedAt
     }
   }
 }
