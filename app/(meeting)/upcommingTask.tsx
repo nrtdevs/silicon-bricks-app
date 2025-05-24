@@ -10,10 +10,12 @@ import { useTheme } from "@/context/ThemeContext";
 import { DeleteMetingTaskDocument, GetAllMeetingTypesDocument, GetUpcomingMeetingTaskDocument, PaginatedProjectsDocument } from "@/graphql/generated";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { Entypo, Feather, Fontisto, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5, Fontisto, MaterialIcons } from "@expo/vector-icons";
+import { FAB } from "@rneui/themed";
+import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, FlatList, Modal, Pressable, ScrollView, View } from "react-native";
+import { Alert, FlatList, Modal, Pressable, ScrollView, TouchableOpacity, View } from "react-native";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 
 const defaultValueData = {
@@ -142,7 +144,7 @@ const UpcommingTask = () => {
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{ width: "100%" }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             placeholder="Search task"
@@ -151,31 +153,23 @@ const UpcommingTask = () => {
                             }}
                         />
                     </View>
-                    <Pressable
-                        onPress={() => {
-                            setAddEditModalVisible(true)
-                            setCreateEditManage(false)
-                            setCurrentMeetingTask(defaultValueData)
-                        }}>
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                    </Pressable>
                 </View>
-
                 <FlatList
                     data={data?.getUpcomingMeetingTask?.data}
                     renderItem={({ item }) => (
                         <View style={styles.scrollContainer}>
                             <View style={[
                                 styles.notesContainer,
-                                { backgroundColor: Colors[theme].cart },
+                                {
+                                    borderColor: Colors[theme].border,
+                                    shadowColor: Colors[theme].shadow,
+                                    backgroundColor: Colors[theme].cart
+                                },
                             ]}>
                                 <View style={styles.notesHeader}>
                                     <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.task}</ThemedText>
                                     <View style={styles.notesInfo}>
-                                        <Feather
-                                            name="edit"
-                                            size={ms(20)}
-                                            color={Colors[theme].text}
+                                        <TouchableOpacity
                                             onPress={() => {
                                                 setAddEditModalVisible(true)
                                                 setCreateEditManage(true)
@@ -189,12 +183,21 @@ const UpcommingTask = () => {
                                                     complete_date: item.completedDate ?? ""
                                                 });
                                             }}
-                                        />
-                                        <View style={{ width: 5 }}></View>
-                                        <MaterialIcons
-                                            name="delete-outline"
-                                            size={ms(22)}
-                                            color={Colors[theme].text}
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                paddingVertical: vs(8),
+                                                paddingHorizontal: ms(12),
+                                                borderRadius: 10,
+                                                borderWidth: 0.5,
+                                                borderColor: "#3B82F6",
+                                                opacity: 0.8
+                                            }}
+                                        >
+                                            <Feather name="edit" size={16} color="#3B82F6" />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
                                             onPress={() => {
                                                 Alert.alert(
                                                     "Delete",
@@ -212,9 +215,21 @@ const UpcommingTask = () => {
                                                         { text: "No", onPress: () => { } },
                                                     ]
                                                 );
-
                                             }}
-                                        />
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                paddingVertical: vs(8),
+                                                paddingHorizontal: ms(12),
+                                                borderRadius: 10,
+                                                borderWidth: 0.5,
+                                                borderColor: "#EF4444",
+                                                opacity: 0.8
+                                            }}
+                                        >
+                                            <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
                                 <ThemedText>{item.priority}</ThemedText>
@@ -222,8 +237,6 @@ const UpcommingTask = () => {
                         </View>
                     )}
                 />
-
-
             </ThemedView>
             {/* Create and Edit modal */}
             <Modal
@@ -433,6 +446,25 @@ const UpcommingTask = () => {
                     setDateTimePickerProps(getDateTimePickerProps(false));
                 }}
             />
+            <FAB
+                size="large"
+                title="Create Task"
+                style={{
+                    position: "absolute",
+                    margin: 10,
+                    right: 0,
+                    bottom: 0,
+                }}
+                icon={{
+                    name: "add",
+                    color: "white",
+                }}
+                onPress={() => {
+                    setAddEditModalVisible(true)
+                    setCreateEditManage(false)
+                    setCurrentMeetingTask(defaultValueData)
+                }}
+            />
         </CustomHeader>
     )
 }
@@ -453,11 +485,17 @@ const styles = ScaledSheet.create({
         marginTop: "5@ms",
     },
     notesContainer: {
-        width: "100%",
-        padding: "12@ms",
-        borderRadius: "8@ms",
-        marginBottom: "16@ms",
-        gap: "8@ms",
+        borderRadius: "20@ms",
+        marginHorizontal: "10@ms",
+        marginVertical: "8@ms",
+        padding: "16@ms",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 5,
+        borderWidth: 1,
+        justifyContent: 'space-between',
+        gap: 10,
     },
     notesHeader: {
         width: "100%",

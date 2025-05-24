@@ -978,3 +978,24 @@ query PaginatedBreakdowns($listInputDto: ListInputDTO!) {
     }
   }
 }
+query ListTrashedMeeting($listInputDto: ListInputDTO!) {
+  listTrashedMeeting(ListInputDTO: $listInputDto) {
+    data {
+      id
+      meetingReference
+      projectId
+      createdByUserId
+      meetingVenueId
+      meetingTypeId
+      projectName
+      parentMeetingId
+      title
+      startTime
+      endTime
+      status
+      meetingDate
+      meetingAgenda
+      meetingUrl
+    }
+  }
+}

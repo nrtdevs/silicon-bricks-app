@@ -88,4 +88,5 @@ export const labels = {
   meetingRoom:"Meeting Room",
   name:"Name",
   title : "Title",
+  report : "Report"
 };

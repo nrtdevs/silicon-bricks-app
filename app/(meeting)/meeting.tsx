@@ -2,23 +2,19 @@ import CustomButton from '@/components/CustomButton';
 import CustomHeader from '@/components/CustomHeader';
 import CustomSearchBar from '@/components/CustomSearchBar';
 import CustomValidation from '@/components/CustomValidation';
-import DateTimePickerModal from '@/components/DateTimePickerModal';
 import NoDataFound from '@/components/NoDataFound';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
-import { labels } from '@/constants/Labels';
+import { FAB } from "@rneui/themed";
 import { useTheme } from '@/context/ThemeContext';
-import { CreateMeetingDocument, CreateNotesDocument, DeleteMetingDocument, EnableMeetingStatusDocument, GetAllMeetingTypesDocument, PaginatedMeetingDocument, PaginatedMeetingVenueDocument, PaginatedProjectsDocument, PaginatedUsersDocument, UpdateMeetingDocument } from '@/graphql/generated';
-import { getDateTimePickerProps } from '@/utils/getDateTimePickerProps';
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
-import { Entypo, Feather, Fontisto, MaterialIcons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { DeleteMetingDocument, EnableMeetingStatusDocument, PaginatedMeetingDocument } from '@/graphql/generated';
+import { useLazyQuery, useMutation, } from '@apollo/client';
+import { Entypo, Feather, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { View, Pressable, Alert, Modal, FlatList, ScrollView, Image, Button } from 'react-native';
+import { View, Pressable, Alert, Modal, FlatList, TouchableOpacity } from 'react-native';
 import { ms, s, ScaledSheet, vs } from 'react-native-size-matters';
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from "expo-file-system";
 import { router } from 'expo-router';
 
 const statusData = [
@@ -33,8 +29,6 @@ const MeetingScreen = () => {
     const [searchQuery, setSearchQuery] = useState<string>("");
     /// View meeting data 
     const [meetingId, setMeetingId] = useState<string>("");
-    const [isViewModalVisible, setViewModalVisible] = useState(false);
-    const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
     const [isNotesModalVisible, setNotesModalVisible] = useState(false);
     const [enableMeetingStatus, enableMeetingStatusState] = useMutation(EnableMeetingStatusDocument, {
         onCompleted: (data) => {
@@ -101,16 +95,8 @@ const MeetingScreen = () => {
                         />
                     </View>
                     <Pressable
-                        onPress={() => {
-                            router.push({
-                                pathname: "/(meeting)/createMeeting",
-                                params: {
-                                    isCreate: "true",
-                                    id: "",
-                                },
-                            })
-                        }}>
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
+                        onPress={() => router.push("/(meeting)/deletedMeeting")}>
+                        <FontAwesome5 name="trash" size={20} color="#EF4444" />
                     </Pressable>
                 </View>
                 <FlatList
@@ -134,82 +120,113 @@ const MeetingScreen = () => {
                                     },
                                 });
                             }}>
-                            <View style={styles.scrollContainer}>
-                                <View style={[
-                                    styles.organizationContainer,
-                                    { backgroundColor: Colors[theme].cart },
-                                ]}>
-                                    <View style={styles.organizationHeader}>
-                                        <ThemedText type="subtitle" style={{ flex: 1 }}>{item.title}</ThemedText>
-                                        <View style={styles.organizationInfo}>
-                                            <View style={{ width: 5 }}></View>
-                                            <Feather
-                                                name="edit"
-                                                size={ms(20)}
-                                                color={Colors[theme].text}
-                                                onPress={() => {
-                                                    router.push({
-                                                        pathname: "/(meeting)/createMeeting",
-                                                        params: {
-                                                            isCreate: "false",
-                                                            id: item.id,
-                                                            startTime: item.startTime,
-                                                            endTime: item.endTime,
-                                                            title: item.title,
-                                                            meetingDate: item.meetingDate,
-                                                            meetingAgenda: item.meetingAgenda,
-                                                            meetingUrl: item.meetingUrl,
-                                                            meetingTypeId: item.meetingTypeId,
-                                                            projectId: item.projectId,
-                                                            meetingVenueId: item.meetingVenueId,
-                                                        },
-                                                    })
-                                                }}
-                                            />
-                                            <View style={{ width: 5 }}></View>
-                                            <MaterialIcons
-                                                name="delete-outline"
-                                                size={ms(22)}
-                                                color={Colors[theme].text}
-                                                onPress={() => {
-                                                    Alert.alert(
-                                                        "Delete",
-                                                        "Are you sure you want to delete?",
-                                                        [
-                                                            {
-                                                                text: "Yes", onPress: () => {
-                                                                    deleteMeeting({
-                                                                        variables: {
-                                                                            ids: Number(item?.id),
-                                                                        }
-                                                                    });
+                            <View style={[
+                                styles.meetingContainer,
+                                {
+                                    borderColor: Colors[theme].border,
+                                    shadowColor: Colors[theme].shadow,
+                                    backgroundColor: Colors[theme].cart
+                                },
+                            ]}>
+                                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6 }}>
+                                    <ThemedText type='subtitle'>{item.title}</ThemedText>
+                                    <View
+                                        style={{
+                                            backgroundColor: item.status == "active" ? "#10B981" : item.status == "completed" ? "#F59E0B" : "#EF4444",
+                                            paddingHorizontal: ms(10),
+                                            padding: vs(2),
+                                            borderRadius: ms(14),
+                                        }}
+                                    >
+                                        <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{item.status.toUpperCase()}</ThemedText>
+                                    </View>
+                                </View>
+                                <View style={{ gap: 20, flexDirection: 'row', marginTop: 15 }}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            router.push({
+                                                pathname: "/(meeting)/createMeeting",
+                                                params: {
+                                                    isCreate: "false",
+                                                    id: item.id,
+                                                    startTime: item.startTime,
+                                                    endTime: item.endTime,
+                                                    title: item.title,
+                                                    meetingDate: item.meetingDate,
+                                                    meetingAgenda: item.meetingAgenda,
+                                                    meetingUrl: item.meetingUrl,
+                                                    meetingTypeId: item.meetingTypeId,
+                                                    projectId: item.projectId,
+                                                    meetingVenueId: item.meetingVenueId,
+                                                },
+                                            })
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            borderWidth: 0.5,
+                                            borderColor: "#3B82F6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <Feather name="edit" size={16} color="#3B82F6" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setMeetingId(item.id);
+                                            setNotesModalVisible(true);
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            borderWidth: 0.5,
+                                            borderColor: "#8B5CF6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <MaterialIcons name="autorenew" size={18} color="#8B5CF6" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            Alert.alert(
+                                                "Delete",
+                                                "Are you sure you want to delete?",
+                                                [
+                                                    {
+                                                        text: "Yes", onPress: () => {
+                                                            deleteMeeting({
+                                                                variables: {
+                                                                    ids: Number(item?.id),
                                                                 }
-                                                            },
-                                                            { text: "No", onPress: () => { } },
-                                                        ]
-                                                    );
-
-                                                }}
-                                            />
-                                        </View>
-                                    </View>
-                                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                        <View style={{
-                                            backgroundColor: item.status == "active" ? "#EAFFF1" : "#F9F9F9", borderRadius: 5, paddingHorizontal: 10,
-                                            borderColor: item.status == "active" ? "#17C653" : "#89500E", borderWidth: 0.5
-                                        }}>
-                                            <ThemedText style={{
-                                                color: item.status == "active" ? "#17C653" : "#89500E"
-                                            }}>{item.status}</ThemedText>
-                                        </View>
-                                        <Pressable
-                                            onPress={() => {
-                                                setMeetingId(item.id);
-                                                setNotesModalVisible(true);
-                                            }}>
-                                            <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                                        </Pressable>
-                                    </View>
+                                                            });
+                                                        }
+                                                    },
+                                                    { text: "No", onPress: () => { } },
+                                                ]
+                                            );
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            borderWidth: 0.5,
+                                            borderColor: "#EF4444",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </Pressable>
@@ -217,63 +234,7 @@ const MeetingScreen = () => {
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
                 />
             </ThemedView>
-            {/* view meeting data  */}
-            <Modal
-                visible={isViewModalVisible}
-                transparent={true}
-                animationType="fade"
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    }}
-                >
-                    <View
-                        style={{
-                            backgroundColor: Colors[theme].cart,
-                            height: vs(220),
-                            width: s(300),
-                            borderRadius: 10,
-                            padding: 10,
-                        }}
-                    >
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                padding: 10,
-                            }}
-                        >
-                            <ThemedText type="subtitle">Meeting Details</ThemedText>
-                            <Pressable onPress={() => setViewModalVisible(false)}>
-                                <Entypo
-                                    name="cross"
-                                    size={ms(20)}
-                                    color={Colors[theme].text}
-                                />
-                            </Pressable>
-                        </View>
-                        <View style={{ flexDirection: 'row', padding: 10 }}>
-                            <View style={{ width: 110 }}>
-                                <ThemedText style={styles.meetingTitle}>Title</ThemedText>
-                                <ThemedText style={styles.meetingTitle}>Time</ThemedText>
-                                <ThemedText style={styles.meetingTitle}>Date</ThemedText>
-                                <ThemedText style={styles.meetingTitle}>Meeting Agenda</ThemedText>
-                            </View>
-                            <View>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.title}</ThemedText>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.startTime} to {selectedMeeting?.endTime}</ThemedText>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.meetingDate}</ThemedText>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.meetingAgenda}</ThemedText>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-            {/* Add Note modal */}
+            {/* Add Status modal */}
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -342,6 +303,26 @@ const MeetingScreen = () => {
                     </View>
                 </View>
             </Modal>
+            <FAB
+                size="large"
+                title="Create Meeting"
+                style={{
+                    position: "absolute",
+                    margin: 10,
+                    right: 0,
+                    bottom: 0,
+                }}
+                icon={{
+                    name: "add",
+                    color: "white",
+                }}
+                onPress={() => router.push({
+                    pathname: "/(meeting)/createMeeting",
+                    params: {
+                        isCreate: "true",
+                    },
+                })}
+            />
         </CustomHeader>
     );
 }
@@ -363,25 +344,25 @@ const styles = ScaledSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
-    searchContainer: {
+     searchContainer: {
         width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: "12@ms",
     },
-    scrollContainer: {
-        marginTop: "5@ms",
-    },
-    organizationContainer: {
-        width: "100%",
-        padding: "12@ms",
-        borderRadius: "8@ms",
-        marginBottom: "16@ms",
-        gap: "8@ms",
-    },
-    organizationInfo: {
-        flexDirection: "row",
+    meetingContainer: {
+        borderRadius: "20@ms",
+        marginHorizontal: "10@ms",
+        marginVertical: "8@ms",
+        padding: "16@ms",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 5,
+        borderWidth: 1,
+        justifyContent: 'space-between',
+        gap: 10,
     },
     organizationHeader: {
         width: "100%",

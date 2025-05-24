@@ -10,6 +10,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { CreateFollowUpDocument, DeleteMetingTaskDocument, PaginatedMeetingTaskDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { FAB } from "@rneui/themed";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -80,27 +81,14 @@ const TaskScreen = () => {
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
-                <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
-                        <CustomSearchBar
-                            searchQuery={searchQuery}
-                            placeholder="Search Task"
-                            onChangeText={(text) => {
-                                setSearchQuery(text);
-                            }}
-                        />
-                    </View>
-                    <Pressable
-                        onPress={() => {
-                            router.push({
-                                pathname: "/(meeting)/addTask",
-                                params: {
-                                    isCreate: "true",
-                                },
-                            });
-                        }}>
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                    </Pressable>
+                <View style={{ width: "100%", marginBottom: 10 }}>
+                    <CustomSearchBar
+                        searchQuery={searchQuery}
+                        placeholder="Search Task"
+                        onChangeText={(text) => {
+                            setSearchQuery(text);
+                        }}
+                    />
                 </View>
                 <FlatList
                     data={filteredData}
@@ -109,7 +97,11 @@ const TaskScreen = () => {
                             <View style={styles.scrollContainer}>
                                 <View style={[
                                     styles.taskContainer,
-                                    { backgroundColor: Colors[theme].cart },
+                                    {
+                                        borderColor: Colors[theme].border,
+                                        shadowColor: Colors[theme].shadow,
+                                        backgroundColor: Colors[theme].cart
+                                    }, ,
                                 ]}>
                                     <View style={styles.taskHeader}>
                                         <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.task}</ThemedText>
@@ -125,7 +117,7 @@ const TaskScreen = () => {
                                                             isCreate: "false",
                                                             task: `${item.task}`,
                                                             comment: `${item.comment}`,
-                                                            id : `${item.id}`
+                                                            id: `${item.id}`
                                                         },
                                                     });
                                                 }}
@@ -264,6 +256,28 @@ const TaskScreen = () => {
                     </View>
                 </View>
             </Modal>
+            <FAB
+                size="large"
+                title="Create Task"
+                style={{
+                    position: "absolute",
+                    margin: 10,
+                    right: 0,
+                    bottom: 0,
+                }}
+                icon={{
+                    name: "add",
+                    color: "white",
+                }}
+                onPress={() => {
+                    router.push({
+                        pathname: "/(meeting)/addTask",
+                        params: {
+                            isCreate: "true",
+                        },
+                    });
+                }}
+            />
         </CustomHeader>
     );
 }
@@ -272,22 +286,21 @@ const styles = ScaledSheet.create({
         flex: 1,
         padding: "12@ms",
     },
-    searchContainer: {
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "12@ms",
-    },
     scrollContainer: {
         marginTop: "1@ms",
     },
     taskContainer: {
-        width: "100%",
-        padding: "12@ms",
-        borderRadius: "8@ms",
-        marginBottom: "16@ms",
-        gap: "8@ms",
+        borderRadius: "20@ms",
+        marginHorizontal: "10@ms",
+        marginVertical: "8@ms",
+        padding: "16@ms",
+        shadowOffset: {width: 0, height: 4},
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 5,
+        borderWidth: 1,
+        justifyContent: 'space-between',
+        gap: 10,
     },
     taskInfo: {
         flexDirection: "row",

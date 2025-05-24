@@ -9,12 +9,12 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateMeetingTypeDocument, DeleteMetingTypeDocument, PaginatedMeetingTypeDocument, UpdateMeetingTypeDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5 } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, FlatList, Modal, Pressable, View, } from "react-native";
+import { Alert, FlatList, Modal, Pressable, TouchableOpacity, View, } from "react-native";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
-import { LinearGradient } from 'expo-linear-gradient';
+import { FAB } from "@rneui/themed";
 
 const defaultValue = {
     name: "",
@@ -118,79 +118,88 @@ const MeetingType = () => {
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{ width: "100%" }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
-                            placeholder="Search Meeting"
+                            placeholder="Search Type"
                             onChangeText={(text) => {
                                 setSearchQuery(text);
                             }}
                         />
                     </View>
-                    <Pressable
-                        onPress={() => {
-                            setAddEditModalVisible(true)
-                            setAddEditManage(false)
-                        }}>
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                    </Pressable>
                 </View>
                 <FlatList
                     data={filteredData}
                     renderItem={({ item }) => (
                         <View style={styles.scrollContainer}>
-                            
-                                <View style={[
-                                    styles.meetingContainer,
-                                    { backgroundColor: Colors[theme].cart },
-                                ]}>
-                                    <View style={styles.meetingHeader}>
-                                       
-                                        <ThemedText type="subtitle" style={{ flex: 1, }} >  {item.name}</ThemedText>
-                                        <View style={styles.organizationInfo}>
-                                            <Feather
-                                                name="edit"
-                                                size={ms(20)}
-                                                color={Colors[theme].text}
-                                                onPress={() => {
-                                                    setAddEditModalVisible(true)
-                                                    setAddEditManage(true)
-                                                    setCurrentMeetingType({
-                                                        name: item?.name,
-                                                        id: item?.id,
-                                                    });
-                                                }}
-                                            />
-                                            <View style={{ width: 5 }}></View>
-                                            <MaterialIcons
-                                                name="delete-outline"
-                                                size={ms(22)}
-                                                color={Colors[theme].text}
-                                                onPress={() => {
-                                                    Alert.alert(
-                                                        "Delete",
-                                                        "Are you sure you want to delete?",
-                                                        [
-                                                            {
-                                                                text: "Yes", onPress: () => {
-                                                                    deleteMeetingType({
-                                                                        variables: {
-                                                                            ids: Number(item?.id),
-                                                                        }
-                                                                    });
+                            <View style={[
+                                styles.meetingTypeContainer,
+                                {
+                                    borderColor: Colors[theme].border,
+                                    shadowColor: Colors[theme].shadow,
+                                    backgroundColor: Colors[theme].cart
+                                },
+                            ]}>
+                                <ThemedText type="subtitle" style={{ flex: 1 }} >{item.name}</ThemedText>
+                                <View style={styles.meetingTypeInfo}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setAddEditModalVisible(true)
+                                            setAddEditManage(true)
+                                            setCurrentMeetingType({
+                                                name: item?.name,
+                                                id: item?.id,
+                                            });
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            borderWidth: 0.5,
+                                            borderColor: "#3B82F6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <Feather name="edit" size={16} color="#3B82F6" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            Alert.alert(
+                                                "Delete",
+                                                "Are you sure you want to delete?",
+                                                [
+                                                    {
+                                                        text: "Yes", onPress: () => {
+                                                            deleteMeetingType({
+                                                                variables: {
+                                                                    ids: Number(item?.id),
                                                                 }
-                                                            },
-                                                            { text: "No", onPress: () => { } },
-                                                        ]
-                                                    );
-
-                                                }}
-                                            />
-                                        </View>
-                                    </View>
-
+                                                            });
+                                                        }
+                                                    },
+                                                    { text: "No", onPress: () => { } },
+                                                ]
+                                            );
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            borderWidth: 0.5,
+                                            borderColor: "#EF4444",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                    </TouchableOpacity>
                                 </View>
-                            
+                            </View>
                         </View>
                     )}
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
@@ -265,6 +274,24 @@ const MeetingType = () => {
                     </View>
                 </View>
             </Modal>
+            <FAB
+                size="small"
+                title="Meeting Type"
+                style={{
+                    position: "absolute",
+                    margin: 15,
+                    right: 0,
+                    bottom: 0,
+                }}
+                icon={{
+                    name: "add",
+                    color: "white",
+                }}
+                onPress={() => {
+                    setAddEditModalVisible(true)
+                    setAddEditManage(false)
+                }}
+            />
         </CustomHeader>
     )
 }
@@ -275,28 +302,30 @@ const styles = ScaledSheet.create({
         padding: "12@ms",
     },
     searchContainer: {
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: "12@ms",
+        marginBottom: "10@ms",
+        marginHorizontal: "10@ms"
     },
     scrollContainer: {
         margin: "5@ms",
     },
-    meetingContainer: {
-        width: "100%",
-        padding: "12@ms",
-        borderRadius: "8@ms",
-        gap: "10@ms",
+    meetingTypeContainer: {
+        borderRadius: "20@ms",
+        marginHorizontal: "5@ms",
+        marginVertical: "5@ms",
+        padding: "16@ms",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 5,
+        borderWidth: 1,
+        justifyContent: 'space-between',
+        gap: 10,
     },
-    organizationInfo: {
-        flexDirection: "row",
-    },
-    meetingHeader: {
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-between",
+    meetingTypeInfo: {
+        gap: 15,
+        flexDirection: 'row',
+        marginTop: 10
     },
     label: {
         fontSize: "16@ms",
@@ -306,7 +335,6 @@ const styles = ScaledSheet.create({
         alignSelf: "flex-start",
     },
     gradient: {
-
         borderRadius: '5@ms',
         alignItems: 'center',
         justifyContent: 'center'

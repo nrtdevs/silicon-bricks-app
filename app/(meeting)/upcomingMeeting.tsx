@@ -8,16 +8,28 @@ import { ThemedView } from "@/components/ThemedView"
 import { Colors } from "@/constants/Colors";
 import { labels } from "@/constants/Labels";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateMeetingDocument, DeleteMetingDocument, GetAllMeetingTypesDocument, GetUpcomingMeetingsDocument, PaginatedMeetingVenueDocument, PaginatedProjectsDocument, PaginatedUsersDocument, UpdateMeetingDocument } from "@/graphql/generated";
+import {
+    CreateMeetingDocument,
+    DeleteMetingDocument,
+    EnableMeetingStatusDocument,
+    GetAllMeetingTypesDocument,
+    GetUpcomingMeetingsDocument,
+    PaginatedMeetingVenueDocument,
+    PaginatedProjectsDocument,
+    PaginatedUsersDocument,
+    UpdateMeetingDocument
+} from "@/graphql/generated";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { Entypo, Feather, Fontisto, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5, Fontisto, MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, FlatList, Modal, Pressable, ScrollView, View, Button, Image } from "react-native";
+import { Alert, FlatList, Modal, Pressable, ScrollView, View, Button, Image, TouchableOpacity } from "react-native";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePickerModal from "@/components/DateTimePickerModal";
+import { FAB } from "@rneui/themed";
+import { router } from "expo-router";
 
 const defaultValue = {
     endTime: '',
@@ -33,7 +45,11 @@ const defaultValue = {
     startTime: '',
     title: ''
 }
-
+const statusData = [
+    { label: "Active", value: "active" },
+    { label: "Completed", value: "completed" },
+    { label: "Inactive", value: "inactive" }
+];
 const UpcomingMeeting = () => {
     const { theme } = useTheme();
     /// serach state 
@@ -63,10 +79,7 @@ const UpcomingMeeting = () => {
             Alert.alert("error", error.message)
         }
     });
-    /// view meeting details
-    const [isViewModalVisible, setViewModalVisible] = useState(false);
-    const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
-    const [isNotesModalVisible, setNotesModalVisible] = useState(false);
+
     /// Create and Edit meeting modal
     const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
     const [addEditManage, setAddEditManage] = useState(false);
@@ -237,7 +250,6 @@ const UpcomingMeeting = () => {
 
     /// image picker
     const [image, setImage] = useState<any>(null);
-
     const pickImage = async () => {
         // Ask for permission
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -258,11 +270,37 @@ const UpcomingMeeting = () => {
             setImage(result.assets[0].uri);
         }
     };
+    /// Meeting status change 
+    const [meetingId, setMeetingId] = useState<string>("");
+    const [isNotesModalVisible, setNotesModalVisible] = useState(false);
+    const [enableMeetingStatus, enableMeetingStatusState] = useMutation(EnableMeetingStatusDocument, {
+        onCompleted: (data) => {
+            reset()
+            refetch();
+            setNotesModalVisible(false);
+            Alert.alert("success", "Create note successfully!");
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
+
+    const onSubmitNotes = (data: any) => {
+        let param = {
+            "ids": [Number(meetingId)],
+            "status": data.status.value,
+        }
+        enableMeetingStatus({
+            variables: {
+                updateMeetingStatusInput: param
+            },
+        });
+    };
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{ width: "100%" }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             placeholder="Search Meeting"
@@ -271,60 +309,103 @@ const UpcomingMeeting = () => {
                             }}
                         />
                     </View>
-                    <Pressable
-                        onPress={() => {
-                            setAddEditManage(true);
-                            setAddEditModalVisible(true);
-                        }}>
-                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                    </Pressable>
                 </View>
                 <FlatList
                     data={filteredData}
                     renderItem={({ item }) => (
-                        <View style={styles.scrollContainer}>
-                            <View style={[
-                                styles.meetingContainer,
-                                { backgroundColor: Colors[theme].cart },
-                            ]}>
-                                <View style={styles.meetingHeader}>
-                                    <ThemedText type="subtitle" style={{ flex: 1 }}>{item.title}</ThemedText>
-                                    <View style={styles.meetingInfo}>
-                                        <MaterialIcons name="visibility" color={Colors[theme].text} size={24}
-                                            onPress={() => {
-                                                setViewModalVisible(true)
-                                                setSelectedMeeting(item);
+                        <Pressable onPress={() => {
+                            router.push({
+                                pathname: "/(meeting)/meetingDetails",
+                                params: {
+                                    id: item.id,
+                                    title: `${item.title}`,
+                                    meetingDate: `${item.meetingDate}`,
+                                    agenda: `${item.meetingAgenda}`,
+                                    reference: `${item.meetingReference}`,
+                                    url: `${item.meetingUrl}`,
+                                    project: `${item.projectName}`,
+                                    startTime: `${item.startTime}`,
+                                    endTime: `${item.endTime}`,
+                                    status: `${item.status}`,
+                                },
+                            });
+                        }}>
+                            <View style={styles.scrollContainer}>
+                                <View style={[
+                                    styles.meetingContainer,
+                                    {
+                                        borderColor: Colors[theme].border,
+                                        shadowColor: Colors[theme].shadow,
+                                        backgroundColor: Colors[theme].cart
+                                    },
+                                ]}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6 }}>
+                                        <ThemedText type="subtitle" style={{ flex: 1 }}>{item.title}</ThemedText>
+                                        <View
+                                            style={{
+                                                backgroundColor: item.status == "active" ? "#10B981" : item.status == "completed" ? "#F59E0B" : "#EF4444",
+                                                paddingHorizontal: ms(10),
+                                                padding: vs(2),
+                                                borderRadius: ms(14),
                                             }}
-                                        />
-                                        <View style={{ width: 5 }}></View>
-                                        <Feather
-                                            name="edit"
-                                            size={ms(20)}
-                                            color={Colors[theme].text}
+                                        >
+                                            <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{item.status.toUpperCase()}</ThemedText>
+                                        </View>
+                                    </View>
+                                    <View style={{ gap: 10, flexDirection: 'row', marginTop: 15 }}>
+                                        <TouchableOpacity
                                             onPress={() => {
-                                                setAddEditManage(true);
-                                                setAddEditModalVisible(true);
-                                                setCurrentMeeting({
-                                                    id: item.id,
-                                                    title: item.title ?? "",
-                                                    startTime: item.startTime,
-                                                    endTime: item.endTime,
-                                                    meetingAgenda: item.meetingAgenda ?? "",
-                                                    meetingReference: item.meetingReference ?? "",
-                                                    projectId: `${item.projectId}`,
-                                                    meetingDate: item.meetingDate,
-                                                    meetingVenueId: `${item.meetingVenueId}`,
-                                                    meetingTypeId: `${item.meetingTypeId}`,
-                                                    meetingUrl: `${item.meetingUrl}`,
-                                                    parentMeetingId: `${item.parentMeetingId}`,
+                                                router.push({
+                                                    pathname: "/(meeting)/createMeeting",
+                                                    params: {
+                                                        isCreate: "false",
+                                                        id: item.id,
+                                                        startTime: item.startTime,
+                                                        endTime: item.endTime,
+                                                        title: item.title,
+                                                        meetingDate: item.meetingDate,
+                                                        meetingAgenda: item.meetingAgenda,
+                                                        meetingUrl: item.meetingUrl,
+                                                        meetingTypeId: item.meetingTypeId,
+                                                        projectId: item.projectId,
+                                                        meetingVenueId: item.meetingVenueId,
+                                                    },
                                                 })
                                             }}
-                                        />
-                                        <View style={{ width: 5 }}></View>
-                                        <MaterialIcons
-                                            name="delete-outline"
-                                            size={ms(22)}
-                                            color={Colors[theme].text}
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                paddingVertical: vs(8),
+                                                paddingHorizontal: ms(12),
+                                                borderRadius: 10,
+                                                borderWidth: 0.5,
+                                                borderColor: "#3B82F6",
+                                                opacity: 0.8
+                                            }}
+                                        >
+                                            <Feather name="edit" size={16} color="#3B82F6" />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setMeetingId(item.id);
+                                                setNotesModalVisible(true);
+                                            }}
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                paddingVertical: vs(8),
+                                                paddingHorizontal: ms(12),
+                                                borderRadius: 10,
+                                                borderWidth: 0.5,
+                                                borderColor: "#8B5CF6",
+                                                opacity: 0.8
+                                            }}
+                                        >
+                                            <MaterialIcons name="autorenew" size={18} color="#8B5CF6" />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
                                             onPress={() => {
                                                 Alert.alert(
                                                     "Delete",
@@ -343,88 +424,29 @@ const UpcomingMeeting = () => {
                                                     ]
                                                 );
                                             }}
-                                        />
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                paddingVertical: vs(8),
+                                                paddingHorizontal: ms(12),
+                                                borderRadius: 10,
+                                                borderWidth: 0.5,
+                                                borderColor: "#EF4444",
+                                                opacity: 0.8
+                                            }}
+                                        >
+                                            <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                        </TouchableOpacity>
                                     </View>
-                                </View>
-                                <ThemedText style={styles.cardTime}>{item.meetingDate} , {item.startTime} to {item.endTime}</ThemedText>
-                                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                    <View style={{
-                                        backgroundColor: item.status == "active" ? "#EAFFF1" : "#F9F9F9", borderRadius: 10, paddingHorizontal: 10,
-                                        borderColor: item.status == "active" ? "#17C653" : "#89500E", borderWidth: 0.5
-                                    }}>
-                                        <ThemedText style={{
-                                            color: item.status == "active" ? "#17C653" : "#89500E"
-                                        }}>{item.status}</ThemedText>
-                                    </View>
-                                    <Pressable
-                                        onPress={() => {
-                                            setNotesModalVisible(true);
-                                        }}>
-                                        <Feather name="plus-square" size={24} color={Colors[theme].text} />
-                                    </Pressable>
                                 </View>
                             </View>
-                        </View>
+                        </Pressable>
                     )}
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
                 />
             </ThemedView>
-            {/* view meeting data  */}
-            <Modal
-                visible={isViewModalVisible}
-                transparent={true}
-                animationType="fade"
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    }}
-                >
-                    <View
-                        style={{
-                            backgroundColor: Colors[theme].cart,
-                            height: vs(220),
-                            width: s(300),
-                            borderRadius: 10,
-                            padding: 10,
-                        }}
-                    >
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                padding: 10,
-                            }}
-                        >
-                            <ThemedText type="subtitle">Meeting Details</ThemedText>
-                            <Pressable onPress={() => setViewModalVisible(false)}>
-                                <Entypo
-                                    name="cross"
-                                    size={ms(20)}
-                                    color={Colors[theme].text}
-                                />
-                            </Pressable>
-                        </View>
-                        <View style={{ flexDirection: 'row', padding: 10 }}>
-                            <View style={{ width: 110 }}>
-                                <ThemedText style={styles.meetingTitle}>Title</ThemedText>
-                                <ThemedText style={styles.meetingTitle}>Time</ThemedText>
-                                <ThemedText style={styles.meetingTitle}>Date</ThemedText>
-                                <ThemedText style={styles.meetingTitle}>Meeting Agenda</ThemedText>
-                            </View>
-                            <View>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.title}</ThemedText>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.startTime} to {selectedMeeting?.endTime}</ThemedText>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.meetingDate}</ThemedText>
-                                <ThemedText style={styles.meetingTitle}> : {selectedMeeting?.meetingAgenda}</ThemedText>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
+
             {/* create and edit modal */}
             <Modal
                 animationType="fade"
@@ -664,7 +686,7 @@ const UpcomingMeeting = () => {
                     </View>
                 </ScrollView>
             </Modal>
-            {/* Add notes modal */}
+            {/* Add Status modal */}
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -675,13 +697,13 @@ const UpcomingMeeting = () => {
                         flex: 1,
                         justifyContent: 'center',
                         alignItems: 'center',
-                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        backgroundColor: 'rgba(0,0,0,0.5)', // Optional: dim background
                     }}
                 >
                     <View
                         style={{
                             backgroundColor: Colors[theme].cart,
-                            height: vs(330),
+                            height: vs(250),
                             width: s(300),
                             borderRadius: 10,
                             padding: 10,
@@ -694,7 +716,7 @@ const UpcomingMeeting = () => {
                                 padding: 10,
                             }}
                         >
-                            <ThemedText type="subtitle">Create</ThemedText>
+                            <ThemedText type="subtitle">Change Status</ThemedText>
                             <Pressable onPress={() => setNotesModalVisible(false)}>
                                 <Entypo
                                     name="cross"
@@ -705,29 +727,24 @@ const UpcomingMeeting = () => {
                         </View>
                         <View style={{ padding: 10 }}>
                             <CustomValidation
-                                type="input"
+                                data={statusData}
+                                type="picker"
+                                hideStar
                                 control={control}
-                                labelStyle={styles.label}
-                                name={"notes"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                label="Notes"
-                                rules={{ required: "enter notes" }}
-                                autoCapitalize="none"
-                            />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                labelStyle={styles.label}
-                                name={"decision"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                label="Decision"
-                                rules={{ required: "enter decision" }}
-                                autoCapitalize="none"
+                                name="status"
+                                label={`Status`}
+                                placeholder="Select status"
+                                rules={{
+                                    required: {
+                                        value: true,
+                                        message: "Select status",
+                                    },
+                                }}
                             />
                             <CustomButton
                                 title="Submit"
                                 onPress={() => {
-                                    //handleSubmit(onSubmitNotes)();
+                                    handleSubmit(onSubmitNotes)();
                                 }}
                                 style={{
                                     backgroundColor: Colors[theme].background,
@@ -757,6 +774,24 @@ const UpcomingMeeting = () => {
                     setDateTimePickerProps(getDateTimePickerProps(false));
                 }}
             />
+            <FAB
+                size="large"
+                title="Create Meeting"
+                style={{
+                    position: "absolute",
+                    margin: 10,
+                    right: 0,
+                    bottom: 0,
+                }}
+                icon={{
+                    name: "add",
+                    color: "white",
+                }}
+                onPress={() => {
+                    setAddEditManage(true);
+                    setAddEditModalVisible(true);
+                }}
+            />
         </CustomHeader>
     )
 }
@@ -776,19 +811,17 @@ const styles = ScaledSheet.create({
         marginTop: "5@ms",
     },
     meetingContainer: {
-        width: "100%",
-        padding: "12@ms",
-        borderRadius: "8@ms",
-        marginBottom: "16@ms",
-        gap: "8@ms",
-    },
-    meetingHeader: {
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
-    meetingInfo: {
-        flexDirection: "row",
+        borderRadius: "20@ms",
+        marginHorizontal: "10@ms",
+        marginVertical: "8@ms",
+        padding: "16@ms",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 5,
+        borderWidth: 1,
+        justifyContent: 'space-between',
+        gap: 10,
     },
     cardTime: {
         fontSize: "16@ms",

@@ -20,12 +20,12 @@ const CustomDrawerContent = (props: any) => {
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(meeting)/meeting')}
       />
-      {/* <DrawerItem
+      <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color={Colors[theme].text} />}
         label={labels?.upcomingMeeting}
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(meeting)/upcomingMeeting')}
-      /> */}
+      />
 
       <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color={Colors[theme].text} />}
@@ -60,6 +60,13 @@ const CustomDrawerContent = (props: any) => {
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(meeting)/upcommingTask')}
       /> */}
+
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="report" size={ms(24)} color={Colors[theme].text} />}
+        label={labels?.report}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/(meeting)/report')}
+      />
 
     </DrawerContentScrollView>
   )

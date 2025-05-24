@@ -17,6 +17,7 @@ import { ScrollView, View, Image, Alert } from "react-native";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from "expo-file-system";
+import { Env } from "@/constants/ApiEndpoints";
 
 const CreateMeeting = () => {
     const { theme } = useTheme();
@@ -203,7 +204,7 @@ const CreateMeeting = () => {
                 name: `upload.${fileExtension}`,
                 type: mimeType,
             } as unknown as Blob);
-            const uploadResponse = await fetch(`http://192.168.1.5:5001/api/files/upload`, {
+            const uploadResponse = await fetch(`${Env.IMAGE_UPLOAD}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -433,7 +434,7 @@ const CreateMeeting = () => {
                             marginTop: vs(20),
                         }}
                     />
-                    {image && <Image source={{ uri: `http://192.168.1.5:5001${image}` }} style={{ width: "100%", height: 200, marginTop: 20, justifyContent: "center", alignSelf: "center" }}
+                    {image && <Image source={{ uri: `${Env.IMAGEURL}${image}` }} style={{ width: "100%", height: 200, marginTop: 20, justifyContent: "center", alignSelf: "center" }}
                     />}
                     <CustomButton
                         title="Submit"
