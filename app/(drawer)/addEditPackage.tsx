@@ -74,6 +74,7 @@ const AddEditPackage = () => {
             variables: {
                 listInputDto: {}
             },
+            fetchPolicy: "network-only"
         });
     }, [])
 

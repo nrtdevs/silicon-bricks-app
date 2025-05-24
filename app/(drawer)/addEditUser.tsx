@@ -243,7 +243,7 @@ const AddEditUser = () => {
                 })
                 return;
             }
-            createUser({                
+            createUser({
                 variables: {
                     data: params,
                 },

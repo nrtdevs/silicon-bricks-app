@@ -32,7 +32,7 @@ const index = () => {
     });
   }, []);
 
-  console.log('Dashboard Data:', error);
+  // console.log('Dashboard Data:', error);
 
   // if (loading) return <ThemedText>Loading...</ThemedText>;
   // if (error) return <ThemedText>Error: {error.message}</ThemedText>; jkj

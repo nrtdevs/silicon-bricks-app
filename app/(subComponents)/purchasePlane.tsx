@@ -12,6 +12,7 @@ import {
   PaginatedPackagesDocument,
   PaginatedPlansDocument,
   UpdatePlanDocument,
+  VerifyPaymentDocument,
 } from "@/graphql/generated";
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
@@ -33,6 +34,7 @@ import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
 import RazorpayCheckout from "react-native-razorpay";
 import alertMsg from "@/constants/alertMsg";
+import { router } from "expo-router";
 
 const defaultValue = {
   name: "",
@@ -60,6 +62,15 @@ const PurchasePlaneScreen = () => {
   const [editModal, setEditModal] = useState<boolean>(false);
   ``;
   const [page, setPage] = useState<number>(1);
+  const [verifyPayment] = useMutation(VerifyPaymentDocument, {
+    onCompleted: (data) => {
+      console.log('payment verified');
+
+    },
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  })
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isStatusModalVisible, setStatusModalVisible] = useState(false);
   const [currentPlanId, setCurrentPlanId] = useState<string>("");
@@ -327,15 +338,16 @@ const PurchasePlaneScreen = () => {
       duration: formData.duration,
       key: "rzp_test_yrANCWqt1Qye8M",
       amount: 409 * 100,
+      // handlePaymentSuccess,
       name: planIdRes?.data?.findPlanById?.name,
       order_id: order.id,
-      prefill: {
-        email: "sidhdadatri@gmail.com",
-        contact: "9999999999",
-        name: "Sidhdadatri",
-      },
+      // prefill: {
+      //   email: "sidhdadatri@gmail.com",
+      //   contact: "9999999999",
+      //   name: "Sidhdadatri",
+      // },
       // handler: function (response: any) {
-      //   handlePaymentSuccess(response)
+      //   handlePaymentSuccess(response, formData.id)
       // },
       theme: { color: Colors.primary },
       remember_customer: true,
@@ -348,6 +360,7 @@ const PurchasePlaneScreen = () => {
       console.log('00099', data?.razorpay_payment_id);
       if (data?.razorpay_payment_id) {
         console.log("098778", data);
+        handlePaymentSuccess(data, formData.id)
       } else {
         Alert.alert(alertMsg.error, "Something went wrong");
       }
@@ -400,36 +413,41 @@ const PurchasePlaneScreen = () => {
     );
   };
 
-  // const handlePaymentSuccess = async ({ razorpay_order_id, razorpay_payment_id, razorpay_signature }: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
-  //   try {
-  //   const planIdRes = await FindPlanById({ variables: { findPlanByIdId: Number(formData.id) } });
-  //     const reponse = await verifyPayment({
-  //       variables: {
-  //         input: {
-  //           planIds: [Number(id)],
-  //           amount: 409 * 100,
-  //           duration: Number(watch('duration')),
-  //           couponCode: watch('couponCode') ?? '',
-  //           razorpayOrderId: razorpay_order_id,
-  //           razorpayPaymentId: razorpay_payment_id,
-  //           razorpaySignature: razorpay_signature,
-  //         },
-  //       },
-  //     });
-  //     if (reponse?.data?.verifyPayment) {
-  //       toast.success(FM('PAYMENT_SUCCESSFUL'));
-  //       navigate('/dashboard');
-  //     } else {
-  //       toast.error(
-  //         FM('PAYMENT_FAILED')
-  //       );
-  //     }
-  //   }
-  //   catch (error) {
-  //     const apolloError = error as ApolloError;
-  //     toast.error(apolloError?.message || FM('FAILED_DUE_TO_ERROR'));
-  //   }
-  // }
+  const handlePaymentSuccess = async (data: any, id: any) => {
+    // : { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = data;
+    // console.log('999', id);
+    let params = {
+      planIds: [Number(id)],
+      amount: 409 * 100,
+      duration: 40,
+      couponCode: 'test555',
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature,
+    }
+    try {
+      const reponse = await verifyPayment({
+        variables: {
+          input: params,
+        },
+      });
+
+      if (reponse?.data?.verifyPayment) {
+        // toast.success(FM('PAYMENT_SUCCESSFUL'));
+        // navigate('/dashboard');
+        router.replace('/(drawer)/(tabs)')
+      } else {
+        // toast.error(
+        //   FM('PAYMENT_FAILED')
+        // );
+      }
+    }
+    catch (error) {
+      // const apolloError = error as ApolloError;
+      // toast.error(apolloError?.message || FM('FAILED_DUE_TO_ERROR'));
+    }
+  }
 
   // if (loading) {
   //   return <Loader />
@@ -535,3 +553,5 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
   },
 });
+
+

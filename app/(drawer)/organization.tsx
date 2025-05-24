@@ -36,6 +36,7 @@ import { useUserContext } from "@/context/RoleContext";
 import { router } from "expo-router";
 import CustomCard from "@/components/master/CustomCard";
 import { Env } from "@/constants/ApiEndpoints";
+import { FAB } from "@rneui/themed";
 
 const defaultValue = {
   name: "",
@@ -319,20 +320,6 @@ const OrganizationScreen = () => {
               }}
             />
           </View>
-          {createPermission && (
-            <Pressable
-              style={styles.buttonContainer}
-              onPress={() => {
-                setModalVisible(true), setCurrentOrganization(defaultValue);
-              }}
-            >
-              <Feather
-                name="plus-square"
-                size={ms(25)}
-                color={Colors[theme].text}
-              />
-            </Pressable>
-          )}
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
@@ -360,6 +347,22 @@ const OrganizationScreen = () => {
           />
         </View>
       </ThemedView>
+
+      {createPermission && <FAB
+        size="large"
+        title="Add User"
+        style={{
+          position: "absolute",
+          margin: 16,
+          right: 0,
+          bottom: 30,
+        }}
+        icon={{
+          name: "add",
+          color: "white",
+        }}
+        onPress={() => { setModalVisible(true), setCurrentOrganization(defaultValue) }}
+      />}
 
       {/* create and edit modal */}
       <Modal

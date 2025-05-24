@@ -171,8 +171,8 @@ const SettingScreen = () => {
             <Feather name="sun" size={ms(18)} color={Colors.orange} />
           }
           trackBar={{
-            activeBackgroundColor: Colors[theme].toggleBtnBackground,
-            inActiveBackgroundColor: Colors[theme].toggleBtnBackground,
+            activeBackgroundColor: Colors[theme].text,
+            inActiveBackgroundColor: Colors[theme].shadow,
             borderWidth: 1,
             borderActiveColor: Colors.black,
             borderInActiveColor: Colors.white,

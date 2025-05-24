@@ -57,8 +57,8 @@ const CustomRole: React.FC<CustomRoleProps> = ({
 
             {/* Action Buttons */}
             <View style={{ gap: 20, flexDirection: 'row', marginTop: 15 }}>
-                {editPermission && <ActionButton icon={<Feather name="edit" size={16} color="#3B82F6" />} text="Edit" bgColor="#3B82F6" onPress={onEdit} />}
-                {deletePermission && <ActionButton icon={<FontAwesome5 name="trash" size={14} color="#EF4444" />} bgColor="#EF4444" text="Delete" onPress={onDelete} />}
+                {editPermission && <ActionButton icon={<Feather name="edit" size={18} color={Colors.white} />} text="Edit" bgColor="#3B82F6" onPress={onEdit} />}
+                {deletePermission && <ActionButton icon={<FontAwesome5 name="trash" size={18} color={Colors.white} />} bgColor="#EF4444" text="Delete" onPress={onDelete} />}
             </View>
 
         </View>
@@ -87,7 +87,8 @@ const ActionButton = ({
                 paddingHorizontal: ms(12),
                 borderRadius: 10,
                 borderWidth: 0.5,
-                borderColor: bgColor,
+                borderColor: Colors.white,
+                backgroundColor: bgColor,
                 opacity: 0.8
             }}
         >

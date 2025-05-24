@@ -210,7 +210,7 @@ export default function LoginScreen() {
               </Pressable>
             </View>
 
-      
+
           </View>
         </View>
       </ScrollView>

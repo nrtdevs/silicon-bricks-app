@@ -257,7 +257,7 @@ const RolesScreen = () => {
           position: "absolute",
           margin: 16,
           right: 0,
-          bottom: 0,
+          bottom: 30,
         }}
         icon={{
           name: "add",
