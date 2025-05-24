@@ -4,8 +4,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { ListTrashedMeetingDocument } from "@/graphql/generated";
-import { useLazyQuery } from "@apollo/client";
+import { HardDeleteMeetingDocument, ListTrashedMeetingDocument, RestoreMeetingDocument } from "@/graphql/generated";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect } from "react";
@@ -26,6 +26,26 @@ const DeletedMeetingScreen = () => {
             },
         });
     }, [])
+    /// restore meeting api 
+    const [restoreMeeting, restoreMeetingState] = useMutation(RestoreMeetingDocument, {
+        onCompleted: (data) => {
+            refetch();
+            Alert.alert("success", "Meeting restore successfully!")
+        },
+        onError: (error) => {
+            Alert.alert("error", error.message)
+        }
+    });
+    /// delete meeting api 
+    const [deleteMeeting, deleteMeetingState] = useMutation(HardDeleteMeetingDocument, {
+        onCompleted: (data) => {
+            refetch();
+            Alert.alert("success", "Meeting delete successfully!")
+        },
+        onError: (error) => {
+            Alert.alert("error", error.message)
+        }
+    });
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -37,6 +57,7 @@ const DeletedMeetingScreen = () => {
                         onPress={() => router.back()}
                         style={{ left: 10 }} />
                     <ThemedText style={{ fontSize: 20, fontWeight: "600", right: 10 }}>Trashed Meeting</ThemedText>
+                    <ThemedText></ThemedText>
                 </View>
                 <FlatList
                     data={data?.listTrashedMeeting.data}
@@ -64,18 +85,18 @@ const DeletedMeetingScreen = () => {
                             </View>
                             <View style={{ gap: 20, flexDirection: 'row', marginTop: 15 }}>
                                 <TouchableOpacity
-                                    onPress={() => { 
+                                    onPress={() => {
                                         Alert.alert(
                                             "Restore",
                                             `${item.title} will be restored`,
                                             [
                                                 {
                                                     text: "Yes", onPress: () => {
-                                                        // deleteMeeting({
-                                                        //     variables: {
-                                                        //         ids: Number(item?.id),
-                                                        //     }
-                                                        // });
+                                                        restoreMeeting({
+                                                            variables: {
+                                                                ids: Number(item?.id),
+                                                            }
+                                                        });
                                                     }
                                                 },
                                                 { text: "No", onPress: () => { } },
@@ -104,11 +125,11 @@ const DeletedMeetingScreen = () => {
                                             [
                                                 {
                                                     text: "Yes", onPress: () => {
-                                                        // deleteMeeting({
-                                                        //     variables: {
-                                                        //         ids: Number(item?.id),
-                                                        //     }
-                                                        // });
+                                                        deleteMeeting({
+                                                            variables: {
+                                                                ids: Number(item?.id),
+                                                            }
+                                                        });
                                                     }
                                                 },
                                                 { text: "No", onPress: () => { } },

@@ -16,7 +16,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useQuery } from "@apollo/client";
 import { GetMeetingDashboardDocument } from "@/graphql/generated";
 import SmallCart from "@/components/vehicle/SmallCart";
-import { router } from "expo-router";
+
 
 const index = () => {
   // test
@@ -47,8 +47,8 @@ const index = () => {
               <Entypo name="menu" size={34} color={Colors[theme].text} />
             </Pressable>
             <ThemedText>Dashboard</ThemedText>
+            <ThemedText></ThemedText>
           </View>
-
           <View style={styles.container}>
             <SmallCart icon={"account-voice"} label={`Active Meetings (${userCount.activeMeetings})`} onPress={() => { }} />
             <SmallCart icon={"account-voice"} label={`Total Meetings (${userCount.totalMeetings})`} onPress={() => { }} />
@@ -61,7 +61,6 @@ const index = () => {
             <SmallCart icon={"note"} label={`Total Tasks (${userCount.totalTasks})`} onPress={() => { }} />
             <SmallCart icon={"note"} label={`Incomplete Tasks (${userCount.inComingTasks})`} onPress={() => { }} />
           </View>
-
         </ScrollView>
       </ThemedView>
     </CustomHeader>

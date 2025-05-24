@@ -195,6 +195,7 @@ const AddTask = () => {
                         onPress={() => router.back()}
                         style={{ left: 10 }} />
                     <ThemedText style={{ fontSize: 20, fontWeight: "600", right: 10 }}>{isCreate == "true" ? "Add Task" : "Update Task"}</ThemedText>
+                    <ThemedText></ThemedText>
                 </View>
                 <ScrollView style={{ paddingHorizontal: 10 }}>
                     <CustomValidation

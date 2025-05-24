@@ -1003,3 +1003,9 @@ mutation UpdateNotes($updateNotesInput: UpdateNotesDto!) {
     uploadDoc
   }
 }
+mutation RestoreMeeting($ids: [Int!]!) {
+  restoreMeeting(ids: $ids)
+}
+mutation HardDeleteMeeting($ids: [Int!]!) {
+  hardDeleteMeeting(ids: $ids)
+}
