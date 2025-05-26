@@ -11,6 +11,7 @@ import { CreateNotePadDocument, DeleteNotePadDocument, PaginatedNotePadDocument,
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Entypo, Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { FAB } from "@rneui/themed";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, FlatList, Modal, Pressable, TouchableOpacity, View } from "react-native";
@@ -112,7 +113,7 @@ const MyNotes = () => {
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "100%" }}>
+                    <View style={{ width: "90%" }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             placeholder="Search notes"
@@ -121,6 +122,10 @@ const MyNotes = () => {
                             }}
                         />
                     </View>
+                    <Pressable
+                        onPress={() => router.push("/(meeting)/trashedNotes")}>
+                        <FontAwesome5 name="trash" size={20} color="#EF4444" />
+                    </Pressable>
                 </View>
                 <FlatList
                     data={filteredData}
@@ -134,7 +139,7 @@ const MyNotes = () => {
                                     backgroundColor: Colors[theme].cart
                                 },
                             ]}>
-                                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6}}>
+                                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6 }}>
                                     <ThemedText type="subtitle" style={{ flex: 1 }}>{item.notesField}</ThemedText>
                                     <View
                                         style={{
@@ -310,6 +315,7 @@ const styles = ScaledSheet.create({
     },
     searchContainer: {
         width: "100%",
+        flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: "12@ms",

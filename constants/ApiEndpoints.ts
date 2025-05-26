@@ -3,7 +3,7 @@ export enum Env {
     BASE_URL = `http://${DOMAIN}/graphql`,
     SERVER_URL = `http://${DOMAIN}`,
     SOCKET_URL = `wss://${DOMAIN}/wss2/:8090`,
-    IMAGEURL = `http://192.168.1.25:5001`,
-    IMAGE_UPLOAD = `http://192.168.1.25:5001/api/files/upload`,
+    IMAGEURL = `http://192.168.1.29:5001`,
+    IMAGE_UPLOAD = `http://192.168.1.29:5001/api/files/upload`,
     LIMIT = 25
 }

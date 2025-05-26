@@ -1,6 +1,7 @@
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import CustomValidation from "@/components/CustomValidation";
+import NoDataFound from "@/components/NoDataFound";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
@@ -176,7 +177,7 @@ const MeetingDetails = () => {
                             <ThemedText style={styles.meetingSubtitle}> : {agenda}</ThemedText>
                             <ThemedText style={styles.meetingSubtitle}> : {reference}</ThemedText>
                             <ThemedText style={styles.meetingSubtitle}> : {url}</ThemedText>
-                            <ThemedText style={styles.meetingSubtitle}> : {project}</ThemedText>
+                            <ThemedText style={styles.meetingSubtitle}> : {project == "null" ? "NA" : project}</ThemedText>
                             <View style={{ flexDirection: "row", alignItems: "center", }}>
                                 <ThemedText style={styles.meetingSubtitle}> : </ThemedText>
                                 <View style={{
@@ -191,24 +192,16 @@ const MeetingDetails = () => {
                         </View>
                     </View>
                 </View>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
-                    <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Notes List</ThemedText>
-                    <FAB
-                        size="small"
-                        style={{
-                            margin: 1,
-                            right: 0,
-                            bottom: 0,
-                        }}
-                        icon={{
-                            name: "add",
-                            color: "white",
-                        }}
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", margin: 15}}>
+                    <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Notes</ThemedText>
+                    <Pressable
                         onPress={() => {
                             setNotesModalVisible(true);
                             setCurrentMeetingNote(defaultValue)
                         }}
-                    />
+                    >
+                        <ThemedText type='link'>+ Create Note</ThemedText>
+                    </Pressable>
                 </View>
                 <FlatList
                     data={data?.getPaginatedNotesByMeetingId.data}
@@ -285,30 +278,25 @@ const MeetingDetails = () => {
                                 </View>
                             </View>
                         </View>
-                    )} />
+                    )} 
+                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+                    />
 
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
-                    <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Task List</ThemedText>
-                    <FAB
-                        size="small"
-                        style={{
-                            margin: 1,
-                            right: 0,
-                            bottom: 0,
-                        }}
-                        icon={{
-                            name: "add",
-                            color: "white",
-                        }}
-                         onPress={() => {
-                            router.push({
+                    <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Tasks</ThemedText>
+
+                    <Pressable
+                        onPress={() => {
+                             router.push({
                                 pathname: "/(meeting)/addTask",
                                 params: {
                                     isCreate: "true",
                                 },
                             });
                         }}
-                    />
+                    >
+                        <ThemedText type='link'>+ Create Task</ThemedText>
+                    </Pressable>
                 </View>
 
                 <FlatList
@@ -327,16 +315,16 @@ const MeetingDetails = () => {
                                 <View style={{ gap: 10, flexDirection: 'row', marginTop: 10 }}>
                                     <TouchableOpacity
                                         onPress={() => {
-                                                    router.push({
-                                                        pathname: "/(meeting)/addTask",
-                                                        params: {
-                                                            isCreate: "false",
-                                                            task: `${item.task}`,
-                                                            comment: `${item.comment}`,
-                                                            id : `${item.id}`
-                                                        },
-                                                    });
-                                                }}
+                                            router.push({
+                                                pathname: "/(meeting)/addTask",
+                                                params: {
+                                                    isCreate: "false",
+                                                    task: `${item.task}`,
+                                                    comment: `${item.comment}`,
+                                                    id: `${item.id}`
+                                                },
+                                            });
+                                        }}
                                         style={{
                                             flexDirection: 'row',
                                             alignItems: 'center',
@@ -387,7 +375,9 @@ const MeetingDetails = () => {
                                 </View>
                             </View>
                         </View>
-                    )} />
+                    )} 
+                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+                    />
             </ThemedView>
             {/* Add Note modal */}
             <Modal
