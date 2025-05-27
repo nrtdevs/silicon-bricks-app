@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { FontAwesome5, MaterialIcons, Feather } from '@expo/vector-icons';
+import { FontAwesome5, MaterialIcons, Feather, Ionicons, Zocial, FontAwesome6 } from '@expo/vector-icons';
 import { ThemedView } from '../ThemedView';
 import { ms, ScaledSheet, vs } from 'react-native-size-matters';
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
 import { ThemedText } from '../ThemedText';
+import { TextInput } from 'react-native-paper';
 
 interface CustomUserProps {
     name: string;
@@ -23,12 +24,25 @@ interface CustomUserProps {
 }
 
 const statusColors = {
-    active: '#10B981',
-    inactive: '#EF4444',
-    pending: '#F59E0B',
-    blocked: 'black'
+    active: '#34D399',
+    inactive: '#F87171',
+    pending: '#FBBF24',
+    blocked: '#60A5FA'
 };
 
+const statusTextColors = {
+    active: '#6EE7B7',
+    inactive: '#FCA5A5',
+    pending: '#FCD34D',
+    blocked: '#BFDBFE'
+};
+
+const statusTextColorsOptions = {
+    active: 'success',
+    inactive: 'danger',
+    pending: 'warning',
+    blocked: 'secondary'
+};
 const CustomUserCard: React.FC<CustomUserProps> = ({
     name,
     status,
@@ -53,38 +67,55 @@ const CustomUserCard: React.FC<CustomUserProps> = ({
 
             }]}
         >
-            <View style={{}}>
+            <View style={{ gap: vs(10) }}>
                 {/* Header */}
-                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6, width: 300 }}>
-                    <View>
-                        <ThemedText type='subtitle'>{name}</ThemedText>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6, justifyContent: 'space-between' }}>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Feather name="user" size={ms(24)} color={Colors[theme]?.primary?.text} />
+                        <ThemedText style={{ marginLeft: ms(5) }} type='subtitle'>{name}</ThemedText>
                     </View>
-                    <View
-                        style={{
-                            backgroundColor: statusColors[status],
-                            paddingHorizontal: ms(10),
-                            padding: vs(2),
-                            borderRadius: ms(14),
-                        }}
-                    >
-                        <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{status.toUpperCase()}</ThemedText>
+                    {readPermission && <MaterialIcons name="arrow-forward-ios" size={24} color={Colors[theme]?.text} onPress={onView} />}
+                </View>
+                {/* <View
+                    style={{
+                        backgroundColor: statusColors[status],
+                        paddingHorizontal: ms(10),
+                        padding: vs(2),
+                        borderRadius: ms(14),
+                        alignSelf: 'flex-start',
+                    }}
+                >
+                    <ThemedText style={{ fontSize: ms(10), color: "white", fontWeight: 'bold' }} type='default'>{status.toUpperCase()}</ThemedText>
+                </View> */}
+                {/* Status Badge */}
+                <View style={{}}>
+                    <View style={[styles.statusBadge, {
+                        backgroundColor: Colors[theme]?.[statusTextColorsOptions[status]]?.bg,
+                        borderColor: Colors[theme]?.[statusTextColorsOptions[status]]?.border
+                    }]}>
+
+                        <Text style={[styles.statusText, { color: Colors[theme]?.[statusTextColorsOptions[status]]?.text }]}>
+                            {status.toUpperCase()}
+                        </Text>
                     </View>
                 </View>
 
-                {/* Details */}
+                {/* Details */}s
                 <View style={{}}>
-                    <ThemedText type='defaultSemiBold' style={{ marginBottom: 4, width: 300, }}>
-                        <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Email:</ThemedText> {email}
-                    </ThemedText>
-                    <ThemedText type='defaultSemiBold' style={{ marginBottom: 4, width: 300, }}>
-                        <ThemedText type='subtitle' style={{ fontSize: ms(18), }}>Mobile No:</ThemedText> {mobileNo}
-                    </ThemedText>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                        <Zocial name="email" size={24} color={Colors[theme]?.textPrimary} />
+                        <ThemedText style={{ marginLeft: ms(10), color: Colors[theme]?.textSecondary, justifyContent: 'center' }}>{email}</ThemedText>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                        <Feather name="phone-outgoing" size={24} color={Colors[theme]?.textPrimary} />
+                        <ThemedText style={{ marginLeft: ms(10), color: Colors[theme]?.textSecondary, justifyContent: 'center' }}>{mobileNo}</ThemedText>
+                    </View>
                 </View>
             </View>
 
             {/* Action Buttons */}
-            <View style={{ gap: 20, flexDirection: 'row', marginTop: 15 }}>
-                {readPermission && <ActionButton icon={<FontAwesome5 name="eye" size={18} color={Colors.white} />} text="View" bgColor="#10B981" onPress={onView} />}
+            <View style={{ flexDirection: 'row', marginTop: vs(10), justifyContent: 'space-between' }}>
                 {editPermission && <ActionButton icon={<Feather name="edit" size={18} color={Colors.white} />} text="Edit" bgColor="#3B82F6" onPress={onEdit} />}
                 {statusPermission && <ActionButton icon={<MaterialIcons name="autorenew" size={18} color={Colors.white} />} bgColor="#8B5CF6" text="Status" onPress={onChangeStatus} />}
                 {deletePermission && <ActionButton icon={<FontAwesome5 name="trash" size={18} color={Colors.white} />} bgColor="#EF4444" text="Delete" onPress={onDelete} />}
@@ -114,14 +145,12 @@ const ActionButton = ({
                 paddingVertical: vs(8),
                 paddingHorizontal: ms(12),
                 borderRadius: 10,
-                borderWidth: 0.5,
-                borderColor: Colors.white,
                 backgroundColor: bgColor,
                 opacity: 0.8
             }}
         >
             {icon}
-            {/* <Text style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>{text}</Text> */}
+            <Text style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>{text}</Text>
         </TouchableOpacity>
     );
 };
@@ -130,16 +159,31 @@ export default CustomUserCard;
 
 const styles = ScaledSheet.create({
     container: {
-        borderRadius: "20@ms",
-        marginHorizontal: "12@ms",
-        marginVertical: "10@ms",
-        padding: "16@ms",
-        shadowOffset: { width: 0, height: 4 },
+        marginHorizontal: '12@s',
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
         shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 5,
+        shadowRadius: 8,
+        elevation: 4,
         borderWidth: 1,
-        justifyContent: 'space-between',
-        gap: 10,
-    }
+    },
+    statusBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        borderWidth: 1,
+    },
+    statusText: {
+        fontSize: 12,
+        fontWeight: '500',
+    },
 })

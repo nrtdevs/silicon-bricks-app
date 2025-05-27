@@ -999,17 +999,3 @@ query ListTrashedMeeting($listInputDto: ListInputDTO!) {
     }
   }
 }
-query PaginatedActivityLogMeeting($listInputDto: ListInputDTO!) {
-  paginatedActivityLogMeeting(ListInputDTO: $listInputDto) {
-    data {
-      id
-      createdByUserId
-      module
-      moduleId
-      description
-      activity
-      ipAddress
-      userAgent
-    }
-  }
-}

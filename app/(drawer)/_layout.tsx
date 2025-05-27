@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
-import { Feather, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons, Octicons } from '@expo/vector-icons';
+import { Entypo, Feather, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons, Octicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { labels } from '@/constants/Labels';
 import { useTheme } from '@/context/ThemeContext';
@@ -115,7 +115,7 @@ const CustomDrawerContent = (props: any) => {
             /> */}
 
             <DrawerItem
-              icon={({ color, size }) => <MaterialIcons name="local-offer" size={ms(24)} color={Colors[theme].text} />}
+              icon={({ color, size }) => <Entypo name="light-bulb" size={ms(24)} color={Colors[theme].text} />}
               label={labels?.plans}
               labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
               onPress={() => router.push('/plans')}
