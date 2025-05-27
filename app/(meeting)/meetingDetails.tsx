@@ -88,12 +88,14 @@ const MeetingDetails = () => {
                         decision: data.decision,
                         uploadDoc: null,
                     }
-                }
+                },
+                fetchPolicy:'network-only'
             }) :
             createMeetingNotes({
                 variables: {
                     notesData: param
                 },
+                fetchPolicy:'network-only'
             });
     };
     /// fetch meeting notes data 
@@ -282,7 +284,7 @@ const MeetingDetails = () => {
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
                     />
 
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", margin: 15 }}>
                     <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Tasks</ThemedText>
 
                     <Pressable

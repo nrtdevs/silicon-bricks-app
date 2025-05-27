@@ -71,7 +71,6 @@ const CreateMeeting = () => {
         }
     });
     const onSubmit = (data: any) => {
-        console.log(data);
         let param = {
             "title": data.title,
             "attendees": data.attendees.map((id: number) => Number(id)),
@@ -86,6 +85,24 @@ const CreateMeeting = () => {
             "projectId": Number(data.projectId.value),
             "uploadDoc": image
         }
+        let paramUpdate = {
+            "id": Number(id),
+            "title": data.title,
+            "attendees": data.attendees.map((id: number) => Number(id)),
+            "startTime": data.startTime,
+            "endTime": data.endTime,
+            "meetingDate": data.meetingDate,
+            "meetingAgenda": data.meetingAgenda,
+            "meetingReference": "",
+            "meetingUrl": data.meetingUrl,
+            "meetingTypeId": Number(data.meetingTypeId.value),
+            "meetingVenueId": Number(data.meetingVenueId.value),
+            "projectId": Number(data.projectId.value),
+            "uploadDoc": null,
+            "projectName": data.projectName.value
+        }
+        console.log('param', paramUpdate);
+        return;        
         isCreate == "true" ?
             createMeeting({
                 variables: {
@@ -113,7 +130,7 @@ const CreateMeeting = () => {
                 },
             });
     };
-    
+
     useEffect(() => {
         if (isCreate == "true") {
             reset();
