@@ -288,7 +288,6 @@ const styles = ScaledSheet.create({
   cardCount: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#111827',
     marginBottom: 4,
   },
   cardName: {
@@ -336,15 +335,10 @@ const styles = ScaledSheet.create({
   },
   section: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
+    padding: 10,
     marginBottom: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
   },
   sectionHeader: {
     flexDirection: 'row',

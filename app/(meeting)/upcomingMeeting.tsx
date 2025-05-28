@@ -248,28 +248,7 @@ const UpcomingMeeting = () => {
         }));
     }, [attendeesData]);
 
-    /// image picker
-    const [image, setImage] = useState<any>(null);
-    const pickImage = async () => {
-        // Ask for permission
-        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (permissionResult.granted === false) {
-            alert("Permission to access camera roll is required!");
-            return;
-        }
 
-        // Pick the image
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            setImage(result.assets[0].uri);
-        }
-    };
     /// Meeting status change 
     const [meetingId, setMeetingId] = useState<string>("");
     const [isNotesModalVisible, setNotesModalVisible] = useState(false);
@@ -352,6 +331,10 @@ const UpcomingMeeting = () => {
                                             <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{item.status.toUpperCase()}</ThemedText>
                                         </View>
                                     </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 5 }}>
+                                        <Feather name="calendar" size={ms(16)} color={Colors[theme].textPrimary} />
+                                        <ThemedText type="default">Time : {item.startTime} To {item.endTime}</ThemedText>
+                                    </View>
                                     <View style={{ gap: 10, flexDirection: 'row', marginTop: 15 }}>
                                         <TouchableOpacity
                                             onPress={() => {
@@ -379,12 +362,12 @@ const UpcomingMeeting = () => {
                                                 paddingVertical: vs(8),
                                                 paddingHorizontal: ms(12),
                                                 borderRadius: 10,
-                                                borderWidth: 0.5,
-                                                borderColor: "#3B82F6",
+                                                backgroundColor: "#3B82F6",
                                                 opacity: 0.8
                                             }}
                                         >
-                                            <Feather name="edit" size={16} color="#3B82F6" />
+                                            icon={<Feather name="edit" size={16} color="#fff" />}
+                                            <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() => {
@@ -398,12 +381,12 @@ const UpcomingMeeting = () => {
                                                 paddingVertical: vs(8),
                                                 paddingHorizontal: ms(12),
                                                 borderRadius: 10,
-                                                borderWidth: 0.5,
-                                                borderColor: "#8B5CF6",
+                                                backgroundColor: "#8B5CF6",
                                                 opacity: 0.8
                                             }}
                                         >
-                                            <MaterialIcons name="autorenew" size={18} color="#8B5CF6" />
+                                            icon={<MaterialIcons name="autorenew" size={18} color='#fff' />}
+                                            <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Status</ThemedText>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             onPress={() => {
@@ -431,12 +414,12 @@ const UpcomingMeeting = () => {
                                                 paddingVertical: vs(8),
                                                 paddingHorizontal: ms(12),
                                                 borderRadius: 10,
-                                                borderWidth: 0.5,
-                                                borderColor: "#EF4444",
+                                                backgroundColor: "#EF4444",
                                                 opacity: 0.8
                                             }}
                                         >
-                                            <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                            icon={<FontAwesome5 name="trash" size={14} color="#fff" />}
+                                            <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -447,245 +430,6 @@ const UpcomingMeeting = () => {
                 />
             </ThemedView>
 
-            {/* create and edit modal */}
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={isAddEditModalVisible}
-            >
-                <ScrollView
-                    style={{
-                        flex: 1,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    }}
-                    contentContainerStyle={{
-                        flexGrow: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                >
-                    <View
-                        style={{
-                            backgroundColor: Colors[theme].cart,
-                            // height: vs(350),
-                            width: s(300),
-                            borderRadius: 10,
-                            padding: 10,
-                        }}>
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                padding: 10,
-                            }}
-                        >
-                            <ThemedText type="subtitle">{addEditManage ? "Update Meeting" : "Create Meeting"}</ThemedText>
-                            <Pressable onPress={() =>
-                                setAddEditModalVisible(false)
-                            }>
-                                <Entypo
-                                    name="cross"
-                                    size={ms(20)}
-                                    color={Colors[theme].text}
-                                />
-                            </Pressable>
-                        </View>
-                        <View style={{ padding: 10 }}>
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                labelStyle={styles.label}
-                                name={"title"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                label={`${labels.title}`}
-                                rules={{
-                                    required: labels.title,
-                                }}
-                                autoCapitalize="none"
-                            />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                placeholder={"Start time"}
-                                name="startTime"
-                                editable={true}
-                                label='Start Time'
-                                rightIcon={
-                                    <MaterialIcons
-                                        name="access-time"
-                                        size={ms(22)}
-                                        color={Colors[theme]?.text}
-                                    />
-                                }
-                                onPress={() => {
-                                    setDateModal({
-                                        start: !dateModal.start,
-                                        end: false,
-                                    });
-                                    setActiveDateField("startTime");
-                                    setDateTimePickerProps(getDateTimePickerProps(true));
-                                }}
-                                pointerEvents="none"
-                                rules={{
-                                    required: {
-                                        value: true,
-                                        message: "Start Time",
-                                    },
-                                }}
-                            />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                placeholder={"End time"}
-                                name="endTime"
-                                editable={true}
-                                label='End Time'
-                                rightIcon={
-                                    <MaterialIcons
-                                        name="access-time"
-                                        size={ms(22)}
-                                        color={Colors[theme]?.text}
-                                    />
-                                }
-                                rules={{
-                                    required: {
-                                        value: true,
-                                        message: "End time",
-                                    },
-                                }}
-                                onPress={() => {
-                                    setDateModal({
-                                        start: !dateModal.start,
-                                        end: false,
-                                    });
-                                    setActiveDateField("endTime");
-                                    setDateTimePickerProps(getDateTimePickerProps(true));
-                                }}
-                                pointerEvents="none"
-                            />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                placeholder={"Meeting Date"}
-                                name="meetingDate"
-                                editable={true}
-                                label='Meeting Date'
-                                rightIcon={
-                                    <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
-                                }
-                                onPress={() => {
-                                    setDateModal({
-                                        start: !dateModal.start,
-                                        end: false,
-                                    });
-                                    setActiveDateField("meetingDate");
-                                    setDateTimePickerProps(getDateTimePickerProps(true));
-                                }}
-                                pointerEvents="none"
-                                rules={{
-                                    required: {
-                                        value: true,
-                                        message: "Enter meeting date",
-                                    },
-                                }}
-                            />
-                            <CustomValidation
-                                data={projectPickerData}
-                                type="picker"
-                                hideStar
-                                control={control}
-                                labelStyle={styles.label}
-                                name="projectId"
-                                label='Project Name'
-                                placeholder={packageLoading ? "Loading..." : "Select Project"}
-                                inputStyle={{ height: vs(50) }}
-                                rules={{
-                                    required: {
-                                        value: true,
-                                        message: "Select project name",
-                                    },
-                                }}
-                            />
-                            <CustomValidation
-                                data={meetingTypePickerData}
-                                type="picker"
-                                hideStar
-                                control={control}
-                                labelStyle={styles.label}
-                                label='Meeting Type'
-                                name="meetingTypeId"
-                                placeholder={meetingTypeLoading ? "Loading..." : "Select Meeting"}
-                                inputStyle={{ height: vs(50) }}
-                            />
-                            <CustomValidation
-                                data={meetingVenuePickerData}
-                                type="picker"
-                                hideStar
-                                control={control}
-                                labelStyle={styles.label}
-                                label='Meeting Venue'
-                                name="meetingVenueId"
-                                placeholder={meetingVenueLoading ? "Loading..." : "Select Venue"}
-                                inputStyle={{ height: vs(50) }}
-                            />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                labelStyle={styles.label}
-                                name={"meetingAgenda"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                label={`Meeting Agenda`}
-                                autoCapitalize="none"
-                            />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                labelStyle={styles.label}
-                                name={"meetingUrl"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                label={`Meeting Link`}
-                                rules={{
-                                    required: labels.title,
-                                }}
-                                autoCapitalize="none"
-                            />
-                            <CustomValidation
-                                data={attendeesPickerData}
-                                type="picker"
-                                hideStar
-                                multiSelect
-                                control={control}
-                                labelStyle={styles.label}
-                                name="attendees"
-                                label='Attendees'
-                                placeholder={attendeesLoading ? "Loading..." : "Select Attendees"}
-                                inputStyle={{ height: vs(50) }}
-                                rules={{
-                                    required: {
-                                        value: true,
-                                        message: "Select Attendees",
-                                    },
-                                }}
-                            />
-
-                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', margin: 10 }}>
-                                <Button title="Pick an image from gallery" onPress={pickImage} />
-                                {image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginTop: 20 }} />}
-                            </View>
-                            <CustomButton
-                                title="Submit"
-                                onPress={() => {
-                                    handleSubmit(onSubmit)();
-                                }}
-                                style={{
-                                    backgroundColor: Colors[theme].background,
-                                    marginTop: vs(20),
-                                }}
-                            />
-                        </View>
-                    </View>
-                </ScrollView>
-            </Modal>
             {/* Add Status modal */}
             <Modal
                 animationType="fade"
@@ -787,10 +531,12 @@ const UpcomingMeeting = () => {
                     name: "add",
                     color: "white",
                 }}
-                onPress={() => {
-                    setAddEditManage(true);
-                    setAddEditModalVisible(true);
-                }}
+                onPress={() => router.push({
+                    pathname: "/(meeting)/createMeeting",
+                    params: {
+                        isCreate: "true",
+                    },
+                })}
             />
         </CustomHeader>
     )

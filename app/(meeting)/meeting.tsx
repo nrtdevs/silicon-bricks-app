@@ -146,8 +146,6 @@ const MeetingScreen = () => {
                                     <Feather name="calendar" size={ms(16)} color={Colors[theme].textPrimary} />
                                     <ThemedText type="default">Time : {item.startTime} To {item.endTime}</ThemedText>
                                 </View>
-
-
                                 <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
                                     <TouchableOpacity
                                         onPress={() => {

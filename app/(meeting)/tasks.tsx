@@ -9,12 +9,12 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateFollowUpDocument, DeleteMetingTaskDocument, PaginatedMeetingTaskDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { FAB } from "@rneui/themed";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, FlatList, Modal, Pressable, View } from "react-native";
+import { Alert, FlatList, Modal, Pressable, TouchableOpacity, View } from "react-native";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 
 const TaskScreen = () => {
@@ -94,82 +94,104 @@ const TaskScreen = () => {
                     data={filteredData}
                     renderItem={({ item }) => {
                         return (
-                            <View style={styles.scrollContainer}>
-                                <View style={[
-                                    styles.taskContainer,
-                                    {
-                                        borderColor: Colors[theme].border,
-                                        shadowColor: Colors[theme].shadow,
-                                        backgroundColor: Colors[theme].cart
-                                    }, ,
-                                ]}>
-                                    <View style={styles.taskHeader}>
-                                        <ThemedText type="subtitle" style={{ flex: 1 }}>{item?.task}</ThemedText>
-                                        <View style={styles.taskInfo}>
-                                            <Feather
-                                                name="edit"
-                                                size={ms(20)}
-                                                color={Colors[theme].text}
-                                                onPress={() => {
-                                                    router.push({
-                                                        pathname: "/(meeting)/addTask",
-                                                        params: {
-                                                            isCreate: "false",
-                                                            task: `${item.task}`,
-                                                            comment: `${item.comment}`,
-                                                            id: `${item.id}`
-                                                        },
-                                                    });
-                                                }}
-                                            />
-                                            <View style={{ width: 5 }}></View>
+                            <View style={[styles.scrollContainer,
+                            {
+                                borderColor: Colors[theme].border,
+                                shadowColor: Colors[theme].shadow,
+                                backgroundColor: Colors[theme].cart
+                            }
+                            ]}>
 
-                                            <MaterialIcons
-                                                name="web"
-                                                size={ms(22)}
-                                                color={Colors[theme].text}
-                                                onPress={() => {
-                                                    setAddEditModalVisible(true)
-                                                }}
-                                            />
-                                            <View style={{ width: 5 }}></View>
-                                            <MaterialIcons
-                                                name="delete-outline"
-                                                size={ms(22)}
-                                                color={Colors[theme].text}
-                                                onPress={() => {
-                                                    Alert.alert(
-                                                        "Delete",
-                                                        "Are you sure you want to delete?",
-                                                        [
-                                                            {
-                                                                text: "Yes", onPress: () => {
-                                                                    deleteMeetingTask({
-                                                                        variables: {
-                                                                            ids: Number(item?.id),
-                                                                        }
-                                                                    });
+                                <ThemedText type='subtitle'>{item?.task}</ThemedText>
+                                <View
+                                    style={{
+                                        width: 100,
+                                        backgroundColor: item.status == "active" ? "#10B981" : item.status == "completed" ? "#F59E0B" : "#EF4444",
+                                        paddingHorizontal: ms(10),
+                                        padding: vs(2),
+                                        borderRadius: ms(14),
+                                    }}
+                                >
+                                    <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{item.status.toUpperCase()}</ThemedText>
+                                </View>
+                                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            router.push({
+                                                pathname: "/(meeting)/addTask",
+                                                params: {
+                                                    isCreate: "false",
+                                                    task: `${item.task}`,
+                                                    comment: `${item.comment}`,
+                                                    id: `${item.id}`
+                                                },
+                                            })
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            backgroundColor: "#3B82F6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        icon={<Feather name="edit" size={16} color="#fff" />}
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setAddEditModalVisible(true)
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            backgroundColor: "#8B5CF6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        {/* icon={<MaterialIcons name="autorenew" size={18} color='#fff' />} */}
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Follow up</ThemedText>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            Alert.alert(
+                                                "Delete",
+                                                "Are you sure you want to delete?",
+                                                [
+                                                    {
+                                                        text: "Yes", onPress: () => {
+                                                            deleteMeetingTask({
+                                                                variables: {
+                                                                    ids: Number(item?.id),
                                                                 }
-                                                            },
-                                                            { text: "No", onPress: () => { } },
-                                                        ]
-                                                    );
-
-                                                }}
-                                            />
-                                        </View>
-                                    </View>
-                                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                        <ThemedText>{item?.priority}</ThemedText>
-                                        <View style={{
-                                            backgroundColor: item.status == "completed" ? "#EAFFF1" : item.status == "approved" ? "#EFF6FF" : "#F9F9F9", borderRadius: 10, padding: 5,
-                                            borderColor: item.status == "completed" ? "#8ACA53" : item.status == "approved" ? "#1B8BFF" : "#89500E", borderWidth: 0.5
-                                        }}>
-                                            <ThemedText style={{
-                                                color: item.status == "completed" ? "#8ACA53" : item.status == "approved" ? "#1B8BFF" : "#89500E"
-                                            }}>{item.status}</ThemedText>
-                                        </View>
-                                    </View>
+                                                            });
+                                                        }
+                                                    },
+                                                    { text: "No", onPress: () => { } },
+                                                ]
+                                            );
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            backgroundColor: "#EF4444",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        icon={<FontAwesome5 name="trash" size={14} color="#fff" />}
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         );
@@ -287,14 +309,11 @@ const styles = ScaledSheet.create({
         padding: "12@ms",
     },
     scrollContainer: {
-        marginTop: "1@ms",
-    },
-    taskContainer: {
         borderRadius: "20@ms",
         marginHorizontal: "10@ms",
         marginVertical: "8@ms",
         padding: "16@ms",
-        shadowOffset: {width: 0, height: 4},
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 5,
@@ -302,14 +321,20 @@ const styles = ScaledSheet.create({
         justifyContent: 'space-between',
         gap: 10,
     },
-    taskInfo: {
-        flexDirection: "row",
+    taskContainer: {
+        borderRadius: "20@ms",
+        marginHorizontal: "10@ms",
+        marginVertical: "8@ms",
+        padding: "16@ms",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 5,
+        borderWidth: 1,
+        justifyContent: 'space-between',
+        gap: 10,
     },
-    taskHeader: {
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
+
     label: {
         fontSize: "16@ms",
         fontWeight: "normal",
