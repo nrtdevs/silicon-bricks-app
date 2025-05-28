@@ -91,8 +91,8 @@ const ModuleScreen = () => {
 
     const [createModule, createModuleState] = useMutation(CreateModuleDocument, {
         onCompleted: (data) => {
-            fetchModules(true);
             reset()
+            fetchModules(true);
             setCurrentModule(defaultValue);
             setEditModal(false);
             setModalVisible(false);
@@ -140,6 +140,7 @@ const ModuleScreen = () => {
     }, [currentModule])
 
     useEffect(() => {
+        setCurrentModule(defaultValue);
         fetchModules();
     }, []);
 
@@ -338,7 +339,7 @@ const ModuleScreen = () => {
                             fetchModules(true);
                         }}
                         keyExtractor={(item: any, index: number) => index.toString()}
-                        contentContainerStyle={{ paddingBottom: vs(60) }}
+                        contentContainerStyle={{ paddingBottom: vs(140) }}
                         ListEmptyComponent={!loading ? <NoDataFound /> : null}
                         ListFooterComponent={
                             hasMore ? (
@@ -453,7 +454,7 @@ const ModuleScreen = () => {
                 <View
                     style={{
                         backgroundColor: Colors[theme].cart,
-                        height: vs(320),
+                        height: vs(330),
                         width: s(300),
                         borderRadius: 10,
                         alignSelf: "center",

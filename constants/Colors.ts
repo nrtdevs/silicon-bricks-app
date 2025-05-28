@@ -4,6 +4,9 @@ const tintColorDark = '#ffffff';
 export const Colors = {
   /** 🎨 Light Theme Colors */
   light: {
+        gray: '#f8f9fa',        // disabled background
+        focusBorder: '#3b82f6',
+
     textPrimary: '#111827',
     textSecondary: '#6B7280',
     text: '#1C1C1E',
@@ -73,6 +76,8 @@ export const Colors = {
 
   /** 🌙 Dark Theme Colors */
   dark: {
+    gray: '#0f172a',
+    focusBorder: '#60a5fa', 
     textPrimary: '#E0E0E0',
     textSecondary: '#9E9E9E',
     text: '#F5F5F7',

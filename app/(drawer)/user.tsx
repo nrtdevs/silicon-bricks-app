@@ -325,7 +325,7 @@ const UserScreen = () => {
               fetchUser(true);
             }}
             keyExtractor={(item: any, index: number) => index.toString()}
-            contentContainerStyle={{ paddingBottom: vs(100) }}
+            contentContainerStyle={{ paddingBottom: vs(120) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
             ListFooterComponent={
               hasMore ? (
@@ -491,7 +491,7 @@ const UserScreen = () => {
           name: "add",
           color: "white",
         }}
-        onPress={() => router.push("/addEditUser")}
+        onPress={() => router.push("/(subComponents)/addEditUser")}
       />}
 
     </CustomHeader>

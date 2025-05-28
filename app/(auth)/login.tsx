@@ -188,7 +188,6 @@ export default function LoginScreen() {
             {/* Login Button */}
             <CustomButton
               title="Choose plane"
-              isLoading={createRequestState?.loading}
               onPress={() => router.push("/(subComponents)/purchasePlane")}
               isGradient
             />

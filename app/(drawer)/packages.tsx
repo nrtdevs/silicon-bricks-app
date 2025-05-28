@@ -260,7 +260,7 @@ const PackageScreen = () => {
                 statusPermission={statusUpdatePermission}
                 onEdit={() => {
                     router.push({
-                        pathname: "/addEditPackage",
+                        pathname: "/(subComponents)/addEditPackage",
                         params: {
                             data: JSON.stringify(item),
                         },
@@ -572,7 +572,7 @@ const PackageScreen = () => {
                     name: "add",
                     color: "white",
                 }}
-                onPress={() => router.push("/addEditPackage")}
+                onPress={() => router.push("/(subComponents)/addEditPackage")}
             />}
         </CustomHeader>
     );

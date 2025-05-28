@@ -241,12 +241,14 @@ const CustomValidation = (props: TextInputProps) => {
       }: any) => {
         const errStyle = {
           backgroundColor: props.disabled
-            ? Colors.gray
-            : Colors[theme].cart,
+            ? Colors[theme].gray
+            : theme === "dark"
+            ? "#1e1e1e"
+            : "#ffffff",
           borderColor: error
-            ? Colors.red
+            ? Colors[theme].danger
             : isFocused
-            ? Colors[theme].border
+            ? Colors[theme].focusBorder
             : Colors[theme].border,
         };
         return (
@@ -277,7 +279,9 @@ const CustomValidation = (props: TextInputProps) => {
                       style={[
                         styles.labelStyle,
                         props.labelStyle,
-                        props.labelStyle ? {} : { color: Colors[theme].lightText },
+                        props.labelStyle
+                          ? {}
+                          : { color: Colors[theme].lightText },
                       ]}
                     >
                       {props.label}
@@ -391,7 +395,9 @@ const CustomValidation = (props: TextInputProps) => {
                     style={[
                       styles.labelStyle,
                       props.labelStyle,
-                      props.labelStyle ? {} : { color: Colors[theme].lightText },
+                      props.labelStyle
+                        ? {}
+                        : { color: Colors[theme].lightText },
                     ]}
                   >
                     {props.label}
@@ -407,7 +413,8 @@ const CustomValidation = (props: TextInputProps) => {
                       errStyle,
                       props.inputStyle,
                       {
-                        backgroundColor: Colors[theme].cart,
+                        backgroundColor:
+                          theme === "dark" ? "#1e1e1e" : "#ffffff",
                         shadowColor: Colors[theme].cart,
                       },
                     ]}
@@ -462,7 +469,7 @@ const CustomValidation = (props: TextInputProps) => {
                     activeColor={Colors.gray}
                     iconStyle={styles.iconStyle}
                     containerStyle={{
-                      backgroundColor: Colors[theme].cart,
+                      backgroundColor: theme === "dark" ? "#1e1e1e" : "#ffffff",
                       borderRadius: ms(8),
                       marginTop: vs(5),
                     }}
@@ -485,7 +492,8 @@ const CustomValidation = (props: TextInputProps) => {
                       errStyle,
                       props.inputStyle,
                       {
-                        backgroundColor: Colors[theme].background,
+                        backgroundColor:
+                          theme === "dark" ? "#1e1e1e" : "#ffffff",
                         shadowColor: Colors[theme].background,
                       },
                     ]}
@@ -536,7 +544,7 @@ const CustomValidation = (props: TextInputProps) => {
                     }
                     searchPlaceholder={props.searchPlaceholder ?? "Search"}
                     containerStyle={{
-                      backgroundColor: Colors[theme].cart,
+                      backgroundColor: theme === "dark" ? "#1e1e1e" : "#ffffff",
                       borderRadius: ms(8),
                       marginTop: vs(5),
                     }}
@@ -625,7 +633,10 @@ const CustomValidation = (props: TextInputProps) => {
                 }}
               >
                 <ThemedText
-                  style={[styles.labelStyle, { color: Colors[theme].lightText }]}
+                  style={[
+                    styles.labelStyle,
+                    { color: Colors[theme].lightText },
+                  ]}
                 >
                   {props.label}{" "}
                   {props.rules?.required ? (
@@ -639,8 +650,7 @@ const CustomValidation = (props: TextInputProps) => {
                     styles.imgContainer,
                     {
                       backgroundColor: Colors[theme].cart,
-                     borderColor: Colors[theme].border,
-                     
+                      borderColor: Colors[theme].border,
                     },
                   ]}
                 >
@@ -653,12 +663,7 @@ const CustomValidation = (props: TextInputProps) => {
                     }}
                     style={styles.image}
                   />
-                  <View
-                    style={[
-                      styles.btnView,
-                     
-                    ]}
-                  >
+                  <View style={[styles.btnView]}>
                     <ThemedText style={styles.placeholderStyle}>
                       {value?.length > 0
                         ? value.slice(0, 12) + "..."
@@ -667,7 +672,7 @@ const CustomValidation = (props: TextInputProps) => {
 
                     <CustomButton
                       title={value?.length > 0 ? "Change" : "Upload"}
-                      isLoading={loading} 
+                      isLoading={loading}
                       onPress={async () => {
                         setLoading(true);
                         const res = await pickImage();

@@ -50,14 +50,13 @@ const CustomUserCard: React.FC<CustomUserProps> = ({
             style={[styles.container, {
                 borderColor: Colors?.[theme]?.border,
                 shadowColor: Colors[theme].shadow,
-                backgroundColor: Colors[theme].cart,
+                // backgroundColor: Colors[theme].cart,
 
             }]}
         >
             <View style={{ gap: vs(10) }}>
                 {/* Header */}
                 <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6, justifyContent: 'space-between' }}>
-
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Feather name="user" size={ms(24)} color={Colors[theme]?.primary?.text} />
                         <ThemedText style={{ marginLeft: ms(5) }} type='subtitle'>{name}</ThemedText>

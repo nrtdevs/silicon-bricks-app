@@ -135,7 +135,7 @@ const Project = () => {
     const params = {
       name: data?.project_name,
       organizationId: 1,
-      description: data?.description,
+      description: data?.description ?? "",
     };
 
     editVisible
@@ -306,7 +306,7 @@ const Project = () => {
                 fetchProject(true);
               }}
               keyExtractor={(item: any, index: number) => index.toString()}
-              contentContainerStyle={{ paddingBottom: vs(100) }}
+              contentContainerStyle={{ paddingBottom: vs(180) }}
               ListEmptyComponent={!loading ? <NoDataFound /> : null}
               ListFooterComponent={
                 hasMore ? (
@@ -412,8 +412,8 @@ const Project = () => {
       >
         <View
           style={{
-            backgroundColor: Colors[theme].cart,
-            height: vs(320),
+            backgroundColor: Colors[theme].background,
+            height: vs(330),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
