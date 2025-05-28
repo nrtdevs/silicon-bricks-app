@@ -61,6 +61,14 @@ export const Colors = {
       border: '#14B8A6',    // Medium teal border
       main: '#14B8A6',      // Main info color
     },
+
+    blocked: {
+      bg: '#F3F4F6',        // Light gray background
+      text: '#111827',      // Very dark gray (near black) text
+      border: '#D1D5DB',    // Soft gray border
+      main: '#1F2937',      // Dark gray main color (for headings or highlights)
+      shadow: '#0000000D',  // Very light shadow (subtle)
+    }
   },
 
   /** 🌙 Dark Theme Colors */
@@ -122,6 +130,14 @@ export const Colors = {
       border: '#14B8A6',    // Medium teal border
       main: '#2DD4BF',      // Lighter info for dark mode
     },
+
+    blocked: {
+      bg: '#1F2937',        // Dark gray background (deep and rich)
+      text: '#F9FAFB',      // Very light text for contrast
+      border: '#374151',    // Charcoal gray border
+      main: '#111827',      // Almost black main color (use for contrast or main highlights)
+      shadow: '#00000050',  // Medium opacity black shadow for depth
+    }
   },
 
   /** 🌎 Universal Colors */

@@ -325,7 +325,7 @@ const UserScreen = () => {
               fetchUser(true);
             }}
             keyExtractor={(item: any, index: number) => index.toString()}
-            contentContainerStyle={{ paddingBottom: vs(60) }}
+            contentContainerStyle={{ paddingBottom: vs(100) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
             ListFooterComponent={
               hasMore ? (

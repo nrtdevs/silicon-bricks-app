@@ -23,26 +23,13 @@ interface CustomUserProps {
     onChangeStatus: () => void;
 }
 
-const statusColors = {
-    active: '#34D399',
-    inactive: '#F87171',
-    pending: '#FBBF24',
-    blocked: '#60A5FA'
-};
-
-const statusTextColors = {
-    active: '#6EE7B7',
-    inactive: '#FCA5A5',
-    pending: '#FCD34D',
-    blocked: '#BFDBFE'
-};
-
 const statusTextColorsOptions = {
     active: 'success',
     inactive: 'danger',
     pending: 'warning',
-    blocked: 'secondary'
+    blocked: 'blocked',
 };
+
 const CustomUserCard: React.FC<CustomUserProps> = ({
     name,
     status,
@@ -61,7 +48,7 @@ const CustomUserCard: React.FC<CustomUserProps> = ({
     return (
         <View
             style={[styles.container, {
-                borderColor: Colors[theme].border,
+                borderColor: Colors?.[theme]?.border,
                 shadowColor: Colors[theme].shadow,
                 backgroundColor: Colors[theme].cart,
 
@@ -77,17 +64,7 @@ const CustomUserCard: React.FC<CustomUserProps> = ({
                     </View>
                     {readPermission && <MaterialIcons name="arrow-forward-ios" size={24} color={Colors[theme]?.text} onPress={onView} />}
                 </View>
-                {/* <View
-                    style={{
-                        backgroundColor: statusColors[status],
-                        paddingHorizontal: ms(10),
-                        padding: vs(2),
-                        borderRadius: ms(14),
-                        alignSelf: 'flex-start',
-                    }}
-                >
-                    <ThemedText style={{ fontSize: ms(10), color: "white", fontWeight: 'bold' }} type='default'>{status.toUpperCase()}</ThemedText>
-                </View> */}
+
                 {/* Status Badge */}
                 <View style={{}}>
                     <View style={[styles.statusBadge, {
@@ -101,7 +78,7 @@ const CustomUserCard: React.FC<CustomUserProps> = ({
                     </View>
                 </View>
 
-                {/* Details */}s
+                {/* Details */}
                 <View style={{}}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                         <Zocial name="email" size={24} color={Colors[theme]?.textPrimary} />
