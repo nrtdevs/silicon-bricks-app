@@ -83,7 +83,7 @@ const DeletedMeetingScreen = () => {
                                     <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{item.status.toUpperCase()}</ThemedText>
                                 </View>
                             </View>
-                            <View style={{ gap: 20, flexDirection: 'row', marginTop: 15 }}>
+                            <View style={{ gap: 20, flexDirection: 'row', marginTop: 15, justifyContent: 'space-between' }}>
                                 <TouchableOpacity
                                     onPress={() => {
                                         Alert.alert(
@@ -110,12 +110,12 @@ const DeletedMeetingScreen = () => {
                                         paddingVertical: vs(8),
                                         paddingHorizontal: ms(12),
                                         borderRadius: 10,
-                                        borderWidth: 0.5,
-                                        borderColor: "#8B5CF6",
+                                        backgroundColor: "#8B5CF6",
                                         opacity: 0.8
                                     }}
                                 >
-                                    <MaterialIcons name="autorenew" size={18} color="#8B5CF6" />
+                                    icon={<MaterialIcons name="autorenew" size={18} color='#fff' />}
+                                    <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Restore</ThemedText>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => {
@@ -143,12 +143,12 @@ const DeletedMeetingScreen = () => {
                                         paddingVertical: vs(8),
                                         paddingHorizontal: ms(12),
                                         borderRadius: 10,
-                                        borderWidth: 0.5,
-                                        borderColor: "#EF4444",
+                                        backgroundColor: "#EF4444",
                                         opacity: 0.8
                                     }}
                                 >
-                                    <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                    icon={<FontAwesome5 name="trash" size={14} color="#fff" />}
+                                    <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
                                 </TouchableOpacity>
                             </View>
                         </View>

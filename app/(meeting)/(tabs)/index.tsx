@@ -62,10 +62,14 @@ const index = () => {
 
           <View style={styles.container}>
             <View style={styles.cardsContainer}>
-              <View style={styles.card}>
+              <View style={[styles.card, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.iconContainer, { backgroundColor: '#F3F4F6' }]}>
-                    <Feather name='home' size={18} color="#4B5563" />
+                  <View style={[styles.iconContainer, { backgroundColor: '#fff' }]}>
+                    <Feather name='home' size={18} color="#3B82F6" />
                   </View>
                   <View style={styles.trendContainer}>
                     <ThemedText style={styles.cardCount}>{userCount.activeMeetings}</ThemedText>
@@ -76,10 +80,14 @@ const index = () => {
             </View>
 
             <View style={styles.cardsContainer}>
-              <View style={styles.card}>
+              <View style={[styles.card, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.iconContainer, { backgroundColor: '#F3F4F6' }]}>
-                    <Feather name='home' size={18} color="#4B5563" />
+                  <View style={[styles.iconContainer, { backgroundColor: '#fff' }]}>
+                    <Feather name='home' size={18} color="#3B82F6" />
                   </View>
                   <View style={styles.trendContainer}>
                     <ThemedText style={styles.cardCount}>{userCount.totalMeetings}</ThemedText>
@@ -88,12 +96,15 @@ const index = () => {
                 <ThemedText style={styles.cardName}>Total Meetings</ThemedText>
               </View>
             </View>
-
             <View style={styles.cardsContainer}>
-              <View style={styles.card}>
+              <View style={[styles.card, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.iconContainer, { backgroundColor: '#F3F4F6' }]}>
-                    <Feather name='home' size={18} color="#4B5563" />
+                  <View style={[styles.iconContainer, { backgroundColor: '#fff' }]}>
+                    <Feather name='home' size={18} color="#3B82F6" />
                   </View>
                   <View style={styles.trendContainer}>
                     <ThemedText style={styles.cardCount}>{userCount.todayMeeting}</ThemedText>
@@ -102,12 +113,15 @@ const index = () => {
                 <ThemedText style={styles.cardName}>Today Meetings</ThemedText>
               </View>
             </View>
-
             <View style={styles.cardsContainer}>
-              <View style={styles.card}>
+              <View style={[styles.card, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.iconContainer, { backgroundColor: '#F3F4F6' }]}>
-                    <Feather name='home' size={18} color="#4B5563" />
+                  <View style={[styles.iconContainer, { backgroundColor: '#fff' }]}>
+                    <Feather name='home' size={18} color="#3B82F6" />
                   </View>
                   <View style={styles.trendContainer}>
                     <ThemedText style={styles.cardCount}>{userCount.upComingMeeting}</ThemedText>
@@ -116,12 +130,15 @@ const index = () => {
                 <ThemedText style={styles.cardName}>Upcoming Meetings</ThemedText>
               </View>
             </View>
-
             <View style={styles.cardsContainer}>
-              <View style={styles.card}>
+              <View style={[styles.card, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.iconContainer, { backgroundColor: '#F3F4F6' }]}>
-                    <Feather name='home' size={18} color="#4B5563" />
+                  <View style={[styles.iconContainer, { backgroundColor: '#fff' }]}>
+                    <Feather name='home' size={18} color="#3B82F6" />
                   </View>
                   <View style={styles.trendContainer}>
                     <ThemedText style={styles.cardCount}>{userCount.completedMeeting}</ThemedText>
@@ -130,12 +147,15 @@ const index = () => {
                 <ThemedText style={styles.cardName}>Complete Meetings</ThemedText>
               </View>
             </View>
-
             <View style={styles.cardsContainer}>
-              <View style={styles.card}>
+              <View style={[styles.card, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
                 <View style={styles.cardHeader}>
-                  <View style={[styles.iconContainer, { backgroundColor: '#F3F4F6' }]}>
-                    <Feather name='home' size={18} color="#4B5563" />
+                  <View style={[styles.iconContainer, { backgroundColor: '#fff' }]}>
+                    <Feather name='home' size={18} color="#3B82F6" />
                   </View>
                   <View style={styles.trendContainer}>
                     <ThemedText style={styles.cardCount}>{userCount.inactiveMeetings}</ThemedText>
@@ -144,48 +164,71 @@ const index = () => {
                 <ThemedText style={styles.cardName}>Inactive Meetings</ThemedText>
               </View>
             </View>
-
             {/* Recent Activity */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <ThemedText>Upcoming Activity</ThemedText>
-                  <ThemedText></ThemedText>
+                <ThemedText></ThemedText>
               </View>
-              <View style={styles.activitiesContainer}>
-                  <View style={styles.activityItem}>
-                    <View style={[styles.activityIcon, { backgroundColor: '#EFF6FF' }]}>
+              <View style={[styles.activitiesContainer, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
+                <View style={styles.activityItem}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={[styles.activityIcon, { backgroundColor: '#fff' }]}>
                       <Feather name='home' size={16} color="#3B82F6" />
                     </View>
-                      <ThemedText>Total Tasks</ThemedText>
-                      <ThemedText>{userCount.totalTasks}</ThemedText>
+                    <ThemedText>Total Tasks</ThemedText>
                   </View>
+                  <ThemedText>{userCount.totalTasks}</ThemedText>
+                </View>
               </View>
-              <View style={styles.activitiesContainer}>
-                  <View style={styles.activityItem}>
-                    <View style={[styles.activityIcon, { backgroundColor: '#EFF6FF' }]}>
+              <View style={[styles.activitiesContainer, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
+                <View style={styles.activityItem}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={[styles.activityIcon, { backgroundColor: '#fff' }]}>
                       <Feather name='home' size={16} color="#3B82F6" />
                     </View>
-                      <ThemedText>Incomplete Tasks</ThemedText>
-                      <ThemedText>{userCount.inComingTasks}</ThemedText>
+                    <ThemedText>Incomplete Tasks</ThemedText>
                   </View>
+                  <ThemedText>{userCount.inComingTasks}</ThemedText>
+                </View>
               </View>
-              <View style={styles.activitiesContainer}>
-                  <View style={styles.activityItem}>
-                    <View style={[styles.activityIcon, { backgroundColor: '#EFF6FF' }]}>
+              <View style={[styles.activitiesContainer, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
+                <View style={styles.activityItem}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={[styles.activityIcon, { backgroundColor: '#fff' }]}>
                       <Feather name='home' size={16} color="#3B82F6" />
                     </View>
-                      <ThemedText>Completed Tasks</ThemedText>
-                      <ThemedText>{userCount.completedTasks}</ThemedText>
+                    <ThemedText>Completed Tasks</ThemedText>
                   </View>
+                  <ThemedText>{userCount.completedTasks}</ThemedText>
+                </View>
               </View>
-               <View style={styles.activitiesContainer}>
-                  <View style={styles.activityItem}>
-                    <View style={[styles.activityIcon, { backgroundColor: '#EFF6FF' }]}>
+              <View style={[styles.activitiesContainer, {
+                borderColor: Colors[theme].border,
+                shadowColor: Colors[theme].shadow,
+                backgroundColor: Colors[theme].cart
+              }]}>
+                <View style={styles.activityItem}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={[styles.activityIcon, { backgroundColor: '#fff' }]}>
                       <Feather name='home' size={16} color="#3B82F6" />
                     </View>
-                      <ThemedText>Ongoing Tasks</ThemedText>
-                      <ThemedText>{userCount.ongoingTasks}</ThemedText>
+                    <ThemedText>Ongoing Tasks</ThemedText>
                   </View>
+                  <ThemedText>{userCount.ongoingTasks}</ThemedText>
+                </View>
               </View>
             </View>
 
@@ -249,8 +292,8 @@ const styles = ScaledSheet.create({
     marginBottom: 4,
   },
   cardName: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: "13@ms",
+    fontWeight: '500',
   },
   cardsContainer: {
     flexDirection: 'row',
@@ -260,7 +303,6 @@ const styles = ScaledSheet.create({
   },
   card: {
     width: CARD_WIDTH,
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -293,7 +335,7 @@ const styles = ScaledSheet.create({
     marginLeft: 4,
   },
   section: {
-    width : '100%',
+    width: '100%',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
@@ -312,10 +354,13 @@ const styles = ScaledSheet.create({
   },
   activitiesContainer: {
     marginTop: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 15
   },
   activityItem: {
     flexDirection: 'row',
-    justifyContent : 'space-between',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
