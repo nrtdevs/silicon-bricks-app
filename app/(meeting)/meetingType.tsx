@@ -158,12 +158,12 @@ const MeetingType = () => {
                                             paddingVertical: vs(8),
                                             paddingHorizontal: ms(12),
                                             borderRadius: 10,
-                                            borderWidth: 0.5,
-                                            borderColor: "#3B82F6",
+                                            backgroundColor: "#3B82F6",
                                             opacity: 0.8
                                         }}
                                     >
-                                        <Feather name="edit" size={16} color="#3B82F6" />
+                                        icon={<Feather name="edit" size={16} color="#fff" />}
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={() => {
@@ -191,12 +191,12 @@ const MeetingType = () => {
                                             paddingVertical: vs(8),
                                             paddingHorizontal: ms(12),
                                             borderRadius: 10,
-                                            borderWidth: 0.5,
-                                            borderColor: "#EF4444",
+                                            backgroundColor: "#EF4444",
                                             opacity: 0.8
                                         }}
                                     >
-                                        <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                        icon={<FontAwesome5 name="trash" size={14} color="#fff" />}
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
                                     </TouchableOpacity>
                                 </View>
                             </View>

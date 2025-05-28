@@ -141,7 +141,14 @@ const MeetingScreen = () => {
                                         <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{item.status.toUpperCase()}</ThemedText>
                                     </View>
                                 </View>
-                                <View style={{ gap: 20, flexDirection: 'row', marginTop: 15 }}>
+
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 5 }}>
+                                    <Feather name="calendar" size={ms(16)} color={Colors[theme].textPrimary} />
+                                    <ThemedText type="default">Time : {item.startTime} To {item.endTime}</ThemedText>
+                                </View>
+
+
+                                <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
                                     <TouchableOpacity
                                         onPress={() => {
                                             router.push({
@@ -168,12 +175,12 @@ const MeetingScreen = () => {
                                             paddingVertical: vs(8),
                                             paddingHorizontal: ms(12),
                                             borderRadius: 10,
-                                            borderWidth: 0.5,
-                                            borderColor: "#3B82F6",
+                                            backgroundColor: "#3B82F6",
                                             opacity: 0.8
                                         }}
                                     >
-                                        <Feather name="edit" size={16} color="#3B82F6" />
+                                        icon={<Feather name="edit" size={16} color="#fff" />}
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={() => {
@@ -187,12 +194,12 @@ const MeetingScreen = () => {
                                             paddingVertical: vs(8),
                                             paddingHorizontal: ms(12),
                                             borderRadius: 10,
-                                            borderWidth: 0.5,
-                                            borderColor: "#8B5CF6",
+                                            backgroundColor: "#8B5CF6",
                                             opacity: 0.8
                                         }}
                                     >
-                                        <MaterialIcons name="autorenew" size={18} color="#8B5CF6" />
+                                        icon={<MaterialIcons name="autorenew" size={18} color='#fff' />}
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Status</ThemedText>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={() => {
@@ -220,12 +227,12 @@ const MeetingScreen = () => {
                                             paddingVertical: vs(8),
                                             paddingHorizontal: ms(12),
                                             borderRadius: 10,
-                                            borderWidth: 0.5,
-                                            borderColor: "#EF4444",
+                                            backgroundColor: "#EF4444",
                                             opacity: 0.8
                                         }}
                                     >
-                                        <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                                        icon={<FontAwesome5 name="trash" size={14} color="#fff" />}
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -344,7 +351,7 @@ const styles = ScaledSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between'
     },
-     searchContainer: {
+    searchContainer: {
         width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
@@ -387,6 +394,19 @@ const styles = ScaledSheet.create({
         marginBottom: 5,
         textAlign: "left",
         alignSelf: "flex-start",
+    },
+    statusBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        borderWidth: 1,
+    },
+    statusText: {
+        fontSize: 12,
+        fontWeight: '500',
     },
 });
 export default MeetingScreen;
