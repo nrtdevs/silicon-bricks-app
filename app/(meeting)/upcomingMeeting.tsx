@@ -366,7 +366,7 @@ const UpcomingMeeting = () => {
                                                 opacity: 0.8
                                             }}
                                         >
-                                            icon={<Feather name="edit" size={16} color="#fff" />}
+                                            <Feather name="edit" size={16} color="#fff" />
                                             <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
                                         </TouchableOpacity>
                                         <TouchableOpacity
@@ -385,7 +385,7 @@ const UpcomingMeeting = () => {
                                                 opacity: 0.8
                                             }}
                                         >
-                                            icon={<MaterialIcons name="autorenew" size={18} color='#fff' />}
+                                            <MaterialIcons name="autorenew" size={18} color='#fff' />
                                             <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Status</ThemedText>
                                         </TouchableOpacity>
                                         <TouchableOpacity
@@ -418,7 +418,7 @@ const UpcomingMeeting = () => {
                                                 opacity: 0.8
                                             }}
                                         >
-                                            icon={<FontAwesome5 name="trash" size={14} color="#fff" />}
+                                            <FontAwesome5 name="trash" size={14} color="#fff" />
                                             <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
                                         </TouchableOpacity>
                                     </View>

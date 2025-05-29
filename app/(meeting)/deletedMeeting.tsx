@@ -114,7 +114,7 @@ const DeletedMeetingScreen = () => {
                                         opacity: 0.8
                                     }}
                                 >
-                                    icon={<MaterialIcons name="autorenew" size={18} color='#fff' />}
+                                    <MaterialIcons name="autorenew" size={18} color='#fff' />
                                     <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Restore</ThemedText>
                                 </TouchableOpacity>
                                 <TouchableOpacity
@@ -147,7 +147,7 @@ const DeletedMeetingScreen = () => {
                                         opacity: 0.8
                                     }}
                                 >
-                                    icon={<FontAwesome5 name="trash" size={14} color="#fff" />}
+                                    <FontAwesome5 name="trash" size={14} color="#fff" />
                                     <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
                                 </TouchableOpacity>
                             </View>
