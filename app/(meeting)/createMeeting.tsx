@@ -101,7 +101,9 @@ const CreateMeeting = () => {
             "uploadDoc": null,
             "projectName": data.projectName.value
         }
-        console.log('param', paramUpdate);
+        // console.log('update param', paramUpdate);
+        console.log('param' , param);
+        
         return;        
         isCreate == "true" ?
             createMeeting({

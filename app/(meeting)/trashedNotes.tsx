@@ -49,44 +49,11 @@ const TrashedNotePad = () => {
                             onPress={() => {
                                 Alert.alert(
                                     "Restore",
-                                    `Notes will be restored`,
+                                    `note will be restored`,
                                     [
                                         {
                                             text: "Yes", onPress: () => {
                                                 // restoreMeeting({
-                                                //     variables: {
-                                                //         ids: Number(item?.id),
-                                                //     }
-                                                // });
-                                            }
-                                        },
-                                        { text: "No", onPress: () => {} },
-                                    ]
-                                );
-                            }}
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                paddingVertical: vs(8),
-                                paddingHorizontal: ms(12),
-                                borderRadius: 10,
-                                borderWidth: 0.5,
-                                borderColor: "#8B5CF6",
-                                opacity: 0.8
-                            }}
-                        >
-                            <MaterialIcons name="autorenew" size={18} color="#8B5CF6" />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => {
-                                Alert.alert(
-                                    "Delete",
-                                    "Are you sure you want to delete?",
-                                    [
-                                        {
-                                            text: "Yes", onPress: () => {
-                                                // deleteMeeting({
                                                 //     variables: {
                                                 //         ids: Number(item?.id),
                                                 //     }
@@ -104,12 +71,45 @@ const TrashedNotePad = () => {
                                 paddingVertical: vs(8),
                                 paddingHorizontal: ms(12),
                                 borderRadius: 10,
-                                borderWidth: 0.5,
-                                borderColor: "#EF4444",
+                                backgroundColor: "#8B5CF6",
                                 opacity: 0.8
                             }}
                         >
-                            <FontAwesome5 name="trash" size={14} color="#EF4444" />
+                            <MaterialIcons name="autorenew" size={18} color='#fff' />
+                            <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Restore</ThemedText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                Alert.alert(
+                                    "Delete",
+                                    "Are you sure you want to delete?",
+                                    [
+                                        {
+                                            text: "Yes", onPress: () => {
+                                                // deleteMeetingTask({
+                                                //     variables: {
+                                                //         ids: Number(item?.id),
+                                                //     }
+                                                // });
+                                            }
+                                        },
+                                        { text: "No", onPress: () => { } },
+                                    ]
+                                );
+                            }}
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                paddingVertical: vs(8),
+                                paddingHorizontal: ms(12),
+                                borderRadius: 10,
+                                backgroundColor: "#EF4444",
+                                opacity: 0.8
+                            }}
+                        >
+                            <FontAwesome5 name="trash" size={14} color="#fff" />
+                            <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
                         </TouchableOpacity>
                     </View>
                 </View>
