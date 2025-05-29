@@ -131,9 +131,6 @@ const AddEditPackage = () => {
                 setValue("offerDescription", parsedData?.offerDescription);
                 setValue("price", parsedData?.price.toString());
                 setValue("module", ids);
-
-
-
                 setValue(
                     "endDate",
                     formatTimeForAPI(parsedData?.offerExpiryDate, "yyyy-mm-dd") || ""
