@@ -125,7 +125,7 @@ const AddEditPackage = () => {
             if (editedData) {
                 const parsedData = JSON.parse(editedData);
                 let ids = parsedData?.modules?.map((item: any) => item.id);
-                console.log('parsedData', parsedData);
+                // console.log('parsedData', parsedData);
                 setValue("name", parsedData?.name);
                 setValue("description", parsedData?.description);
                 setValue("offerDescription", parsedData?.offerDescription);
@@ -174,7 +174,7 @@ const AddEditPackage = () => {
                 })
                 return;
             }
-            console.log("params", params);
+            // console.log("params", params);
             createPackage({
                 variables: {
                     createPackageInput: params,
@@ -188,7 +188,7 @@ const AddEditPackage = () => {
     if (createPackageState.loading || updatePackageState.loading) return <Loader />;
 
     return (
-        <CustomHeader>
+        <CustomHeader title={editedData ? "Edit Package" : "Add Package"}>
             <ScrollView
                 contentContainerStyle={{
                     // backgroundColor: Colors[theme].cart,
@@ -196,7 +196,7 @@ const AddEditPackage = () => {
                     padding: 10,
                 }}
             >
-                <View
+                {/* <View
                     style={{
                         flexDirection: "row",
                         justifyContent: "space-between",
@@ -206,9 +206,9 @@ const AddEditPackage = () => {
                     <ThemedText type="subtitle">
                         Package
                     </ThemedText>
-                </View>
+                </View> */}
 
-                <View style={{ padding: 10 }}>
+                <View style={{ padding: 10 ,paddingTop:0}}>
                     <CustomValidation
                         type="input"
                         control={control}

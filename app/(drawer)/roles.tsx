@@ -4,37 +4,40 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
-  FlatList
-} from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
+  FlatList,
+} from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLazyQuery } from '@apollo/client'
-import { Feather, MaterialIcons, } from '@expo/vector-icons'
-import { useScrollToTop } from '@react-navigation/native'
+import { useLazyQuery } from "@apollo/client";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { useScrollToTop } from "@react-navigation/native";
 import { gql, useMutation } from "@apollo/client";
-import CustomHeader from '@/components/CustomHeader'
-import { ThemedText } from '@/components/ThemedText'
-import CustomValidation from '@/components/CustomValidation';
-import { Dialog, Portal, } from "react-native-paper";
-import { ThemeProvider, useTheme } from '@/context/ThemeContext';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { set, useForm } from 'react-hook-form';
+import CustomHeader from "@/components/CustomHeader";
+import { ThemedText } from "@/components/ThemedText";
+import CustomValidation from "@/components/CustomValidation";
+import { Dialog, Portal } from "react-native-paper";
+import { ThemeProvider, useTheme } from "@/context/ThemeContext";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { set, useForm } from "react-hook-form";
 import { z } from "zod";
-import { ms, ScaledSheet, vs } from 'react-native-size-matters';
-import { labels } from '@/constants/Labels';
-import { ThemedView } from '@/components/ThemedView';
-import CustomSearchBar from '@/components/CustomSearchBar';
-import { Pressable } from 'react-native';
-import { Colors } from '@/constants/Colors';
+import { ms, ScaledSheet, vs } from "react-native-size-matters";
+import { labels } from "@/constants/Labels";
+import { ThemedView } from "@/components/ThemedView";
+import CustomSearchBar from "@/components/CustomSearchBar";
+import { Pressable } from "react-native";
+import { Colors } from "@/constants/Colors";
 import debounce from "lodash.debounce";
-import { DeleteRoleDocument, PaginatedRolesDocument } from '@/graphql/generated';
-import { useUserContext } from '@/context/RoleContext';
-import { router, useFocusEffect } from 'expo-router';
-import NoDataFound from '@/components/NoDataFound';
-import CustomRole from '@/components/master/CustomRole';
-import { FAB } from '@rneui/themed';
-import { Env } from '@/constants/ApiEndpoints';
-import Loader from '@/components/ui/Loader';
+import {
+  DeleteRoleDocument,
+  PaginatedRolesDocument,
+} from "@/graphql/generated";
+import { useUserContext } from "@/context/RoleContext";
+import { router, useFocusEffect } from "expo-router";
+import NoDataFound from "@/components/NoDataFound";
+import CustomRole from "@/components/master/CustomRole";
+import { FAB } from "@rneui/themed";
+import { Env } from "@/constants/ApiEndpoints";
+import Loader from "@/components/ui/Loader";
 
 const RolesScreen = () => {
   const { theme } = useTheme();
@@ -98,7 +101,7 @@ const RolesScreen = () => {
     }, [])
   );
 
-  /// search state 
+  /// search state
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   /// delete role state --
@@ -121,8 +124,8 @@ const RolesScreen = () => {
       //   setModalVisible(false);
     },
     onError: (error) => {
-      console.log('Error', error);
-    }
+      console.log("Error", error);
+    },
   });
 
   const [visible, setVisible] = useState(false);
@@ -134,13 +137,20 @@ const RolesScreen = () => {
   const createPermission = can("MasterApp:Module:Create");
   const statusUpdatePermission = can("MasterApp:Module:Action");
 
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(
+    null
+  );
   const schema = z.object({
     name: z.string().min(4, { message: "Name is required" }),
     description: z.string().min(4, { message: "Description is required" }),
   });
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(schema),
   });
 
@@ -157,8 +167,8 @@ const RolesScreen = () => {
               editable: "true",
               id: item.id,
               name: item.name,
-            }
-          })
+            },
+          });
         }}
         onDelete={() =>
           Alert.alert("Delete", "Are you sure you want to delete?", [
@@ -173,7 +183,7 @@ const RolesScreen = () => {
                 });
               },
             },
-            { text: "No", onPress: () => { } },
+            { text: "No", onPress: () => {} },
           ])
         }
         editPermission={checkUpdatePermission}
@@ -198,10 +208,7 @@ const RolesScreen = () => {
     [searchQuery]
   );
 
-  if (
-    ((loading && page == 1 && !refreshing) ||
-      deleteRoleState?.loading)
-  ) {
+  if ((loading && page == 1 && !refreshing) || deleteRoleState?.loading) {
     return <Loader />;
   }
 
@@ -234,7 +241,7 @@ const RolesScreen = () => {
             fetchRoles(true);
           }}
           keyExtractor={(item: any, index: number) => index.toString()}
-          contentContainerStyle={{ paddingBottom: vs(60) }}
+          contentContainerStyle={{ paddingBottom: vs(100) }}
           ListEmptyComponent={!loading ? <NoDataFound /> : null}
           ListFooterComponent={
             hasMore ? (
@@ -250,33 +257,35 @@ const RolesScreen = () => {
         />
       </ThemedView>
 
-      {createPermission && <FAB
-        size="large"
-        title="Add Role"
-        style={{
-          position: "absolute",
-          margin: 16,
-          right: 0,
-          bottom: 30,
-        }}
-        icon={{
-          name: "add",
-          color: "white",
-        }}
-        onPress={() => router.push("/(subComponents)/createRole")}
-      />}
-    </CustomHeader >
-  )
-}
+      {createPermission && (
+        <FAB
+          size="large"
+          title="Add Role"
+          style={{
+            position: "absolute",
+            margin: 16,
+            right: 0,
+            bottom: 30,
+          }}
+          icon={{
+            name: "add",
+            color: "white",
+          }}
+          onPress={() => router.push("/(subComponents)/createRole")}
+        />
+      )}
+    </CustomHeader>
+  );
+};
 
-export default RolesScreen
+export default RolesScreen;
 
 const styles = ScaledSheet.create({
   contentContainer: {
     flex: 1,
   },
   innerContainer: {
-    paddingVertical: 10
+    paddingVertical: 10,
   },
   buttonContainer: { marginLeft: "12@ms" },
   searchContainer: {
@@ -285,12 +294,11 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  organizationParentContainer: {
-  },
+  organizationParentContainer: {},
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   organizationContainer: {
     width: "100%",
@@ -305,7 +313,7 @@ const styles = ScaledSheet.create({
   },
   loadingText: {
     fontSize: 18,
-    color: '#007BFF'
+    color: "#007BFF",
   },
   permission: {
     color: "green",
@@ -316,37 +324,37 @@ const styles = ScaledSheet.create({
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
   errorText: {
     fontSize: 18,
-    color: 'red'
+    color: "red",
   },
   noDataText: {
     fontSize: 16,
-    color: '#888',
-    textAlign: 'center',
+    color: "#888",
+    textAlign: "center",
     alignSelf: "center",
     justifyContent: "center",
-    alignContent: "center"
+    alignContent: "center",
   },
   deleteButton: {
-    backgroundColor: '#ee0b0b',
+    backgroundColor: "#ee0b0b",
     padding: 6,
-    borderRadius: 20
+    borderRadius: 20,
   },
   editButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     padding: 6,
-    borderRadius: 20
+    borderRadius: 20,
   },
   card: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#dadada',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#dadada",
     padding: 10,
     margin: 8,
     borderRadius: 12,
@@ -354,17 +362,15 @@ const styles = ScaledSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 0 },
-    shadowColor: 'black',
+    shadowColor: "black",
     elevation: 5,
-    marginHorizontal: 20
+    marginHorizontal: 20,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center'
+    flexDirection: "row",
+    alignItems: "center",
   },
-  name: {
-
-  },
+  name: {},
   cardDot: {
     fontSize: 16,
     color: "black",
@@ -397,6 +403,6 @@ const styles = ScaledSheet.create({
     fontSize: "14@ms",
     fontWeight: "bold",
     justifyContent: "center",
-    alignSelf: "center"
+    alignSelf: "center",
   },
-})
+});

@@ -4,8 +4,10 @@ import { ScaledSheet, vs } from 'react-native-size-matters'
 import { Colors } from '@/constants/Colors'
 import { useTheme } from '@/context/ThemeContext'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ThemedText } from './ThemedText'
 
 const CustomHeader = ({
+  title,
   toggleValue,
   children,
   leftComponent,
@@ -31,6 +33,17 @@ const CustomHeader = ({
         ]}
       >
         {leftComponent ? leftComponent : null}
+        <ThemedText
+          style={{
+            color: Colors[theme].text,
+            fontSize: 18,
+            fontWeight: 'bold',
+            flex: 1,
+            textAlign: 'center'
+          }}
+        >
+          {title}
+        </ThemedText>
         {rightComponent ? rightComponent : null}
       </View>
       {children}

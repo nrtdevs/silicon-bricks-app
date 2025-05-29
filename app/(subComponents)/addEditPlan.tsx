@@ -31,37 +31,7 @@ import * as ImagePicker from "expo-image-picker";
 import CustomHeader from "@/components/CustomHeader";
 import * as FileSystem from "expo-file-system";
 
-
-const designationData = [
-    { label: "CEO", value: "CEO" },
-    { label: "CTO", value: "CTO" },
-    { label: "Employee", value: "EMPLOYEE" },
-    { label: "HR", value: "HR" },
-    { label: "Manager", value: "MANAGER" },
-    { label: "Super Admin", value: "SUPER_ADMIN" },
-    { label: "Team Lead", value: "TEAM_LEAD" },
-];
-
-const pickerData = [
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inactive" },
-    { label: "Blocked", value: "blocked" },
-    { label: "Pending", value: "pending" },
-];
-
-const userTypeData = [
-    { label: "admin", value: "admin" },
-    { label: "adminEmployee", value: "adminEmployee" },
-    { label: "organization", value: "organization" },
-    { label: "organizationEmployee", value: "organizationEmployee" },
-];
-
 const AddEditPlan = () => {
-    const insuranceOptions = [
-        { label: "Yes", value: true },
-        { label: "No", value: false },
-    ];
-
 
     useEffect(() => {
         dropdownCouponData({
@@ -82,14 +52,6 @@ const AddEditPlan = () => {
         });
     }, [])
 
-    const years = useMemo(() => {
-        const currentYear = new Date().getFullYear();
-        return Array.from({ length: currentYear - 1996 }, (_, index) => ({
-            label: (1997 + index).toString(),
-            value: (1997 + index).toString(),
-        }));
-    }, []);
-    const [image, setImage] = useState<string>("");
     const {
         control,
         handleSubmit,
@@ -113,32 +75,25 @@ const AddEditPlan = () => {
     const { data: editedData } = useLocalSearchParams<any>();
 
 
-
-    const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
-        getDateTimePickerProps(false)
-    );
-
-
     useFocusEffect(
         useCallback(() => {
             if (editedData) {
-
                 const parsedData = JSON.parse(editedData);
-                console.log("editedData", parsedData);
-                setValue("name", parsedData?.name);
-                setValue("duration", parsedData?.duration?.toString());
-                setValue("package", Number(parsedData?.package?.id));
-                setValue("price", parsedData?.price);
-                setValue("coupon", parsedData?.coupon?.id);
-                setValue("description", parsedData?.description);
+                // console.log("editedData", parsedData);
+                setValue("name", parsedData?.name || "");
+                setValue("duration", parsedData?.duration?.toString() || "");
+                setValue("package", Number(parsedData?.package?.id) || "");
+                setValue("price", parsedData?.price || "");
+                setValue("coupon", parsedData?.coupon?.id|| "");
+                setValue("description", parsedData?.description || "");
             }
         }, [editedData])
     );
 
     useEffect(() => {
         if (watch("package")) {
-            console.log('00000', watch('package'));
-            setValue("price", watch("package")?.price.toString());
+            // console.log('00000', watch('package'));
+            setValue("price", watch("package")?.price?.toString());
         }
     }, [watch("package")])
 
@@ -180,8 +135,8 @@ const AddEditPlan = () => {
                 // couponId: typeof data?.coupon == 'string' ? Number(data?.coupon) : Number(data?.coupon?.id),
                 description: data?.description ?? "",
             }
-            console.log('params22', typeof data?.package);
-            console.log('params', typeof params?.packageId);
+            // console.log('params22', typeof data?.package);
+            // console.log('params', typeof params?.packageId);
 
             if (editedData) {
                 const parsedData = JSON.parse(editedData);
@@ -208,7 +163,7 @@ const AddEditPlan = () => {
     if (createPlanState.loading || updatePlanState.loading) return <Loader />;
 
     return (
-        <CustomHeader>
+        <CustomHeader title={editedData ? "Edit Plan" : "Add Plan"}>
             <ScrollView
                 contentContainerStyle={{
                     backgroundColor: Colors[theme].cart,
@@ -217,22 +172,12 @@ const AddEditPlan = () => {
                     borderRadius: 10,
                     alignSelf: "center",
                     padding: 10,
+                    paddingBottom: 40,
                 }}
                 showsVerticalScrollIndicator={false}
             >
-                <View
-                    style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        paddingTop: 20,
-                    }}
-                >
-                    <ThemedText type="subtitle">
-                        Plan
-                    </ThemedText>
-                </View>
 
-                <View style={{ padding: 10 }}>
+                <View style={{ padding: 10, paddingTop: 0 }}>
                     <CustomValidation
                         type="input"
                         control={control}

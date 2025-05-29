@@ -105,18 +105,21 @@ const Project = () => {
     },
   });
 
-  const [updateProjectStatus, updateProjectStatusState] = useMutation(EnableProjectStatusDocument, {
-    onCompleted: (data) => {
-      reset();
-      refetch();
-      setStatusModalVisible(false);
-      fetchProject(true);
-    },
-    onError: (error) => {
-      setStatusModalVisible(false);
-      Alert.alert("Error", error.message);
-    },
-  });
+  const [updateProjectStatus, updateProjectStatusState] = useMutation(
+    EnableProjectStatusDocument,
+    {
+      onCompleted: (data) => {
+        reset();
+        refetch();
+        setStatusModalVisible(false);
+        fetchProject(true);
+      },
+      onError: (error) => {
+        setStatusModalVisible(false);
+        Alert.alert("Error", error.message);
+      },
+    }
+  );
 
   const [deleteProject, deleteProjectState] = useMutation(
     DeleteProjectDocument,
@@ -140,18 +143,18 @@ const Project = () => {
 
     editVisible
       ? updateProject({
-        variables: {
-          updateProjectInput: {
-            id: Number(currentProject?.id),
-            ...params,
+          variables: {
+            updateProjectInput: {
+              id: Number(currentProject?.id),
+              ...params,
+            },
           },
-        },
-      })
+        })
       : createProject({
-        variables: {
-          createProjectInput: { ...params },
-        },
-      });
+          variables: {
+            createProjectInput: { ...params },
+          },
+        });
   };
 
   const {
@@ -255,12 +258,12 @@ const Project = () => {
                 });
               },
             },
-            { text: "No", onPress: () => { } },
+            { text: "No", onPress: () => {} },
           ])
         }
         onChangeStatus={() => {
           setProjectId(item.id);
-          setValue('status', item?.status);
+          setValue("status", item?.status);
           setStatusModalVisible(true);
         }}
       />
@@ -268,9 +271,9 @@ const Project = () => {
   };
 
   if (
-    ((loading && page == 1 && !refreshing) ||
-      deleteProjectState.loading ||
-      updateProjectStatusState?.loading)
+    (loading && page == 1 && !refreshing) ||
+    deleteProjectState.loading ||
+    updateProjectStatusState?.loading
   ) {
     return <Loader />;
   }
@@ -453,36 +456,39 @@ const Project = () => {
               },
             }}
             onChangeText={() => {
-              updateProjectStatus({
-                variables: {
-                  data: {
-                    ids: [Number(projectId)],
-                    status: watch("status")?.value,
+              watch("status")?.value &&
+                updateProjectStatus({
+                  variables: {
+                    data: {
+                      ids: [Number(projectId)],
+                      status: watch("status")?.value,
+                    },
                   },
-                },
-              });
+                });
             }}
           />
         </View>
       </Modal>
-      {createPermission && <FAB
-        size="large"
-        title="Add Project"
-        style={{
-          position: "absolute",
-          margin: 16,
-          right: 0,
-          bottom: 30,
-        }}
-        icon={{
-          name: "add",
-          color: "white",
-        }}
-        onPress={() => {
-          setCurrentProject(defaultValue)
-          setModalVisible(true)
-        }}
-      />}
+      {createPermission && (
+        <FAB
+          size="large"
+          title="Add Project"
+          style={{
+            position: "absolute",
+            margin: 16,
+            right: 0,
+            bottom: 30,
+          }}
+          icon={{
+            name: "add",
+            color: "white",
+          }}
+          onPress={() => {
+            setCurrentProject(defaultValue);
+            setModalVisible(true);
+          }}
+        />
+      )}
     </CustomHeader>
   );
 };
@@ -510,15 +516,14 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
   },
   searchContainer: {
-    marginHorizontal: '12@ms',
+    marginHorizontal: "12@ms",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "12@ms",
   },
   buttonContainer: { marginLeft: "12@ms" },
-  organizationParentContainer: {
-  },
+  organizationParentContainer: {},
   deleteButton: {
     backgroundColor: "#ee0b0b",
     padding: 6,
@@ -534,8 +539,7 @@ const styles = ScaledSheet.create({
     marginBottom: 15,
     backgroundColor: "#F1F4FF",
   },
-  scrollContainer: {
-  },
+  scrollContainer: {},
   card: {
     marginHorizontal: 10,
     marginVertical: 10,
@@ -611,5 +615,3 @@ const styles = ScaledSheet.create({
     fontSize: "12@ms",
   },
 });
-
-

@@ -276,7 +276,7 @@ const AddEditUser = () => {
   if (createUserState.loading || updateUserState.loading) return <Loader />;
 
   return (
-    <CustomHeader>
+    <CustomHeader title={editedData ? "Edit User" : "Add User"}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
@@ -287,10 +287,10 @@ const AddEditUser = () => {
           paddingHorizontal: 10,
           paddingVertical: 22,
           justifyContent: "flex-start",
-          paddingBottom: 20,
+          paddingBottom: 50,
         }}
       >
-        <View
+        {/* <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
@@ -298,9 +298,16 @@ const AddEditUser = () => {
           }}
         >
           <ThemedText type="subtitle">User</ThemedText>
-        </View>
+        </View> */}
 
-        <View style={{ padding: 10, position: "relative", paddingBottom: 30 }}>
+        <View
+          style={{
+            paddingHorizontal: 10,
+            position: "relative",
+            paddingBottom: 30,
+            paddingTop: 0,
+          }}
+        >
           <Pressable style={styles.imageContainer}>
             <Image
               source={{
@@ -419,7 +426,8 @@ const AddEditUser = () => {
           onPress={handleSubmit(onSubmit)}
           style={{
             backgroundColor: Colors[theme].background,
-            marginTop: vs(10),
+            // marginTop: vs(10),
+            marginHorizontal: 10,
           }}
         />
       </ScrollView>

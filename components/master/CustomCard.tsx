@@ -180,7 +180,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
         {
           borderColor: Colors?.[theme]?.border,
           shadowColor: Colors[theme].shadow,
-          // backgroundColor: Colors[theme].cart,
+          backgroundColor: Colors[theme].cart,
         },
       ]}
     >
@@ -196,11 +196,11 @@ const CustomCard: React.FC<CustomCardProps> = ({
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Feather
+            {/* <Feather
               name="user"
               size={ms(24)}
               color={Colors[theme]?.primary?.text}
-            />
+            /> */}
             <ThemedText style={{ marginLeft: ms(5) }} type="subtitle">
               {name}
             </ThemedText>

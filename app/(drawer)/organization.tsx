@@ -35,7 +35,6 @@ import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
 import { router } from "expo-router";
 import CustomCard from "@/components/master/CustomCard";
-import Card from "@/components/master/Card";
 import { Env } from "@/constants/ApiEndpoints";
 import { FAB } from "@rneui/themed";
 

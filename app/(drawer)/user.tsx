@@ -47,22 +47,6 @@ const defaultValue = {
   imagePath: "",
   designation: "",
 };
-const userTypeData = [
-  { label: "admin", value: "admin" },
-  { label: "adminEmployee", value: "adminEmployee" },
-  { label: "organization", value: "organization" },
-  { label: "organizationEmployee", value: "organizationEmployee" },
-];
-
-const designationData = [
-  { label: "CEO", value: "CEO" },
-  { label: "CTO", value: "CTO" },
-  { label: "Employee", value: "EMPLOYEE" },
-  { label: "HR", value: "HR" },
-  { label: "Manager", value: "MANAGER" },
-  { label: "Super Admin", value: "SUPER_ADMIN" },
-  { label: "Team Lead", value: "TEAM_LEAD" },
-];
 
 const pickerData = [
   { label: "Active", value: "active" },
@@ -466,7 +450,7 @@ const UserScreen = () => {
                 ids: [Number(currentUser.id)],
                 status: watch('status')?.value,
               };
-              updateUserStatus({ variables: { data: params } });
+              watch('status')?.value && updateUserStatus({ variables: { data: params } });
             }}
             rules={{
               required: {
