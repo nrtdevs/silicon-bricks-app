@@ -35,11 +35,11 @@ const CreateMeeting = () => {
         meetingVenueId,
     } = useLocalSearchParams();
     /// create and edit state
-    const [activeDateField, setActiveDateField] = useState<string | null>(null);
+    const [activeDateField, setActiveDateField] = useState<any>(null);
     const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
         getDateTimePickerProps(false)
     );
-    const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm();
+    const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{title:string, startTime:string, endTime:string, meetingDate:any, projectId:any, meetingTypeId:any, meetingVenueId:any, meetingAgenda:any, meetingUrl:any, attendees:any,}>();
     const [dateModal, setDateModal] = useState({
         start: false,
         end: false,
@@ -71,6 +71,11 @@ const CreateMeeting = () => {
         }
     });
     const onSubmit = (data: any) => {
+        console.log('990000',watch('meetingTypeId'));
+        console.log('000',watch('attendees'));
+        
+        console.log(data);
+        return;
         let param = {
             "title": data.title,
             "attendees": data.attendees.map((id: number) => Number(id)),
@@ -101,10 +106,6 @@ const CreateMeeting = () => {
             "uploadDoc": null,
             "projectName": data.projectName.value
         }
-        // console.log('update param', paramUpdate);
-        console.log('param' , param);
-        
-        return;        
         isCreate == "true" ?
             createMeeting({
                 variables: {
@@ -144,7 +145,7 @@ const CreateMeeting = () => {
             setValue('meetingAgenda', meetingAgenda as string);
             setValue('meetingUrl', meetingUrl as string);
             setValue('meetingTypeId', meetingTypeId as string);
-            setValue('meetingVenueId', meetingVenueId as string);
+            setValue('meetingVenueId', meetingVenueId?.toString() ?? "");
             setValue('projectId', projectId as string);
         }
 
@@ -202,7 +203,7 @@ const CreateMeeting = () => {
     const attendeesPickerData = useMemo(() => {
         if (!attendeesData?.paginatedUsers.data) return [];
         return attendeesData.paginatedUsers.data.map((item) => ({
-            label: item.name,
+            label: item.email,
             value: item.id,
         }));
     }, [attendeesData]);
@@ -253,6 +254,9 @@ const CreateMeeting = () => {
             uploadImage(uri);
         }
     };
+
+    // console.log('9999',attendeesPickerData);
+    
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -284,7 +288,7 @@ const CreateMeeting = () => {
                         control={control}
                         placeholder={"Start time"}
                         name="startTime"
-                        editable={true}
+                        editable={false}
                         label='Start Time'
                         rightIcon={
                             <MaterialIcons
@@ -314,7 +318,7 @@ const CreateMeeting = () => {
                         control={control}
                         placeholder={"End time"}
                         name="endTime"
-                        editable={true}
+                        editable={false}
                         label='End Time'
                         rightIcon={
                             <MaterialIcons
@@ -432,6 +436,8 @@ const CreateMeeting = () => {
                         multiSelect
                         control={control}
                         labelStyle={styles.label}
+                        keyToCompareData="value"
+                        keyToShowData="label"
                         name="attendees"
                         label='Attendees'
                         placeholder={attendeesLoading ? "Loading..." : "Select Attendees"}
@@ -479,7 +485,7 @@ const CreateMeeting = () => {
                             : getLocalizedTime(selectedDate);
 
                         if (activeDateField) {
-                            setValue(activeDateField, timeOrDate);
+                            setValue(activeDateField, timeOrDate?.toString());
                         }
                     }
                     setActiveDateField(null);
