@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
 import CustomButton from "@/components/CustomButton";
-import { Feather, Fontisto } from "@expo/vector-icons";
+import { Feather, FontAwesome5, Fontisto } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useTheme } from "@/context/ThemeContext";
@@ -276,7 +276,23 @@ const AddEditUser = () => {
   if (createUserState.loading || updateUserState.loading) return <Loader />;
 
   return (
-    <CustomHeader title={editedData ? "Edit User" : "Add User"}>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title={editedData ? "Edit User" : "Add User"}
+    >
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
@@ -287,7 +303,7 @@ const AddEditUser = () => {
           paddingHorizontal: 10,
           paddingVertical: 22,
           justifyContent: "flex-start",
-          paddingBottom: 50,
+          paddingBottom: 100,
         }}
       >
         {/* <View
@@ -425,7 +441,7 @@ const AddEditUser = () => {
           title="Submit"
           onPress={handleSubmit(onSubmit)}
           style={{
-            backgroundColor: Colors[theme].background,
+            backgroundColor: Colors[theme].cart,
             // marginTop: vs(10),
             marginHorizontal: 10,
           }}

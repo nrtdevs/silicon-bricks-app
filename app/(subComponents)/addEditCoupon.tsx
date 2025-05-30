@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import CustomButton from "@/components/CustomButton";
-import { Feather, Fontisto } from "@expo/vector-icons";
+import { Feather, FontAwesome5, Fontisto } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useTheme } from "@/context/ThemeContext";
@@ -199,7 +199,23 @@ const AddEditCoupon = () => {
   if (createCouponState.loading || updateCouponState.loading) return <Loader />;
 
   return (
-    <CustomHeader title={editedData ? "Edit Coupon" : "Add Coupon"}>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title={editedData ? "Edit Coupon" : "Add Coupon"}
+    >
       <ScrollView
         contentContainerStyle={{
           borderRadius: 10,

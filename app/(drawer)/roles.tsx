@@ -9,7 +9,7 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLazyQuery } from "@apollo/client";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useScrollToTop } from "@react-navigation/native";
 import { gql, useMutation } from "@apollo/client";
 import CustomHeader from "@/components/CustomHeader";
@@ -43,12 +43,14 @@ const RolesScreen = () => {
   const { theme } = useTheme();
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [search, setSearch] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [rolesData, { error, data, loading, refetch }] = useLazyQuery(
     PaginatedRolesDocument
   );
   const [rolesList, setRolesList] = useState<any[]>([]);
   const fetchRoles = async (isRefreshing = false, searchParams = "") => {
+    if (loading && !isRefreshing) return;
     let currentPage = isRefreshing ? 1 : page;
 
     if (isRefreshing) {
@@ -75,12 +77,14 @@ const RolesScreen = () => {
         const newItems = data?.data || [];
 
         setRolesList((prev: any) => {
-          return isRefreshing && currentPage == 1
+          return isRefreshing || currentPage == 1
             ? newItems
             : [...prev, ...newItems];
         });
         const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
-        setPage(currentPage + 1);
+        if (!isRefreshing && currentPage < lastPage) {
+          setPage(currentPage + 1);
+        }
         setHasMore(currentPage < lastPage);
         setRefreshing(false);
       } else {
@@ -213,23 +217,51 @@ const RolesScreen = () => {
   }
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title="Role"
+      rightComponent={
+        <Pressable
+          onPress={() => {
+            setSearch((prev) => !prev);
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5 name="search" size={22} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ flex: 1 }}>
-            <CustomSearchBar
-              searchQuery={searchQuery}
-              onChangeText={(text) => {
-                setSearchQuery(text);
-                debouncedSearch(text);
-              }}
-              placeholder={labels?.searchRole}
-              // loading={loading}
-              onClear={() => {
-                setSearchQuery("");
-              }}
-            />
-          </View>
+          {search && (
+            <View style={{ flex: 1 }}>
+              <CustomSearchBar
+                searchQuery={searchQuery}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  debouncedSearch(text);
+                }}
+                placeholder={labels?.searchRole}
+                // loading={loading}
+                onClear={() => {
+                  setSearchQuery("");
+                }}
+              />
+            </View>
+          )}
         </View>
 
         <FlatList
@@ -289,6 +321,7 @@ const styles = ScaledSheet.create({
   },
   buttonContainer: { marginLeft: "12@ms" },
   searchContainer: {
+    marginBottom: "16@ms",
     marginHorizontal: "12@s",
     flexDirection: "row",
     justifyContent: "space-between",

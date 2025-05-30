@@ -5,7 +5,8 @@ import {
   SafeAreaView,
   StyleSheet,
   FlatList,
-  RefreshControl
+  RefreshControl,
+  Text,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
@@ -42,7 +43,7 @@ const VehicleList = () => {
     useLazyQuery<any>(PaginatedVehiclesDocument);
 
   const navigation = useNavigation();
-  const { theme } = useTheme()
+  const { theme } = useTheme();
   const statusArr = [
     {
       label: "Active",
@@ -118,8 +119,7 @@ const VehicleList = () => {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [vehicleList, setVehicleList] = useState<any>([]); 
-
+  const [vehicleList, setVehicleList] = useState<any>([]);
 
   const fetchVehicleList = async (isRefresh = false, search = "") => {
     const currentPage = isRefresh ? 1 : page;
@@ -128,7 +128,7 @@ const VehicleList = () => {
       setRefreshing(true);
       setPage(1);
     }
-    setIsLoading(true)
+    setIsLoading(true);
     const params = {
       limit: Env.LIMIT,
       page: currentPage,
@@ -151,7 +151,7 @@ const VehicleList = () => {
       );
       setPage(currentPage + 1);
       if (isRefresh) setRefreshing(false);
-      setIsLoading(false)
+      setIsLoading(false);
       setHasMore(currentPage < lastPage);
     } else {
       if (isRefresh) setVehicleList([]);
@@ -162,7 +162,7 @@ const VehicleList = () => {
 
   const [isSearch, setIsSearch] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -189,7 +189,6 @@ const VehicleList = () => {
   );
 
   const renderItems = (item: any) => {
-
     return (
       <VehicleCard
         brand={item?.make}
@@ -231,8 +230,11 @@ const VehicleList = () => {
   // console.log('page',page);
   // console.log('refreshing',refreshing);
 
-
-  if ((loading && page == 1 && !refreshing) || deleteVehicleStat.loading || changeVehicleStatusStat.loading)
+  if (
+    (loading && page == 1 && !refreshing) ||
+    deleteVehicleStat.loading ||
+    changeVehicleStatusStat.loading
+  )
     return <Loader />;
 
   return (
@@ -254,10 +256,13 @@ const VehicleList = () => {
         data={vehicleList}
         keyExtractor={(item, index) => item?.id?.toString()}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={!isLoading ? <NoDataFound onPress={() => fetchVehicleList(true)} /> : null}
+        ListEmptyComponent={
+          !isLoading ? (
+            <NoDataFound onPress={() => fetchVehicleList(true)} />
+          ) : null
+        }
         renderItem={({ item }: any) => renderItems(item)}
         contentContainerStyle={{ paddingVertical: ms(10) }}
-
         ListFooterComponent={
           hasMore ? (
             <ActivityIndicator size="small" color={Colors.primary} />

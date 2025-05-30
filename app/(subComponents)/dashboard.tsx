@@ -36,7 +36,7 @@ const dashboard = () => {
             icon={"family-tree"}
             label={"Admin"}
             onPress={() => {
-              router.navigate("/(drawer)/(tabs)");
+              router.push("/(drawer)/(tabs)");
             }}
           />
         )}
@@ -44,14 +44,14 @@ const dashboard = () => {
           icon={"shield-car"}
           label={"Vehicle"}
           onPress={() => {
-            router.navigate("/(vehicle)/(tabs)/home");
+            router.push("/(vehicle)/(tabs)/home");
           }}
         />
         <SmallCart
           icon={"handshake"}
           label={"Meeting"}
           onPress={() => {
-            router.navigate("/(meeting)/(tabs)");
+            router.push("/(meeting)/(tabs)");
           }}
         /> 
        

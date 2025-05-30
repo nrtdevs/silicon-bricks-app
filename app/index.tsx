@@ -33,7 +33,7 @@ const Index = () => {
   return <Redirect href="/(auth)/login" />;
   // return <Redirect href="/(subComponents)/dashboard" />;
   // return <Redirect href="/(meeting)/(tabs)" />;
-  return <Redirect href="/(drawer)/module" />;
+  // return <Redirect href="/(drawer)/user" />;
 };
 
 

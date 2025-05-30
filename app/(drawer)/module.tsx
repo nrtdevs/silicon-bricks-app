@@ -23,7 +23,13 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import { ScrollView } from "react-native";
-import { AntDesign, Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Entypo,
+  Feather,
+  FontAwesome5,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -56,6 +62,7 @@ const pickerData = [
 const ModuleScreen = () => {
   const { theme } = useTheme();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [search, setSearch] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState("");
   const [editModal, setEditModal] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
@@ -148,6 +155,8 @@ const ModuleScreen = () => {
   }, []);
 
   const fetchModules = async (isRefreshing = false, searchParams = "") => {
+    if (loading && !isRefreshing) return;
+
     const currentPage = isRefreshing ? 1 : page;
 
     if (isRefreshing) {
@@ -174,12 +183,14 @@ const ModuleScreen = () => {
         const newItems = data?.data || [];
 
         setModuleList((prev: any) => {
-          return isRefreshing && currentPage == 1
+          return isRefreshing || currentPage == 1
             ? newItems
             : [...prev, ...newItems];
         });
         const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
-        setPage(currentPage + 1);
+        if (!isRefreshing && currentPage < lastPage) {
+          setPage(currentPage + 1);
+        }
         setHasMore(currentPage < lastPage);
         setRefreshing(false);
       } else {
@@ -283,23 +294,51 @@ const ModuleScreen = () => {
   }
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title="Module"
+      rightComponent={
+        <Pressable
+          onPress={() => {
+            setSearch((prev) => !prev);
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5 name="search" size={22} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ flex: 1 }}>
-            <CustomSearchBar
-              searchQuery={searchQuery}
-              onChangeText={(text) => {
-                setSearchQuery(text);
-                debouncedSearch(text);
-              }}
-              placeholder={labels?.searchModule}
-              loading={loading}
-              onClear={() => {
-                setSearchQuery("");
-              }}
-            />
-          </View>
+          {search && (
+            <View style={{ flex: 1 }}>
+              <CustomSearchBar
+                searchQuery={searchQuery}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  debouncedSearch(text);
+                }}
+                placeholder={labels?.searchModule}
+                loading={loading}
+                onClear={() => {
+                  setSearchQuery("");
+                }}
+              />
+            </View>
+          )}
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
@@ -338,7 +377,7 @@ const ModuleScreen = () => {
               fetchModules(true);
             }}
             keyExtractor={(item: any, index: number) => index.toString()}
-            contentContainerStyle={{ paddingBottom: vs(140) }}
+            contentContainerStyle={{ paddingBottom: vs(120) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
             ListFooterComponent={
               hasMore ? (
@@ -372,7 +411,7 @@ const ModuleScreen = () => {
         <View
           style={{
             backgroundColor: Colors[theme].cart,
-            height: vs(400),
+            height: vs(350),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
@@ -385,7 +424,6 @@ const ModuleScreen = () => {
               flexDirection: "row",
               justifyContent: "space-between",
               padding: 10,
-              bottom: 30,
             }}
           >
             <ThemedText type="subtitle">
@@ -431,18 +469,20 @@ const ModuleScreen = () => {
                 setIsFocused(editModal ? "testDescription" : "description")
               }
             />
-          </View>
 
-          <CustomButton
+            <CustomButton
             title="Submit"
             onPress={() => {
               handleSubmit(onSubmit)();
             }}
             style={{
               backgroundColor: Colors[theme].background,
-              marginTop: vs(10),
+              marginTop: vs(15),
             }}
           />
+          </View>
+
+          
         </View>
       </Modal>
 

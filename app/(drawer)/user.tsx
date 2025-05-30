@@ -2,10 +2,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Image,
   Pressable,
-  StyleSheet,
-  Text,
   View,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
@@ -19,7 +16,7 @@ import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, FontAwesome5 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -78,6 +75,7 @@ const UserScreen = () => {
   const [image, setImage] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isModalVisible, setModalVisible] = useState(false);
+  const [search, setSearch] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState("");
   const [editModal, setEditModal] = useState<boolean>(false);
   const [isInfoModalVisible, setInfoModalVisible] = useState(false);
@@ -110,15 +108,18 @@ const UserScreen = () => {
     PaginatedUsersDocument
   );
 
-  const [updateUserStatus, updateUserStatusState] = useMutation(ChangeUserStatusDocument, {
-    onCompleted: (data) => {
-      fetchUser(true);
-      setStatusModalVisible(false);
-    },
-    onError: (error) => {
-      Alert.alert("Error", error.message);
-    },
-  });
+  const [updateUserStatus, updateUserStatusState] = useMutation(
+    ChangeUserStatusDocument,
+    {
+      onCompleted: (data) => {
+        fetchUser(true);
+        setStatusModalVisible(false);
+      },
+      onError: (error) => {
+        Alert.alert("Error", error.message);
+      },
+    }
+  );
 
   const [deleteUser, deleteUserState] = useMutation(DeleteUserDocument, {
     onCompleted: (data) => {
@@ -128,7 +129,7 @@ const UserScreen = () => {
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
-    }
+    },
   });
 
   //test
@@ -142,7 +143,6 @@ const UserScreen = () => {
     setValue("designation", currentUser?.designation);
   }, [currentUser]);
 
-
   useFocusEffect(
     useCallback(() => {
       fetchUser(true);
@@ -151,8 +151,8 @@ const UserScreen = () => {
 
   const renderItem = ({ item, index }: any) => {
     let rolesId = item?.roles?.map((item: any) => {
-      return item?.id
-    })
+      return item?.id;
+    });
     return (
       <CustomUserCard
         name={item?.name}
@@ -169,7 +169,7 @@ const UserScreen = () => {
             params: {
               data: JSON.stringify(item),
             },
-          })
+          });
         }}
         onDelete={() =>
           Alert.alert("Delete", "Are you sure you want to delete?", [
@@ -179,11 +179,11 @@ const UserScreen = () => {
                 deleteUser({
                   variables: {
                     ids: [Number(item?.id)],
-                  }
+                  },
                 });
               },
             },
-            { text: "No", onPress: () => { } },
+            { text: "No", onPress: () => {} },
           ])
         }
         onChangeStatus={() => {
@@ -198,7 +198,7 @@ const UserScreen = () => {
             designation: item?.designation,
           });
           setValue("status", item?.status);
-          setImage(item?.avatar)
+          setImage(item?.avatar);
           setStatusModalVisible(true);
         }}
         onView={() => {
@@ -211,7 +211,6 @@ const UserScreen = () => {
             id: item?.id,
             imagePath: item?.avatar,
             designation: item?.designation,
-
           });
           setInfoModalVisible(true);
         }}
@@ -226,17 +225,69 @@ const UserScreen = () => {
     [searchQuery]
   );
 
+  // const fetchUser = async (isRefreshing = false, searchParams = "") => {
+  //   if (loading && !isRefreshing) return;
+  //   const currentPage = isRefreshing ? 1 : page;
+  //   if (isRefreshing) {
+  //     setRefreshing(true);
+  //     setPage(1);
+  //   }
+  //   const params = {
+  //     limit: Env?.LIMIT,
+  //     page: currentPage,
+  //     search: searchParams,
+  //   };
+
+  //   try {
+  //     const res: any = await userData({
+  //       variables: {
+  //         listInputDto: params,
+  //       },
+  //       fetchPolicy: "network-only",
+  //     });
+
+  //     if (res?.data?.paginatedUsers) {
+  //       const data: any = res?.data?.paginatedUsers;
+  //       const newItems = data?.data || [];
+
+  //       setUserLIst((prev: any) => {
+  //         return isRefreshing && currentPage == 1
+  //           ? newItems
+  //           : [...prev, ...newItems];
+  //       });
+
+  //       const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+  //       setPage(currentPage + 1);
+  //       setHasMore(currentPage < lastPage);
+  //       setRefreshing(false);
+  //     } else {
+  //       console.log("API call failed or returned no data:", res?.errors);
+  //       setRefreshing(false);
+  //       setHasMore(false);
+  //     }
+  //   } catch (error) {
+  //     console.error("Fetch failed:", error);
+  //     setRefreshing(false);
+  //     setHasMore(false);
+  //   }
+  // };
+
   const fetchUser = async (isRefreshing = false, searchParams = "") => {
+    // Prevent concurrent requests
+    if (loading && !isRefreshing) return;
+
     const currentPage = isRefreshing ? 1 : page;
+    const params = {
+      limit: Env?.LIMIT,
+      page: currentPage,
+      search: searchParams || searchQuery, // Use current searchQuery if no params passed
+    };
+
+    // Set refreshing state only if we're actually refreshing
     if (isRefreshing) {
       setRefreshing(true);
       setPage(1);
     }
-    const params = {
-      limit: Env?.LIMIT,
-      page: currentPage,
-      search: searchParams,
-    };
 
     try {
       const res: any = await userData({
@@ -250,54 +301,85 @@ const UserScreen = () => {
         const data: any = res?.data?.paginatedUsers;
         const newItems = data?.data || [];
 
-        setUserLIst((prev: any) => {
-          return isRefreshing && currentPage == 1
-            ? newItems
-            : [...prev, ...newItems];
-        });
+        // Clear the list if refreshing or it's the first page
+        setUserLIst((prev) =>
+          isRefreshing || currentPage === 1 ? newItems : [...prev, ...newItems]
+        );
 
         const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
-        setPage(currentPage + 1);
         setHasMore(currentPage < lastPage);
-        setRefreshing(false);
+
+        // Only increment page if we're not refreshing and there's more data
+        // if (loading && !isRefreshing) return;
+        if (!isRefreshing && currentPage < lastPage) {
+          setPage(currentPage + 1);
+        }
       } else {
         console.log("API call failed or returned no data:", res?.errors);
-        setRefreshing(false);
         setHasMore(false);
       }
     } catch (error) {
       console.error("Fetch failed:", error);
-      setRefreshing(false);
       setHasMore(false);
+    } finally {
+      setRefreshing(false);
     }
   };
 
   if (
-    ((loading && page == 1 && !refreshing) ||
-      deleteUserState.loading ||
-      updateUserStatusState?.loading)
+    (loading && page == 1 && !refreshing) ||
+    deleteUserState.loading ||
+    updateUserStatusState?.loading
   ) {
     return <Loader />;
   }
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title="User"
+      rightComponent={
+        <Pressable
+          onPress={() => {
+            setSearch((prev) => !prev);
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5 name="search" size={22} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ flex: 1 }}>
-            <CustomSearchBar
-              searchQuery={searchQuery}
-              onChangeText={(text) => {
-                setSearchQuery(text);
-                debouncedSearch(text);
-              }}
-              placeholder={labels?.searchUser}
-              loading={loading}
-              onClear={() => {
-                setSearchQuery("");
-              }}
-            />
-          </View>
+          {search && (
+            <View style={{ flex: 1 }}>
+              <CustomSearchBar
+                searchQuery={searchQuery}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  debouncedSearch(text);
+                }}
+                placeholder={labels?.searchUser}
+                loading={loading}
+                onClear={() => {
+                  setSearchQuery("");
+                }}
+              />
+            </View>
+          )}
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
@@ -329,7 +411,6 @@ const UserScreen = () => {
           />
         </View>
       </ThemedView>
-
 
       {/* user info modal */}
       <Modal
@@ -398,7 +479,6 @@ const UserScreen = () => {
         </View>
       </Modal>
 
-
       {/* status modal */}
       <Modal
         isVisible={isStatusModalVisible}
@@ -409,12 +489,11 @@ const UserScreen = () => {
         <View
           style={{
             backgroundColor: Colors[theme].cart,
-            height: vs(320),
+            height: vs(330),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
             padding: 10,
-
           }}
         >
           <View
@@ -424,9 +503,7 @@ const UserScreen = () => {
               padding: 10,
             }}
           >
-            <ThemedText type="subtitle">
-              {"Change Status"}
-            </ThemedText>
+            <ThemedText type="subtitle">{"Change Status"}</ThemedText>
             <Pressable
               onPress={() => {
                 setStatusModalVisible(false);
@@ -448,9 +525,10 @@ const UserScreen = () => {
             onChangeText={() => {
               const params = {
                 ids: [Number(currentUser.id)],
-                status: watch('status')?.value,
+                status: watch("status")?.value,
               };
-              watch('status')?.value && updateUserStatus({ variables: { data: params } });
+              watch("status")?.value &&
+                updateUserStatus({ variables: { data: params } });
             }}
             rules={{
               required: {
@@ -462,22 +540,23 @@ const UserScreen = () => {
         </View>
       </Modal>
 
-      {createPermission && <FAB
-        size="large"
-        title="Add User"
-        style={{
-          position: "absolute",
-          margin: 16,
-          right: 0,
-          bottom: 30,
-        }}
-        icon={{
-          name: "add",
-          color: "white",
-        }}
-        onPress={() => router.push("/(subComponents)/addEditUser")}
-      />}
-
+      {createPermission && (
+        <FAB
+          size="large"
+          title="Add User"
+          style={{
+            position: "absolute",
+            margin: 16,
+            right: 0,
+            bottom: 30,
+          }}
+          icon={{
+            name: "add",
+            color: "white",
+          }}
+          onPress={() => router.push("/(subComponents)/addEditUser")}
+        />
+      )}
     </CustomHeader>
   );
 };
@@ -502,15 +581,14 @@ const styles = ScaledSheet.create({
     flex: 1,
   },
   searchContainer: {
-    marginHorizontal: '12@s',
+    marginHorizontal: "12@s",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "12@ms",
   },
   buttonContainer: { marginLeft: "12@ms" },
-  organizationParentContainer: {
-  },
+  organizationParentContainer: {},
   organizationContainer: {
     width: "100%",
     padding: "12@ms",
@@ -546,10 +624,10 @@ const styles = ScaledSheet.create({
     justifyContent: "space-between",
   },
   imageContainer: {
-    width: '70@ms',
-    height: '70@ms',
-    borderRadius: '70@ms',
-    marginBottom: '12@ms',
+    width: "70@ms",
+    height: "70@ms",
+    borderRadius: "70@ms",
+    marginBottom: "12@ms",
     backgroundColor: Colors.gray,
     justifyContent: "center",
     alignItems: "center",
@@ -558,20 +636,20 @@ const styles = ScaledSheet.create({
     borderColor: "#ccc",
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: ms(50),
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   editImage: {
-    position: 'absolute',
+    position: "absolute",
     top: 3,
     left: 50,
     width: 35,
     height: 35,
     borderRadius: 100,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

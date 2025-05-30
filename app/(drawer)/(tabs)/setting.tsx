@@ -1,4 +1,12 @@
-import { Pressable, View, ScrollView, Alert, Button, Text, Image } from "react-native";
+import {
+  Pressable,
+  View,
+  ScrollView,
+  Alert,
+  Button,
+  Text,
+  Image,
+} from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { Switch } from "@rneui/themed";
 import CustomHeader from "@/components/CustomHeader";
@@ -19,7 +27,7 @@ import {
 import { Colors } from "@/constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import asyncKeys from "@/constants/asyncKeys";
 import alertMsg from "@/constants/alertMsg";
 import Loader from "@/components/ui/Loader";
@@ -29,7 +37,11 @@ import Toggle from "react-native-toggle-element";
 import * as SecureStore from "expo-secure-store";
 import { ThemedView } from "@/components/ThemedView";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { FindUserByIdDocument, GetAllDynamicPageDocument, UpdateProfileDocument } from "@/graphql/generated";
+import {
+  FindUserByIdDocument,
+  GetAllDynamicPageDocument,
+  UpdateProfileDocument,
+} from "@/graphql/generated";
 import Modal from "react-native-modal";
 import CustomValidation from "@/components/CustomValidation";
 import { useForm } from "react-hook-form";
@@ -38,7 +50,6 @@ import * as ImagePicker from "expo-image-picker";
 import { Env } from "@/constants/ApiEndpoints";
 import * as FileSystem from "expo-file-system";
 
-
 const { NetworkManager } = NativeModules;
 
 const SettingScreen = () => {
@@ -46,21 +57,31 @@ const SettingScreen = () => {
   const [userId, setUserId] = useState<number>(0);
   const [image, setImage] = useState<string>("");
   const [toggleValue, setToggleValue] = useState<any>(false);
-  const [isModalVisible, setModalVisible] = useState<boolean>(false)
-  const [pages, setPages] = useState<any>([])
-  const { control, setValue, handleSubmit, watch } = useForm<{ name: string, email: string, phoneNo: string }>({
+  const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const [pages, setPages] = useState<any>([]);
+  const { control, setValue, handleSubmit, watch } = useForm<{
+    name: string;
+    email: string;
+    phoneNo: string;
+  }>({
     defaultValues: {
       name: "",
       email: "",
-      phoneNo: ""
-    }
-
+      phoneNo: "",
+    },
   });
 
-  const [userData, { data, error, loading, refetch }] = useLazyQuery<any>(FindUserByIdDocument)
-  const [pagesData, { error: pageDataError, data: pagesApiData, loading: pageDataLoading, refetch: pageDataRefetch }] = useLazyQuery(
-    GetAllDynamicPageDocument
-  );
+  const [userData, { data, error, loading, refetch }] =
+    useLazyQuery<any>(FindUserByIdDocument);
+  const [
+    pagesData,
+    {
+      error: pageDataError,
+      data: pagesApiData,
+      loading: pageDataLoading,
+      refetch: pageDataRefetch,
+    },
+  ] = useLazyQuery(GetAllDynamicPageDocument);
   // const [updateUser, updateUserState] = useMutation(UpdateProfileDocument, {
   //   onCompleted: () => {
   //     refetch();
@@ -80,7 +101,7 @@ const SettingScreen = () => {
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
-    }
+    },
   });
 
   useEffect(() => {
@@ -105,14 +126,13 @@ const SettingScreen = () => {
   //   }
   // }, [isFocused]);
 
-
   const getUserData = async () => {
     const res = await pagesData({
       variables: {
         listInputDto: {
           limit: 10,
-          page: 1
-        }
+          page: 1,
+        },
       },
     });
     setPages(res?.data?.getAllDynamicPage?.data);
@@ -122,8 +142,8 @@ const SettingScreen = () => {
     setUserId(Number(parsedUserData?.userId));
     const response = await userData({
       variables: {
-        findUserByIdId: Number(parsedUserData?.userId)
-      }
+        findUserByIdId: Number(parsedUserData?.userId),
+      },
     });
     setImage(response.data?.findUserById?.avatar);
   };
@@ -132,7 +152,7 @@ const SettingScreen = () => {
     return (
       <CustomSwitch
         thumbColor={Colors.white}
-        onValueChange={() => { }}
+        onValueChange={() => {}}
         value={false}
         style={styles.switchStyle}
       />
@@ -193,7 +213,10 @@ const SettingScreen = () => {
       onTouchAction: () => {
         setValue("name", data?.findUserById?.name);
         setValue("email", data?.findUserById?.email);
-        setValue("phoneNo", (data?.findUserById?.mobileNo as number).toString());
+        setValue(
+          "phoneNo",
+          (data?.findUserById?.mobileNo as number).toString()
+        );
         setModalVisible(true);
       },
     },
@@ -202,36 +225,36 @@ const SettingScreen = () => {
       title: labels.notification,
       iconLib: Ionicons,
       iconName: "notifications-outline",
-      onTouchAction: () => { },
+      onTouchAction: () => {},
     },
     {
       id: 3,
       title: labels.language,
       iconLib: FontAwesome,
       iconName: "language",
-      onTouchAction: () => { },
+      onTouchAction: () => {},
     },
-    {
-      id: 4,
-      title: labels.appearance,
-      iconLib: Ionicons,
-      iconName: "moon",
-      onTouchAction: () => { },
-      rightIcon: rightIcon2(),
-    },
+    // {
+    //   id: 4,
+    //   title: labels.appearance,
+    //   iconLib: Ionicons,
+    //   iconName: "moon",
+    //   onTouchAction: () => {},
+    //   rightIcon: rightIcon2(),
+    // },
     {
       id: 5,
       title: labels.support,
       iconLib: FontAwesome,
       iconName: "support",
-      onTouchAction: () => { },
+      onTouchAction: () => {},
     },
     {
       id: 6,
       title: labels.help,
       iconLib: Feather,
       iconName: "help-circle",
-      onTouchAction: () => { },
+      onTouchAction: () => {},
     },
   ];
 
@@ -239,16 +262,14 @@ const SettingScreen = () => {
     Alert.alert(labels.logout_title, labels.logout_msg, [
       {
         text: labels.cancel,
-        onPress: () => {
-
-        },
+        onPress: () => {},
         style: "cancel",
       },
       {
         text: labels.logout,
         onPress: async () => {
           await SecureStore.deleteItemAsync("userData");
-          router.dismissTo('/login');
+          router.dismissTo("/login");
         },
       },
     ]);
@@ -260,21 +281,19 @@ const SettingScreen = () => {
       mobileNo: Number(watch("phoneNo")),
       id: userId,
       email: watch("email"),
-      avatar: image
-    }
+      avatar: image,
+    };
 
     try {
-      updateUser(
-        {
-          variables: {
-            data: params
-          }
-        }
-      );
+      updateUser({
+        variables: {
+          data: params,
+        },
+      });
     } catch (error) {
       console.error("Error updating user:", error);
     }
-  }
+  };
 
   // const handleImagePickerPress = async () => {
   //   let result = await ImagePicker.launchImageLibraryAsync({
@@ -312,7 +331,7 @@ const SettingScreen = () => {
       //   uri: uri,
       //   name: `upload.${fileExtension}`,
       //   type: mimeType,
-      // } as any); 
+      // } as any);
 
       const uploadResponse = await fetch(`${Env.SERVER_URL}/api/files/upload`, {
         method: "POST",
@@ -335,7 +354,7 @@ const SettingScreen = () => {
 
   const handleImagePickerPress = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
@@ -347,19 +366,15 @@ const SettingScreen = () => {
     }
   };
 
-
-
   return (
     <CustomHeader
       toggleValue={toggleValue}
-      leftComponent={
-        <ThemedText style={styles.headerLeft}>{labels.settings}</ThemedText>
-      }
+      title={labels.settings}
       rightComponent={
         <Pressable style={styles.iconStyle} onPress={logoutFunc}>
-          <MaterialIcons
+          <MaterialCommunityIcons
             name="logout"
-            size={ms(20)}
+            size={24}
             color={Colors[theme].text}
           />
         </Pressable>
@@ -375,9 +390,7 @@ const SettingScreen = () => {
       >
         <ThemedView>
           <View style={styles.userInfo}>
-            <Pressable
-              style={styles.imageContainer}
-            >
+            <Pressable style={styles.imageContainer}>
               <Image
                 source={{
                   uri: `${Env?.SERVER_URL}${image}`,
@@ -386,8 +399,12 @@ const SettingScreen = () => {
               />
             </Pressable>
             <View>
-              <ThemedText style={styles.userName}>{data?.findUserById?.name}</ThemedText>
-              <ThemedText style={styles.userEmail}>{data?.findUserById?.email}</ThemedText>
+              <ThemedText style={styles.userName}>
+                {data?.findUserById?.name}
+              </ThemedText>
+              <ThemedText style={styles.userEmail}>
+                {data?.findUserById?.email}
+              </ThemedText>
             </View>
           </View>
           {firstData?.map((item: any, i: number) => {
@@ -397,7 +414,12 @@ const SettingScreen = () => {
                 onPress={item?.onTouchAction}
                 style={[
                   styles.container,
-                  { backgroundColor: Colors[theme].cart },
+                  {
+                    backgroundColor:
+                      theme === "light"
+                        ? Colors?.cartBackground
+                        : Colors[theme]?.cart,
+                  },
                 ]}
               >
                 {item.image ? (
@@ -434,15 +456,22 @@ const SettingScreen = () => {
             return (
               <Pressable
                 key={i}
-                onPress={() => router.push({
-                  pathname: '/dynamicPage',
-                  params: {
-                    data: JSON.stringify(item)
-                  }
-                })}
+                onPress={() =>
+                  router.push({
+                    pathname: "/dynamicPage",
+                    params: {
+                      data: JSON.stringify(item),
+                    },
+                  })
+                }
                 style={[
                   styles.container,
-                  { backgroundColor: Colors[theme].cart },
+                  {
+                    backgroundColor:
+                      theme === "light"
+                        ? Colors?.cartBackground
+                        : Colors[theme]?.cart,
+                  },
                 ]}
               >
                 {item.image ? (
@@ -453,8 +482,13 @@ const SettingScreen = () => {
                     size={ms(22)}
                     color={Colors[theme].text}
                   />
-                ) : <Foundation name="page-csv" size={ms(22)}
-                  color={Colors[theme].text} />}
+                ) : (
+                  <Foundation
+                    name="page-csv"
+                    size={ms(22)}
+                    color={Colors[theme].text}
+                  />
+                )}
 
                 <View style={{ width: "80%" }}>
                   <ThemedText type="default">
@@ -505,9 +539,7 @@ const SettingScreen = () => {
                 padding: 10,
               }}
             >
-              <ThemedText type="subtitle">
-                Update Profile
-              </ThemedText>
+              <ThemedText type="subtitle">Update Profile</ThemedText>
               <Pressable
                 onPress={() => {
                   setModalVisible(false);
@@ -518,9 +550,7 @@ const SettingScreen = () => {
             </View>
 
             <View style={{ padding: 10 }}>
-              <Pressable
-                style={styles.imageContainer}
-              >
+              <Pressable style={styles.imageContainer}>
                 <Image
                   source={{
                     uri: `${Env?.SERVER_URL}${image}`,
@@ -530,10 +560,15 @@ const SettingScreen = () => {
               </Pressable>
               <Pressable
                 onPress={handleImagePickerPress}
-                style={styles?.editImage}>
-                <Feather name="edit-2" size={ms(20)} color='black' style={{ fontWeight: 'bold', }} />
+                style={styles?.editImage}
+              >
+                <Feather
+                  name="edit-2"
+                  size={ms(20)}
+                  color="black"
+                  style={{ fontWeight: "bold" }}
+                />
               </Pressable>
-
 
               {/* <Pressable onPress={handleImagePickerPress} style={styles.imageContainer}>
                 {image && <Image source={{ uri: image }} style={styles.image} />}
@@ -545,7 +580,7 @@ const SettingScreen = () => {
                 name={"name"}
                 label={"Name"}
                 rules={{
-                  required: "Name is required"
+                  required: "Name is required",
                 }}
                 autoCapitalize="none"
               />
@@ -576,7 +611,10 @@ const SettingScreen = () => {
             <CustomButton
               title="Submit"
               onPress={handleSubmit(onSubmit)}
-              style={{ marginTop: vs(10), backgroundColor: Colors[theme].background }}
+              style={{
+                marginTop: vs(10),
+                backgroundColor: Colors[theme].background,
+              }}
             />
           </View>
         </Modal>
@@ -589,7 +627,7 @@ export default SettingScreen;
 
 const styles = ScaledSheet.create({
   headerLeft: {
-    fontSize: "18@ms",
+    // fontSize: "18@ms",
     fontWeight: 600,
     textAlign: "center",
   },
@@ -612,7 +650,7 @@ const styles = ScaledSheet.create({
     right: "10@s",
   },
   userInfo: {
-    marginVertical: vs(15),
+    // marginVertical: vs(15),
     flexDirection: "row",
     alignItems: "center",
     gap: ms(15),
@@ -620,7 +658,7 @@ const styles = ScaledSheet.create({
   },
   userName: {},
   userEmail: {
-    color: 'gray'
+    color: "gray",
   },
   label: {
     color: Colors.grayText,
@@ -629,10 +667,10 @@ const styles = ScaledSheet.create({
     fontWeight: 400,
   },
   imageContainer: {
-    width: '80@ms',
-    height: '80@ms',
-    borderRadius: '70@ms',
-    marginBottom: '12@ms',
+    width: "80@ms",
+    height: "80@ms",
+    borderRadius: "70@ms",
+    marginBottom: "12@ms",
     backgroundColor: Colors.gray,
     justifyContent: "center",
     alignItems: "center",
@@ -641,20 +679,20 @@ const styles = ScaledSheet.create({
     borderColor: "#ccc",
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: ms(50),
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   editImage: {
-    position: 'absolute',
+    position: "absolute",
     top: 3,
     left: 55,
     width: 35,
     height: 35,
     borderRadius: 100,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

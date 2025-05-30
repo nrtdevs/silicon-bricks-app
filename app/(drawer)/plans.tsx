@@ -10,7 +10,7 @@ import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, FontAwesome5 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -47,6 +47,7 @@ const statusData = [
 const PlanScreen = () => {
   const { theme } = useTheme();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [search, setSearch] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState("");
   const [editModal, setEditModal] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
@@ -322,10 +323,36 @@ const PlanScreen = () => {
   }
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title="Plan"
+      rightComponent={
+        <Pressable
+          onPress={() => {
+            setSearch((prev) => !prev);
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5 name="search" size={22} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ flex: 1 }}>
+          {search &&<View style={{ flex: 1 }}>
             <CustomSearchBar
               searchQuery={searchQuery}
               onChangeText={(text) => {
@@ -338,7 +365,7 @@ const PlanScreen = () => {
                 setSearchQuery("");
               }}
             />
-          </View>
+          </View>}
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
@@ -347,7 +374,7 @@ const PlanScreen = () => {
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
-              paddingBottom: vs(60),
+              paddingBottom: vs(100),
             }}
           />
         </View>
@@ -356,7 +383,7 @@ const PlanScreen = () => {
       {createPermission && (
         <FAB
           size="large"
-          title="Add User"
+          title="Add Plan"
           style={{
             position: "absolute",
             margin: 16,

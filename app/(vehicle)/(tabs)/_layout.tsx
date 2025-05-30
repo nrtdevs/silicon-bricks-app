@@ -11,9 +11,9 @@ const _layout = () => {
   const { theme } = useTheme();
   return (
     <Tabs
-        initialRouteName="home" 
-      screenOptions={{ 
-        headerShown:false,
+      initialRouteName="home"
+      screenOptions={{
+        headerShown: false,
         tabBarStyle: Platform.select({
           ios: {},
           default: {
@@ -31,9 +31,7 @@ const _layout = () => {
           tabBarLabel: ({ focused }: any) => (
             <Text
               style={{
-                color:  focused
-                  ? Colors.gradient1
-                  : Colors[theme].text
+                color: focused ? Colors.gradient1 : Colors[theme].text,
               }}
             >
               {labels?.home}
@@ -43,11 +41,7 @@ const _layout = () => {
             <Entypo
               name="home"
               size={ms(24)}
-              color={
-                focused
-                  ? Colors.gradient1
-                  : Colors[theme].text
-              }
+              color={focused ? Colors.gradient1 : Colors[theme].text}
             />
           ),
         }}
@@ -58,9 +52,7 @@ const _layout = () => {
           tabBarLabel: ({ focused }: any) => (
             <Text
               style={{
-                color: focused
-                  ? Colors.gradient1
-                  : Colors[theme].text
+                color: focused ? Colors.gradient1 : Colors[theme].text,
               }}
             >
               {labels?.settings}
@@ -70,11 +62,7 @@ const _layout = () => {
             <MaterialIcons
               name="settings"
               size={24}
-              color={
-                focused
-                  ? Colors.gradient1
-                  : Colors[theme].text
-              }
+              color={focused ? Colors.gradient1 : Colors[theme].text}
             />
           ),
         }}

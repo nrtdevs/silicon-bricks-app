@@ -24,6 +24,7 @@ import {
   AntDesign,
   Entypo,
   Feather,
+  FontAwesome5,
   Fontisto,
   MaterialIcons,
 } from "@expo/vector-icons";
@@ -83,6 +84,7 @@ const PackageScreen = () => {
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedModules, setSelectedModules] = useState<any>(null);
+  const [serrch, setSerrch] = useState<boolean>(false);
   const [packageList, setPackageList] = useState<any>([]);
   const { can, hasAny } = useUserContext();
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -199,6 +201,7 @@ const PackageScreen = () => {
   );
 
   const fetchPackage = async (isRefreshing = false, searchParams = "") => {
+    if (loading && !isRefreshing) return;
     let currentPage = isRefreshing ? 1 : page;
 
     if (isRefreshing) {
@@ -225,12 +228,14 @@ const PackageScreen = () => {
         const newItems = data?.data || [];
 
         setPackageList((prev: any) => {
-          return isRefreshing && currentPage == 1
+          return isRefreshing || currentPage == 1
             ? newItems
             : [...prev, ...newItems];
         });
         const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
-        setPage(currentPage + 1);
+        if (!isRefreshing && currentPage < lastPage) {
+          setPage(currentPage + 1);
+        }
         setHasMore(currentPage < lastPage);
         setRefreshing(false);
       } else {
@@ -313,21 +318,49 @@ const PackageScreen = () => {
   };
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title="Packages"
+      rightComponent={
+        <Pressable
+          onPress={() => {
+            setSerrch((prev) => !prev);
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5 name="search" size={22} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
           <View style={{ flex: 1 }}>
-            <CustomSearchBar
-              searchQuery={searchQuery}
-              onChangeText={(text) => {
-                setSearchQuery(text);
-                debouncedSearch(text);
-              }}
-              placeholder={labels?.searchPackage}
-              onClear={() => {
-                setSearchQuery("");
-              }}
-            />
+            {serrch && (
+              <CustomSearchBar
+                searchQuery={searchQuery}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  debouncedSearch(text);
+                }}
+                placeholder={labels?.searchPackage}
+                onClear={() => {
+                  setSearchQuery("");
+                }}
+              />
+            )}
           </View>
         </View>
 
@@ -341,7 +374,7 @@ const PackageScreen = () => {
               fetchPackage(true);
             }}
             keyExtractor={(item: any, index: number) => index.toString()}
-            contentContainerStyle={{ paddingBottom: vs(60) }}
+            contentContainerStyle={{ paddingBottom: vs(120) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
             ListFooterComponent={
               hasMore ? (
@@ -449,7 +482,7 @@ const PackageScreen = () => {
               padding: ms(10),
             }}
           >
-            <ThemedText type="subtitle">User</ThemedText>
+            <ThemedText type="subtitle">Package</ThemedText>
             <Pressable
               onPress={() => {
                 setCurrentPackage(defaultValue);
@@ -563,7 +596,7 @@ const PackageScreen = () => {
       {createPermission && (
         <FAB
           size="large"
-          title="Add User"
+          title="Add Package"
           style={{
             position: "absolute",
             margin: 16,

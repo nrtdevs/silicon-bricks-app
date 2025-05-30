@@ -243,21 +243,24 @@ const CustomCard: React.FC<CustomCardProps> = ({
 
         {/* Details */}
         {description?.length > 0 && (
-          <View style={{}}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <ThemedText
-                style={{
-                  color: Colors[theme]?.textSecondary,
-                  justifyContent: "center",
-                }}
-              >
-                Description:
-              </ThemedText>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <ThemedText
+              style={{
+                color: Colors[theme]?.textSecondary,
+                justifyContent: "center",
+              }}
+            >
+              Description:
+            </ThemedText>
+            <View
+              style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+            >
               <ThemedText
                 style={{
                   marginLeft: ms(10),
                   color: Colors[theme]?.textSecondary,
                   justifyContent: "center",
+                  lineHeight: vs(18),
                 }}
               >
                 {description}

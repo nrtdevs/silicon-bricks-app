@@ -20,7 +20,12 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import { ScrollView } from "react-native";
-import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import {
+  Entypo,
+  Feather,
+  FontAwesome5,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -73,6 +78,7 @@ const OrganizationScreen = () => {
   const [page, setPage] = useState<number>(1);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isFocused, setIsFocused] = useState("");
+  const [search, setSearch] = useState<boolean>(false);
   const [editModal, setEditModal] = useState<boolean>(false);
   const [isStatusModalVisible, setStatusModalVisible] = useState(false);
   const [currentOrganization, setCurrentOrganization] = useState<{
@@ -85,7 +91,8 @@ const OrganizationScreen = () => {
     {
       onCompleted: (data) => {
         reset();
-        fetchOrganization(true);
+        refetch();
+        fetchOrganization();
         setModalVisible(false);
       },
       onError: (error) => {
@@ -108,7 +115,7 @@ const OrganizationScreen = () => {
     UpdateOrganizationDocument,
     {
       onCompleted: (data) => {
-        fetchOrganization(true);
+        fetchOrganization();
         setCurrentOrganization(defaultValue);
         setEditModal(false);
         setModalVisible(false);
@@ -123,7 +130,7 @@ const OrganizationScreen = () => {
     DeleteOrganizationDocument,
     {
       onCompleted: (data) => {
-        fetchOrganization(true);
+        fetchOrganization();
         setCurrentOrganization(defaultValue);
         setEditModal(false);
         setModalVisible(false);
@@ -138,7 +145,7 @@ const OrganizationScreen = () => {
     EnableOrganizationStatusDocument,
     {
       onCompleted: (data) => {
-        fetchOrganization(true);
+        fetchOrganization();
         setStatusModalVisible(false);
       },
       onError: (error) => {
@@ -147,19 +154,19 @@ const OrganizationScreen = () => {
     }
   );
 
-  // const setCurrentOrganizationData() => {
-  //   setValue("name", currentOrganization?.name)
-  //   setValue("description", currentOrganization?.description)
-  // }
-
   useEffect(() => {
     setValue("name", currentOrganization?.name);
     setValue("description", currentOrganization?.description);
   }, [currentOrganization]);
 
+  // useEffect(() => {
+  //   setCurrentOrganization(defaultValue);
+  //   fetchOrganization();
+  // }, []);
+
   useEffect(() => {
     setCurrentOrganization(defaultValue);
-    fetchOrganization();
+    fetchOrganization(true); // Start with refresh=true to reset pagination
   }, []);
 
   const onSubmit = (data: any) => {
@@ -238,7 +245,58 @@ const OrganizationScreen = () => {
   };
   // console.log('page',data?.paginatedOrganization?.meta?.totalItems);
 
+  // const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
+  //   let currentPage = isRefreshing ? 1 : page;
+
+  //   if (isRefreshing) {
+  //     setRefreshing(true);
+  //     setPage(1);
+  //   }
+
+  //   const params = {
+  //     limit: Env?.LIMIT as number,
+  //     page: currentPage,
+  //     search: searchParams,
+  //   };
+
+  //   try {
+  //     const res: any = await organizationData({
+  //       variables: {
+  //         listInputDto: params,
+  //       },
+  //       fetchPolicy: "network-only",
+  //     });
+
+  //     if (res?.data?.paginatedOrganization) {
+  //       const data: any = res?.data?.paginatedOrganization;
+  //       const newItems = data?.data || [];
+  //       console.log("Fetched organizations:", newItems.length);
+
+  //       setOrganizationList((prev: any) => {
+  //         return isRefreshing && currentPage == 1
+  //           ? newItems
+  //           : [...prev, ...newItems];
+  //       });
+  //       const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+  //       setHasMore(currentPage < lastPage);
+  //       setPage(currentPage + 1);
+  //       setRefreshing(false);
+  //     } else {
+  //       console.log("API call failed or returned no data:", res?.errors);
+  //       setRefreshing(false);
+  //       setHasMore(false);
+  //     }
+  //   } catch (error) {
+  //     console.error("Fetch failed:", error);
+  //     setRefreshing(false);
+  //     setHasMore(false);
+  //   }
+  // };
+
   const fetchOrganization = async (isRefreshing = false, searchParams = "") => {
+    // Prevent concurrent requests
+    if (loading && !isRefreshing) return;
+
     let currentPage = isRefreshing ? 1 : page;
 
     if (isRefreshing) {
@@ -249,7 +307,7 @@ const OrganizationScreen = () => {
     const params = {
       limit: Env?.LIMIT as number,
       page: currentPage,
-      search: searchParams,
+      search: searchParams || searchQuery,
     };
 
     try {
@@ -263,31 +321,31 @@ const OrganizationScreen = () => {
       if (res?.data?.paginatedOrganization) {
         const data: any = res?.data?.paginatedOrganization;
         const newItems = data?.data || [];
+        console.log("Fetched organizations:", newItems.length);
 
-        setOrganizationList((prev: any) => {
-          return isRefreshing && currentPage == 1
-            ? newItems
-            : [...prev, ...newItems];
-        });
+        // Clear the list if refreshing or it's the first page
+        setOrganizationList((prev) =>
+          isRefreshing || currentPage === 1 ? newItems : [...prev, ...newItems]
+        );
+
         const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
-        setPage(currentPage + 1);
         setHasMore(currentPage < lastPage);
-        setRefreshing(false);
-      } else {
-        console.log("API call failed or returned no data:", res?.errors);
-        setRefreshing(false);
-        setHasMore(false);
+
+        // Only increment page if we're not refreshing and there's more data
+        if (!isRefreshing && currentPage < lastPage) {
+          setPage(currentPage + 1);
+        }
       }
     } catch (error) {
       console.error("Fetch failed:", error);
+    } finally {
       setRefreshing(false);
-      setHasMore(false);
     }
   };
 
   const debouncedSearch = useCallback(
     debounce((text) => {
-      fetchOrganization(true, text);
+      fetchOrganization(false, text);
     }, 500),
     [searchQuery]
   );
@@ -301,23 +359,51 @@ const OrganizationScreen = () => {
   }
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title="Organization"
+      rightComponent={
+        <Pressable
+          onPress={() => {
+            setSearch((prev) => !prev);
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5 name="search" size={22} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ flex: 1 }}>
-            <CustomSearchBar
-              searchQuery={searchQuery}
-              onChangeText={(text) => {
-                setSearchQuery(text);
-                debouncedSearch(text);
-              }}
-              placeholder={labels?.searchOrganization}
-              loading={loading}
-              onClear={() => {
-                setSearchQuery("");
-              }}
-            />
-          </View>
+          {search && (
+            <View style={{ flex: 1 }}>
+              <CustomSearchBar
+                searchQuery={searchQuery}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  debouncedSearch(text);
+                }}
+                placeholder={labels?.searchOrganization}
+                loading={loading}
+                onClear={() => {
+                  setSearchQuery("");
+                }}
+              />
+            </View>
+          )}
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
@@ -328,6 +414,12 @@ const OrganizationScreen = () => {
             onRefresh={() => {
               fetchOrganization(true);
             }}
+            // refreshControl={
+            //   <RefreshControl
+            //     refreshing={refreshing && !loading}
+            //     onRefresh={() => fetchOrganization(true)}
+            //   />
+            // }
             keyExtractor={(item: any, index: number) => index.toString()}
             contentContainerStyle={{ paddingBottom: vs(120) }}
             ListEmptyComponent={!loading ? <NoDataFound /> : null}
@@ -338,7 +430,7 @@ const OrganizationScreen = () => {
             }
             onEndReached={() => {
               if (hasMore && !loading) {
-                fetchOrganization();
+                fetchOrganization(false, searchQuery);
               }
             }}
             onEndReachedThreshold={0.5}
@@ -435,23 +527,23 @@ const OrganizationScreen = () => {
               onFocus={() => setIsFocused("description")}
               autoCapitalize="none"
             />
-          </View>
 
-          <CustomButton
-            title="Submit"
-            isLoading={
-              editModal
-                ? updateOrganizationState.loading
-                : createOrganizationState.loading
-            }
-            onPress={() => {
-              handleSubmit(onSubmit)();
-            }}
-            style={{
-              backgroundColor: Colors[theme].background,
-              marginTop: vs(10),
-            }}
-          />
+            <CustomButton
+              title="Submit"
+              isLoading={
+                editModal
+                  ? updateOrganizationState.loading
+                  : createOrganizationState.loading
+              }
+              onPress={() => {
+                handleSubmit(onSubmit)();
+              }}
+              style={{
+                backgroundColor: Colors[theme].background,
+                marginTop: vs(15),
+              }}
+            />
+          </View>
         </View>
       </Modal>
 

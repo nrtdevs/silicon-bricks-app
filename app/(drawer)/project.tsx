@@ -7,7 +7,12 @@ import {
   Pressable,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import {
+  Entypo,
+  Feather,
+  FontAwesome5,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { gql, useMutation } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client";
 import { set, useForm } from "react-hook-form";
@@ -37,6 +42,7 @@ import CustomCard from "@/components/master/CustomCard";
 import { Env } from "@/constants/ApiEndpoints";
 import Loader from "@/components/ui/Loader";
 import { FAB } from "@rneui/themed";
+import { router } from "expo-router";
 
 interface ProjectData {
   id: number;
@@ -61,6 +67,7 @@ const Project = () => {
   const { theme } = useTheme();
   const [editVisible, setEditVisible] = useState(false);
   const [isStatusModalVisible, setStatusModalVisible] = useState(false);
+  const [search, setSearch] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isModalVisible, setModalVisible] = useState(false);
   const [projectId, setProjectId] = useState<string>("");
@@ -183,6 +190,8 @@ const Project = () => {
   );
 
   const fetchProject = async (isRefreshing = false, searchParams = "") => {
+    if (loading && !isRefreshing) return;
+
     const currentPage = isRefreshing ? 1 : page;
 
     if (isRefreshing) {
@@ -208,12 +217,14 @@ const Project = () => {
         const newItems = data?.data || [];
 
         setProjectList((prev: any) => {
-          return isRefreshing && currentPage == 1
+          return isRefreshing || currentPage == 1
             ? newItems
             : [...prev, ...newItems];
         });
         const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
-        setPage(currentPage + 1);
+        if (!isRefreshing && currentPage < lastPage) {
+          setPage(currentPage + 1);
+        }
         if (isRefreshing) setRefreshing(false);
         setHasMore(currentPage < lastPage);
         setRefreshing(false);
@@ -279,24 +290,52 @@ const Project = () => {
   }
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title="Project"
+      rightComponent={
+        <Pressable
+          onPress={() => {
+            setSearch((prev) => !prev);
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5 name="search" size={22} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
       <ThemedView style={styles.contentContainer}>
         <View>
           <View style={styles.searchContainer}>
-            <View style={{ flex: 1 }}>
-              <CustomSearchBar
-                searchQuery={searchQuery}
-                onChangeText={(text) => {
-                  setSearchQuery(text);
-                  debouncedSearch(text);
-                }}
-                placeholder={labels?.searchProject}
-                loading={loading}
-                onClear={() => {
-                  setSearchQuery("");
-                }}
-              />
-            </View>
+            {search && (
+              <View style={{ flex: 1 }}>
+                <CustomSearchBar
+                  searchQuery={searchQuery}
+                  onChangeText={(text) => {
+                    setSearchQuery(text);
+                    debouncedSearch(text);
+                  }}
+                  placeholder={labels?.searchProject}
+                  loading={loading}
+                  onClear={() => {
+                    setSearchQuery("");
+                  }}
+                />
+              </View>
+            )}
           </View>
 
           <View style={styles.scrollContainer}>
@@ -336,64 +375,62 @@ const Project = () => {
           setModalVisible(false);
         }}
       >
-        <ThemedView>
+        <View
+          style={{
+            backgroundColor: Colors[theme].cart,
+            height: vs(350),
+            width: s(300),
+            borderRadius: 10,
+            alignSelf: "center",
+            padding: 10,
+            justifyContent: "center",
+          }}
+        >
           <View
             style={{
-              backgroundColor: Colors[theme].cart,
-              height: vs(330),
-              width: s(300),
-              borderRadius: 10,
-              alignSelf: "center",
+              flexDirection: "row",
+              justifyContent: "space-between",
               padding: 10,
-              justifyContent: "center",
             }}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                padding: 10,
+            <ThemedText type="subtitle">Create Project</ThemedText>
+            <Pressable
+              onPress={() => {
+                setModalVisible(false);
               }}
             >
-              <ThemedText type="subtitle">Create Project</ThemedText>
-              <Pressable
+              <Entypo
+                name="cross"
+                size={ms(20)}
+                color={Colors[theme].text}
                 onPress={() => {
+                  setCurrentProject(defaultValue);
+                  setEditVisible(false);
                   setModalVisible(false);
                 }}
-              >
-                <Entypo
-                  name="cross"
-                  size={ms(20)}
-                  color={Colors[theme].text}
-                  onPress={() => {
-                    setCurrentProject(defaultValue);
-                    setEditVisible(false);
-                    setModalVisible(false);
-                  }}
-                />
-              </Pressable>
-            </View>
+              />
+            </Pressable>
+          </View>
 
-            <View style={{ padding: 10 }}>
-              <CustomValidation
-                type="input"
-                control={control}
-                labelStyle={styles?.label}
-                name={"project_name"}
-                label={`${labels.projectName}`}
-                rules={{
-                  required: labels.projectName,
-                }}
-                autoCapitalize="none"
-              />
-              <CustomValidation
-                type="input"
-                control={control}
-                name={"description"}
-                label={`${labels.description}`}
-                labelStyle={styles.label}
-              />
-            </View>
+          <View style={{ padding: 10 }}>
+            <CustomValidation
+              type="input"
+              control={control}
+              labelStyle={styles?.label}
+              name={"project_name"}
+              label={`${labels.projectName}`}
+              rules={{
+                required: labels.projectName,
+              }}
+              autoCapitalize="none"
+            />
+            <CustomValidation
+              type="input"
+              control={control}
+              name={"description"}
+              label={`${labels.description}`}
+              labelStyle={styles.label}
+            />
             <CustomButton
               title="Submit"
               onPress={handleSubmit(onSubmit)}
@@ -403,7 +440,7 @@ const Project = () => {
               }}
             />
           </View>
-        </ThemedView>
+        </View>
       </Modal>
 
       {/* status modal */}

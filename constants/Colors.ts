@@ -145,6 +145,7 @@ export const Colors = {
   },
 
   /** 🌎 Universal Colors */
+  cartBackground: '#F0F2F5',
   white: "#FFFFFF",
   black: "#000000",
   red: "#FF3B30",

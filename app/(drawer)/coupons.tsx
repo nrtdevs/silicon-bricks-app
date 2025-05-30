@@ -27,6 +27,7 @@ import {
   AntDesign,
   Entypo,
   Feather,
+  FontAwesome5,
   Fontisto,
   MaterialIcons,
 } from "@expo/vector-icons";
@@ -79,6 +80,7 @@ const statusData = [
 const CouponScreen = () => {
   const { theme } = useTheme();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [search, setSearch] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState("");
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -243,6 +245,7 @@ const CouponScreen = () => {
   // };
 
   const fetchCoupons = async (isRefreshing = false, searchParams = "") => {
+    if (loading && !isRefreshing) return;
     const currentPage = isRefreshing ? 1 : page;
     if (isRefreshing) {
       setRefreshing(true);
@@ -267,13 +270,15 @@ const CouponScreen = () => {
         const newItems = data?.data || [];
 
         setCouponList((prev: any) => {
-          return isRefreshing && currentPage == 1
+          return isRefreshing || currentPage == 1
             ? newItems
             : [...prev, ...newItems];
         });
 
         const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
-        setPage(currentPage + 1);
+        if (!isRefreshing && currentPage < lastPage) {
+          setPage(currentPage + 1);
+        }
         setHasMore(currentPage < lastPage);
         setRefreshing(false);
       } else {
@@ -433,23 +438,51 @@ const CouponScreen = () => {
   // }
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title="Coupon"
+      rightComponent={
+        <Pressable
+          onPress={() => {
+            setSearch((prev) => !prev);
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5 name="search" size={22} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ flex: 1 }}>
-            <CustomSearchBar
-              searchQuery={searchQuery}
-              onChangeText={(text) => {
-                setSearchQuery(text);
-                debouncedSearch(text);
-              }}
-              placeholder={labels?.searchCoupon}
-              loading={loading}
-              onClear={() => {
-                setSearchQuery("");
-              }}
-            />
-          </View>
+          {search && (
+            <View style={{ flex: 1 }}>
+              <CustomSearchBar
+                searchQuery={searchQuery}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  debouncedSearch(text);
+                }}
+                placeholder={labels?.searchCoupon}
+                loading={loading}
+                onClear={() => {
+                  setSearchQuery("");
+                }}
+              />
+            </View>
+          )}
         </View>
         <View style={styles.organizationParentContainer}>
           <FlatList
@@ -506,7 +539,7 @@ const CouponScreen = () => {
       {createPermission && (
         <FAB
           size="large"
-          title="Add User"
+          title="Add Coupon"
           style={{
             position: "absolute",
             margin: 16,
@@ -520,215 +553,6 @@ const CouponScreen = () => {
           onPress={() => router.push("/(subComponents)/addEditCoupon")}
         />
       )}
-
-      {/* CREATE AND EDIT MODAL */}
-      <Modal
-        isVisible={isModalVisible}
-        onBackdropPress={() => {
-          reset();
-          setCurrentCoupon(defaultValue);
-          setEditModal(false);
-          setModalVisible(false);
-        }}
-      >
-        <ScrollView
-          contentContainerStyle={{
-            backgroundColor: Colors[theme].cart,
-            // height: vs(500),
-            width: s(300),
-            borderRadius: 10,
-            alignSelf: "center",
-            padding: 10,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingTop: 20,
-            }}
-          >
-            <ThemedText type="subtitle">
-              {editModal ? "Edit" : "Create Coupon"}
-            </ThemedText>
-
-            <Pressable
-              onPress={() => {
-                reset();
-                setEditModal(false);
-                setCurrentCoupon(defaultValue);
-                setModalVisible(false);
-              }}
-            >
-              <Entypo name="cross" size={ms(20)} color={Colors[theme].text} />
-            </Pressable>
-          </View>
-
-          <View style={{ padding: 10 }}>
-            <CustomValidation
-              type="input"
-              control={control}
-              labelStyle={styles.label}
-              name={"couponCode"}
-              inputStyle={[{ lineHeight: ms(20) }]}
-              label={"Coupon Code"}
-              placeholder={"Provide coupon code"}
-              rules={{
-                required: "couponCode is required",
-              }}
-              autoCapitalize="none"
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              name={"minOrderAmount"}
-              keyboardType="number-pad"
-              label={"Min Order Amount"}
-              placeholder={"Enter min order amount"}
-              labelStyle={styles.label}
-              rules={{
-                required: "Min order amount is required",
-              }}
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              name={"discountValue"}
-              label={"discount Value"}
-              placeholder={"Discount Value"}
-              keyboardType="number-pad"
-              labelStyle={styles.label}
-              rules={{
-                required: "Max discount amount is required",
-              }}
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              name={"usageLimit"}
-              keyboardType="number-pad"
-              label={"Usage Limit"}
-              placeholder={"Enter usageLimit"}
-              labelStyle={styles.label}
-              rules={{
-                required: "Usage limit is required",
-              }}
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              placeholder="Start Date"
-              name="start_date"
-              label="Start Date"
-              labelStyle={styles.label}
-              editable={false}
-              rightIcon={
-                <Fontisto
-                  name="date"
-                  size={ms(20)}
-                  color={Colors[theme]?.text}
-                />
-              }
-              onPress={() => {
-                setDateModal({
-                  start: !dateModal.start,
-                  end: false,
-                });
-                setDateTimePickerProps(getDateTimePickerProps(true));
-              }}
-              pointerEvents="none"
-              rules={{
-                required: "Start date is required",
-              }}
-            />
-
-            <CustomValidation
-              type="input"
-              control={control}
-              placeholder="End Date"
-              name="end_date"
-              label="End Date"
-              labelStyle={styles.label}
-              editable={false}
-              rightIcon={
-                <Fontisto
-                  name="date"
-                  size={ms(20)}
-                  color={Colors[theme]?.text}
-                />
-              }
-              onPress={() => {
-                setDateModal({
-                  end: !dateModal.end,
-                  start: false,
-                });
-                setDateTimePickerProps(getDateTimePickerProps(true));
-              }}
-              pointerEvents="none"
-              rules={{
-                required: "End date is required",
-              }}
-            />
-
-            {/* <CustomValidation
-                            type="input"
-                            control={control}
-                            placeholder="End Date"
-                            name="end_date"
-                            label="End Date"
-                            labelStyle={styles.label}
-                            rightIcon={
-                                <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
-                            }
-                            onPress={() => {
-                                setDateModal({
-                                    end: !dateModal.end,
-                                    start: false,
-                                });
-                                setDateTimePickerProps(getDateTimePickerProps(true));
-                            }}
-                            pointerEvents="none"
-                            rules={{
-                                required: "End date is required",
-                            }}
-                        /> */}
-
-            <CustomValidation
-              type="input"
-              control={control}
-              name={"description"}
-              multiline
-              label={"Description"}
-              // placeholder={editModal ? "Test organization description" : "Enter description"}
-              labelStyle={styles.label}
-              inputContainerStyle={{
-                height: vs(100),
-              }}
-              inputStyle={{
-                height: vs(100),
-              }}
-              containerStyle={{
-                height: vs(100),
-              }}
-              autoCapitalize="none"
-            />
-
-            <CustomButton
-              title="Submit"
-              onPress={handleSubmit(onSubmit)}
-              style={{
-                backgroundColor: Colors[theme].background,
-                marginTop: vs(50),
-              }}
-            />
-          </View>
-        </ScrollView>
-      </Modal>
 
       {/* user info modal */}
       <Modal
@@ -753,7 +577,7 @@ const CouponScreen = () => {
               padding: ms(10),
             }}
           >
-            <ThemedText type="subtitle">User</ThemedText>
+            <ThemedText type="subtitle">Coupon</ThemedText>
             <Pressable
               onPress={() => {
                 setCurrentCoupon(defaultValue);
@@ -847,7 +671,7 @@ const CouponScreen = () => {
         <View
           style={{
             backgroundColor: Colors[theme].cart,
-            height: vs(320),
+            height: vs(330),
             width: s(300),
             borderRadius: 10,
             alignSelf: "center",
