@@ -94,10 +94,9 @@ const MeetingScreen = () => {
                             }}
                         />
                     </View>
-                    <Pressable
-                        onPress={() => router.push("/(meeting)/deletedMeeting")}>
-                        <FontAwesome5 name="trash" size={20} color="#EF4444" />
-                    </Pressable>
+                    <FontAwesome5
+                        name="trash" size={20} color="#EF4444"
+                        onPress={() => router.push("/(meeting)/deletedMeeting")} />
                 </View>
                 <FlatList
                     data={filteredData}
@@ -196,7 +195,7 @@ const MeetingScreen = () => {
                                             opacity: 0.8
                                         }}
                                     >
-                                       <MaterialIcons name="autorenew" size={18} color='#fff' />
+                                        <MaterialIcons name="autorenew" size={18} color='#fff' />
                                         <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Status</ThemedText>
                                     </TouchableOpacity>
                                     <TouchableOpacity

@@ -71,41 +71,38 @@ const CreateMeeting = () => {
         }
     });
     const onSubmit = (data: any) => {
-        console.log('990000',watch('meetingTypeId'));
-        console.log('000',watch('attendees'));
-        
-        console.log(data);
-        return;
+        console.log('pressed');
         let param = {
-            "title": data.title,
-            "attendees": data.attendees.map((id: number) => Number(id)),
-            "startTime": data.startTime,
-            "endTime": data.endTime,
-            "meetingDate": data.meetingDate,
-            "meetingAgenda": data.meetingAgenda,
+            "title": data?.title,
+            "attendees": data?.attendees.map((id: number) => Number(id)),
+            "startTime": data?.startTime,
+            "endTime": data?.endTime,
+            "meetingDate": data?.meetingDate,
+            "meetingAgenda": data?.meetingAgenda,
             "meetingReference": "",
-            "meetingUrl": data.meetingUrl,
-            "meetingTypeId": Number(data.meetingTypeId.value),
-            "meetingVenueId": Number(data.meetingVenueId.value),
-            "projectId": Number(data.projectId.value),
+            "meetingUrl": data?.meetingUrl,
+            "meetingTypeId": Number(data?.meetingTypeId?.value),
+            "meetingVenueId": Number(data?.meetingVenueId?.value),
+            "projectId": Number(data?.projectId?.value),
             "uploadDoc": image
         }
-        let paramUpdate = {
-            "id": Number(id),
-            "title": data.title,
-            "attendees": data.attendees.map((id: number) => Number(id)),
-            "startTime": data.startTime,
-            "endTime": data.endTime,
-            "meetingDate": data.meetingDate,
-            "meetingAgenda": data.meetingAgenda,
-            "meetingReference": "",
-            "meetingUrl": data.meetingUrl,
-            "meetingTypeId": Number(data.meetingTypeId.value),
-            "meetingVenueId": Number(data.meetingVenueId.value),
-            "projectId": Number(data.projectId.value),
-            "uploadDoc": null,
-            "projectName": data.projectName.value
-        }
+        // let paramUpdate = {
+        //     "id": Number(id),
+        //     "title": data.title,
+        //     "attendees": data.attendees.map((id: number) => Number(id)),
+        //     "startTime": data.startTime,
+        //     "endTime": data.endTime,
+        //     "meetingDate": data.meetingDate,
+        //     "meetingAgenda": data.meetingAgenda,
+        //     "meetingReference": "",
+        //     "meetingUrl": data.meetingUrl,
+        //     "meetingTypeId": Number(data.meetingTypeId.value),
+        //     "meetingVenueId": Number(data.meetingVenueId.value),
+        //     "projectId": Number(data.projectId.value),
+        //     "uploadDoc": null,
+        //     "projectName": data.projectName.value
+        // }
+       
         isCreate == "true" ?
             createMeeting({
                 variables: {
@@ -203,7 +200,7 @@ const CreateMeeting = () => {
     const attendeesPickerData = useMemo(() => {
         if (!attendeesData?.paginatedUsers.data) return [];
         return attendeesData.paginatedUsers.data.map((item) => ({
-            label: item.email,
+            label: item.name,
             value: item.id,
         }));
     }, [attendeesData]);
@@ -254,9 +251,7 @@ const CreateMeeting = () => {
             uploadImage(uri);
         }
     };
-
-    // console.log('9999',attendeesPickerData);
-    
+   
     return (
         <CustomHeader>
             <ThemedView style={styles.contentContainer}>
@@ -348,7 +343,7 @@ const CreateMeeting = () => {
                         control={control}
                         placeholder={"Meeting Date"}
                         name="meetingDate"
-                        editable={true}
+                        editable={false}
                         label='Meeting Date'
                         rightIcon={
                             <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
@@ -464,9 +459,7 @@ const CreateMeeting = () => {
                     <CustomButton
                         title="Submit"
                         isLoading={createMeetingState.loading || updateMeetingState.loading}
-                        onPress={() => {
-                            handleSubmit(onSubmit)();
-                        }}
+                        onPress={ handleSubmit(onSubmit)}
                         style={{
                             backgroundColor: Colors[theme].background,
                             marginTop: vs(20),

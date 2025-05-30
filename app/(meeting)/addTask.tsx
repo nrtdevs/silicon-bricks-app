@@ -309,7 +309,7 @@ const AddTask = () => {
                         control={control}
                         placeholder={"Start Date"}
                         name="openedDate"
-                        editable={true}
+                        editable={false}
                         label='Start Date'
                         rightIcon={
                             <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
@@ -329,7 +329,7 @@ const AddTask = () => {
                         control={control}
                         placeholder={"Due Date"}
                         name="dueDate"
-                        editable={true}
+                        editable={false}
                         label='Due Date'
                         rightIcon={
                             <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
@@ -371,7 +371,6 @@ const AddTask = () => {
                 dateTimePickerProps={dateTimePickerProps}
                 setDateTimePickerProps={setDateTimePickerProps}
                 onDateTimeSelection={(event: any, selectedDate: any) => {
-                    console.log("selectedDate", selectedDate)
                     if (event.type != "dismissed") {
                         setValue(
                             dateModal.start ? "openedDate" : "dueDate",

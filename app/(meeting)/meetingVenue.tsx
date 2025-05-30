@@ -305,6 +305,7 @@ const MeetingVenue = () => {
                                 type="input"
                                 control={control}
                                 labelStyle={styles.label}
+                                keyboardType="number-pad"
                                 name={"contactNumber"}
                                 label="Contact Number"
                                 inputStyle={[{ lineHeight: ms(20) }]}
