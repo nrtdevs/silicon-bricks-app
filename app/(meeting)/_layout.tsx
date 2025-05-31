@@ -19,7 +19,7 @@ const CustomDrawerContent = (props: any) => {
       <View style={{
         height: 150, borderColor: Colors[theme].border,
         shadowColor: Colors[theme].shadow,
-        backgroundColor: Colors[theme].cart, borderRadius: 5
+        backgroundColor: "#e3e4e6", borderRadius: 5
       }}>
         <View style={{
           alignItems: 'center',
