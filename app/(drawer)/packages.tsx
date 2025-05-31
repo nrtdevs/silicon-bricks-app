@@ -84,7 +84,7 @@ const PackageScreen = () => {
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedModules, setSelectedModules] = useState<any>(null);
-  const [serrch, setSerrch] = useState<boolean>(false);
+  const [serrch, setSearch] = useState<boolean>(false);
   const [packageList, setPackageList] = useState<any>([]);
   const { can, hasAny } = useUserContext();
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -173,20 +173,21 @@ const PackageScreen = () => {
   useFocusEffect(
     useCallback(() => {
       fetchPackage(true);
+      setSearch(false);
     }, [])
   );
 
   const debouncedSearch = useCallback(
-    debounce((text) => {
-      packagesData({
+    debounce(async (text) => {
+      console.log("kkk", text);
+      let res = await packagesData({
         variables: {
           listInputDto: {
-            limit: 10,
-            page: 1,
             search: text,
           },
         },
       });
+      setPackageList(res?.data?.paginatedPackages?.data);
     }, 500),
     [searchQuery]
   );
@@ -337,7 +338,7 @@ const PackageScreen = () => {
       rightComponent={
         <Pressable
           onPress={() => {
-            setSerrch((prev) => !prev);
+            setSearch((prev) => !prev);
           }}
           style={{ padding: ms(10) }}
         >

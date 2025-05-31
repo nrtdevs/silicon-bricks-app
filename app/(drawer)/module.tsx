@@ -45,7 +45,7 @@ import { useUserContext } from "@/context/RoleContext";
 import CustomCard from "@/components/master/CustomCard";
 import { Env } from "@/constants/ApiEndpoints";
 import { FAB } from "@rneui/themed";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 const defaultValue = {
   name: "",
@@ -149,10 +149,18 @@ const ModuleScreen = () => {
     setValue("description", currentModule?.description);
   }, [currentModule]);
 
-  useEffect(() => {
-    setCurrentModule(defaultValue);
-    fetchModules();
-  }, []);
+  // useEffect(() => {
+  //   setCurrentModule(defaultValue);
+  //   fetchModules();
+  // }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setCurrentModule(defaultValue);
+      fetchModules();
+      setSearch(false);
+    }, [])
+  );
 
   const fetchModules = async (isRefreshing = false, searchParams = "") => {
     if (loading && !isRefreshing) return;
@@ -471,18 +479,16 @@ const ModuleScreen = () => {
             />
 
             <CustomButton
-            title="Submit"
-            onPress={() => {
-              handleSubmit(onSubmit)();
-            }}
-            style={{
-              backgroundColor: Colors[theme].background,
-              marginTop: vs(15),
-            }}
-          />
+              title="Submit"
+              onPress={() => {
+                handleSubmit(onSubmit)();
+              }}
+              style={{
+                backgroundColor: Colors[theme].background,
+                marginTop: vs(15),
+              }}
+            />
           </View>
-
-          
         </View>
       </Modal>
 

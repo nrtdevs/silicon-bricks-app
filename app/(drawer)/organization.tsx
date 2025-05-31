@@ -38,7 +38,7 @@ import Loader from "@/components/ui/Loader";
 import NoDataFound from "@/components/NoDataFound";
 import debounce from "lodash.debounce";
 import { useUserContext } from "@/context/RoleContext";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import CustomCard from "@/components/master/CustomCard";
 import { Env } from "@/constants/ApiEndpoints";
 import { FAB } from "@rneui/themed";
@@ -164,10 +164,18 @@ const OrganizationScreen = () => {
   //   fetchOrganization();
   // }, []);
 
-  useEffect(() => {
-    setCurrentOrganization(defaultValue);
-    fetchOrganization(true); // Start with refresh=true to reset pagination
-  }, []);
+  // useEffect(() => {
+  //   setCurrentOrganization(defaultValue);
+  //   fetchOrganization(true); // Start with refresh=true to reset pagination
+  // }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      setCurrentOrganization(defaultValue);
+      fetchOrganization(true);
+      setSearch(false);
+    }, [])
+  );
 
   const onSubmit = (data: any) => {
     try {

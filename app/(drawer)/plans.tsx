@@ -130,6 +130,7 @@ const PlanScreen = () => {
         },
         fetchPolicy: "network-only",
       });
+      setSearch(false);
     }, [])
   );
 

@@ -23,7 +23,7 @@ import { Colors } from "@/constants/Colors";
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 import CustomButton from "@/components/CustomButton";
 import { router, useLocalSearchParams } from "expo-router";
@@ -95,7 +95,7 @@ const CreateRoleScreen = () => {
   } = useForm<{ role: any; name: string }>({
     defaultValues: {},
   });
-  console.log("0909", watch("role")?.appName);
+  // console.log("0909", watch("role")?.appName);
 
   const { theme } = useTheme();
 
@@ -164,12 +164,11 @@ const CreateRoleScreen = () => {
       permissionIds: selectedRoles,
     };
 
-    if (selectedRoles.length ==0) {
+    if (selectedRoles.length == 0) {
       console.log("Select at least 1 permission");
       Alert.alert("Error", "Select at least 1 permission.");
       return;
-  }
-    
+    }
 
     editable == "true"
       ? updateRole({
@@ -196,10 +195,27 @@ const CreateRoleScreen = () => {
     //     }
     // )
   };
-  console.log("09", data?.allPermissions);
+
+  // console.log("09", data?.allPermissions);
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title={editable ? "Edit Role" : "Add Role"}
+    >
       <ScrollView contentContainerStyle={styles.container}>
         <ThemedView>
           <CustomValidation
@@ -255,7 +271,10 @@ const CreateRoleScreen = () => {
                           <View
                             key={index}
                             style={{
-                              backgroundColor: Colors[theme].cart,
+                              backgroundColor:
+                                theme == "light"
+                                  ? Colors?.cartBackground
+                                  : Colors[theme]?.cart,
                               padding: 10,
                               borderRadius: 10,
                               marginBottom: 20,
@@ -316,11 +335,14 @@ const CreateRoleScreen = () => {
                                       ? "checkbox-outline"
                                       : "checkbox-blank-outline"
                                   }
-                                  size={45}
+                                  size={35}
                                   color={Colors[theme].text}
                                 />
                               </Pressable>
-                              <ThemedText type="subtitle" style={{fontSize:26}}>
+                              <ThemedText
+                                type="subtitle"
+                                style={{ fontSize: 20 }}
+                              >
                                 {item.name}
                               </ThemedText>
                             </View>
@@ -369,12 +391,12 @@ const CreateRoleScreen = () => {
                                               ? "checkbox-outline"
                                               : "checkbox-blank-outline"
                                           }
-                                          size={40}
+                                          size={30}
                                           color={Colors[theme].text}
                                         />
                                       </Pressable>
                                       {/* <MaterialCommunityIcons name="checkbox-outline" size={24} color="black" /> */}
-                                      <ThemedText style={{ fontSize: 22 }}>
+                                      <ThemedText style={{ fontSize: 20 }}>
                                         {item.action}
                                       </ThemedText>
                                     </View>

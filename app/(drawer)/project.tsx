@@ -42,7 +42,7 @@ import CustomCard from "@/components/master/CustomCard";
 import { Env } from "@/constants/ApiEndpoints";
 import Loader from "@/components/ui/Loader";
 import { FAB } from "@rneui/themed";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 interface ProjectData {
   id: number;
@@ -173,9 +173,16 @@ const Project = () => {
     watch,
   } = useForm();
 
-  useEffect(() => {
-    fetchProject();
-  }, []);
+  // useEffect(() => {
+  //   fetchProject();
+  // }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProject();
+      setSearch(false);
+    }, [])
+  );
 
   useEffect(() => {
     setValue("project_name", currentProject?.project_name);

@@ -194,6 +194,7 @@ const CouponScreen = () => {
   useFocusEffect(
     useCallback(() => {
       fetchCoupons(true);
+      setSearch(false)
     }, [])
   );
 

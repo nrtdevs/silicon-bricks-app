@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   CreateOrganizationDocument,
@@ -22,7 +22,13 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import { ScrollView } from "react-native";
-import { AntDesign, Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Entypo,
+  Feather,
+  FontAwesome5,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import CustomSearchBar from "@/components/CustomSearchBar";
@@ -32,6 +38,8 @@ import { set, useForm } from "react-hook-form";
 import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import Loader from "@/components/ui/Loader";
+import { router, useFocusEffect } from "expo-router";
+import debounce from "lodash.debounce";
 
 const defaultValue = {
   name: "",
@@ -56,6 +64,8 @@ const SubscriptionScreen = () => {
   const [subscriptionsData, { error, data, loading, refetch }] = useLazyQuery(
     PaginatedSubscriptionsDocument
   );
+
+  console.log("00000", data?.paginatedSubscriptions?.data[0]);
 
   // const [createOrganization, createOrganizationState] = useMutation(CreateOrganizationDocument, {
   //   onCompleted: (data) => {
@@ -107,6 +117,7 @@ const SubscriptionScreen = () => {
   const [isFocused, setIsFocused] = useState("");
   const [editModal, setEditModal] = useState<boolean>(false);
   const [isStatusModalVisible, setStatusModalVisible] = useState(false);
+  const [search, setSearch] = useState(false);
   const [currentOrganization, setCurrentOrganization] = useState<{
     name: string;
     description: string;
@@ -131,16 +142,33 @@ const SubscriptionScreen = () => {
     { label: "Pending", value: "pending" },
   ];
 
-  useEffect(() => {
-    subscriptionsData({
-      variables: {
-        listInputDto: {
-          limit: 12,
-          page: 1,
+  const statusTextColorsOptions = {
+    active: "success",
+    inactive: "danger",
+    used: "warning",
+    expired: "blocked",
+  };
+
+  // useEffect(() => {
+  //   subscriptionsData({
+  //     variables: {
+  //       listInputDto: {},
+  //     },
+  //   });
+  //   setSearchQuery("")
+  // }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      subscriptionsData({
+        variables: {
+          listInputDto: {},
         },
-      },
-    });
-  }, []);
+      });
+      setSearchQuery("");
+      setSearch(false);
+    }, [])
+  );
 
   const onSubmit = (data: any) => {
     let param = {
@@ -162,6 +190,17 @@ const SubscriptionScreen = () => {
     //     },
     //   });
   };
+
+  const debouncedSearch = useCallback(
+    debounce(async (text) => {
+      const res = await subscriptionsData({
+        variables: {
+          listInputDto: { search: text },
+        },
+      });
+    }, 500),
+    [searchQuery]
+  );
 
   // console.log(watch("topic"));
 
@@ -196,27 +235,51 @@ const SubscriptionScreen = () => {
   // console.log('image',image);
 
   return (
-    <CustomHeader>
+    <CustomHeader
+      leftComponent={
+        <Pressable
+          onPress={() => {
+            router.back();
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5
+            name="arrow-left"
+            size={22}
+            color={Colors[theme].text}
+          />
+        </Pressable>
+      }
+      title="Subscription"
+      rightComponent={
+        <Pressable
+          onPress={() => {
+            setSearch((prev) => !prev);
+          }}
+          style={{ padding: ms(10) }}
+        >
+          <FontAwesome5 name="search" size={22} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
       <ThemedView style={styles.contentContainer}>
         <View style={styles.searchContainer}>
-          <View style={{ width: "100%" }}>
-            <CustomSearchBar
-              searchQuery={searchQuery}
-              onChangeText={(text) => {
-                setSearchQuery(text);
-                // setSelected(
-                //   dummyData.filter((item) =>
-                //     item.language.toLowerCase().includes(text.toLowerCase())
-                //   )
-                // );
-              }}
-              placeholder={labels?.searchTeam}
-              loading={loading}
-              onClear={() => {
-                setSearchQuery("");
-              }}
-            />
-          </View>
+          {search && (
+            <View style={{ width: "100%" }}>
+              <CustomSearchBar
+                searchQuery={searchQuery}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  debouncedSearch(text);
+                }}
+                placeholder={labels?.searchTeam}
+                loading={loading}
+                onClear={() => {
+                  setSearchQuery("");
+                }}
+              />
+            </View>
+          )}
           {/* <Pressable
             style={styles.buttonContainer}
             onPress={() => {
@@ -234,10 +297,15 @@ const SubscriptionScreen = () => {
                 key={index}
                 style={[
                   styles.organizationContainer,
-                  { backgroundColor: Colors[theme].cart },
+                  {
+                    backgroundColor:
+                      theme == "light"
+                        ? Colors?.cartBackground
+                        : Colors[theme].cart,
+                  },
                 ]}
               >
-                <ThemedText
+                {/* <ThemedText
                   style={[
                     styles.status,
                     {
@@ -249,81 +317,38 @@ const SubscriptionScreen = () => {
                   ]}
                 >
                   {item?.status}
-                </ThemedText>
+                </ThemedText> */}
+                <View
+                  style={[
+                    styles.statusBadge,
+                    {
+                      backgroundColor:
+                        Colors[theme]?.[statusTextColorsOptions[item?.status]]
+                          ?.bg,
+                      borderColor:
+                        Colors[theme]?.[statusTextColorsOptions[item?.status]]
+                          ?.border,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusText,
+                      {
+                        color:
+                          Colors[theme]?.[statusTextColorsOptions[item?.status]]
+                            ?.text,
+                      },
+                    ]}
+                  >
+                    {item?.status.toUpperCase()}
+                  </Text>
+                </View>
 
                 <View style={styles.organizationHeader}>
                   <ThemedText type="subtitle" style={{ flex: 1 }}>
                     {item?.name}
                   </ThemedText>
-                  <View style={styles.organizationInfo}>
-                    <MaterialIcons
-                      name="attractions"
-                      size={ms(20)}
-                      color={Colors[theme].text}
-                      onPress={() => {
-                        // setCurrentOrganization({
-                        //   name: item?.name,
-                        //   description: item?.description,
-                        //   id: item?.id,
-                        // });
-                        setStatusModalVisible(true);
-                      }}
-                    />
-
-                    <AntDesign
-                      name="eyeo"
-                      size={ms(20)}
-                      color={Colors[theme].text}
-                      onPress={() => {
-                        // setCurrentOrganization({
-                        //   name: item?.name,
-                        //   description: item?.description,
-                        //   id: item?.id,
-                        // });
-                        setStatusModalVisible(true);
-                      }}
-                    />
-
-                    <Feather
-                      name="edit"
-                      size={ms(20)}
-                      color={Colors[theme].text}
-                      onPress={() => {
-                        // setCurrentOrganization({
-                        //   name: item?.name,
-                        //   description: item?.description,
-                        //   id: item?.id,
-                        // });
-                        // setCurrentOrganizationData();
-                        setModalVisible(true);
-                        setEditModal(true);
-                      }}
-                    />
-                    <MaterialIcons
-                      name="delete-outline"
-                      size={ms(20)}
-                      color={Colors[theme].text}
-                      onPress={() => {
-                        Alert.alert(
-                          "Delete",
-                          "Are you sure you want to delete?",
-                          [
-                            {
-                              text: "Yes",
-                              onPress: () => {
-                                // deleteOrganization({
-                                //   variables: {
-                                //     deleteOrganizationId: Number(item?.id),
-                                //   }
-                                // });
-                              },
-                            },
-                            { text: "No", onPress: () => { } },
-                          ]
-                        );
-                      }}
-                    />
-                  </View>
                 </View>
 
                 <View style={styles.userInfo}>
@@ -455,7 +480,7 @@ const styles = ScaledSheet.create({
   },
   contentContainer: {
     flex: 1,
-    padding: "12@ms",
+    paddingHorizontal: "12@ms",
   },
   searchContainer: {
     width: "100%",
@@ -502,5 +527,18 @@ const styles = ScaledSheet.create({
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "500",
   },
 });

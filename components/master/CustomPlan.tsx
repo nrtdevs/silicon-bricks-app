@@ -46,8 +46,8 @@ const CustomPlan: React.FC<CustomPlanProps> = ({
   onChangeStatus,
 }) => {
   const { theme } = useTheme();
-  console.log("price", price);
-  console.log("dis price", discountedPrice);
+  // console.log("price", price);
+  // console.log("dis price", discountedPrice);
   return (
     <View
       style={[

@@ -102,6 +102,7 @@ const RolesScreen = () => {
   useFocusEffect(
     useCallback(() => {
       fetchRoles(true);
+      setSearch(false)
     }, [])
   );
 
