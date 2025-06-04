@@ -10,7 +10,7 @@ import { FAB } from "@rneui/themed";
 import { useTheme } from '@/context/ThemeContext';
 import { DeleteMetingDocument, EnableMeetingStatusDocument, PaginatedMeetingDocument } from '@/graphql/generated';
 import { useLazyQuery, useMutation, } from '@apollo/client';
-import { Entypo, Feather, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Entypo, Feather, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { View, Pressable, Alert, Modal, FlatList, TouchableOpacity } from 'react-native';
@@ -82,7 +82,16 @@ const MeetingScreen = () => {
         item?.title?.toLowerCase().includes(searchQuery.toLowerCase())
     );
     return (
-        <CustomHeader>
+        <CustomHeader
+            title="Meeting"
+            leftComponent={(
+                <MaterialCommunityIcons
+                name="arrow-left"
+                size={ms(20)}
+                color={Colors[theme]?.text}
+                onPress={() => router.back()}
+                style={{ left: 0 }} />
+            )}>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
                     <View style={{ width: "90%" }}>

@@ -29,6 +29,23 @@ export type About = {
   title: Scalars['String']['output'];
 };
 
+export type Activity = {
+  __typename?: 'Activity';
+  activity: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  createdBy: User;
+  createdByUserId: Scalars['Int']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  ipAddress: Scalars['String']['output'];
+  module: Scalars['String']['output'];
+  moduleId?: Maybe<Scalars['Int']['output']>;
+  organization: Organization;
+  updatedAt: Scalars['DateTime']['output'];
+  userAgent: Scalars['String']['output'];
+};
+
 export type AnalyticsFilters = {
   endDate?: InputMaybe<Scalars['String']['input']>;
   expenseType?: InputMaybe<Scalars['String']['input']>;
@@ -68,6 +85,7 @@ export type Breakdown = {
   createdBy?: Maybe<User>;
   createdById?: Maybe<Scalars['Float']['output']>;
   id: Scalars['ID']['output'];
+  isIndividualDeleted: Scalars['Boolean']['output'];
   latitude: Scalars['String']['output'];
   longitude: Scalars['String']['output'];
   media: Array<BreakdownMedia>;
@@ -78,6 +96,14 @@ export type Breakdown = {
   updatedAt: Scalars['DateTime']['output'];
   vehicle: Vehicle;
   vehicleId: Scalars['Int']['output'];
+};
+
+export type BreakdownFilterType = {
+  breakdownType?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Breakdown_Status>;
+  vehicleId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type BreakdownMedia = {
@@ -209,6 +235,8 @@ export type CreateCouponDto = {
 export type CreateFollowUpDto = {
   body: Scalars['String']['input'];
   subject: Scalars['String']['input'];
+  taskId?: InputMaybe<Scalars['Float']['input']>;
+  userId: Scalars['Float']['input'];
 };
 
 export type CreateMeetingDto = {
@@ -222,7 +250,6 @@ export type CreateMeetingDto = {
   meetingVenueId?: InputMaybe<Scalars['Float']['input']>;
   parentMeetingId?: InputMaybe<Scalars['Float']['input']>;
   projectId?: InputMaybe<Scalars['Float']['input']>;
-  projectName?: InputMaybe<Scalars['String']['input']>;
   startTime: Scalars['String']['input'];
   title: Scalars['String']['input'];
   uploadDoc?: InputMaybe<Scalars['String']['input']>;
@@ -270,7 +297,7 @@ export type CreateMultipleOrderInput = {
 };
 
 export type CreateNotePadDto = {
-  notesField: Scalars['String']['input'];
+  notesField?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CreateNotesDto = {
@@ -467,6 +494,15 @@ export type ExpenseByTypeResponse = {
   totalCount: Scalars['Int']['output'];
 };
 
+export type ExpenseFilterType = {
+  breakDownId?: InputMaybe<Scalars['Int']['input']>;
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  expenseType?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  vehicleId?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type ExpenseSummaryResponse = {
   __typename?: 'ExpenseSummaryResponse';
   averageExpense: Scalars['Float']['output'];
@@ -474,6 +510,52 @@ export type ExpenseSummaryResponse = {
   periodComparison?: Maybe<PeriodComparison>;
   totalAmount: Scalars['Float']['output'];
   totalExpenses: Scalars['Int']['output'];
+};
+
+export type FilterMeeting = {
+  endTime?: InputMaybe<Scalars['String']['input']>;
+  meetingAgenda?: InputMaybe<Scalars['String']['input']>;
+  meetingDate?: InputMaybe<Scalars['DateTime']['input']>;
+  startTime?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type FilterMeetingDto = {
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type FilterMeetingMonthYearDto = {
+  month: Scalars['Float']['input'];
+  year: Scalars['Float']['input'];
+};
+
+export type FilterMeetingTask = {
+  completedDate?: InputMaybe<Scalars['DateTime']['input']>;
+  dueDate?: InputMaybe<Scalars['DateTime']['input']>;
+  openedDate?: InputMaybe<Scalars['DateTime']['input']>;
+  priority?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<Scalars['String']['input']>;
+  task?: InputMaybe<Scalars['String']['input']>;
+  weightType?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type FilterMeetingType = {
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type FilterMeetingVenue = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  contactNumber?: InputMaybe<Scalars['Float']['input']>;
+  contactPerson?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type FilterNotesData = {
+  decision?: InputMaybe<Scalars['String']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type FollowUp = {
@@ -484,8 +566,11 @@ export type FollowUp = {
   createdById: Scalars['Float']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['Float']['output'];
+  organization: Organization;
   subject?: Maybe<Scalars['String']['output']>;
+  taskId?: Maybe<Scalars['Float']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['Float']['output'];
 };
 
 export type Group = {
@@ -564,6 +649,7 @@ export type Meeting = {
   meetingVenue?: Maybe<MeetingVenue>;
   meetingVenueId?: Maybe<Scalars['Float']['output']>;
   notes?: Maybe<Array<Notes>>;
+  organization: Organization;
   parentMeeting?: Maybe<Meeting>;
   parentMeetingId?: Maybe<Scalars['Float']['output']>;
   projectId?: Maybe<Scalars['Float']['output']>;
@@ -587,29 +673,35 @@ export type MeetingAttendeeDto = {
   userName: Scalars['String']['output'];
 };
 
+export type MeetingDateCount = {
+  __typename?: 'MeetingDateCount';
+  count: Scalars['Float']['output'];
+  date: Scalars['String']['output'];
+};
+
 export type MeetingFiltersDto = {
   endDate?: InputMaybe<Scalars['DateTime']['input']>;
   startDate?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-export type MeetingMultipleDeviceNotificationDto = {
-  body: Scalars['String']['input'];
-  icon: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  tokens: Array<Scalars['String']['input']>;
-};
-
-export type MeetingNotificationDto = {
-  body: Scalars['String']['input'];
-  icon: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  token: Scalars['String']['input'];
-};
-
-export type MeetingNotificationResponse = {
-  __typename?: 'MeetingNotificationResponse';
-  message?: Maybe<Scalars['String']['output']>;
-  success: Scalars['Boolean']['output'];
+export type MeetingNotification = {
+  __typename?: 'MeetingNotification';
+  actionUrl?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<User>;
+  createdByUserId?: Maybe<Scalars['Float']['output']>;
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  entityId?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  message: Scalars['String']['output'];
+  module: Scalars['String']['output'];
+  organization: Organization;
+  organizationId: Scalars['Int']['output'];
+  readAt?: Maybe<Scalars['DateTime']['output']>;
+  title: Scalars['String']['output'];
+  userBy?: Maybe<User>;
+  userId?: Maybe<Scalars['Float']['output']>;
 };
 
 export type MeetingOrMeetings = Meeting | MeetingArray;
@@ -643,6 +735,7 @@ export type MeetingTask = {
   notesId?: Maybe<Scalars['Float']['output']>;
   notesTask?: Maybe<Notes>;
   openedDate: Scalars['DateTime']['output'];
+  organization: Organization;
   ownerId?: Maybe<Scalars['Float']['output']>;
   ownerName?: Maybe<Scalars['String']['output']>;
   parentTask?: Maybe<MeetingTask>;
@@ -650,6 +743,7 @@ export type MeetingTask = {
   priority: Scalars['String']['output'];
   projectId?: Maybe<Scalars['Float']['output']>;
   projectName?: Maybe<Scalars['String']['output']>;
+  remarks?: Maybe<Scalars['String']['output']>;
   status: Scalars['String']['output'];
   subtasks?: Maybe<Array<MeetingTask>>;
   task?: Maybe<Scalars['String']['output']>;
@@ -679,23 +773,20 @@ export enum MeetingTaskStatus {
 }
 
 export type MeetingTaskStatusDto = {
-  completePercent?: InputMaybe<Scalars['Float']['input']>;
   ids: Array<Scalars['Float']['input']>;
+  remarks?: InputMaybe<Scalars['String']['input']>;
   status: MeetingTaskStatus;
-};
-
-export type MeetingTopicNotificationDto = {
-  body: Scalars['String']['input'];
-  icon: Scalars['String']['input'];
-  title: Scalars['String']['input'];
-  topic: Scalars['String']['input'];
+  totalTaskComplete?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type MeetingType = {
   __typename?: 'MeetingType';
   createdAt: Scalars['DateTime']['output'];
+  createdBy: User;
+  createdByUserId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  organization: Organization;
 };
 
 export type MeetingVenue = {
@@ -704,9 +795,12 @@ export type MeetingVenue = {
   contactNumber?: Maybe<Scalars['Float']['output']>;
   contactPerson?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
+  createdBy: User;
+  createdByUserId: Scalars['ID']['output'];
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  organization: Organization;
 };
 
 export type Meta = {
@@ -775,7 +869,7 @@ export type Mutation = {
   createContact: Contact;
   createCoupon: Coupon;
   createDynamicPage: About;
-  createFollowUp: FollowUp;
+  createFollowUp: Array<FollowUp>;
   createMeeting: Meeting;
   createMeetingTask: MeetingTask;
   createMeetingType: MeetingType;
@@ -844,13 +938,13 @@ export type Mutation = {
   hardDeleteRole: Scalars['Boolean']['output'];
   hardDeleteSubscription: Scalars['Boolean']['output'];
   hardDeleteUser: Scalars['Boolean']['output'];
+  hardDeleteVehicle: Scalars['Boolean']['output'];
   login: LoginRes;
   logout: Scalars['Boolean']['output'];
+  markAllNotificationsMeeting: Scalars['Boolean']['output'];
   markAllVehicleNotificationsAsRead: MarkAllAsReadResponse;
+  markNotificationAsReadMeeting: Scalars['Boolean']['output'];
   markVehicleNotificationAsRead: Notifications;
-  meetingSendMultiplePushNotification: MeetingNotificationResponse;
-  meetingSendPushNotification: MeetingNotificationResponse;
-  meetingSendTopicNotification: MeetingNotificationResponse;
   register: LoginRes;
   requestOtp: OtpRes;
   resetPassword: Scalars['Boolean']['output'];
@@ -897,6 +991,7 @@ export type Mutation = {
   updateProject: Project;
   updateRole: Role;
   updateSubscription: Subscriptions;
+  updateTaskStatusByAdmin: MeetingTask;
   updateUser: User;
   updateVehicle: Vehicle;
   updateVehicleExpense: VehicleExpense;
@@ -1015,7 +1110,7 @@ export type MutationCreateDynamicPageArgs = {
 
 
 export type MutationCreateFollowUpArgs = {
-  data: CreateFollowUpDto;
+  followUpData: CreateFollowUpDto;
 };
 
 
@@ -1360,28 +1455,23 @@ export type MutationHardDeleteUserArgs = {
 };
 
 
+export type MutationHardDeleteVehicleArgs = {
+  ids: Array<Scalars['Int']['input']>;
+};
+
+
 export type MutationLoginArgs = {
   loginData: ValidateDto;
 };
 
 
+export type MutationMarkNotificationAsReadMeetingArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationMarkVehicleNotificationAsReadArgs = {
   input: MarkAsReadInput;
-};
-
-
-export type MutationMeetingSendMultiplePushNotificationArgs = {
-  data: MeetingMultipleDeviceNotificationDto;
-};
-
-
-export type MutationMeetingSendPushNotificationArgs = {
-  data: MeetingNotificationDto;
-};
-
-
-export type MutationMeetingSendTopicNotificationArgs = {
-  data: MeetingTopicNotificationDto;
 };
 
 
@@ -1616,6 +1706,11 @@ export type MutationUpdateSubscriptionArgs = {
 };
 
 
+export type MutationUpdateTaskStatusByAdminArgs = {
+  input: MeetingTaskStatusDto;
+};
+
+
 export type MutationUpdateUserArgs = {
   data: UpdateUserDto;
 };
@@ -1643,6 +1738,7 @@ export type NotePad = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
   notesField?: Maybe<Scalars['String']['output']>;
+  organization: Organization;
   status: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -1675,6 +1771,7 @@ export type Notes = {
   meeting?: Maybe<Meeting>;
   meetingId?: Maybe<Scalars['Float']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
+  organization: Organization;
   task?: Maybe<Array<MeetingTask>>;
   uploadDoc?: Maybe<Scalars['String']['output']>;
 };
@@ -1816,6 +1913,12 @@ export type PaginatedAbout = {
   meta: Meta;
 };
 
+export type PaginatedActivity = {
+  __typename?: 'PaginatedActivity';
+  data: Array<Activity>;
+  meta: Meta;
+};
+
 export type PaginatedApplicationModules = {
   __typename?: 'PaginatedApplicationModules';
   data: Array<ApplicationModule>;
@@ -1855,6 +1958,12 @@ export type PaginatedLogs = {
 export type PaginatedMeeting = {
   __typename?: 'PaginatedMeeting';
   data: Array<Meeting>;
+  meta: Meta;
+};
+
+export type PaginatedMeetingNotification = {
+  __typename?: 'PaginatedMeetingNotification';
+  data: Array<MeetingNotification>;
   meta: Meta;
 };
 
@@ -2077,6 +2186,11 @@ export type Query = {
   dropDownNotes: PaginatedNotes;
   dropdownOffers: PaginatedOffers;
   dropdownRoles: PaginatedRoles;
+  exportMeetingFile: Scalars['String']['output'];
+  exportMeetingNotesFile: Scalars['String']['output'];
+  exportMeetingTaskFile: Scalars['String']['output'];
+  exportMeetingTypeFile: Scalars['String']['output'];
+  exportMeetingVenueFile: Scalars['String']['output'];
   filteredMeetingTasks: PaginatedMeetingTask;
   findBreakdownById: Breakdown;
   findCouponById: Coupon;
@@ -2092,9 +2206,11 @@ export type Query = {
   findUserById: User;
   findVehicleById: Vehicle;
   findVehicleExpenseById: VehicleExpense;
+  getActivityIdMeeting: Activity;
   getAllDynamicPage: PaginatedAbout;
   getAllMeetingTypes: Array<MeetingType>;
   getAllNotePad: Array<NotePad>;
+  getBreakdownExportData: Scalars['String']['output'];
   getBreakdownStatusCounts: Array<Scalars['JSON']['output']>;
   getBreakdownStatuses: Array<BreakdownStatus>;
   getBreakdownTypeSuggestions: Array<Scalars['JSON']['output']>;
@@ -2110,30 +2226,39 @@ export type Query = {
   getNotesId: Notes;
   getPaginatedMeetingTaskByMeetingId: PaginatedMeetingTask;
   getPaginatedNotesByMeetingId: PaginatedNotes;
+  getTodaysMeetings: PaginatedMeeting;
   getUpcomingMeetingTask: PaginatedMeetingTask;
   getUpcomingMeetings: PaginatedMeeting;
   getUsersWithPermission: Array<User>;
   getVehicleDashboardAnalytics: DashboardAnalyticsResponse;
   getVehicleExpenseByType: ExpenseByTypeResponse;
+  getVehicleExpenseExportData: Scalars['String']['output'];
   getVehicleExpenseStatusCounts: Array<Scalars['JSON']['output']>;
   getVehicleExpenseStatuses: Array<VehicleExpenseStatus>;
   getVehicleExpenseSummary: ExpenseSummaryResponse;
   getVehicleExpenseTypeSuggestions: Array<Scalars['JSON']['output']>;
-  getVehicleExportData: Array<Scalars['JSON']['output']>;
+  getVehicleExportData: Scalars['String']['output'];
   getVehicleMonthlyTrends: MonthlyTrendResponse;
   getVehicleStatusCounts: Array<Scalars['JSON']['output']>;
   getVehicleTopExpenses: TopExpensesResponse;
+  listTrashedChildMeting: PaginatedMeeting;
   listTrashedFollowUp: PaginatedFollowUp;
   listTrashedMeeting: PaginatedMeeting;
   listTrashedMeetingTask: PaginatedMeetingTask;
   listTrashedMeetingType: PaginatedMeetingType;
   listTrashedMeetingVenue: PaginatedMeetingVenue;
+  listTrashedMetingSubTasks: PaginatedMeetingTask;
   listTrashedNotePad: PaginatedNotePad;
   listTrashedNotes: PaginatedNotes;
   listTrashedOrganizations: PaginatedOrganizations;
   listTrashedProjects: PaginatedProjects;
   listTrashedRoles: PaginatedRoles;
+  meetingNotificationIsRead: Array<MeetingNotification>;
+  meetingTaskDateRangeGraph: Array<MeetingDateCount>;
+  meetingsByMonthYear: Scalars['JSONObject']['output'];
+  meetingsDateRangeGraph: Array<MeetingDateCount>;
   packagesDropdown: PaginatedPackages;
+  paginatedActivityLogMeeting: PaginatedActivity;
   paginatedBreakdowns: PaginatedBreakdowns;
   paginatedContact: PaginatedContact;
   paginatedCoupons: PaginatedCoupons;
@@ -2146,6 +2271,7 @@ export type Query = {
   paginatedMeetingType: PaginatedMeetingType;
   paginatedMeetingVenue: PaginatedMeetingVenue;
   paginatedMeetingsForUserId: PaginatedMeeting;
+  paginatedMeetingsNotification: PaginatedMeetingNotification;
   paginatedModules: PaginatedApplicationModules;
   paginatedNotePad: PaginatedNotePad;
   paginatedNotes: PaginatedNotes;
@@ -2248,6 +2374,31 @@ export type QueryDropdownRolesArgs = {
 };
 
 
+export type QueryExportMeetingFileArgs = {
+  filter?: InputMaybe<FilterMeeting>;
+};
+
+
+export type QueryExportMeetingNotesFileArgs = {
+  filter?: InputMaybe<FilterNotesData>;
+};
+
+
+export type QueryExportMeetingTaskFileArgs = {
+  filter?: InputMaybe<FilterMeetingTask>;
+};
+
+
+export type QueryExportMeetingTypeFileArgs = {
+  filter?: InputMaybe<FilterMeetingType>;
+};
+
+
+export type QueryExportMeetingVenueFileArgs = {
+  filter?: InputMaybe<FilterMeetingVenue>;
+};
+
+
 export type QueryFilteredMeetingTasksArgs = {
   assigneeIds?: InputMaybe<Array<Scalars['Int']['input']>>;
   query: ListInputDto;
@@ -2324,8 +2475,19 @@ export type QueryFindVehicleExpenseByIdArgs = {
 };
 
 
+export type QueryGetActivityIdMeetingArgs = {
+  id: Scalars['Float']['input'];
+};
+
+
 export type QueryGetAllDynamicPageArgs = {
   ListInputDTO: ListInputDto;
+};
+
+
+export type QueryGetBreakdownExportDataArgs = {
+  filter: BreakdownFilterType;
+  sheetName: Scalars['String']['input'];
 };
 
 
@@ -2401,6 +2563,11 @@ export type QueryGetPaginatedNotesByMeetingIdArgs = {
 };
 
 
+export type QueryGetTodaysMeetingsArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
 export type QueryGetUpcomingMeetingTaskArgs = {
   ListInputDTO: ListInputDto;
 };
@@ -2423,6 +2590,12 @@ export type QueryGetVehicleDashboardAnalyticsArgs = {
 
 export type QueryGetVehicleExpenseByTypeArgs = {
   filters?: InputMaybe<AnalyticsFilters>;
+};
+
+
+export type QueryGetVehicleExpenseExportDataArgs = {
+  filter: ExpenseFilterType;
+  sheetName: Scalars['String']['input'];
 };
 
 
@@ -2457,6 +2630,11 @@ export type QueryGetVehicleTopExpensesArgs = {
 };
 
 
+export type QueryListTrashedChildMetingArgs = {
+  listInputDTO: ListInputDto;
+};
+
+
 export type QueryListTrashedFollowUpArgs = {
   ListInputDto: ListInputDto;
 };
@@ -2479,6 +2657,11 @@ export type QueryListTrashedMeetingTypeArgs = {
 
 export type QueryListTrashedMeetingVenueArgs = {
   ListInputDTO: ListInputDto;
+};
+
+
+export type QueryListTrashedMetingSubTasksArgs = {
+  listInputDTO: ListInputDto;
 };
 
 
@@ -2507,7 +2690,32 @@ export type QueryListTrashedRolesArgs = {
 };
 
 
+export type QueryMeetingNotificationIsReadArgs = {
+  isRead: Scalars['Boolean']['input'];
+};
+
+
+export type QueryMeetingTaskDateRangeGraphArgs = {
+  filter?: InputMaybe<FilterMeetingDto>;
+};
+
+
+export type QueryMeetingsByMonthYearArgs = {
+  filter: FilterMeetingMonthYearDto;
+};
+
+
+export type QueryMeetingsDateRangeGraphArgs = {
+  filter?: InputMaybe<FilterMeetingDto>;
+};
+
+
 export type QueryPackagesDropdownArgs = {
+  ListInputDTO: ListInputDto;
+};
+
+
+export type QueryPaginatedActivityLogMeetingArgs = {
   ListInputDTO: ListInputDto;
 };
 
@@ -2572,6 +2780,11 @@ export type QueryPaginatedMeetingVenueArgs = {
 export type QueryPaginatedMeetingsForUserIdArgs = {
   query: ListInputDto;
   userId: Scalars['Int']['input'];
+};
+
+
+export type QueryPaginatedMeetingsNotificationArgs = {
+  ListInputDTO: ListInputDto;
 };
 
 
@@ -2652,6 +2865,7 @@ export type QueryPaginatedVehicleNotificationArgs = {
 
 export type QueryPaginatedVehiclesArgs = {
   ListInputDTO: ListInputDto;
+  isTrash?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -2843,6 +3057,8 @@ export type UpdateFollowUpDto = {
   body?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['Float']['input'];
   subject?: InputMaybe<Scalars['String']['input']>;
+  taskId?: InputMaybe<Scalars['Float']['input']>;
+  userId?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type UpdateMeetingDto = {
@@ -2857,7 +3073,6 @@ export type UpdateMeetingDto = {
   meetingVenueId?: InputMaybe<Scalars['Float']['input']>;
   parentMeetingId?: InputMaybe<Scalars['Float']['input']>;
   projectId?: InputMaybe<Scalars['Float']['input']>;
-  projectName?: InputMaybe<Scalars['String']['input']>;
   startTime?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
   uploadDoc?: InputMaybe<Scalars['String']['input']>;
@@ -3119,6 +3334,7 @@ export type VehicleExpense = {
   expenseDate?: Maybe<Scalars['DateTime']['output']>;
   expenseType: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  isIndividualDeleted: Scalars['Boolean']['output'];
   organizationBy: Organization;
   organizationId: Scalars['Int']['output'];
   status: Scalars['String']['output'];
@@ -3778,11 +3994,11 @@ export type CreateMeetingTaskMutationVariables = Exact<{
 export type CreateMeetingTaskMutation = { __typename?: 'Mutation', createMeetingTask: { __typename?: 'MeetingTask', id: string, ownerId?: number | null, assigneeId?: number | null, meetingId?: number | null, notesId?: number | null, projectId?: number | null, parentTaskId?: number | null, task?: string | null, comment?: string | null, openedDate: any, dueDate: any, completedDate?: any | null, priority: string, status: string, completePercent?: number | null, totalTaskComplete?: number | null, weightType?: string | null } };
 
 export type CreateFollowUpMutationVariables = Exact<{
-  data: CreateFollowUpDto;
+  followUpData: CreateFollowUpDto;
 }>;
 
 
-export type CreateFollowUpMutation = { __typename?: 'Mutation', createFollowUp: { __typename?: 'FollowUp', body?: string | null, id: number, subject?: string | null } };
+export type CreateFollowUpMutation = { __typename?: 'Mutation', createFollowUp: Array<{ __typename?: 'FollowUp', id: number, userId: number, taskId?: number | null, subject?: string | null, body?: string | null, createdById: number }> };
 
 export type CreateNotePadMutationVariables = Exact<{
   notesData: CreateNotePadDto;
@@ -4222,6 +4438,13 @@ export type ListTrashedMeetingQueryVariables = Exact<{
 
 export type ListTrashedMeetingQuery = { __typename?: 'Query', listTrashedMeeting: { __typename?: 'PaginatedMeeting', data: Array<{ __typename?: 'Meeting', id: string, meetingReference: string, projectId?: number | null, createdByUserId: string, meetingVenueId?: number | null, meetingTypeId: number, projectName?: string | null, parentMeetingId?: number | null, title: string, startTime: string, endTime: string, status: string, meetingDate: any, meetingAgenda?: string | null, meetingUrl?: string | null }> } };
 
+export type PaginatedActivityLogMeetingQueryVariables = Exact<{
+  listInputDto: ListInputDto;
+}>;
+
+
+export type PaginatedActivityLogMeetingQuery = { __typename?: 'Query', paginatedActivityLogMeeting: { __typename?: 'PaginatedActivity', data: Array<{ __typename?: 'Activity', id: string, createdByUserId: number, module: string, moduleId?: number | null, description?: string | null, activity: string, ipAddress: string, userAgent: string }> } };
+
 
 export const RequestOtpDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RequestOtp"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"otpRequestData"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OtpRequestDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"requestOtp"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"otpRequestData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"otpRequestData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"otpGeneratedSuccessfully"}},{"kind":"Field","name":{"kind":"Name","value":"otp"}}]}}]}}]} as unknown as DocumentNode<RequestOtpMutation, RequestOtpMutationVariables>;
 export const LoginDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Login"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"loginData"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ValidateDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"loginData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"loginData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"userType"}}]}},{"kind":"Field","name":{"kind":"Name","value":"accessToken"}}]}}]}}]} as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
@@ -4304,7 +4527,7 @@ export const DeleteNotesDocument = {"kind":"Document","definitions":[{"kind":"Op
 export const CreateNotesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateNotes"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"notesData"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateNotesDto"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createNotes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"notesData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"notesData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"meetingId"}},{"kind":"Field","name":{"kind":"Name","value":"decision"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"uploadDoc"}}]}}]}}]} as unknown as DocumentNode<CreateNotesMutation, CreateNotesMutationVariables>;
 export const DeleteMetingTaskDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteMetingTask"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteMetingTask"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<DeleteMetingTaskMutation, DeleteMetingTaskMutationVariables>;
 export const CreateMeetingTaskDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMeetingTask"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateMeetingTaskDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createMeetingTask"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeId"}},{"kind":"Field","name":{"kind":"Name","value":"meetingId"}},{"kind":"Field","name":{"kind":"Name","value":"notesId"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"parentTaskId"}},{"kind":"Field","name":{"kind":"Name","value":"task"}},{"kind":"Field","name":{"kind":"Name","value":"comment"}},{"kind":"Field","name":{"kind":"Name","value":"openedDate"}},{"kind":"Field","name":{"kind":"Name","value":"dueDate"}},{"kind":"Field","name":{"kind":"Name","value":"completedDate"}},{"kind":"Field","name":{"kind":"Name","value":"priority"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"completePercent"}},{"kind":"Field","name":{"kind":"Name","value":"totalTaskComplete"}},{"kind":"Field","name":{"kind":"Name","value":"weightType"}}]}}]}}]} as unknown as DocumentNode<CreateMeetingTaskMutation, CreateMeetingTaskMutationVariables>;
-export const CreateFollowUpDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateFollowUp"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"data"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateFollowUpDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createFollowUp"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"data"},"value":{"kind":"Variable","name":{"kind":"Name","value":"data"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"body"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"subject"}}]}}]}}]} as unknown as DocumentNode<CreateFollowUpMutation, CreateFollowUpMutationVariables>;
+export const CreateFollowUpDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateFollowUp"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"followUpData"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateFollowUpDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createFollowUp"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"followUpData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"followUpData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"userId"}},{"kind":"Field","name":{"kind":"Name","value":"taskId"}},{"kind":"Field","name":{"kind":"Name","value":"subject"}},{"kind":"Field","name":{"kind":"Name","value":"body"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}}]}}]}}]} as unknown as DocumentNode<CreateFollowUpMutation, CreateFollowUpMutationVariables>;
 export const CreateNotePadDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateNotePad"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"notesData"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateNotePadDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createNotePad"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"notesData"},"value":{"kind":"Variable","name":{"kind":"Name","value":"notesData"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"notesField"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<CreateNotePadMutation, CreateNotePadMutationVariables>;
 export const DeleteNotePadDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteNotePad"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteNotePad"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<DeleteNotePadMutation, DeleteNotePadMutationVariables>;
 export const UpdateNotePadDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateNotePad"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updateNotesInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateNotePadDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateNotePad"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updateNotesInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updateNotesInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"notesField"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<UpdateNotePadMutation, UpdateNotePadMutationVariables>;
@@ -4368,3 +4591,4 @@ export const GetPaginatedNotesByMeetingIdDocument = {"kind":"Document","definiti
 export const GetPaginatedMeetingTaskByMeetingIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetPaginatedMeetingTaskByMeetingId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"meetingId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"query"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getPaginatedMeetingTaskByMeetingId"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"meetingId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"meetingId"}}},{"kind":"Argument","name":{"kind":"Name","value":"query"},"value":{"kind":"Variable","name":{"kind":"Name","value":"query"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"ownerId"}},{"kind":"Field","name":{"kind":"Name","value":"createdByUserId"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeId"}},{"kind":"Field","name":{"kind":"Name","value":"meetingId"}},{"kind":"Field","name":{"kind":"Name","value":"notesId"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"parentTaskId"}},{"kind":"Field","name":{"kind":"Name","value":"ownerName"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeName"}},{"kind":"Field","name":{"kind":"Name","value":"task"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"comment"}},{"kind":"Field","name":{"kind":"Name","value":"openedDate"}},{"kind":"Field","name":{"kind":"Name","value":"dueDate"}},{"kind":"Field","name":{"kind":"Name","value":"completedDate"}},{"kind":"Field","name":{"kind":"Name","value":"priority"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"completePercent"}},{"kind":"Field","name":{"kind":"Name","value":"totalTaskComplete"}},{"kind":"Field","name":{"kind":"Name","value":"weightType"}}]}}]}}]}}]} as unknown as DocumentNode<GetPaginatedMeetingTaskByMeetingIdQuery, GetPaginatedMeetingTaskByMeetingIdQueryVariables>;
 export const PaginatedBreakdownsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaginatedBreakdowns"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paginatedBreakdowns"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"vehicleId"}},{"kind":"Field","name":{"kind":"Name","value":"vehicle"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"make"}},{"kind":"Field","name":{"kind":"Name","value":"model"}},{"kind":"Field","name":{"kind":"Name","value":"year"}},{"kind":"Field","name":{"kind":"Name","value":"color"}},{"kind":"Field","name":{"kind":"Name","value":"chassisNumber"}},{"kind":"Field","name":{"kind":"Name","value":"numberPlate"}},{"kind":"Field","name":{"kind":"Name","value":"maintenanceHistory"}},{"kind":"Field","name":{"kind":"Name","value":"avatar"}},{"kind":"Field","name":{"kind":"Name","value":"insurance"}},{"kind":"Field","name":{"kind":"Name","value":"insuranceValidTill"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"latitude"}},{"kind":"Field","name":{"kind":"Name","value":"longitude"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"organizationId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"breakdownType"}},{"kind":"Field","name":{"kind":"Name","value":"breakdownDate"}},{"kind":"Field","name":{"kind":"Name","value":"breakdownDescription"}},{"kind":"Field","name":{"kind":"Name","value":"breakdownLocation"}},{"kind":"Field","name":{"kind":"Name","value":"latitude"}},{"kind":"Field","name":{"kind":"Name","value":"longitude"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"organizationId"}},{"kind":"Field","name":{"kind":"Name","value":"createdById"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]}}]} as unknown as DocumentNode<PaginatedBreakdownsQuery, PaginatedBreakdownsQueryVariables>;
 export const ListTrashedMeetingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ListTrashedMeeting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"listTrashedMeeting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"meetingReference"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"createdByUserId"}},{"kind":"Field","name":{"kind":"Name","value":"meetingVenueId"}},{"kind":"Field","name":{"kind":"Name","value":"meetingTypeId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"parentMeetingId"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"startTime"}},{"kind":"Field","name":{"kind":"Name","value":"endTime"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"meetingDate"}},{"kind":"Field","name":{"kind":"Name","value":"meetingAgenda"}},{"kind":"Field","name":{"kind":"Name","value":"meetingUrl"}}]}}]}}]}}]} as unknown as DocumentNode<ListTrashedMeetingQuery, ListTrashedMeetingQueryVariables>;
+export const PaginatedActivityLogMeetingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PaginatedActivityLogMeeting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ListInputDTO"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paginatedActivityLogMeeting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ListInputDTO"},"value":{"kind":"Variable","name":{"kind":"Name","value":"listInputDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdByUserId"}},{"kind":"Field","name":{"kind":"Name","value":"module"}},{"kind":"Field","name":{"kind":"Name","value":"moduleId"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"activity"}},{"kind":"Field","name":{"kind":"Name","value":"ipAddress"}},{"kind":"Field","name":{"kind":"Name","value":"userAgent"}}]}}]}}]}}]} as unknown as DocumentNode<PaginatedActivityLogMeetingQuery, PaginatedActivityLogMeetingQueryVariables>;

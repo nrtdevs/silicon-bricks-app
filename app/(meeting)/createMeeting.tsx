@@ -476,7 +476,6 @@ const CreateMeeting = () => {
                         const timeOrDate = activeDateField === "meetingDate"
                             ? getLocalizedDate(selectedDate)
                             : getLocalizedTime(selectedDate);
-
                         if (activeDateField) {
                             setValue(activeDateField, timeOrDate?.toString());
                         }

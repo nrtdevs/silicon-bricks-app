@@ -4,7 +4,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-// import { PaginatedActivityLogMeetingDocument } from "@/graphql/generated";
+import { PaginatedActivityLogMeetingDocument } from "@/graphql/generated";
 import { useLazyQuery } from "@apollo/client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -14,17 +14,17 @@ import { ms, ScaledSheet } from "react-native-size-matters";
 
 const ReportScreen = () => {
     const { theme } = useTheme();
-    /// fetch report api 
-    // const [getMeeting, { data, refetch, loading: listLoading }] = useLazyQuery(PaginatedActivityLogMeetingDocument);
+    // fetch report api 
+    const [getMeeting, { data, refetch, loading: listLoading }] = useLazyQuery(PaginatedActivityLogMeetingDocument);
     useEffect(() => {
-        // getMeeting({
-        //     variables: {
-        //         listInputDto: {
-        //             page: 1,
-        //             limit: 10,
-        //         },
-        //     },
-        // });
+        getMeeting({
+            variables: {
+                listInputDto: {
+                    page: 1,
+                    limit: 10,
+                },
+            },
+        });
     }, [])
     return (
         <CustomHeader>
@@ -39,7 +39,7 @@ const ReportScreen = () => {
                     <ThemedText style={{ fontSize: 20, fontWeight: "600", right: 10 }}>Report </ThemedText>
                     <ThemedText></ThemedText>
                 </View>
-                {/* <FlatList
+                <FlatList
                     data={data?.paginatedActivityLogMeeting.data}
                     renderItem={({ item }) => (
                         <View style={[
@@ -56,7 +56,7 @@ const ReportScreen = () => {
                         </View>
                     )}
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
-                /> */}
+                />
             </ThemedView>
         </CustomHeader>
     );

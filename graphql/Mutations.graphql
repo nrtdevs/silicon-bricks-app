@@ -862,15 +862,17 @@ mutation CreateMeetingTask($input: CreateMeetingTaskDto!) {
   }
 }
 
- 
-
-mutation CreateFollowUp($data: CreateFollowUpDto!) {
-  createFollowUp(data: $data) {
-    body
+mutation CreateFollowUp($followUpData: CreateFollowUpDto!) {
+  createFollowUp(followUpData: $followUpData) {
     id
+    userId
+    taskId
     subject
+    body
+    createdById
   }
 }
+
 mutation CreateNotePad($notesData: CreateNotePadDto!) {
   createNotePad(notesData: $notesData) {
     id
@@ -878,9 +880,11 @@ mutation CreateNotePad($notesData: CreateNotePadDto!) {
     status
   }
 }
+
 mutation DeleteNotePad($ids: [Int!]!) {
   deleteNotePad(ids: $ids)
 }
+
 mutation UpdateNotePad($updateNotesInput: UpdateNotePadDto!) {
   updateNotePad(updateNotesInput: $updateNotesInput) {
     id
@@ -888,7 +892,6 @@ mutation UpdateNotePad($updateNotesInput: UpdateNotePadDto!) {
     status
   }
 }
-
 
  mutation CreateVehicle($createVehicleInput: CreateVehicleDto!) {
   createVehicle(createVehicleInput: $createVehicleInput) {
@@ -905,6 +908,7 @@ mutation UpdateVehicle($updateVehicleInput: UpdateVehicleDto!) {
 mutation DeleteVehicle($deleteVehicleId: Int!) {
   deleteVehicle(id: $deleteVehicleId)
 }
+
 mutation ChangePackageStatus($updatePackageStatusInput: PackageStatusDto!) {
   changePackageStatus(updatePackageStatusInput: $updatePackageStatusInput) {
     ... on Package {
@@ -933,6 +937,7 @@ mutation ChangePackageStatus($updatePackageStatusInput: PackageStatusDto!) {
     }
   }
 }
+
 mutation EnableMeetingStatus($updateMeetingStatusInput: MeetingStatusDto!) {
   enableMeetingStatus(updateMeetingStatusInput: $updateMeetingStatusInput) {
     ... on Meeting {
@@ -941,8 +946,6 @@ mutation EnableMeetingStatus($updateMeetingStatusInput: MeetingStatusDto!) {
     }
   }
 }
-
-
 
 mutation EnableVehicleStatus($data: VehicleStatusDto!) {
   enableVehicleStatus(data: $data) {
@@ -993,6 +996,7 @@ mutation UpdateMeetingTask($updateMeetingTaskInput: UpdateMeetingTaskDto!) {
     weightType
   }
 }
+
 mutation UpdateNotes($updateNotesInput: UpdateNotesDto!) {
   updateNotes(updateNotesInput: $updateNotesInput) {
     id
@@ -1003,9 +1007,11 @@ mutation UpdateNotes($updateNotesInput: UpdateNotesDto!) {
     uploadDoc
   }
 }
+
 mutation RestoreMeeting($ids: [Int!]!) {
   restoreMeeting(ids: $ids)
 }
+
 mutation HardDeleteMeeting($ids: [Int!]!) {
   hardDeleteMeeting(ids: $ids)
 }
