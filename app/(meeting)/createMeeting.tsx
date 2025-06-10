@@ -125,7 +125,6 @@ const CreateMeeting = () => {
                         "meetingVenueId": Number(data.meetingVenueId.value),
                         "projectId": Number(data.projectId.value),
                         "uploadDoc": null,
-                        "projectName": data.projectName
                     }
                 },
             });

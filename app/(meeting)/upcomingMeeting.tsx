@@ -21,7 +21,7 @@ import {
 } from "@/graphql/generated";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { Entypo, Feather, FontAwesome5, Fontisto, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5, Fontisto, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, FlatList, Modal, Pressable, ScrollView, View, Button, Image, TouchableOpacity } from "react-native";
@@ -276,7 +276,15 @@ const UpcomingMeeting = () => {
         });
     };
     return (
-        <CustomHeader>
+        <CustomHeader title="U Meeting"
+            leftComponent={(
+                <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={ms(20)}
+                    color={Colors[theme]?.text}
+                    onPress={() => router.back()}
+                    style={{ left: 0 }} />
+            )}>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
                     <View style={{ width: "100%" }}>

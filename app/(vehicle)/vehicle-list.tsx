@@ -2,12 +2,11 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   FlatList,
   RefreshControl
 } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback,useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   DeleteVehicleDocument,
@@ -21,7 +20,6 @@ import { FAB } from "@rneui/themed";
 import {
   router,
   useFocusEffect,
-  useLocalSearchParams,
   useNavigation,
 } from "expo-router";
 import NoDataFound from "@/components/NoDataFound";

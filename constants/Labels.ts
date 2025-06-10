@@ -80,6 +80,7 @@ export const labels = {
   pages:"Pages",
   meeting:"Meeting",
   upcomingMeeting:"Upcoming Meeting",
+  exitingMeeting:"Exiting Meeting",
   meetingType:"Meeting Type",
   meetingVenue:"Meeting Venue",
   myNotes:"My Notes",

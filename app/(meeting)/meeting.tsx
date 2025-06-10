@@ -86,11 +86,11 @@ const MeetingScreen = () => {
             title="Meeting"
             leftComponent={(
                 <MaterialCommunityIcons
-                name="arrow-left"
-                size={ms(20)}
-                color={Colors[theme]?.text}
-                onPress={() => router.back()}
-                style={{ left: 0 }} />
+                    name="arrow-left"
+                    size={ms(20)}
+                    color={Colors[theme]?.text}
+                    onPress={() => router.back()}
+                    style={{ left: 0 }} />
             )}>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>

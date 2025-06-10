@@ -62,13 +62,9 @@ const TaskScreen = () => {
         }
     });
     const onSubmit = (data: any) => {
-        let param = {
-            ...data
-        }
-        console.log(param);
         createMeetingFollowUp({
             variables: {
-                data: {
+                followUpData: {
                     ...data
                 },
             },
@@ -87,9 +83,8 @@ const TaskScreen = () => {
                 color={Colors[theme]?.text}
                 onPress={() => router.back()}
                 style={{ left: 0 }} />)}>
-
             <ThemedView style={styles.contentContainer}>
-                <View style={{ width: "100%", marginBottom: 10, paddingHorizontal: ms(10) }}>
+                <View style={{ width: "100%",marginBottom: 10,paddingHorizontal: ms(10)}}>
                     <CustomSearchBar
                         searchQuery={searchQuery}
                         placeholder="Search Task"
@@ -165,7 +160,7 @@ const TaskScreen = () => {
                                         }}
                                     >
                                         {/* icon={<MaterialIcons name="autorenew" size={18} color='#fff' />} */}
-                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Follow up</ThemedText>
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Follow Up</ThemedText>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={() => {
@@ -253,7 +248,7 @@ const TaskScreen = () => {
                                 control={control}
                                 labelStyle={styles.label}
                                 name={"subject"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
+                                inputStyle={[{lineHeight: ms(20)}]}
                                 label={`Subject`}
                                 rules={{
                                     required: "Enter subject",
@@ -265,7 +260,7 @@ const TaskScreen = () => {
                                 control={control}
                                 labelStyle={styles.label}
                                 name={"body"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
+                                inputStyle={[{lineHeight: ms(20)}]}
                                 label={`Body`}
                                 rules={{
                                     required: "Enter body",
@@ -342,7 +337,6 @@ const styles = ScaledSheet.create({
         justifyContent: 'space-between',
         gap: 10,
     },
-
     label: {
         fontSize: "16@ms",
         fontWeight: "normal",
