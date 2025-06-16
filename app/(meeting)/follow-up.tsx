@@ -1,0 +1,368 @@
+import CustomHeader from "@/components/CustomHeader";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
+import { FAB } from "@rneui/themed";
+import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/context/ThemeContext";
+import { router } from "expo-router";
+import { FlatList, Modal, Pressable, ScrollView, View } from "react-native";
+import CustomSearchBar from "@/components/CustomSearchBar";
+import { useEffect, useMemo, useState } from "react";
+import { TouchableOpacity } from "react-native";
+import { Alert } from "react-native";
+import { useLazyQuery, useQuery } from "@apollo/client";
+import { PaginatedFollowUpDocument, PaginatedUsersDocument } from "@/graphql/generated";
+import NoDataFound from "@/components/NoDataFound";
+import CustomValidation from "@/components/CustomValidation";
+import CustomButton from "@/components/CustomButton";
+import { useForm } from "react-hook-form";
+
+const FollowUp = () => {
+    const { theme } = useTheme();
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [addEditManage, setAddEditManage] = useState(false);
+    const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
+    const [getFollowUp, { data, refetch, loading: listLoading }] = useLazyQuery(PaginatedFollowUpDocument);
+    useEffect(() => {
+        getFollowUp({
+            variables: {
+                listInputDto: {
+                    page: 1,
+                    limit: 10,
+                },
+            },
+        });
+    }, [])
+    const filteredData = data?.paginatedFollowUp?.data?.filter((item) =>
+        item?.subject?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{
+        name: string, contactNumber: string, address: string, contactPerson: string, description: string
+    }>({ defaultValues: {} });
+    /// fetch user data 
+    const { data: attendeesData, loading: attendeesLoading, error: attendeesError } = useQuery(PaginatedUsersDocument, {
+        variables: {
+            "listInputDto": {
+                "limit": 10,
+                "page": 1
+            }
+        }
+    });
+    const attendeesPickerData = useMemo(() => {
+        if (!attendeesData?.paginatedUsers.data) return [];
+        return attendeesData.paginatedUsers.data.map((item) => ({
+            label: item.name,
+            value: item.id,
+        }));
+    }, [attendeesData]);
+    return (
+        <CustomHeader
+            title="Foloow Up"
+            leftComponent={(
+                <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={ms(20)}
+                    color={Colors[theme]?.text}
+                    onPress={() => router.back()}
+                    style={{ left: 0 }} />
+            )}
+        >
+            <ThemedView style={styles.contentContainer}>
+                <View style={styles.searchContainer}>
+                    <View style={{ width: "90%" }}>
+                        <CustomSearchBar
+                            searchQuery={searchQuery}
+                            placeholder="Search Follow up"
+                            onChangeText={(text) => {
+                                setSearchQuery(text);
+                            }}
+                        />
+                    </View>
+                    <FontAwesome5
+                        name="trash" size={20} color="#EF4444"
+                        onPress={() => router.push("/(meeting)/trashed-followUp")}
+                    />
+                </View>
+                <FlatList
+                    data={filteredData}
+                    renderItem={({ item }) => (
+                        <Pressable
+                            onPress={() => { }}>
+                            <View style={[
+                                styles.followContainer,
+                                {
+                                    borderColor: Colors[theme].border,
+                                    shadowColor: Colors[theme].shadow,
+                                    backgroundColor: Colors[theme].cart
+                                },
+                            ]}>
+                                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6 }}>
+                                    <ThemedText type='subtitle'>{item.subject}</ThemedText>
+                                    <View
+                                        style={{
+                                            // backgroundColor: item.status == "active" ? "#10B981" : item.status == "completed" ? "#F59E0B" : "#EF4444",
+                                            paddingHorizontal: ms(10),
+                                            padding: vs(2),
+                                            borderRadius: ms(14),
+                                        }}
+                                    >
+                                        <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>asaas</ThemedText>
+                                    </View>
+                                </View>
+                                <ThemedText type="default">{item.body}</ThemedText>
+                                <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
+                                    <TouchableOpacity
+                                        onPress={() => { }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            backgroundColor: "#3B82F6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <Feather name="edit" size={16} color="#fff" />
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            //setMeetingId(item.id);
+                                            // setNotesModalVisible(true);
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            backgroundColor: "#8B5CF6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <MaterialIcons name="autorenew" size={18} color='#fff' />
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Status</ThemedText>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            Alert.alert(
+                                                "Delete",
+                                                "Are you sure you want to delete?",
+                                                [
+                                                    {
+                                                        text: "Yes", onPress: () => {
+                                                            // deleteMeeting({
+                                                            //     variables: {
+                                                            //         ids: Number(item?.id),
+                                                            //     }
+                                                            // });
+                                                        }
+                                                    },
+                                                    { text: "No", onPress: () => { } },
+                                                ]
+                                            );
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            backgroundColor: "#EF4444",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <FontAwesome5 name="trash" size={14} color="#fff" />
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Pressable>
+                    )}
+                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+                />
+            </ThemedView>
+
+            {/* Create and Edit modal */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isAddEditModalVisible}
+            >
+                <ScrollView
+                    style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    }}
+                    contentContainerStyle={{
+                        flexGrow: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
+                    <View
+                        style={{
+                            backgroundColor: Colors[theme].cart,
+                            width: s(300),
+                            borderRadius: 10,
+                            padding: 10,
+                        }}>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                padding: 10,
+                            }}
+                        >
+                            <ThemedText type="subtitle">{addEditManage ? "Update Follow Up" : "Create Follow Up"}</ThemedText>
+                            <Pressable onPress={() => {
+                                setAddEditModalVisible(false)
+                                //setCurrentMeetingVenue(defaultValue)
+                            }
+                            }>
+                                <Entypo
+                                    name="cross"
+                                    size={ms(20)}
+                                    color={Colors[theme].text}
+                                />
+                            </Pressable>
+                        </View>
+                        <View style={{ padding: 10 }}>
+                            <CustomValidation
+                                type="input"
+                                control={control}
+                                labelStyle={styles.label}
+                                name={"name"}
+                                label="Venue Name"
+                                inputStyle={[{ lineHeight: ms(20) }]}
+                                rules={{
+                                    required: "Enter Name",
+                                }}
+                                autoCapitalize="none"
+                            />
+                            <CustomValidation
+                                type="input"
+                                control={control}
+                                labelStyle={styles.label}
+                                keyboardType="number-pad"
+                                name={"contactNumber"}
+                                label="Contact Number"
+                                inputStyle={[{ lineHeight: ms(20) }]}
+                                rules={{
+                                    required: "Enter Number",
+                                }}
+                                autoCapitalize="none"
+                            />
+                            <CustomValidation
+                                type="input"
+                                control={control}
+                                labelStyle={styles.label}
+                                name={"contactPerson"}
+                                inputStyle={[{ lineHeight: ms(20) }]}
+                                label="Contact Person"
+                                rules={{
+                                    required: "Enter Person",
+                                }}
+                                autoCapitalize="none"
+                            />
+                            <CustomValidation
+                                type="input"
+                                control={control}
+                                labelStyle={styles.label}
+                                name="address"
+                                label="Address"
+                                inputStyle={[{ lineHeight: ms(20) }]}
+                                rules={{
+                                    required: "Enter address",
+                                }}
+                                autoCapitalize="none"
+                            />
+                            <CustomValidation
+                                type="input"
+                                control={control}
+                                labelStyle={styles.label}
+                                name="description"
+                                label="Description"
+                                inputStyle={[{ lineHeight: ms(20) }]}
+                                rules={{
+                                    required: "Enter Description",
+                                }}
+                                autoCapitalize="none"
+                            />
+
+                            <CustomButton
+                                title="Submit"
+                                // isLoading={createMeetingState?.loading || updateMeetingVenueState?.loading}
+                                onPress={() => {
+                                    // handleSubmit(onSubmit)();
+                                }}
+                                style={{
+                                    backgroundColor: Colors[theme].background,
+                                    marginTop: vs(30),
+                                }}
+                            />
+                        </View>
+                    </View>
+                </ScrollView>
+            </Modal>
+
+            <FAB
+                size="large"
+                title="Follow Up"
+                style={{
+                    position: "absolute",
+                    margin: 10,
+                    right: 0,
+                    bottom: 0,
+                }}
+                icon={{
+                    name: "add",
+                    color: "white",
+                }}
+                onPress={() => {
+                    setAddEditModalVisible(true)
+                    setAddEditManage(false)
+                }}
+            />
+        </CustomHeader>
+    );
+}
+const styles = ScaledSheet.create({
+    contentContainer: {
+        flex: 1,
+        padding: "12@ms",
+    },
+    searchContainer: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "12@ms",
+    },
+    followContainer: {
+        borderRadius: "20@ms",
+        marginHorizontal: "10@ms",
+        marginVertical: "8@ms",
+        padding: "16@ms",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 5,
+        borderWidth: 1,
+        justifyContent: 'space-between',
+        gap: 10,
+    },
+    label: {
+        fontSize: "16@ms",
+        fontWeight: "normal",
+        marginBottom: "5@ms",
+        textAlign: "left",
+        alignSelf: "flex-start",
+    },
+})
+export default FollowUp;

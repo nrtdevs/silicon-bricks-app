@@ -213,15 +213,14 @@ mutation DeletePermission($deletePermissionId: Float!) {
 }
 
 #create organization
-mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
-  createOrganization(createOrganizationInput: $createOrganizationInput) {
+mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!, $registerData: RegisterDto!) {
+  createOrganization(createOrganizationInput: $createOrganizationInput, registerData: $registerData) {
     id
     name
     description
     status
   }
 }
-
 #update organization
 mutation UpdateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
   updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
@@ -866,7 +865,6 @@ mutation CreateFollowUp($followUpData: CreateFollowUpDto!) {
   createFollowUp(followUpData: $followUpData) {
     id
     userId
-    taskId
     subject
     body
     createdById
@@ -1015,3 +1013,15 @@ mutation RestoreMeeting($ids: [Int!]!) {
 mutation HardDeleteMeeting($ids: [Int!]!) {
   hardDeleteMeeting(ids: $ids)
 }
+
+mutation CreateMilestone($input: MilestoneDto!) {
+  createMilestone(input: $input) {
+    id
+    projectId
+    name
+    startDate
+    endDate
+    projectName
+    totalTaskCompleteMilestone
+    status
+  }

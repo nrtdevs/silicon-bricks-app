@@ -81,6 +81,8 @@ export const labels = {
   meeting:"Meeting",
   upcomingMeeting:"Upcoming Meeting",
   exitingMeeting:"Exiting Meeting",
+  mileStone : "Milestone",
+  followUp : "Follow Up",
   meetingType:"Meeting Type",
   meetingVenue:"Meeting Venue",
   myNotes:"My Notes",

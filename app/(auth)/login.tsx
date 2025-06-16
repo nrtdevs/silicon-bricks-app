@@ -208,8 +208,6 @@ export default function LoginScreen() {
                 </ThemedText>
               </Pressable>
             </View>
-
-
           </View>
         </View>
       </ScrollView>
