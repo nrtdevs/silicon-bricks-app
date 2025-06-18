@@ -12,13 +12,18 @@ import CustomSearchBar from "@/components/CustomSearchBar";
 import { useEffect, useMemo, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Alert } from "react-native";
-import { useLazyQuery, useQuery } from "@apollo/client";
-import { PaginatedFollowUpDocument, PaginatedUsersDocument } from "@/graphql/generated";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { CreateFollowUpDocument, DeleteFollowUpDocument, PaginatedFollowUpDocument, PaginatedMeetingTaskDocument, PaginatedUsersDocument, UpdateFollowUpDocument } from "@/graphql/generated";
 import NoDataFound from "@/components/NoDataFound";
 import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import { useForm } from "react-hook-form";
 
+const defaultValue = {
+    body: "",
+    id: "",
+    subject: ""
+}
 const FollowUp = () => {
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState<string>("");
@@ -39,7 +44,7 @@ const FollowUp = () => {
         item?.subject?.toLowerCase().includes(searchQuery.toLowerCase())
     );
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{
-        name: string, contactNumber: string, address: string, contactPerson: string, description: string
+        body: string, subject: string,
     }>({ defaultValues: {} });
     /// fetch user data 
     const { data: attendeesData, loading: attendeesLoading, error: attendeesError } = useQuery(PaginatedUsersDocument, {
@@ -57,6 +62,94 @@ const FollowUp = () => {
             value: item.id,
         }));
     }, [attendeesData]);
+    /// task api data 
+    const { data: taskData, loading: taskLoading, error: taskError } = useQuery(PaginatedMeetingTaskDocument, {
+        variables: {
+            "listInputDto": {
+                "limit": 10,
+                "page": 1
+            }
+        }
+    });
+    const taskPickerData = useMemo(() => {
+        if (!taskData?.paginatedMeetingTask.data) return [];
+        return taskData.paginatedMeetingTask.data.map((item) => ({
+            label: item.comment,
+            value: item.id,
+        }));
+    }, [taskData]);
+
+    /// delete follow up api 
+    const [deleteFollowUp, deleteFollowupState] = useMutation(DeleteFollowUpDocument, {
+        onCompleted: (data) => {
+            refetch();
+            Alert.alert("success", "Milesotone deleted successfully!")
+        },
+        onError: (error) => {
+            Alert.alert("error", error.message)
+        }
+    });
+
+    /// create follow up
+    const [createFollowUp, createFollowupState] = useMutation(CreateFollowUpDocument, {
+        onCompleted: (data) => {
+            reset()
+            Alert.alert("success", "Follow Up create successfully!");
+            router.back();
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
+    const [updateFollowup, updateMotesState] = useMutation(UpdateFollowUpDocument, {
+        onCompleted: (data) => {
+            reset()
+            refetch();
+            setAddEditManage(false);
+            setAddEditModalVisible(false);
+            Alert.alert("Success", "Follow up updated successfully!");
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
+    const onSubmit = (data: any) => {
+        let param = {
+            "body": data.body,
+            "followUpId": Number(data?.user?.value),
+            "subject": data.subject,
+            "taskId": Number(data?.task?.value),
+            "userId": 1
+        }
+        addEditManage ?
+            updateFollowup({
+                variables: {
+                    updateFollowUpInput: {
+                        id: Number(currentFollowNote.id),
+                        followUpId: Number(data?.user?.value),
+                        taskId: Number(data?.task?.value),
+                        userId: 1,
+                        subject: data.subject,
+                        body: data.body,
+                    }
+                }
+            }) :
+            createFollowUp({
+                variables: {
+                    followUpData: param
+                },
+            })
+
+    };
+    const [currentFollowNote, setCurrentFollowNote] = useState<{
+        id: string;
+        body: string;
+        subject: string
+    }>(defaultValue);
+    useEffect(() => {
+        setValue("body", currentFollowNote?.body)
+        setValue("subject", currentFollowNote?.subject)
+    }, [currentFollowNote])
     return (
         <CustomHeader
             title="Foloow Up"
@@ -88,102 +181,78 @@ const FollowUp = () => {
                 <FlatList
                     data={filteredData}
                     renderItem={({ item }) => (
-                        <Pressable
-                            onPress={() => { }}>
-                            <View style={[
-                                styles.followContainer,
-                                {
-                                    borderColor: Colors[theme].border,
-                                    shadowColor: Colors[theme].shadow,
-                                    backgroundColor: Colors[theme].cart
-                                },
-                            ]}>
-                                <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6 }}>
-                                    <ThemedText type='subtitle'>{item.subject}</ThemedText>
-                                    <View
-                                        style={{
-                                            // backgroundColor: item.status == "active" ? "#10B981" : item.status == "completed" ? "#F59E0B" : "#EF4444",
-                                            paddingHorizontal: ms(10),
-                                            padding: vs(2),
-                                            borderRadius: ms(14),
-                                        }}
-                                    >
-                                        <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>asaas</ThemedText>
-                                    </View>
-                                </View>
-                                <ThemedText type="default">{item.body}</ThemedText>
-                                <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
-                                    <TouchableOpacity
-                                        onPress={() => { }}
-                                        style={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            paddingVertical: vs(8),
-                                            paddingHorizontal: ms(12),
-                                            borderRadius: 10,
-                                            backgroundColor: "#3B82F6",
-                                            opacity: 0.8
-                                        }}
-                                    >
-                                        <Feather name="edit" size={16} color="#fff" />
-                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            //setMeetingId(item.id);
-                                            // setNotesModalVisible(true);
-                                        }}
-                                        style={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            paddingVertical: vs(8),
-                                            paddingHorizontal: ms(12),
-                                            borderRadius: 10,
-                                            backgroundColor: "#8B5CF6",
-                                            opacity: 0.8
-                                        }}
-                                    >
-                                        <MaterialIcons name="autorenew" size={18} color='#fff' />
-                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Status</ThemedText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            Alert.alert(
-                                                "Delete",
-                                                "Are you sure you want to delete?",
-                                                [
-                                                    {
-                                                        text: "Yes", onPress: () => {
-                                                            // deleteMeeting({
-                                                            //     variables: {
-                                                            //         ids: Number(item?.id),
-                                                            //     }
-                                                            // });
-                                                        }
-                                                    },
-                                                    { text: "No", onPress: () => { } },
-                                                ]
-                                            );
-                                        }}
-                                        style={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            paddingVertical: vs(8),
-                                            paddingHorizontal: ms(12),
-                                            borderRadius: 10,
-                                            backgroundColor: "#EF4444",
-                                            opacity: 0.8
-                                        }}
-                                    >
-                                        <FontAwesome5 name="trash" size={14} color="#fff" />
-                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
-                                    </TouchableOpacity>
-                                </View>
+                        <View style={[
+                            styles.followContainer,
+                            {
+                                borderColor: Colors[theme].border,
+                                shadowColor: Colors[theme].shadow,
+                                backgroundColor: Colors[theme].cart
+                            },
+                        ]}>
+                            <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6 }}>
+                                <ThemedText type='subtitle'>{item.subject}</ThemedText>
                             </View>
-                        </Pressable>
+                            <ThemedText type="default">{item.body}</ThemedText>
+                            <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setAddEditModalVisible(true)
+                                        setAddEditManage(true)
+                                        setCurrentFollowNote({
+                                            id: `${item?.id}`,
+                                            body: item?.body ?? "",
+                                            subject: item?.subject ?? ""
+                                        });
+                                    }}
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        paddingVertical: vs(8),
+                                        paddingHorizontal: ms(12),
+                                        borderRadius: 10,
+                                        backgroundColor: "#3B82F6",
+                                        opacity: 0.8
+                                    }}
+                                >
+                                    <Feather name="edit" size={16} color="#fff" />
+                                    <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        Alert.alert(
+                                            "Delete",
+                                            "Are you sure you want to delete?",
+                                            [
+                                                {
+                                                    text: "Yes", onPress: () => {
+                                                        deleteFollowUp({
+                                                            variables: {
+                                                                ids: Number(item?.id),
+                                                            }
+                                                        });
+                                                    }
+                                                },
+                                                { text: "No", onPress: () => { } },
+                                            ]
+                                        );
+                                    }}
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        paddingVertical: vs(8),
+                                        paddingHorizontal: ms(12),
+                                        borderRadius: 10,
+                                        backgroundColor: "#EF4444",
+                                        opacity: 0.8
+                                    }}
+                                >
+                                    <FontAwesome5 name="trash" size={14} color="#fff" />
+                                    <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Delete</ThemedText>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
                     )}
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
                 />
@@ -222,7 +291,7 @@ const FollowUp = () => {
                             <ThemedText type="subtitle">{addEditManage ? "Update Follow Up" : "Create Follow Up"}</ThemedText>
                             <Pressable onPress={() => {
                                 setAddEditModalVisible(false)
-                                //setCurrentMeetingVenue(defaultValue)
+                                setCurrentFollowNote(defaultValue)
                             }
                             }>
                                 <Entypo
@@ -234,14 +303,52 @@ const FollowUp = () => {
                         </View>
                         <View style={{ padding: 10 }}>
                             <CustomValidation
+                                data={attendeesPickerData}
+                                type="picker"
+                                hideStar
+                                control={control}
+                                labelStyle={styles.label}
+                                keyToCompareData="value"
+                                keyToShowData="label"
+                                name="user"
+                                label='User'
+                                placeholder={attendeesLoading ? "Loading..." : "Select User"}
+                                inputStyle={{ height: vs(50) }}
+                                rules={{
+                                    required: {
+                                        value: true,
+                                        message: "Select User",
+                                    },
+                                }}
+                            />
+                            <CustomValidation
+                                data={taskPickerData}
+                                type="picker"
+                                hideStar
+                                control={control}
+                                labelStyle={styles.label}
+                                keyToCompareData="value"
+                                keyToShowData="label"
+                                name="task"
+                                label='Task'
+                                placeholder={taskLoading ? "Loading..." : "Select task"}
+                                inputStyle={{ height: vs(50) }}
+                                rules={{
+                                    required: {
+                                        value: true,
+                                        message: "Select task",
+                                    },
+                                }}
+                            />
+                            <CustomValidation
                                 type="input"
                                 control={control}
                                 labelStyle={styles.label}
-                                name={"name"}
-                                label="Venue Name"
+                                name="subject"
+                                label="Subject"
                                 inputStyle={[{ lineHeight: ms(20) }]}
                                 rules={{
-                                    required: "Enter Name",
+                                    required: "Enter Subject",
                                 }}
                                 autoCapitalize="none"
                             />
@@ -249,57 +356,19 @@ const FollowUp = () => {
                                 type="input"
                                 control={control}
                                 labelStyle={styles.label}
-                                keyboardType="number-pad"
-                                name={"contactNumber"}
-                                label="Contact Number"
+                                name="body"
+                                label="Body"
                                 inputStyle={[{ lineHeight: ms(20) }]}
                                 rules={{
-                                    required: "Enter Number",
+                                    required: "Enter Body",
                                 }}
                                 autoCapitalize="none"
                             />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                labelStyle={styles.label}
-                                name={"contactPerson"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                label="Contact Person"
-                                rules={{
-                                    required: "Enter Person",
-                                }}
-                                autoCapitalize="none"
-                            />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                labelStyle={styles.label}
-                                name="address"
-                                label="Address"
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                rules={{
-                                    required: "Enter address",
-                                }}
-                                autoCapitalize="none"
-                            />
-                            <CustomValidation
-                                type="input"
-                                control={control}
-                                labelStyle={styles.label}
-                                name="description"
-                                label="Description"
-                                inputStyle={[{ lineHeight: ms(20) }]}
-                                rules={{
-                                    required: "Enter Description",
-                                }}
-                                autoCapitalize="none"
-                            />
-
                             <CustomButton
                                 title="Submit"
-                                // isLoading={createMeetingState?.loading || updateMeetingVenueState?.loading}
+                                // isLoading={createFollowupState?.loading}
                                 onPress={() => {
-                                    // handleSubmit(onSubmit)();
+                                    handleSubmit(onSubmit)();
                                 }}
                                 style={{
                                     backgroundColor: Colors[theme].background,
@@ -327,6 +396,7 @@ const FollowUp = () => {
                 onPress={() => {
                     setAddEditModalVisible(true)
                     setAddEditManage(false)
+                    setCurrentFollowNote(defaultValue)
                 }}
             />
         </CustomHeader>

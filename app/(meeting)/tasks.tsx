@@ -9,7 +9,7 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateFollowUpDocument, DeleteMetingTaskDocument, PaginatedMeetingTaskDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons} from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { FAB } from "@rneui/themed";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -84,7 +84,7 @@ const TaskScreen = () => {
                 onPress={() => router.back()}
                 style={{ left: 0 }} />)}>
             <ThemedView style={styles.contentContainer}>
-                <View style={{ width: "100%",marginBottom: 10,paddingHorizontal: ms(10)}}>
+                <View style={{ width: "100%", marginBottom: 10, paddingHorizontal: ms(10) }}>
                     <CustomSearchBar
                         searchQuery={searchQuery}
                         placeholder="Search Task"
@@ -248,7 +248,7 @@ const TaskScreen = () => {
                                 control={control}
                                 labelStyle={styles.label}
                                 name={"subject"}
-                                inputStyle={[{lineHeight: ms(20)}]}
+                                inputStyle={[{ lineHeight: ms(20) }]}
                                 label={`Subject`}
                                 rules={{
                                     required: "Enter subject",
@@ -260,7 +260,7 @@ const TaskScreen = () => {
                                 control={control}
                                 labelStyle={styles.label}
                                 name={"body"}
-                                inputStyle={[{lineHeight: ms(20)}]}
+                                inputStyle={[{ lineHeight: ms(20) }]}
                                 label={`Body`}
                                 rules={{
                                     required: "Enter body",

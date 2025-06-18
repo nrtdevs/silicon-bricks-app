@@ -1025,3 +1025,40 @@ mutation CreateMilestone($input: MilestoneDto!) {
     totalTaskCompleteMilestone
     status
   }
+}
+mutation DeleteMilestone($ids: [Int!]!) {
+  deleteMilestone(ids: $ids)
+}
+mutation DeleteFollowUp($ids: [Int!]!) {
+  deleteFollowUp(ids: $ids)
+}
+
+
+mutation HardDeleteFollowUp($ids: [Int!]!) {
+  hardDeleteFollowUp(ids: $ids)
+}
+mutation RestoreFollowUp($ids: [Int!]!) {
+  restoreFollowUp(ids: $ids)
+}
+mutation UpdateFollowUp($updateFollowUpInput: UpdateFollowUpDto!) {
+  updateFollowUp(updateFollowUpInput: $updateFollowUpInput) {
+    id
+    userId
+    followUpId
+    subject
+    body
+    createdById 
+  }
+}
+mutation UpdateMilestone($updateMilestoneInput: UpdateMilestoneDto!) {
+  updateMilestone(updateMilestoneInput: $updateMilestoneInput) {
+    id
+    projectId
+    name
+    startDate
+    endDate
+    projectName
+    totalTaskCompleteMilestone
+    status
+  }
+}

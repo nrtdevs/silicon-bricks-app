@@ -120,7 +120,7 @@ const MyNotes = () => {
                 style={{ left: 10 }} />}>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%",paddingHorizontal: 10}}>
+                    <View style={{ width: "90%", paddingHorizontal: 10 }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             placeholder="Search notes"

@@ -4,18 +4,28 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { PaginatedMilestoneDocument } from "@/graphql/generated";
-import { useLazyQuery, useMutation } from "@apollo/client";
-import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { CreateMilestoneDocument, DeleteMilestoneDocument, PaginatedMilestoneDocument, PaginatedProjectsDocument, UpdateMilestoneDocument } from "@/graphql/generated";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { Entypo, Feather, FontAwesome5, Fontisto, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { FAB } from "@rneui/themed";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, FlatList, Modal, Pressable, ScrollView, TouchableOpacity, View } from "react-native";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import { useForm } from "react-hook-form";
+import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
+import DateTimePickerModal from "@/components/DateTimePickerModal";
+import { formatTimeForAPI } from "@/utils/formatDateTime";
 
+const defaultValue = {
+    id: "",
+    projectId: "",
+    name: "",
+    startDate: "",
+    endDate: "",
+}
 const Milestone = () => {
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState<string>("");
@@ -41,28 +51,98 @@ const Milestone = () => {
     }>({ defaultValues: {} });
     const onSubmit = (data: any) => {
         let param = {
-            ...data
+            "name": data.name,
+            "projectId": Number(data?.project?.value),
+            "startDate": data.startDate,
+            "endDate": data.endDate,
         }
-        console.log(param);
-        // createMeetingType({
-        //     variables: {
-        //         data: {
-        //             ...data
-        //         },
-        //     },
-        // });
-
+        console.log(data);
+        return;
+        addEditManage
+            ? updateMilestone({
+                variables: {
+                    updateMilestoneInput: {
+                        id: Number(currentMilestone.id),
+                        projectId: Number(data?.project?.value),
+                        startDate: data.startDate,
+                        endDate: data.endDate,
+                        name: data.subject,
+                    }
+                }
+            }) :
+            createMilestone({
+                variables: {
+                    input: {
+                        ...param
+                    },
+                },
+            });
     };
-    // const [createMilestone, createMilestoneState] = useMutation(CreateMeetingDocument, {
-    //         onCompleted: (data) => {
-    //             reset()
-    //             Alert.alert("success", "Milestone create successfully!");
-    //             router.back();
-    //         },
-    //         onError: (error) => {
-    //             Alert.alert("Error", error.message);
-    //         }
-    //     });
+    const [currentMilestone, setCurrentMilestone] = useState<{
+        id: string,
+        name: string,
+        projectId: string,
+        startDate: string,
+        endDate: string
+    }>(defaultValue);
+    /// api create and update 
+    const [updateMilestone, updateMilestoneState] = useMutation(UpdateMilestoneDocument, {
+        onCompleted: (data) => {
+            reset()
+            refetch();
+            setAddEditManage(false);
+            setAddEditModalVisible(false);
+            Alert.alert("Success", "Milestone updated successfully!");
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
+    const [createMilestone, createMilestoneState] = useMutation(CreateMilestoneDocument, {
+        onCompleted: (data) => {
+            reset()
+            Alert.alert("success", "Milestone create successfully!");
+            router.back();
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
+    /// delete milestone api 
+    const [deleteMilestone, deleteMilestoneState] = useMutation(DeleteMilestoneDocument, {
+        onCompleted: (data) => {
+            refetch();
+            Alert.alert("success", "Milesotone deleted successfully!")
+        },
+        onError: (error) => {
+            Alert.alert("error", error.message)
+        }
+    });
+    /// fetch project data
+    const { data: projectData, loading: packageLoading, error: packageError, } = useQuery(PaginatedProjectsDocument, {
+        variables: {
+            "listInputDto": {
+                "limit": 10,
+                "page": 1
+            }
+        }
+    });
+    const projectPickerData = useMemo(() => {
+        if (!projectData?.paginatedProjects?.data) return [];
+        return projectData.paginatedProjects.data.map((item) => ({
+            label: item.name,
+            value: item.id,
+        }));
+    }, [projectData]);
+    /// date picker
+    const [activeDateField, setActiveDateField] = useState<string | null>(null);
+    const [dateModal, setDateModal] = useState({
+        start: false,
+        end: false,
+    });
+    const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
+        getDateTimePickerProps(false)
+    );
     return (
         <CustomHeader
             title="Milestone"
@@ -103,7 +183,17 @@ const Milestone = () => {
                             <ThemedText type="default">{item.projectName}</ThemedText>
                             <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
                                 <TouchableOpacity
-                                    onPress={() => { }}
+                                    onPress={() => {
+                                        setAddEditModalVisible(true)
+                                        setAddEditManage(true)
+                                        setCurrentMilestone({
+                                            id: `${item?.id}`,
+                                            name: item.name,
+                                            projectId: `${item.projectId}`,
+                                            startDate: item.startDate,
+                                            endDate: item.endDate
+                                        });
+                                    }}
                                     style={{
                                         flexDirection: 'row',
                                         alignItems: 'center',
@@ -120,36 +210,17 @@ const Milestone = () => {
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => {
-                                        // setMeetingId(item.id);
-                                        // setNotesModalVisible(true);
-                                    }}
-                                    style={{
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        paddingVertical: vs(8),
-                                        paddingHorizontal: ms(12),
-                                        borderRadius: 10,
-                                        backgroundColor: "#8B5CF6",
-                                        opacity: 0.8
-                                    }}
-                                >
-                                    <MaterialIcons name="autorenew" size={18} color='#fff' />
-                                    <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Status</ThemedText>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => {
                                         Alert.alert(
                                             "Delete",
                                             "Are you sure you want to delete?",
                                             [
                                                 {
                                                     text: "Yes", onPress: () => {
-                                                        // deleteMeeting({
-                                                        //     variables: {
-                                                        //         ids: Number(item?.id),
-                                                        //     }
-                                                        // });
+                                                        deleteMilestone({
+                                                            variables: {
+                                                                ids: Number(item?.id),
+                                                            }
+                                                        });
                                                     }
                                                 },
                                                 { text: "No", onPress: () => { } },
@@ -206,7 +277,7 @@ const Milestone = () => {
                                 padding: 10,
                             }}
                         >
-                            <ThemedText type="subtitle">{addEditManage ? "Update Follow Up" : "Create Follow Up"}</ThemedText>
+                            <ThemedText type="subtitle">{addEditManage ? "Update Milestone" : "Create Milestone"}</ThemedText>
                             <Pressable onPress={() => {
                                 setAddEditModalVisible(false)
                                 //setCurrentMeetingVenue(defaultValue)
@@ -225,7 +296,7 @@ const Milestone = () => {
                                 control={control}
                                 labelStyle={styles.label}
                                 name={"name"}
-                                label="Venue Name"
+                                label="Name"
                                 inputStyle={[{ lineHeight: ms(20) }]}
                                 rules={{
                                     required: "Enter Name",
@@ -233,9 +304,66 @@ const Milestone = () => {
                                 autoCapitalize="none"
                             />
 
+                            <CustomValidation
+                                data={projectPickerData}
+                                type="picker"
+                                hideStar
+                                control={control}
+                                labelStyle={styles.label}
+                                name="project"
+                                label='Project Name'
+                                placeholder={packageLoading ? "Loading..." : "Select Project"}
+                                inputStyle={{ height: vs(50) }}
+                                rules={{
+                                    required: {
+                                        value: true,
+                                        message: "Select project name",
+                                    },
+                                }}
+                            />
+                            <CustomValidation
+                                type="input"
+                                control={control}
+                                placeholder={"Start Date"}
+                                name="startDate"
+                                editable={false}
+                                label='Start Date'
+                                rightIcon={
+                                    <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
+                                }
+                                onPress={() => {
+                                    setDateModal({
+                                        start: !dateModal.start,
+                                        end: false,
+                                    });
+                                    setActiveDateField("startDate");
+                                    setDateTimePickerProps(getDateTimePickerProps(true));
+                                }}
+                                pointerEvents="none"
+                            />
+                            <CustomValidation
+                                type="input"
+                                control={control}
+                                placeholder={"Due Date"}
+                                name="endDate"
+                                editable={false}
+                                label='Due Date'
+                                rightIcon={
+                                    <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
+                                }
+                                onPress={() => {
+                                    setDateModal({
+                                        start: !dateModal.start,
+                                        end: false,
+                                    });
+                                    setActiveDateField("endDate");
+                                    setDateTimePickerProps(getDateTimePickerProps(true));
+                                }}
+                                pointerEvents="none"
+                            />
                             <CustomButton
                                 title="Submit"
-                                // isLoading={createMeetingState?.loading || updateMeetingVenueState?.loading}
+                                isLoading={createMilestoneState?.loading}
                                 onPress={() => {
                                     handleSubmit(onSubmit)();
                                 }}
@@ -247,10 +375,25 @@ const Milestone = () => {
                         </View>
                     </View>
                 </ScrollView>
+                <DateTimePickerModal
+                    mode="date"
+                    dateTimePickerProps={dateTimePickerProps}
+                    setDateTimePickerProps={setDateTimePickerProps}
+                    onDateTimeSelection={(event: any, selectedDate: any) => {
+                        if (event.type != "dismissed") {
+                            setValue(
+                                dateModal.start ? "startDate" : "endDate",
+                                formatTimeForAPI(selectedDate, "yyyy-mm-dd") || "",
+                            );
+                        }
+                        setActiveDateField(null);
+                        setDateTimePickerProps(getDateTimePickerProps(false));
+                    }}
+                />
             </Modal>
             <FAB
                 size="large"
-                title="Create Milestone"
+                title="Add Milestone"
                 style={{
                     position: "absolute",
                     margin: 10,

@@ -4,8 +4,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { ListTrashedFollowUpDocument } from "@/graphql/generated";
-import { useLazyQuery } from "@apollo/client";
+import { DeleteFollowUpDocument, HardDeleteFollowUpDocument, ListTrashedFollowUpDocument, RestoreFollowUpDocument } from "@/graphql/generated";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect } from "react";
@@ -25,6 +25,26 @@ const FollowUpTrashed = () => {
             },
         });
     }, [])
+    /// delete follow up api 
+    const [deleteFollowUp, deleteFollowupState] = useMutation(HardDeleteFollowUpDocument, {
+        onCompleted: (data) => {
+            refetch();
+            Alert.alert("success", "Milesotone deleted successfully!")
+        },
+        onError: (error) => {
+            Alert.alert("error", error.message)
+        }
+    });
+    /// restore follow up api 
+    const [restoreFollowup, restoreMeetingState] = useMutation(RestoreFollowUpDocument, {
+        onCompleted: (data) => {
+            refetch();
+            Alert.alert("success", "Follow up restore successfully!")
+        },
+        onError: (error) => {
+            Alert.alert("error", error.message)
+        }
+    });
     return (
         <CustomHeader
             title="Foloow Up"
@@ -51,37 +71,23 @@ const FollowUpTrashed = () => {
                                 },
                             ]}>
                                 <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6 }}>
-                                    <ThemedText type='subtitle'>{item.subject}</ThemedText>
-                                    <View
-                                        style={{
-                                            // backgroundColor: item.status == "active" ? "#10B981" : item.status == "completed" ? "#F59E0B" : "#EF4444",
-                                            paddingHorizontal: ms(10),
-                                            padding: vs(2),
-                                            borderRadius: ms(14),
-                                        }}
-                                    >
-                                        <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>asaas</ThemedText>
-                                    </View>
+                                    <ThemedText type='subtitle'>{item?.subject}</ThemedText>
                                 </View>
-
-                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 5 }}>
-                                    <Feather name="calendar" size={ms(16)} color={Colors[theme].textPrimary} />
-                                    <ThemedText type="default">Time : sda To time</ThemedText>
-                                </View>
+                                <ThemedText type="default">{item?.body}</ThemedText>
                                 <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
                                     <TouchableOpacity
                                         onPress={() => {
                                             Alert.alert(
                                                 "Restore",
-                                                `note will be restored`,
+                                                `Follow up will be restored`,
                                                 [
                                                     {
                                                         text: "Yes", onPress: () => {
-                                                            // restoreMeeting({
-                                                            //     variables: {
-                                                            //         ids: Number(item?.id),
-                                                            //     }
-                                                            // });
+                                                            restoreFollowup({
+                                                                variables: {
+                                                                    ids: Number(item?.id),
+                                                                }
+                                                            });
                                                         }
                                                     },
                                                     { text: "No", onPress: () => { } },
@@ -110,11 +116,11 @@ const FollowUpTrashed = () => {
                                                 [
                                                     {
                                                         text: "Yes", onPress: () => {
-                                                            // deleteMeetingTask({
-                                                            //     variables: {
-                                                            //         ids: Number(item?.id),
-                                                            //     }
-                                                            // });
+                                                            deleteFollowUp({
+                                                                variables: {
+                                                                    ids: Number(item?.id),
+                                                                }
+                                                            });
                                                         }
                                                     },
                                                     { text: "No", onPress: () => { } },
