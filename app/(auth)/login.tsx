@@ -42,7 +42,7 @@ export default function LoginScreen() {
     formState: { errors },
   } = useForm<LoginFormData>({
     defaultValues: {
-      email: "admin@newrise.in",
+      email: "prince@newrise.in",
       password: "Password@123",
     },
   });

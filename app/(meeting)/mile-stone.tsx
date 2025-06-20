@@ -56,8 +56,6 @@ const Milestone = () => {
             "startDate": data.startDate,
             "endDate": data.endDate,
         }
-        console.log(data);
-        return;
         addEditManage
             ? updateMilestone({
                 variables: {

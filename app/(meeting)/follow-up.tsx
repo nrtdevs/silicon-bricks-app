@@ -18,6 +18,7 @@ import NoDataFound from "@/components/NoDataFound";
 import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import { useForm } from "react-hook-form";
+import * as SecureStore from "expo-secure-store";
 
 const defaultValue = {
     body: "",
@@ -27,6 +28,7 @@ const defaultValue = {
 const FollowUp = () => {
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [userId, setUserId] = useState<number>(0);
     const [addEditManage, setAddEditManage] = useState(false);
     const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
     const [getFollowUp, { data, refetch, loading: listLoading }] = useLazyQuery(PaginatedFollowUpDocument);
@@ -45,7 +47,7 @@ const FollowUp = () => {
     );
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{
         body: string, subject: string,
-    }>({ defaultValues: {} });
+    }>({ defaultValues: {}});
     /// fetch user data 
     const { data: attendeesData, loading: attendeesLoading, error: attendeesError } = useQuery(PaginatedUsersDocument, {
         variables: {
@@ -113,14 +115,20 @@ const FollowUp = () => {
             Alert.alert("Error", error.message);
         }
     });
-    const onSubmit = (data: any) => {
+    const onSubmit = async (data: any) => {
+        const storedData = await SecureStore.getItemAsync("userData");
+        if (!storedData) return null;
+        let parsedUserData = JSON.parse(storedData);
+        setUserId(Number(parsedUserData?.userId));
         let param = {
             "body": data.body,
             "followUpId": Number(data?.user?.value),
             "subject": data.subject,
             "taskId": Number(data?.task?.value),
-            "userId": 1
+            "userId": userId
         }
+        console.log('UserId', userId);
+        return;
         addEditManage ?
             updateFollowup({
                 variables: {
@@ -128,7 +136,7 @@ const FollowUp = () => {
                         id: Number(currentFollowNote.id),
                         followUpId: Number(data?.user?.value),
                         taskId: Number(data?.task?.value),
-                        userId: 1,
+                        userId: userId,
                         subject: data.subject,
                         body: data.body,
                     }
@@ -139,7 +147,6 @@ const FollowUp = () => {
                     followUpData: param
                 },
             })
-
     };
     const [currentFollowNote, setCurrentFollowNote] = useState<{
         id: string;
