@@ -53,7 +53,6 @@ const DateTimePickerModal = ({
                 textColor={colorScheme === "dark" ? Colors.white : Colors.black}
                 themeVariant={colorScheme === "dark" ? "dark" : "light"}
                 accentColor={colorScheme === "dark" ? Colors.white : Colors.black}
-
             />
         </Overlay>
     ) : null;

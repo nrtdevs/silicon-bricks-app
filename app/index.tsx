@@ -36,7 +36,6 @@ const Index = () => {
   return <Redirect href="/(drawer)/subscriptions" />;
 };
 
-
 const styles = ScaledSheet.create({
   appBar: {
     fontSize: "18@ms",
@@ -66,4 +65,3 @@ const styles = ScaledSheet.create({
   },
 });
 export default Index;
-

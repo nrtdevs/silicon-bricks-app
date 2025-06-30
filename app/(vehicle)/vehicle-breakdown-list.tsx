@@ -166,6 +166,7 @@ const VehicleBreakDownList = () => {
         onView={() =>
           router.navigate({
             pathname: "/vehicle-details",
+            
             params: { data: JSON.stringify(item) },
           })
         }
