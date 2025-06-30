@@ -69,7 +69,6 @@ const TaskScreen = () => {
                 },
             },
         });
-
     };
     const filteredData = data?.paginatedMeetingTask?.data?.filter((item) =>
         item?.task?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -248,7 +247,7 @@ const TaskScreen = () => {
                                 control={control}
                                 labelStyle={styles.label}
                                 name={"subject"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
+                                inputStyle={[{lineHeight: ms(20)}]}
                                 label={`Subject`}
                                 rules={{
                                     required: "Enter subject",
