@@ -9,7 +9,7 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateNotePadDocument, DeleteNotePadDocument, PaginatedNotePadDocument, UpdateNotePadDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Entypo, Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { FAB } from "@rneui/themed";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -110,10 +110,17 @@ const MyNotes = () => {
         item?.notesField?.toLowerCase().includes(searchQuery.toLowerCase())
     );
     return (
-        <CustomHeader>
+        <CustomHeader
+            title="My Notes"
+            leftComponent={<MaterialCommunityIcons
+                name="arrow-left"
+                size={ms(20)}
+                color={Colors[theme]?.text}
+                onPress={() => router.back()}
+                style={{ left: 10 }} />}>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{ width: "90%", paddingHorizontal: 10 }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             placeholder="Search notes"
@@ -174,7 +181,7 @@ const MyNotes = () => {
                                             opacity: 0.8
                                         }}
                                     >
-                                       <Feather name="edit" size={16} color="#fff" />
+                                        <Feather name="edit" size={16} color="#fff" />
                                         <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
                                     </TouchableOpacity>
                                     <TouchableOpacity

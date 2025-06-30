@@ -187,7 +187,7 @@ export default function LoginScreen() {
 
             {/* Login Button */}
             <CustomButton
-              title="Choose plane"
+              title="Choose Plan"
               onPress={() => router.push("/(subComponents)/purchasePlane")}
               isGradient
             />
@@ -208,8 +208,6 @@ export default function LoginScreen() {
                 </ThemedText>
               </Pressable>
             </View>
-
-
           </View>
         </View>
       </ScrollView>

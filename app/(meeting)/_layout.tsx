@@ -10,6 +10,7 @@ import { ms } from 'react-native-size-matters';
 import { View, Image } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { Divider } from '@rneui/themed';
+import { color } from '@rneui/base';
 
 
 const CustomDrawerContent = (props: any) => {
@@ -51,6 +52,28 @@ const CustomDrawerContent = (props: any) => {
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(meeting)/upcomingMeeting')}
       />
+
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color="#3B82F6" />}
+        label={labels?.exitingMeeting}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/(meeting)/exitingMeeting')}
+      />
+
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color="#3B82F6" />}
+        label={labels?.mileStone}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/(meeting)/mile-stone')}
+      />
+
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color="#3B82F6" />}
+        label={labels?.followUp}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/(meeting)/follow-up')}
+      />
+
       <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color="#3B82F6" />}
         label={labels?.meetingType}

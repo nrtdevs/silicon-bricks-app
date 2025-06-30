@@ -15,7 +15,7 @@ import {
     UpdateNotesDocument
 } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Entypo, Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { FAB } from "@rneui/themed";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -89,13 +89,13 @@ const MeetingDetails = () => {
                         uploadDoc: null,
                     }
                 },
-                fetchPolicy:'network-only'
+                fetchPolicy: 'network-only'
             }) :
             createMeetingNotes({
                 variables: {
                     notesData: param
                 },
-                fetchPolicy:'network-only'
+                fetchPolicy: 'network-only'
             });
     };
     /// fetch meeting notes data 
@@ -146,11 +146,17 @@ const MeetingDetails = () => {
         }
     });
     return (
-        <CustomHeader>
+        <CustomHeader
+            title="Meeting Details"
+            leftComponent={(
+                <MaterialCommunityIcons
+                name="arrow-left"
+                size={ms(20)}
+                color={Colors[theme]?.text}
+                onPress={() => router.back()}
+                style={{ left: 0 }} />
+            )}>
             <ThemedView style={styles.contentContainer}>
-                <View style={styles.searchContainer}>
-                    <ThemedText style={{ fontSize: 20, fontWeight: "700" }}> Details</ThemedText>
-                </View>
                 <View style={[
                     styles.meetingDetailsCard,
                     {
@@ -194,7 +200,7 @@ const MeetingDetails = () => {
                         </View>
                     </View>
                 </View>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", margin: 15}}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", margin: 15 }}>
                     <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Notes</ThemedText>
                     <Pressable
                         onPress={() => {
@@ -280,16 +286,16 @@ const MeetingDetails = () => {
                                 </View>
                             </View>
                         </View>
-                    )} 
+                    )}
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
-                    />
+                />
 
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", margin: 15 }}>
                     <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Tasks</ThemedText>
 
                     <Pressable
                         onPress={() => {
-                             router.push({
+                            router.push({
                                 pathname: "/(meeting)/addTask",
                                 params: {
                                     isCreate: "true",
@@ -377,9 +383,9 @@ const MeetingDetails = () => {
                                 </View>
                             </View>
                         </View>
-                    )} 
+                    )}
                     ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
-                    />
+                />
             </ThemedView>
             {/* Add Note modal */}
             <Modal

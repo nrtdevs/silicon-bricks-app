@@ -125,7 +125,6 @@ const CreateMeeting = () => {
                         "meetingVenueId": Number(data.meetingVenueId.value),
                         "projectId": Number(data.projectId.value),
                         "uploadDoc": null,
-                        "projectName": data.projectName
                     }
                 },
             });
@@ -476,7 +475,6 @@ const CreateMeeting = () => {
                         const timeOrDate = activeDateField === "meetingDate"
                             ? getLocalizedDate(selectedDate)
                             : getLocalizedTime(selectedDate);
-
                         if (activeDateField) {
                             setValue(activeDateField, timeOrDate?.toString());
                         }

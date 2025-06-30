@@ -9,5 +9,6 @@ export const getDateTimePickerProps = (visible:boolean) => {
       uniqueKey: null,
       is24Hour: false,
       format: 'YYYY-MM-DD',
+      minimumDate: new Date(),
     };
   };

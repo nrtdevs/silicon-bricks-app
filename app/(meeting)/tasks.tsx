@@ -9,7 +9,7 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateFollowUpDocument, DeleteMetingTaskDocument, PaginatedMeetingTaskDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Entypo, Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { FAB } from "@rneui/themed";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -62,26 +62,28 @@ const TaskScreen = () => {
         }
     });
     const onSubmit = (data: any) => {
-        let param = {
-            ...data
-        }
-        console.log(param);
         createMeetingFollowUp({
             variables: {
-                data: {
+                followUpData: {
                     ...data
                 },
             },
         });
-
     };
     const filteredData = data?.paginatedMeetingTask?.data?.filter((item) =>
         item?.task?.toLowerCase().includes(searchQuery.toLowerCase())
     );
     return (
-        <CustomHeader>
+        <CustomHeader
+            title="Tasks"
+            leftComponent={(<MaterialCommunityIcons
+                name="arrow-left"
+                size={ms(20)}
+                color={Colors[theme]?.text}
+                onPress={() => router.back()}
+                style={{ left: 0 }} />)}>
             <ThemedView style={styles.contentContainer}>
-                <View style={{ width: "100%", marginBottom: 10 }}>
+                <View style={{ width: "100%", marginBottom: 10, paddingHorizontal: ms(10) }}>
                     <CustomSearchBar
                         searchQuery={searchQuery}
                         placeholder="Search Task"
@@ -157,7 +159,7 @@ const TaskScreen = () => {
                                         }}
                                     >
                                         {/* icon={<MaterialIcons name="autorenew" size={18} color='#fff' />} */}
-                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Follow up</ThemedText>
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Follow Up</ThemedText>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={() => {
@@ -245,7 +247,7 @@ const TaskScreen = () => {
                                 control={control}
                                 labelStyle={styles.label}
                                 name={"subject"}
-                                inputStyle={[{ lineHeight: ms(20) }]}
+                                inputStyle={[{lineHeight: ms(20)}]}
                                 label={`Subject`}
                                 rules={{
                                     required: "Enter subject",
@@ -334,7 +336,6 @@ const styles = ScaledSheet.create({
         justifyContent: 'space-between',
         gap: 10,
     },
-
     label: {
         fontSize: "16@ms",
         fontWeight: "normal",

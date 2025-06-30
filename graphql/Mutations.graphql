@@ -213,15 +213,14 @@ mutation DeletePermission($deletePermissionId: Float!) {
 }
 
 #create organization
-mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!) {
-  createOrganization(createOrganizationInput: $createOrganizationInput) {
+mutation CreateOrganization($createOrganizationInput: CreateOrganizationDto!, $registerData: RegisterDto!) {
+  createOrganization(createOrganizationInput: $createOrganizationInput, registerData: $registerData) {
     id
     name
     description
     status
   }
 }
-
 #update organization
 mutation UpdateOrganization($updateOrganizationInput: UpdateOrganizationDto!) {
   updateOrganization(updateOrganizationInput: $updateOrganizationInput) {
@@ -862,15 +861,16 @@ mutation CreateMeetingTask($input: CreateMeetingTaskDto!) {
   }
 }
 
- 
-
-mutation CreateFollowUp($data: CreateFollowUpDto!) {
-  createFollowUp(data: $data) {
-    body
+mutation CreateFollowUp($followUpData: CreateFollowUpDto!) {
+  createFollowUp(followUpData: $followUpData) {
     id
+    userId
     subject
+    body
+    createdById
   }
 }
+
 mutation CreateNotePad($notesData: CreateNotePadDto!) {
   createNotePad(notesData: $notesData) {
     id
@@ -878,9 +878,11 @@ mutation CreateNotePad($notesData: CreateNotePadDto!) {
     status
   }
 }
+
 mutation DeleteNotePad($ids: [Int!]!) {
   deleteNotePad(ids: $ids)
 }
+
 mutation UpdateNotePad($updateNotesInput: UpdateNotePadDto!) {
   updateNotePad(updateNotesInput: $updateNotesInput) {
     id
@@ -888,7 +890,6 @@ mutation UpdateNotePad($updateNotesInput: UpdateNotePadDto!) {
     status
   }
 }
-
 
  mutation CreateVehicle($createVehicleInput: CreateVehicleDto!) {
   createVehicle(createVehicleInput: $createVehicleInput) {
@@ -905,6 +906,7 @@ mutation UpdateVehicle($updateVehicleInput: UpdateVehicleDto!) {
 mutation DeleteVehicle($deleteVehicleId: Int!) {
   deleteVehicle(id: $deleteVehicleId)
 }
+
 mutation ChangePackageStatus($updatePackageStatusInput: PackageStatusDto!) {
   changePackageStatus(updatePackageStatusInput: $updatePackageStatusInput) {
     ... on Package {
@@ -933,6 +935,7 @@ mutation ChangePackageStatus($updatePackageStatusInput: PackageStatusDto!) {
     }
   }
 }
+
 mutation EnableMeetingStatus($updateMeetingStatusInput: MeetingStatusDto!) {
   enableMeetingStatus(updateMeetingStatusInput: $updateMeetingStatusInput) {
     ... on Meeting {
@@ -941,8 +944,6 @@ mutation EnableMeetingStatus($updateMeetingStatusInput: MeetingStatusDto!) {
     }
   }
 }
-
-
 
 mutation EnableVehicleStatus($data: VehicleStatusDto!) {
   enableVehicleStatus(data: $data) {
@@ -993,6 +994,7 @@ mutation UpdateMeetingTask($updateMeetingTaskInput: UpdateMeetingTaskDto!) {
     weightType
   }
 }
+
 mutation UpdateNotes($updateNotesInput: UpdateNotesDto!) {
   updateNotes(updateNotesInput: $updateNotesInput) {
     id
@@ -1003,9 +1005,60 @@ mutation UpdateNotes($updateNotesInput: UpdateNotesDto!) {
     uploadDoc
   }
 }
+
 mutation RestoreMeeting($ids: [Int!]!) {
   restoreMeeting(ids: $ids)
 }
+
 mutation HardDeleteMeeting($ids: [Int!]!) {
   hardDeleteMeeting(ids: $ids)
+}
+
+mutation CreateMilestone($input: MilestoneDto!) {
+  createMilestone(input: $input) {
+    id
+    projectId
+    name
+    startDate
+    endDate
+    projectName
+    totalTaskCompleteMilestone
+    status
+  }
+}
+mutation DeleteMilestone($ids: [Int!]!) {
+  deleteMilestone(ids: $ids)
+}
+mutation DeleteFollowUp($ids: [Int!]!) {
+  deleteFollowUp(ids: $ids)
+}
+
+
+mutation HardDeleteFollowUp($ids: [Int!]!) {
+  hardDeleteFollowUp(ids: $ids)
+}
+mutation RestoreFollowUp($ids: [Int!]!) {
+  restoreFollowUp(ids: $ids)
+}
+mutation UpdateFollowUp($updateFollowUpInput: UpdateFollowUpDto!) {
+  updateFollowUp(updateFollowUpInput: $updateFollowUpInput) {
+    id
+    userId
+    followUpId
+    subject
+    body
+    createdById 
+  }
+}
+mutation UpdateMilestone($updateMilestoneInput: UpdateMilestoneDto!) {
+  updateMilestone(updateMilestoneInput: $updateMilestoneInput) {
+    id
+    projectId
+    name
+    startDate
+    endDate
+    projectName
+    totalTaskCompleteMilestone
+    status
+  }
 }

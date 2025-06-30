@@ -999,3 +999,57 @@ query ListTrashedMeeting($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+query PaginatedActivityLogMeeting($listInputDto: ListInputDTO!) {
+  paginatedActivityLogMeeting(ListInputDTO: $listInputDto) {
+    data {
+      id
+      createdByUserId
+      module
+      moduleId
+      description
+      activity
+      ipAddress
+      userAgent
+    }
+  }
+}
+
+query ListTrashedFollowUp($listInputDto: ListInputDTO!) {
+  listTrashedFollowUp(ListInputDto: $listInputDto) {
+    data {
+      id
+      userId
+      followUpId
+      subject
+      body
+      createdById
+    }
+  }
+}
+query PaginatedFollowUp($listInputDto: ListInputDTO!) {
+  paginatedFollowUp(ListInputDTO: $listInputDto) {
+    data {
+      id
+      userId
+      followUpId
+      subject
+      body
+      createdById
+    }
+  }
+}
+query PaginatedMilestone($listInputDto: ListInputDTO!) {
+  paginatedMilestone(ListInputDTO: $listInputDto) {
+    data {
+      id
+      projectId
+      name
+      startDate
+      endDate
+      projectName
+      totalTaskCompleteMilestone
+      status
+    }
+  }
+}

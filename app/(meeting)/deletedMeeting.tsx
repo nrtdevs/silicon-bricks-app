@@ -47,18 +47,17 @@ const DeletedMeetingScreen = () => {
         }
     });
     return (
-        <CustomHeader>
+        <CustomHeader
+            title="Trashed Meeting"
+            leftComponent={(
+                <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={ms(20)}
+                    color={Colors[theme]?.text}
+                    onPress={() => router.back()}
+                    style={{ left: 10 }} />
+            )}>
             <ThemedView style={styles.contentContainer}>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
-                    <MaterialCommunityIcons
-                        name="arrow-left"
-                        size={ms(20)}
-                        color={Colors[theme]?.text}
-                        onPress={() => router.back()}
-                        style={{ left: 10 }} />
-                    <ThemedText style={{ fontSize: 20, fontWeight: "600", right: 10 }}>Trashed Meeting</ThemedText>
-                    <ThemedText></ThemedText>
-                </View>
                 <FlatList
                     data={data?.listTrashedMeeting.data}
                     renderItem={({ item }) => (

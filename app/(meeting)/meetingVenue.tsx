@@ -9,9 +9,10 @@ import { Colors } from "@/constants/Colors"
 import { useTheme } from "@/context/ThemeContext"
 import { CreateMeetingVenueDocument, DeleteMetingVenueDocument, PaginatedMeetingVenueDocument, UpdateMeetingVenueDocument } from "@/graphql/generated"
 import { useLazyQuery, useMutation } from "@apollo/client"
-import { Entypo, Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons"
+import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import { FAB } from "@rneui/themed"
 import { isLoading } from "expo-font"
+import { router } from "expo-router"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Alert, FlatList, Modal, Pressable, View, ScrollView, TouchableOpacity } from "react-native"
@@ -130,7 +131,15 @@ const MeetingVenue = () => {
     const [isViewModalVisible, setViewModalVisible] = useState(false);
     const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
     return (
-        <CustomHeader>
+        <CustomHeader
+            title="Meeting Venue"
+            onBackPress={() => router.back()}
+            leftComponent={<MaterialCommunityIcons
+                name="arrow-left"
+                size={ms(20)}
+                color={Colors[theme]?.text}
+                onPress={() => router.back()}
+                style={{ left: 10 }} />}>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
                     <View style={{ width: "100%" }}>
