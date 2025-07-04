@@ -133,23 +133,25 @@ const AddTask = () => {
         let param = {
             "assigneeId": Number(data.owner?.value),
             "comment": data.comment,
-            "completePercent": 10,
+            "completePercent": null,
             "dueDate": data.dueDate,
-            "meetingId": null,
-            "notesId": null,
+            "meetingId": Number(data.meeting?.value) == null ? null : Number(data.meeting.value),
+            "notesId": Number(data.note?.value) == null ? null : Number(data.note.value),
             "openedDate": data.openedDate,
             "parentTaskId": null,
             "priority": data.priority?.value,
-            "projectId": Number(data.project?.value),
+            "projectId": Number(data.project?.value) == null ? null : Number(data.project?.value),
             "task": data.task,
             "weightType": data.weight.value,
         }
         isCreate == "true" ?
             createMeetingTask({
                 variables: {
-                    input: {
-                        ...param
-                    },
+                    inputs : [
+                        {
+                            ...param
+                        }
+                    ]
                 },
             }) :
             updateMeetingTask({
@@ -194,7 +196,7 @@ const AddTask = () => {
                 size={ms(20)}
                 color={Colors[theme]?.text}
                 onPress={() => router.back()}
-                style={{ left: 10 }} />}>
+                style={{ padding: ms(10) }} />}>
             <ThemedView style={styles.contentContainer}>
                 <ScrollView style={{ paddingHorizontal: 10 }}>
                     <CustomValidation

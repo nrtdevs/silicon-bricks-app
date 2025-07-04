@@ -81,7 +81,15 @@ const TaskScreen = () => {
                 size={ms(20)}
                 color={Colors[theme]?.text}
                 onPress={() => router.back()}
-                style={{ left: 0 }} />)}>
+                style={{ padding: ms(10) }} />
+            )}
+            rightComponent={
+                <FontAwesome5
+                    name="trash" size={20} color="#EF4444"
+                    onPress={() => router.push("/(meeting)/trashedTask")}
+                    style={{ padding: ms(10) }} />
+            }
+        >
             <ThemedView style={styles.contentContainer}>
                 <View style={{ width: "100%", marginBottom: 10, paddingHorizontal: ms(10) }}>
                     <CustomSearchBar
@@ -247,7 +255,7 @@ const TaskScreen = () => {
                                 control={control}
                                 labelStyle={styles.label}
                                 name={"subject"}
-                                inputStyle={[{lineHeight: ms(20)}]}
+                                inputStyle={[{ lineHeight: ms(20) }]}
                                 label={`Subject`}
                                 rules={{
                                     required: "Enter subject",

@@ -46,19 +46,19 @@ const CustomDrawerContent = (props: any) => {
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(meeting)/meeting')}
       />
-      <DrawerItem
+      {/* <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color="#3B82F6" />}
         label={labels?.upcomingMeeting}
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(meeting)/upcomingMeeting')}
-      />
+      /> */}
 
-      <DrawerItem
+      {/* <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color="#3B82F6" />}
         label={labels?.exitingMeeting}
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(meeting)/exitingMeeting')}
-      />
+      /> */}
 
       <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="meeting-room" size={ms(24)} color="#3B82F6" />}

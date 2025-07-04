@@ -4,7 +4,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { HardDeleteMeetingDocument, ListTrashedMeetingDocument, RestoreMeetingDocument } from "@/graphql/generated";
+import { HardDeleteMilestoneDocument, ListTrashedMilestoneDocument, RestoreMilestoneDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -12,12 +12,12 @@ import { useEffect } from "react";
 import { Alert, FlatList, TouchableOpacity, View } from "react-native";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
 
-const DeletedMeetingScreen = () => {
+const TrashedMilestone = () => {
     const { theme } = useTheme();
-    /// fetch trashted meeting api 
-    const [getMeeting, { data, refetch, loading: listLoading }] = useLazyQuery(ListTrashedMeetingDocument);
+    ///Milestone API 
+    const [getMilestoneUp, { data, refetch, loading: listLoading }] = useLazyQuery(ListTrashedMilestoneDocument);
     useEffect(() => {
-        getMeeting({
+        getMilestoneUp({
             variables: {
                 listInputDto: {
                     page: 1,
@@ -26,21 +26,21 @@ const DeletedMeetingScreen = () => {
             },
         });
     }, [])
-    /// restore meeting api 
-    const [restoreMeeting, restoreMeetingState] = useMutation(RestoreMeetingDocument, {
+    /// Restore Milestone API 
+    const [restoreMilestone, restoreMilestoneState] = useMutation(RestoreMilestoneDocument, {
         onCompleted: (data) => {
             refetch();
-            Alert.alert("success", "Meeting restore successfully!")
+            Alert.alert("success", "Milestone restore successfully!")
         },
         onError: (error) => {
             Alert.alert("error", error.message)
         }
     });
-    /// delete meeting api 
-    const [deleteMeeting, deleteMeetingState] = useMutation(HardDeleteMeetingDocument, {
+    /// Delete Milestone API 
+    const [deleteMilestone, deleteMilestoneState] = useMutation(HardDeleteMilestoneDocument, {
         onCompleted: (data) => {
             refetch();
-            Alert.alert("success", "Meeting delete successfully!")
+            Alert.alert("success", "Milestone delete successfully!")
         },
         onError: (error) => {
             Alert.alert("error", error.message)
@@ -48,21 +48,22 @@ const DeletedMeetingScreen = () => {
     });
     return (
         <CustomHeader
-            title="Trashed Meeting"
+            title="Trashed Milestone"
             leftComponent={(
                 <MaterialCommunityIcons
                     name="arrow-left"
                     size={ms(20)}
                     color={Colors[theme]?.text}
                     onPress={() => router.back()}
-                    style={{ padding: ms(10) }}/>
-            )}>
-            <ThemedView style={styles.contentContainer}>
+                    style={{ padding: 10 }} />
+            )}
+        >
+            <ThemedView>
                 <FlatList
-                    data={data?.listTrashedMeeting.data}
+                    data={data?.listTrashedMilestone.data}
                     renderItem={({ item }) => (
                         <View style={[
-                            styles.trashedContainer,
+                            styles.milestoneContainer,
                             {
                                 borderColor: Colors[theme].border,
                                 shadowColor: Colors[theme].shadow,
@@ -70,28 +71,29 @@ const DeletedMeetingScreen = () => {
                             },
                         ]}>
                             <View style={{ flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap', gap: 6 }}>
-                                <ThemedText type='subtitle'>{item.title}</ThemedText>
+                                <ThemedText type='subtitle'>{item.name}</ThemedText>
                                 <View
                                     style={{
-                                        backgroundColor: item.status == "active" ? "#10B981" : item.status == "completed" ? "#F59E0B" : "#EF4444",
+                                        // backgroundColor: item.status == "active" ? "#10B981" : item.status == "completed" ? "#F59E0B" : "#EF4444",
                                         paddingHorizontal: ms(10),
                                         padding: vs(2),
                                         borderRadius: ms(14),
                                     }}
                                 >
-                                    <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{item.status.toUpperCase()}</ThemedText>
+                                    <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>asaas</ThemedText>
                                 </View>
                             </View>
-                            <View style={{ gap: 20, flexDirection: 'row', marginTop: 15, justifyContent: 'space-between' }}>
+                            <ThemedText type="default">{item.projectName}</ThemedText>
+                            <View style={{ flexDirection: 'row', marginTop: 10, justifyContent: 'space-between' }}>
                                 <TouchableOpacity
                                     onPress={() => {
                                         Alert.alert(
                                             "Restore",
-                                            `${item.title} will be restored`,
+                                            `${item.name} will be restored`,
                                             [
                                                 {
                                                     text: "Yes", onPress: () => {
-                                                        restoreMeeting({
+                                                        restoreMilestone({
                                                             variables: {
                                                                 ids: Number(item?.id),
                                                             }
@@ -124,7 +126,7 @@ const DeletedMeetingScreen = () => {
                                             [
                                                 {
                                                     text: "Yes", onPress: () => {
-                                                        deleteMeeting({
+                                                        deleteMilestone({
                                                             variables: {
                                                                 ids: Number(item?.id),
                                                             }
@@ -161,9 +163,9 @@ const DeletedMeetingScreen = () => {
 const styles = ScaledSheet.create({
     contentContainer: {
         flex: 1,
-        padding: "12@ms",
+        padding: "12@ms"
     },
-    trashedContainer: {
+    milestoneContainer: {
         borderRadius: "20@ms",
         marginHorizontal: "10@ms",
         marginVertical: "8@ms",
@@ -176,5 +178,12 @@ const styles = ScaledSheet.create({
         justifyContent: 'space-between',
         gap: 10,
     },
-});
-export default DeletedMeetingScreen;
+    label: {
+        fontSize: "16@ms",
+        fontWeight: "normal",
+        marginBottom: "5@ms",
+        textAlign: "left",
+        alignSelf: "flex-start",
+    },
+})
+export default TrashedMilestone;

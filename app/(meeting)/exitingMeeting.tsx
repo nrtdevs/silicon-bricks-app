@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { ms, ScaledSheet, vs } from "react-native-size-matters";
 import { Colors } from "react-native/Libraries/NewAppScreen";
 
@@ -85,9 +86,12 @@ const ExitingMeeting = () => {
                     size={ms(20)}
                     color={Colors[theme]?.text}
                     onPress={() => router.back()}
-                    style={{ left: 0 }} />
+                    style={{ padding: 10 }} />
             )}>
             <ThemedView style={styles.contentContainer}>
+                <ScrollView>
+
+                
                 <CustomValidation
                     type="input"
                     control={control}
@@ -215,13 +219,14 @@ const ExitingMeeting = () => {
 
                 <CustomButton
                     title="Submit"
-                    // isLoading={createMeetingState.loading || updateMeetingState.loading}
+                    isLoading={createMeetingState.loading}
                     onPress={handleSubmit(onSubmit)}
                     style={{
                         backgroundColor: Colors[theme].background,
                         marginTop: vs(20),
                     }}
                 />
+                </ScrollView>
             </ThemedView>
             <DateTimePickerModal
                 mode={activeDateField === "meetingDate" ? "date" : "time"}
@@ -246,7 +251,7 @@ const ExitingMeeting = () => {
 const styles = ScaledSheet.create({
     contentContainer: {
         flex: 1,
-        padding: "12@ms",
+        paddingHorizontal: "20@ms",
     },
     label: {
         fontSize: "16@ms",

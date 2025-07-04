@@ -144,13 +144,19 @@ const Milestone = () => {
     return (
         <CustomHeader
             title="Milestone"
+            rightComponent={
+                <FontAwesome5
+                    name="trash" size={20} color="#EF4444"
+                    onPress={() => router.push("/(meeting)/trashedMilestone")}
+                    style={{ padding: ms(10) }} />
+            }
             leftComponent={(
                 <MaterialCommunityIcons
                     name="arrow-left"
                     size={ms(20)}
                     color={Colors[theme]?.text}
                     onPress={() => router.back()}
-                    style={{ left: 0 }} />
+                    style={{ padding: 10 }} />
             )}
         >
             <ThemedView style={styles.contentContainer}>

@@ -117,10 +117,19 @@ const MyNotes = () => {
                 size={ms(20)}
                 color={Colors[theme]?.text}
                 onPress={() => router.back()}
-                style={{ left: 10 }} />}>
+                style ={{padding : 10}}
+                />
+                }
+                rightComponent={
+                <FontAwesome5
+                    name="trash" size={20} color="#EF4444"
+                    onPress={() => router.push("/(meeting)/trashedNotes")}
+                    style={{ padding: ms(10) }} />
+            }
+                >
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%", paddingHorizontal: 10 }}>
+                    <View style={{ width: "100%", paddingHorizontal: 10 }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             placeholder="Search notes"
@@ -129,10 +138,6 @@ const MyNotes = () => {
                             }}
                         />
                     </View>
-                    <Pressable
-                        onPress={() => router.push("/(meeting)/trashedNotes")}>
-                        <FontAwesome5 name="trash" size={20} color="#EF4444" />
-                    </Pressable>
                 </View>
                 <FlatList
                     data={filteredData}

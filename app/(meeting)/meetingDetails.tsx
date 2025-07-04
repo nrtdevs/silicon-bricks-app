@@ -150,11 +150,11 @@ const MeetingDetails = () => {
             title="Meeting Details"
             leftComponent={(
                 <MaterialCommunityIcons
-                name="arrow-left"
-                size={ms(20)}
-                color={Colors[theme]?.text}
-                onPress={() => router.back()}
-                style={{ left: 0 }} />
+                    name="arrow-left"
+                    size={ms(20)}
+                    color={Colors[theme]?.text}
+                    onPress={() => router.back()}
+                    style={{ padding: ms(10) }} />
             )}>
             <ThemedView style={styles.contentContainer}>
                 <View style={[
@@ -172,10 +172,9 @@ const MeetingDetails = () => {
                             <ThemedText style={styles.meetingTitle}>Start Time</ThemedText>
                             <ThemedText style={styles.meetingTitle}>End Time</ThemedText>
                             <ThemedText style={styles.meetingTitle}>Meeting Agenda</ThemedText>
-                            <ThemedText style={styles.meetingTitle}>Reference</ThemedText>
-                            <ThemedText style={styles.meetingTitle}>Meeting Url</ThemedText>
                             <ThemedText style={styles.meetingTitle}>Project</ThemedText>
                             <ThemedText style={styles.meetingTitle}>Status</ThemedText>
+                            <ThemedText style={styles.meetingTitle}>Meeting Url</ThemedText>
                         </View>
                         <View>
                             <ThemedText style={styles.meetingSubtitle}> : {title}</ThemedText>
@@ -183,8 +182,6 @@ const MeetingDetails = () => {
                             <ThemedText style={styles.meetingSubtitle}> : {startTime}</ThemedText>
                             <ThemedText style={styles.meetingSubtitle}> : {endTime}</ThemedText>
                             <ThemedText style={styles.meetingSubtitle}> : {agenda}</ThemedText>
-                            <ThemedText style={styles.meetingSubtitle}> : {reference}</ThemedText>
-                            <ThemedText style={styles.meetingSubtitle}> : {url}</ThemedText>
                             <ThemedText style={styles.meetingSubtitle}> : {project == "null" ? "NA" : project}</ThemedText>
                             <View style={{ flexDirection: "row", alignItems: "center", }}>
                                 <ThemedText style={styles.meetingSubtitle}> : </ThemedText>
@@ -197,6 +194,7 @@ const MeetingDetails = () => {
                                     <ThemedText style={{ fontSize: ms(10), color: Colors.white, fontWeight: 'bold' }} type='default'>{status}</ThemedText>
                                 </View>
                             </View>
+                            <ThemedText style={styles.meetingSubtitle}> : {url}</ThemedText>
                         </View>
                     </View>
                 </View>
@@ -287,12 +285,12 @@ const MeetingDetails = () => {
                             </View>
                         </View>
                     )}
-                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+                    ListEmptyComponent={!listLoading ?
+                        <ThemedText style={{ justifyContent: "center", textAlign: "center" }}>No Notes A</ThemedText>
+                        : null}
                 />
-
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", margin: 15 }}>
                     <ThemedText style={{ fontSize: 20, fontWeight: "700" }}>Tasks</ThemedText>
-
                     <Pressable
                         onPress={() => {
                             router.push({
@@ -306,7 +304,6 @@ const MeetingDetails = () => {
                         <ThemedText type='link'>+ Create Task</ThemedText>
                     </Pressable>
                 </View>
-
                 <FlatList
                     data={fetchData?.getPaginatedMeetingTaskByMeetingId.data}
                     renderItem={({ item }) => (
@@ -384,7 +381,9 @@ const MeetingDetails = () => {
                             </View>
                         </View>
                     )}
-                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+                    ListEmptyComponent={!dataLoading ?
+                        <ThemedText style={{ justifyContent: "center", textAlign: "center" }}>No Tasks Available</ThemedText>
+                        : null}
                 />
             </ThemedView>
             {/* Add Note modal */}

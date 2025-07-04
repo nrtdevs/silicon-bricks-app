@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import React from "react";
 import { ThemedView } from "@/components/ThemedView";
-import { ScaledSheet } from 'react-native-size-matters';
+import { ms, ScaledSheet } from 'react-native-size-matters';
 import CustomHeader from "@/components/CustomHeader";
 import { Entypo, Feather } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
@@ -16,7 +16,6 @@ import { ScrollView } from "react-native-gesture-handler";
 import { ThemedText } from "@/components/ThemedText";
 import { useQuery } from "@apollo/client";
 import { GetMeetingDashboardDocument } from "@/graphql/generated";
-import SmallCart from "@/components/vehicle/SmallCart";
 
 const { width } = Dimensions.get('window');
 const CARD_GAP = 16;
@@ -32,16 +31,11 @@ const index = () => {
   if (error) return <ThemedText>Error: {error.message}</ThemedText>;
   const userCount = data?.getMeetingDashboard || {};
 
-  const cardData = [
-    { id: '1', name: 'Users', count: '1,245', icon: 'users', trend: 'up', change: '12%' },
-    { id: '2', name: 'Orders', count: '89', icon: 'shopping-cart', trend: 'down', change: '5%' },
-    { id: '3', name: 'Revenue', count: '$8,540', icon: 'dollar-sign', trend: 'up', change: '24%' },
-    { id: '4', name: 'Tasks', count: '7', icon: 'check-circle', trend: 'steady' },
-  ];
   return (
     <CustomHeader
       title="Dashboard" leftComponent={
         <Pressable
+        style={{ padding: ms(10) }}
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
         >
           <Entypo name="menu" size={34} color={Colors[theme].text} />

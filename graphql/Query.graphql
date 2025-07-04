@@ -1053,3 +1053,47 @@ query PaginatedMilestone($listInputDto: ListInputDTO!) {
     }
   }
 }
+query ListTrashedMilestone($listInputDto: ListInputDTO!) {
+  listTrashedMilestone(ListInputDTO: $listInputDto) {
+    data {
+      id
+      projectId
+      name
+      startDate
+      endDate
+      projectName
+      totalTaskCompleteMilestone
+      status
+    }
+  }
+}
+query ListTrashedMeetingTask($listInputDto: ListInputDTO!) {
+  listTrashedMeetingTask(ListInputDTO: $listInputDto) {
+    data {
+      id
+      ownerId
+      createdByUserId
+      assigneeId
+      meetingId
+      notesId
+      projectId
+      parentTaskId
+      milestoneId
+      ownerName
+      assigneeName
+      task
+      projectName
+      comment
+      remarks
+      openedDate
+      dueDate
+      completedDate
+      priority
+      status
+      completePercent
+      totalTaskComplete
+      weightType
+      totalTaskCompleteMilestone
+    }
+  }
+}

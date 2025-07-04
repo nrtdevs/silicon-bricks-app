@@ -276,14 +276,14 @@ const UpcomingMeeting = () => {
         });
     };
     return (
-        <CustomHeader title="U Meeting"
+        <CustomHeader title="Update Meeting"
             leftComponent={(
                 <MaterialCommunityIcons
                     name="arrow-left"
                     size={ms(20)}
                     color={Colors[theme]?.text}
                     onPress={() => router.back()}
-                    style={{ left: 0 }} />
+                    style={{ padding : 10}} />
             )}>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>

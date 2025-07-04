@@ -134,12 +134,18 @@ const MeetingVenue = () => {
         <CustomHeader
             title="Meeting Venue"
             onBackPress={() => router.back()}
-            leftComponent={<MaterialCommunityIcons
-                name="arrow-left"
-                size={ms(20)}
-                color={Colors[theme]?.text}
-                onPress={() => router.back()}
-                style={{ left: 10 }} />}>
+            rightComponent={
+                <FontAwesome5
+                    name="trash" size={20} color="#EF4444"
+                    onPress={() => router.push("/(meeting)/trashedVenue")} />
+            }
+            leftComponent={
+                <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={ms(20)}
+                    color={Colors[theme]?.text}
+                    onPress={() => router.back()}
+                    style={{ padding: 10 }} />}>
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
                     <View style={{ width: "100%" }}>

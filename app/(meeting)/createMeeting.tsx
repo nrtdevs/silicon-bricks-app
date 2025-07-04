@@ -71,7 +71,7 @@ const CreateMeeting = () => {
         }
     });
     const onSubmit = (data: any) => {
-        console.log('pressed');
+        console.log(data);
         let param = {
             "title": data?.title,
             "attendees": data?.attendees.map((id: number) => Number(id)),
@@ -86,23 +86,6 @@ const CreateMeeting = () => {
             "projectId": Number(data?.projectId?.value),
             "uploadDoc": image
         }
-        // let paramUpdate = {
-        //     "id": Number(id),
-        //     "title": data.title,
-        //     "attendees": data.attendees.map((id: number) => Number(id)),
-        //     "startTime": data.startTime,
-        //     "endTime": data.endTime,
-        //     "meetingDate": data.meetingDate,
-        //     "meetingAgenda": data.meetingAgenda,
-        //     "meetingReference": "",
-        //     "meetingUrl": data.meetingUrl,
-        //     "meetingTypeId": Number(data.meetingTypeId.value),
-        //     "meetingVenueId": Number(data.meetingVenueId.value),
-        //     "projectId": Number(data.projectId.value),
-        //     "uploadDoc": null,
-        //     "projectName": data.projectName.value
-        // }
-       
         isCreate == "true" ?
             createMeeting({
                 variables: {
@@ -252,19 +235,19 @@ const CreateMeeting = () => {
     };
    
     return (
-        <CustomHeader>
+        <CustomHeader 
+        title={isCreate == "true" ? 'Create Meeting' : "Update Meeting"}
+            leftComponent={(
+                <MaterialCommunityIcons
+                    name="arrow-left"
+                    size={ms(20)}
+                    color={Colors[theme]?.text}
+                    onPress={() => router.back()}
+                    style={{padding: ms(10)}}/>
+            )}
+        >
             <ThemedView style={styles.contentContainer}>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
-                    <MaterialCommunityIcons
-                        name="arrow-left"
-                        size={ms(20)}
-                        color={Colors[theme]?.text}
-                        onPress={() => router.back()}
-                        style={{ left: 10 }} />
-                    <ThemedText style={styles.appBarText}>{isCreate == "true" ? 'Create Meeting' : "Update Meeting"}</ThemedText>
-                    <ThemedText></ThemedText>
-                </View>
-                <ScrollView style={{ paddingHorizontal: 10 }}>
+                <ScrollView style={{ paddingHorizontal: 25 }}>
                     <CustomValidation
                         type="input"
                         control={control}
@@ -489,7 +472,6 @@ const CreateMeeting = () => {
 const styles = ScaledSheet.create({
     contentContainer: {
         flex: 1,
-        padding: "12@ms",
     },
     appBarText: {
         fontSize: 20,

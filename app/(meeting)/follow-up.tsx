@@ -47,7 +47,7 @@ const FollowUp = () => {
     );
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{
         body: string, subject: string,
-    }>({ defaultValues: {}});
+    }>({ defaultValues: {} });
     /// fetch user data 
     const { data: attendeesData, loading: attendeesLoading, error: attendeesError } = useQuery(PaginatedUsersDocument, {
         variables: {
@@ -166,12 +166,18 @@ const FollowUp = () => {
                     size={ms(20)}
                     color={Colors[theme]?.text}
                     onPress={() => router.back()}
-                    style={{ left: 0 }} />
+                    style={{ padding: 10 }} />
             )}
+            rightComponent={
+                <FontAwesome5
+                    name="trash" size={20} color="#EF4444"
+                    onPress={() => router.push("/(meeting)/trashed-followUp")}
+                    style={{ padding: ms(10) }} />
+            }
         >
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
-                    <View style={{ width: "90%" }}>
+                    <View style={{ width: "100%" }}>
                         <CustomSearchBar
                             searchQuery={searchQuery}
                             placeholder="Search Follow up"
@@ -180,10 +186,6 @@ const FollowUp = () => {
                             }}
                         />
                     </View>
-                    <FontAwesome5
-                        name="trash" size={20} color="#EF4444"
-                        onPress={() => router.push("/(meeting)/trashed-followUp")}
-                    />
                 </View>
                 <FlatList
                     data={filteredData}

@@ -839,17 +839,23 @@ mutation CreateNotes($notesData: [CreateNotesDto!]!) {
 mutation DeleteMetingTask($ids: [Int!]!) {
   deleteMetingTask(ids: $ids)
 }
-mutation CreateMeetingTask($input: CreateMeetingTaskDto!) {
-  createMeetingTask(input: $input) {
+mutation CreateMeetingTask($inputs: [CreateMeetingTaskDto!]!) {
+  createMeetingTask(inputs: $inputs) {
     id
     ownerId
+    createdByUserId
     assigneeId
     meetingId
     notesId
     projectId
     parentTaskId
+    milestoneId
+    ownerName
+    assigneeName
     task
+    projectName
     comment
+    remarks
     openedDate
     dueDate
     completedDate
@@ -858,6 +864,7 @@ mutation CreateMeetingTask($input: CreateMeetingTaskDto!) {
     completePercent
     totalTaskComplete
     weightType
+    totalTaskCompleteMilestone
   }
 }
 
@@ -1033,7 +1040,6 @@ mutation DeleteFollowUp($ids: [Int!]!) {
   deleteFollowUp(ids: $ids)
 }
 
-
 mutation HardDeleteFollowUp($ids: [Int!]!) {
   hardDeleteFollowUp(ids: $ids)
 }
@@ -1061,4 +1067,16 @@ mutation UpdateMilestone($updateMilestoneInput: UpdateMilestoneDto!) {
     totalTaskCompleteMilestone
     status
   }
+}
+mutation RestoreMilestone($ids: [Int!]!) {
+  restoreMilestone(ids: $ids)
+}
+mutation HardDeleteMilestone($ids: [Int!]!) {
+  hardDeleteMilestone(ids: $ids)
+}
+mutation RestoreMeetingTask($ids: [Int!]!) {
+  restoreMeetingTask(ids: $ids)
+}
+mutation HardDeleteMeetingTask($ids: [Int!]!) {
+  hardDeleteMeetingTask(ids: $ids)
 }

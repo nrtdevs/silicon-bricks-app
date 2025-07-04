@@ -35,6 +35,7 @@ const ReportScreen = () => {
                     size={ms(20)}
                     color={Colors[theme]?.text}
                     onPress={() => router.back()}
+                    style={{ padding: ms(10) }}
                 />
             }>
             <ThemedView style={styles.contentContainer}>

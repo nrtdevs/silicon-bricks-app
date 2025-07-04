@@ -54,7 +54,7 @@ const FollowUpTrashed = () => {
                     size={ms(20)}
                     color={Colors[theme]?.text}
                     onPress={() => router.back()}
-                    style={{ left: 0 }} />
+                    style={{padding : 10}} />
             )}>
             <ThemedView style={styles.contentContainer}>
                 <FlatList

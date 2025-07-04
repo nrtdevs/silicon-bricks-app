@@ -123,7 +123,14 @@ const MeetingType = () => {
                 size={ms(20)}
                 color={Colors[theme]?.text}
                 onPress={() => router.back()}
-                style={{ left: 0 }} />)}>
+                style={{ padding: 10 }} />)}
+            rightComponent={
+                <FontAwesome5
+                    name="trash" size={20} color="#EF4444"
+                    // onPress={() => router.push("/(meeting)/trashed-followUp")}
+                    style={{ padding: ms(10) }} />
+            }
+        >
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
                     <View style={{ width: "100%" }}>
