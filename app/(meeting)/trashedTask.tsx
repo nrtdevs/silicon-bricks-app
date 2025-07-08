@@ -1,4 +1,5 @@
 import CustomHeader from "@/components/CustomHeader";
+import NoDataFound from "@/components/NoDataFound";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
@@ -152,6 +153,7 @@ const TrashedTask = () => {
                             </View>
                         </View>
                     )}
+                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
                 />
 
             </ThemedView>

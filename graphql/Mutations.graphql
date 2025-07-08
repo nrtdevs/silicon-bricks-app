@@ -767,7 +767,9 @@ mutation CreateMeetingVenue($data: CreateMeetingVenueDto!) {
     contactPerson
     contactNumber
     description
-    createdAt
+    latitude
+    longitude
+    createdByUserId
   }
 }
 mutation UpdateMeetingVenue($updateMeetingVenueInput: UpdateMeetingVenueDto!) {
@@ -1079,4 +1081,10 @@ mutation RestoreMeetingTask($ids: [Int!]!) {
 }
 mutation HardDeleteMeetingTask($ids: [Int!]!) {
   hardDeleteMeetingTask(ids: $ids)
+}
+mutation RestoreMeetingVenue($ids: [Int!]!) {
+  restoreMeetingVenue(ids: $ids)
+}
+mutation HardDeleteMeetingVenue($ids: [Int!]!) {
+  hardDeleteMeetingVenue(ids: $ids)
 }

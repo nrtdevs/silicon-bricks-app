@@ -9,8 +9,6 @@ import { Colors } from '@/constants/Colors';
 import { ms } from 'react-native-size-matters';
 import { View, Image } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { Divider } from '@rneui/themed';
-import { color } from '@rneui/base';
 
 
 const CustomDrawerContent = (props: any) => {

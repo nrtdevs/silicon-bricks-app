@@ -103,6 +103,8 @@ const MeetingVenue = () => {
             contactNumber: Number(data.contactNumber),
             contactPerson: data.contactPerson,
             description: data.description,
+            latitude: 23.18563,
+            longitude: 77.45067
         }
         addEditManage ?
             updateMeetingVenue({
@@ -120,6 +122,8 @@ const MeetingVenue = () => {
                         contactNumber: Number(data.contactNumber),
                         contactPerson: data.contactPerson,
                         description: data.description,
+                        latitude: 23.18563,
+                        longitude: 77.45067
                     },
                 },
             });
