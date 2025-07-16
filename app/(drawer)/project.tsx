@@ -80,7 +80,7 @@ const Project = () => {
     description: string;
     id: string;
   }>(defaultValue);
-  const { can, hasAny } = useUserContext();
+  const { can } = useUserContext();
   const deletePermission = can("MasterApp:Project:Delete");
   const updatePermission = can("MasterApp:Project:Update");
   const createPermission = can("MasterApp:Project:Create");

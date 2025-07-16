@@ -11,7 +11,7 @@ import { CreateMeetingVenueDocument, DeleteMetingVenueDocument, PaginatedMeeting
 import { useLazyQuery, useMutation } from "@apollo/client"
 import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons"
 import { FAB } from "@rneui/themed"
-import { isLoading } from "expo-font"
+import * as Location from 'expo-location';
 import { router } from "expo-router"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -134,6 +134,26 @@ const MeetingVenue = () => {
     // View Venue Details
     const [isViewModalVisible, setViewModalVisible] = useState(false);
     const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
+
+    // location service function
+    const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setErrorMsg('Permission to access location was denied');
+                console.log("---------------not working------------------");
+                return;
+            }
+            let currentLocation = await Location.getCurrentPositionAsync({});
+            console.log(currentLocation, "----------working-------------");
+            setLocation(currentLocation.coords);
+        })();
+    }, []);
+    
+
     return (
         <CustomHeader
             title="Meeting Venue"
@@ -263,6 +283,19 @@ const MeetingVenue = () => {
                     }}
                     ListEmptyComponent={!loading ? <NoDataFound /> : null}
                 />
+
+                <View style={{ padding: 20 }}>
+                    {errorMsg ? (
+                        <ThemedText>{errorMsg}</ThemedText>
+                    ) : location ? (
+                        <>
+                            <ThemedText>Latitude: {location.latitude}</ThemedText>
+                            <ThemedText>Longitude: {location.longitude}</ThemedText>
+                        </>
+                    ) : (
+                        <ThemedText>Fetching location...</ThemedText>
+                    )}
+                </View>
             </ThemedView>
             {/* Create and Edit modal */}
             <Modal
