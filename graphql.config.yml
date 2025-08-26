@@ -1,5 +1,18 @@
+# schema:
+#   - 'http://192.168.1.32:5001/graphql'
+# documents: './graphql/*.graphql'
+# generates:
+#   graphql/generated.ts:
+#     plugins:
+#       - typescript
+#       - typescript-operations
+#       - typed-document-node
+#   graphql/introspection.json:
+#     plugins:
+#       - introspection
+
 schema:
-  - 'http://192.168.1.32:5001/graphql'
+  - 'https://gateway.siliconbricks.in/graphql'
 documents: './graphql/*.graphql'
 generates:
   graphql/generated.ts:
