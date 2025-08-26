@@ -1,10 +1,10 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { FontAwesome5, MaterialIcons, Feather } from '@expo/vector-icons';
-import { ThemedView } from '../ThemedView';
-import { ms, ScaledSheet, vs } from 'react-native-size-matters';
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from 'react';
+import { Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
+import { ms, ScaledSheet } from 'react-native-size-matters';
 import { ThemedText } from '../ThemedText';
 
 interface VehicleCardProps {
@@ -13,124 +13,205 @@ interface VehicleCardProps {
   chassisNumber: string;
   number: string;
   createdAt: string;
-  status: 'active' | 'inactive' | 'pending';
+  status: 'active' | 'inactive' | 'breakdown' | 'maintenance';
   onEdit: () => void;
   onDelete: () => void;
   onChangeStatus: () => void;
   onView: () => void;
 }
 
-const statusColors = {
-  active: '#10B981',
-  inactive: '#EF4444',
-  breakdown: '#F59E0B',
-  maintenance: '#3B82F6'
+const statusColors: Record<VehicleCardProps['status'], readonly [string, string]> = {
+  active: ['#10B981', '#059669'],
+  inactive: ['#EF4444', '#DC2626'],
+  breakdown: ['#F59E0B', '#D97706'],
+  maintenance: ['#3B82F6', '#2563EB']
 };
+
+const statusIcons = {
+  active: 'checkmark-circle',
+  inactive: 'close-circle',
+  breakdown: 'warning',
+  maintenance: 'construct'
+} as const;
 
 const VehicleCard: React.FC<VehicleCardProps> = ({
   brand,
   model,
   chassisNumber,
   number,
-  createdAt,
   status,
   onEdit,
   onDelete,
   onChangeStatus,
   onView,
 }) => {
-  const { theme } = useTheme()
+  const { theme } = useTheme();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [scaleValue] = useState(new Animated.Value(1));
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handlePressIn = () => {
+    Animated.timing(scaleValue, {
+      toValue: 0.98,
+      duration: 100,
+      easing: Easing.ease,
+      useNativeDriver: true
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(scaleValue, {
+      toValue: 1,
+      duration: 100,
+      easing: Easing.ease,
+      useNativeDriver: true
+    }).start();
+  };
+
   return (
-    <View
-      style={[styles.container, {
-        borderColor: Colors[theme].border,
-        shadowColor: Colors[theme].shadow,
-        backgroundColor: Colors[theme].cart
-
-      }]}
-    >
-      <View>
-        {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6 }}>
-          <View>
-            <ThemedText type='subtitle'>{brand}</ThemedText>
-            <ThemedText type='default'>{model}</ThemedText>
-          </View>
-          <View
-            style={{
-              backgroundColor: statusColors[status],
-              paddingHorizontal: ms(10),
-              padding: vs(2),
-              borderRadius: ms(14),
-            }}
-          >
-            <ThemedText style={{ fontSize: ms(10), color: Colors.white }} type='default'>{status.toUpperCase()}</ThemedText>
-          </View>
-        </View>
-
-        <View style={{
-
-          // show the dotted line
-          borderStyle: 'dotted',
-          borderWidth: 1,
+    <Animated.View
+      style={[
+        styles.container,
+        {
+          transform: [{ scale: scaleValue }],
           borderColor: Colors[theme].border,
-          marginVertical: 10,
-        }} />
-        {/* Details */}
-        <View style={{}}>
-          <ThemedText type='defaultSemiBold' style={{ marginBottom: 4 }}>
-            <ThemedText type='default'>Chassis No:</ThemedText> {chassisNumber}
-          </ThemedText>
-          <ThemedText type='defaultSemiBold' style={{ marginBottom: 4 }}>
-            <ThemedText type='default'>Vehicle No:</ThemedText> {number}
-          </ThemedText>
-          <ThemedText type='defaultSemiBold' style={{ marginBottom: 4 }}>
-            <ThemedText type='default'>Reg. Date:</ThemedText> {new Date(createdAt).toLocaleDateString()}
-          </ThemedText>
+          shadowColor: Colors[theme].shadow,
+          backgroundColor: Colors[theme].cart
+        }
+      ]}
+    >
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={toggleExpand}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={styles.contentContainer}
+      >
+        {/* Header with status badge */}
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <ThemedText type='title' style={styles.brandText}>{brand}</ThemedText>
+            <ThemedText type='subtitle' style={styles.modelText}>{model}</ThemedText>
+          </View>
+
+          <LinearGradient
+            colors={statusColors[status]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.statusBadge}
+          >
+            <Ionicons
+              name={statusIcons[status]}
+              size={ms(12)}
+              color={Colors.white}
+              style={styles.statusIcon}
+            />
+            <ThemedText style={styles.statusText} type='default'>
+              {status.toUpperCase()}
+            </ThemedText>
+          </LinearGradient>
         </View>
-      </View>
 
-      {/* Action Buttons */}
-      <View style={{ gap: 10 }}>
-        <ActionButton icon={<FontAwesome5 name="eye" size={ms(14)} color={Colors.white} />} text="View" bgColor="#10B981" onPress={onView} />
-        <ActionButton icon={<Feather name="edit" size={ms(16)} color={Colors.white}/>} text="Edit" bgColor="#3B82F6" onPress={onEdit} />
-        <ActionButton icon={<MaterialIcons name="autorenew" size={ms(18)} color={Colors.white} />} bgColor="#8B5CF6" text="Status" onPress={onChangeStatus} />
-        <ActionButton icon={<FontAwesome5 name="trash" size={ms(14)} color={Colors.white} />} bgColor="#EF4444" text="Delete" onPress={onDelete} />
-      </View>
+        {/* Divider */}
+        <View style={[styles.divider, { backgroundColor: Colors[theme].border }]} />
 
-    </View>
+        {/* Vehicle Details */}
+        <View style={styles.detailsContainer}>
+          <DetailRow
+            icon="finger-print"
+            label="Chassis No:"
+            value={chassisNumber}
+            theme={theme}
+          />
+          <DetailRow
+            icon="car-sport"
+            label="Vehicle No:"
+            value={number}
+            theme={theme}
+          />
+        </View>
+
+        {/* Expandable Action Buttons */}
+        <Animated.View>
+          <View style={styles.actionsRow}>
+            <ActionButton
+              icon="eye"
+              text="View"
+              bgColor="#10B981"
+              onPress={onView}
+            />
+            <ActionButton
+              icon="create-outline"
+              text="Edit"
+              bgColor="#3B82F6"
+              onPress={onEdit}
+            />
+            <ActionButton
+              icon="swap-vertical"
+              text="Status"
+              bgColor="#8B5CF6"
+              onPress={onChangeStatus}
+            />
+            <ActionButton
+              icon="trash"
+              text="Delete"
+              bgColor="#EF4444"
+              onPress={onDelete}
+            />
+          </View>
+        </Animated.View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
-const ActionButton = ({
+interface DetailRowProps {
+  icon: 'finger-print' | 'car-sport' | 'calendar';
+  label: string;
+  value: string;
+  theme: 'light' | 'dark';
+}
+
+const DetailRow: React.FC<DetailRowProps> = ({ icon, label, value, theme }) => (
+  <View style={styles.detailRow}>
+    <Ionicons
+      name={icon}
+      size={ms(14)}
+      color={Colors[theme].text}
+      style={styles.detailIcon}
+    />
+    <ThemedText type="default" style={styles.detailLabel}>
+      {label}
+    </ThemedText>
+    <ThemedText type="defaultSemiBold" style={styles.detailValue}>
+      {value}
+    </ThemedText>
+  </View>
+);
+
+interface ActionButtonProps {
+  icon: 'eye' | 'create-outline' | 'swap-vertical' | 'trash';
+  text: string;
+  bgColor: string;
+  onPress: () => void;
+}
+
+const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
   text,
   onPress,
   bgColor,
-}: {
-  icon: React.ReactNode;
-  text: string;
-  bgColor: string;
-  onPress: () => void;
 }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: vs(8),
-        paddingHorizontal: ms(12),
-        borderRadius: 10,
-        borderWidth: 0.5,
-        borderColor: Colors.white,
-        backgroundColor:bgColor,
-        opacity: 0.8
-      }}
+      style={[styles.actionButton, { backgroundColor: bgColor }]}
     >
-      {icon}
-      {/* <Text style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>{text}</Text> */}
+      <Ionicons name={icon} size={ms(16)} color={Colors.white} />
+      <Text style={styles.actionButtonText}>{text}</Text>
     </TouchableOpacity>
   );
 };
@@ -142,13 +223,103 @@ const styles = ScaledSheet.create({
     borderRadius: "20@ms",
     marginHorizontal: "16@ms",
     marginVertical: "10@ms",
-    padding: "16@ms",
+    padding: "0@ms",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
     elevation: 5,
     borderWidth: 1,
+    overflow: 'hidden',
+  },
+  contentContainer: {
+    padding: "16@ms",
+  },
+  header: {
     flexDirection: 'row',
-    justifyContent: 'space-between'
-  }
-})
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: "10@vs",
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  brandText: {
+    fontSize: "18@ms",
+    marginBottom: "2@vs",
+  },
+  modelText: {
+    fontSize: "14@ms",
+    opacity: 0.8,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: "10@ms",
+    paddingVertical: "4@vs",
+    borderRadius: "20@ms",
+  },
+  statusIcon: {
+    marginRight: "4@ms",
+  },
+  statusText: {
+    fontSize: "10@ms",
+    color: Colors.white,
+    fontWeight: 'bold',
+  },
+  divider: {
+    height: 1,
+    marginVertical: "10@vs",
+    opacity: 0.5,
+  },
+  detailsContainer: {
+    marginBottom: "15@vs",
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: "8@vs",
+  },
+  detailIcon: {
+    marginRight: "8@ms",
+    opacity: 0.7,
+  },
+  detailLabel: {
+    fontSize: "12@ms",
+    marginRight: "4@ms",
+    opacity: 0.8,
+  },
+  detailValue: {
+    fontSize: "12@ms",
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: "8@vs",
+    paddingHorizontal: "12@ms",
+    borderRadius: "10@ms",
+    flex: 1,
+    marginHorizontal: "4@ms",
+  },
+  actionButtonText: {
+    color: Colors.white,
+    marginLeft: "6@ms",
+    fontSize: "12@ms",
+    fontWeight: '500',
+  },
+  miniActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: "8@ms",
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  miniActionButton: {
+    padding: "4@ms",
+  },
+});
