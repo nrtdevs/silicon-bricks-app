@@ -1,6 +1,6 @@
 schema:
-  - 'http://192.168.1.33:5001/graphql'
-  # - 'https://gateway.siliconbricks.in/graphql'
+  # - 'http://192.168.1.33:5001/graphql'
+  - 'https://gateway.siliconbricks.in/graphql'
 documents: './graphql/*.graphql'
 generates:
   graphql/generated.ts:

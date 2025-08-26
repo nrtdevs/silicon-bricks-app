@@ -284,7 +284,7 @@ const MeetingVenue = () => {
                     ListEmptyComponent={!loading ? <NoDataFound /> : null}
                 />
 
-                <View style={{ padding: 20 }}>
+                {/* <View style={{ padding: 20 }}>
                     {errorMsg ? (
                         <ThemedText>{errorMsg}</ThemedText>
                     ) : location ? (
@@ -295,7 +295,7 @@ const MeetingVenue = () => {
                     ) : (
                         <ThemedText>Fetching location...</ThemedText>
                     )}
-                </View>
+                </View> */}
             </ThemedView>
             {/* Create and Edit modal */}
             <Modal

@@ -1088,3 +1088,9 @@ mutation RestoreMeetingVenue($ids: [Int!]!) {
 mutation HardDeleteMeetingVenue($ids: [Int!]!) {
   hardDeleteMeetingVenue(ids: $ids)
 }
+mutation RestoreMeetingType($ids: [Int!]!) {
+  restoreMeetingType(ids: $ids)
+}
+mutation HardDeleteMeetingType($ids: [Int!]!) {
+  hardDeleteMeetingType(ids: $ids)
+}

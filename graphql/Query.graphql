@@ -1112,3 +1112,12 @@ query ListTrashedMeetingVenue($listInputDto: ListInputDTO!) {
     }
   }
 }
+query ListTrashedMeetingType($listInputDto: ListInputDTO!) {
+  listTrashedMeetingType(ListInputDTO: $listInputDto) {
+    data {
+      id
+      name
+      createdByUserId
+    }
+  }
+}
