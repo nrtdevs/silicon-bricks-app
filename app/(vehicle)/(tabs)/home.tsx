@@ -142,11 +142,11 @@ const styles = ScaledSheet.create({
     width: CARD_WIDTH,
     padding: ms(16),
     borderRadius: ms(12),
-    marginVertical: ms(8),
-    shadowOffset: { width: 0, height: ms(4) },
-    shadowOpacity: 0.1,
-    shadowRadius: ms(6),
-    elevation: ms(5),
+    marginVertical: ms(10),
+    shadowOffset: { width: 0, height: ms(2) },
+    shadowOpacity: 0.08,
+    shadowRadius: ms(4),
+    elevation: ms(3),
     borderWidth: 1,
     justifyContent: 'space-between',
     gap: ms(10),
@@ -172,85 +172,5 @@ const styles = ScaledSheet.create({
     fontSize: ms(14),
     fontWeight: '500',
     marginTop: ms(5),
-  },
-  // Removed unused styles to clean up
-  appBar: {
-    fontSize: "18@ms",
-    fontWeight: "500",
-  },
-  cardStyle: {
-    backgroundColor: "#C9C9C9",
-    borderRadius: 8,
-    padding: 15,
-    marginHorizontal: 15,
-    marginVertical: 5
-  },
-  cardTitle: {
-    fontSize: "18@ms",
-    fontWeight: '700'
-  },
-  cardSub: {
-    fontSize: "18@ms",
-    fontWeight: '700',
-    justifyContent: "center",
-    alignItems: "center",
-    textAlign: "center",
-  },
-  cardHeading: {
-    fontSize: "16@ms",
-    fontWeight: "normal"
-  },
-  trendContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  trendText: {
-    fontSize: 12,
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  section: {
-    width: '100%',
-    borderRadius: 16,
-    padding: 10,
-    marginBottom: 16,
-    shadowOffset: { width: 0, height: 1 },
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  activitiesContainer: {
-    borderRadius: "20@ms",
-    paddingHorizontal: "20@ms",
-    marginVertical: "8@ms",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 5,
-    borderWidth: 1,
-    justifyContent: 'space-between',
-
-  },
-  activityItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  activityIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  activityText: {
-    flex: 1,
   },
 });

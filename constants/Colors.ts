@@ -16,7 +16,7 @@ export const Colors = {
     shadow: "rgba(0, 0, 0, 0.06)",
     lightText: "#7E7E7E",
     placeholder: "#A8A8A8",
-    cart: "#FFFFFF", // Light modern card background
+    cart: "#F8F8F8", // Changed to a light gray to be visible against white background
     primary: {
       bg: "#EFF6FF", // Very light blue background
       text: "#1E40AF", // Dark blue text
