@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList } from "react
 import { Controller } from "react-hook-form";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/context/ThemeContext";
 
 type Option = {
   label: string;
@@ -19,16 +20,11 @@ type CustomDropdownProps = {
   error?: string;
 };
 
-const CustomDropdown: React.FC<CustomDropdownProps> = ({
-  control,
-  name,
-  label,
-  required,
-  placeholder = "Select...",
-  options,
-  error,
-}) => {
+const CustomDropdown: React.FC<CustomDropdownProps> = ({ control, name, label, required, placeholder = "Select...", options, error }) => {
   const [visible, setVisible] = useState(false);
+
+  // Detect theme
+  const { theme } = useTheme();
 
   return (
     <Controller
@@ -40,31 +36,32 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
           <Text
             style={[
               styles.label,
-              error ? { color: Colors.red } : {},
+              { color: Colors[theme].textPrimary },
+              error ? { color: Colors[theme].danger.main } : {},
             ]}
           >
             {label}
-            {required && <Text style={{ color: Colors.red }}> *</Text>}
+            {required && <Text style={{ color: Colors[theme].danger.main }}> *</Text>}
           </Text>
 
           {/* Dropdown */}
           <TouchableOpacity
             style={[
               styles.dropdown,
-              { borderColor: error ? Colors.red : value ? Colors.blue : Colors.light.border },
+              { borderColor: error ? Colors[theme].danger.main : value ? Colors.blue : Colors[theme].border },
             ]}
             onPress={() => setVisible(true)}
           >
-            <Text style={{ color: value ? Colors.light.textPrimary : Colors.light.placeholder }}>
+            <Text style={{ color: value ? Colors[theme].textPrimary : Colors[theme].placeholder }}>
               {value
                 ? options.find((opt) => opt.value === value)?.label
                 : placeholder}
             </Text>
-            <Ionicons name="chevron-down" size={20} color={Colors.light.textSecondary} />
+            <Ionicons name="chevron-down" size={20} color={Colors[theme].textSecondary} />
           </TouchableOpacity>
 
           {/* Error */}
-          {error && <Text style={styles.error}>{error}</Text>}
+          {error && <Text style={[styles.error, { color: Colors[theme].danger.main }]}>{error}</Text>}
 
           {/* Modal Picker */}
           <Modal visible={visible} transparent animationType="fade">
@@ -73,19 +70,19 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
               activeOpacity={1}
               onPress={() => setVisible(false)}
             >
-              <View style={styles.modalContent}>
+              <View style={[styles.modalContent, { backgroundColor: Colors[theme].background }]}>
                 <FlatList
                   data={options}
                   keyExtractor={(item) => item.value}
                   renderItem={({ item }) => (
                     <TouchableOpacity
-                      style={styles.option}
+                      style={[styles.option, { borderBottomColor: Colors[theme].border }]}
                       onPress={() => {
                         onChange(item.value);
                         setVisible(false);
                       }}
                     >
-                      <Text>{item.label}</Text>
+                      <Text style={{ color: Colors[theme].textPrimary }}>{item.label}</Text>
                     </TouchableOpacity>
                   )}
                 />
@@ -103,7 +100,6 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     fontSize: 14,
     fontWeight: "500",
-    color: Colors.light.textPrimary,
   },
   dropdown: {
     borderWidth: 1,
@@ -116,15 +112,12 @@ const styles = StyleSheet.create({
   error: {
     marginTop: 4,
     fontSize: 12,
-    color: Colors.red,
   },
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.3)", // Keeping this as rgba for transparency
   },
   modalContent: {
-    backgroundColor: Colors.light.background,
     margin: 20,
     borderRadius: 8,
     padding: 10,
@@ -132,7 +125,6 @@ const styles = StyleSheet.create({
   option: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
   },
 });
 

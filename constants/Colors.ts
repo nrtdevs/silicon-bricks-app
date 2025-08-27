@@ -86,6 +86,7 @@ export const Colors = {
     border: "#2C2C2E",
     shadow: "rgba(255, 255, 255, 0.05)",
     lightText: "#9E9E9F",
+    placeholder: "#A8A8A8", // Added for consistency with light theme
     inputColor: "#4D4D4D",
     cart: "#1e1e1e", // Elegant dark card
     primary: {
