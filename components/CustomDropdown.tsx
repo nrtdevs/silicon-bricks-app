@@ -71,18 +71,37 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ control, name, label, r
               onPress={() => setVisible(false)}
             >
               <View style={[styles.modalContent, { backgroundColor: Colors[theme].background }]}>
+                <View style={[styles.modalHeader, { borderBottomColor: Colors[theme].border }]}>
+                  <Text style={[styles.modalTitle, { color: Colors[theme].textPrimary }]}>
+                    Select {label}
+                  </Text>
+                  <TouchableOpacity onPress={() => setVisible(false)}>
+                    <Ionicons name="close" size={24} color={Colors[theme].textSecondary} />
+                  </TouchableOpacity>
+                </View>
                 <FlatList
                   data={options}
                   keyExtractor={(item) => item.value}
                   renderItem={({ item }) => (
                     <TouchableOpacity
-                      style={[styles.option, { borderBottomColor: Colors[theme].border }]}
+                      style={[
+                        styles.option,
+                        { borderBottomColor: Colors[theme].border },
+                        value === item.value && { backgroundColor: Colors.blue + "1A" }, // Highlight selected option
+                      ]}
                       onPress={() => {
                         onChange(item.value);
                         setVisible(false);
                       }}
                     >
-                      <Text style={{ color: Colors[theme].textPrimary }}>{item.label}</Text>
+                      <Text
+                        style={[
+                          { color: Colors[theme].textPrimary },
+                          value === item.value && { fontWeight: "600" }, // Bold text for selected option
+                        ]}
+                      >
+                        {item.label}
+                      </Text>
                     </TouchableOpacity>
                   )}
                 />
@@ -116,11 +135,24 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dim background
   },
   modalContent: {
     margin: 20,
     borderRadius: 8,
     padding: 10,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
   },
   option: {
     padding: 12,
