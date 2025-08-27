@@ -3,6 +3,7 @@ import { View, TextInput, Text, StyleSheet } from "react-native";
 import { Controller } from "react-hook-form";
 import { Colors } from "@/constants/Colors";
 import { KeyboardTypeOptions } from "react-native";
+import { useTheme } from "@/context/ThemeContext";
 
 type CustomInputProps = {
   control: any;
@@ -17,6 +18,9 @@ type CustomInputProps = {
 
 const CustomInput = ({ control, name, label, placeholder, secureTextEntry, type = "text", required = false, }: CustomInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
+
+  // Detect theme
+  const { theme } = useTheme();
 
   // map type -> keyboardType
   const getKeyboardType = (): KeyboardTypeOptions => {
@@ -40,11 +44,12 @@ const CustomInput = ({ control, name, label, placeholder, secureTextEntry, type 
           <Text
             style={[
               styles.label,
-              error ? { color: "red" } : {},
+              { color: Colors[theme].textPrimary },
+              error ? { color: Colors[theme].danger.main } : {},
             ]}
           >
             {label}
-            {required && <Text style={{ color: "red" }}> *</Text>}
+            {required && <Text style={{ color: Colors[theme].danger.main }}> *</Text>}
           </Text>
 
 
@@ -59,19 +64,24 @@ const CustomInput = ({ control, name, label, placeholder, secureTextEntry, type 
             keyboardType={getKeyboardType()}
             onFocus={() => setIsFocused(true)}
             placeholder={placeholder}
+            placeholderTextColor={Colors[theme].lightText}
             secureTextEntry={secureTextEntry}
             style={[
               styles.input,
-              error
-                ? { borderColor: Colors.light.danger.border }
-                : isFocused
-                  ? { borderColor: Colors.blue }
-                  : { borderColor: Colors.light.border },
+              {
+                borderColor: error
+                  ? Colors[theme].danger.main
+                  : isFocused
+                    ? Colors.blue
+                    : Colors[theme].border,
+                backgroundColor: Colors[theme].background,
+                color: Colors[theme].textPrimary,
+              },
             ]}
           />
 
           {/* Error Message */}
-          {error && <Text style={styles.errorText}>{error.message || "Invalid input"}</Text>}
+          {error && <Text style={[styles.errorText, { color: Colors[theme].danger.main }]}>{error.message || "Invalid input"}</Text>}
         </View>
       )}
     />
@@ -85,7 +95,6 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     fontSize: 14,
     fontWeight: "500",
-    color: Colors.light.textPrimary,
   },
   input: {
     borderWidth: 1.5,
@@ -93,10 +102,8 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     margin: 1,
-    backgroundColor: Colors.light.background,
   },
   errorText: {
-    color: Colors.red,
     marginTop: 4,
     fontSize: 13,
   },
