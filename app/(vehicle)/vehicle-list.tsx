@@ -27,7 +27,7 @@ import NoDataFound from "@/components/NoDataFound";
 import StatusModal from "@/components/vehicle/StatusModal";
 import CustomValidation from "@/components/CustomValidation";
 import { useForm } from "react-hook-form";
-import { Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import CustomSearchBar from "@/components/CustomSearchBar";
 
 import debounce from "lodash.debounce";
@@ -35,6 +35,8 @@ import { Colors } from "@/constants/Colors";
 import { Env } from "@/constants/ApiEndpoints";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/context/ThemeContext";
+import CustomHeader from "@/components/CustomHeader";
+import { DrawerActions } from "@react-navigation/native";
 
 const VehicleList = () => {
   const [getVehicleListApi, { data, loading, error, refetch }] =
@@ -236,6 +238,17 @@ const VehicleList = () => {
     return <Loader />;
 
   return (
+    <CustomHeader
+      title="Vehicle List"
+      leftComponent={
+        <Pressable
+          style={styles.menuButton}
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        >
+          <Entypo name="menu" size={ms(28)} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
     <ThemedView style={{ flex: 1 }}>
       {isSearch && (
         <CustomSearchBar
@@ -315,9 +328,14 @@ const VehicleList = () => {
         }
       />
     </ThemedView>
+    </CustomHeader>
   );
 };
 
 export default VehicleList;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  menuButton: {
+    padding: ms(10),
+  },
+});

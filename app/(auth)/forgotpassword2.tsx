@@ -1,16 +1,16 @@
-import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
-import { ms, ScaledSheet, vs } from 'react-native-size-matters'
 import CustomHeader from '@/components/CustomHeader'
-import { Controller, useForm } from 'react-hook-form'
-import { router } from 'expo-router'
 import { ThemedText } from '@/components/ThemedText'
+import { router } from 'expo-router'
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { SafeAreaView, TouchableOpacity, View } from 'react-native'
+import { ms, ScaledSheet, vs } from 'react-native-size-matters'
 
-import { useTheme } from '@/context/ThemeContext'
+import CustomButton from '@/components/CustomButton'
+import CustomValidation from '@/components/CustomValidation'
 import { Colors } from '@/constants/Colors'
 import { labels } from '@/constants/Labels'
-import CustomButton from '@/components/CustomButton' 
-import CustomValidation from '@/components/CustomValidation'
+import { useTheme } from '@/context/ThemeContext'
 
 type Props = {}
 
@@ -73,7 +73,7 @@ const ForgotPassword = (props: Props) => {
           />
 
           <View style={styles.sep}>
-            <TouchableOpacity onPress={() => router.dismissTo('/login2')}>
+            <TouchableOpacity onPress={() => router.dismissTo('/(auth)/login')}>
               <ThemedText style={styles.footerLink}>
                 {labels.loginInstead}
               </ThemedText>

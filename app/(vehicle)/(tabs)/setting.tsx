@@ -258,14 +258,12 @@ export default setting;
 const styles = ScaledSheet.create({
   mainContainer: {
     flex: 1,
-    // Removed backgroundColor: 'transparent' to allow ThemedView to apply theme background
   },
   header: {
     paddingHorizontal: '20@s',
     paddingVertical: '15@vs',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(0,0,0,0.1)',
-    // Removed hardcoded backgroundColor, now applied dynamically in the component
   },
   headerTitle: {
     fontSize: '24@ms',
