@@ -36,7 +36,7 @@ const VehicleAdd = () => {
       label: (1997 + index).toString(),
       value: (1997 + index).toString(),
     }));
-  }, []); 
+  }, []);
 
   const { control, handleSubmit, formState: { errors }, reset, watch, setValue, } = useForm<any>({
     defaultValues: {
@@ -45,7 +45,7 @@ const VehicleAdd = () => {
       chassisNumber: "",
       numberPlate: "",
       year: "",
-      insurance: { label: "No", value: false }, 
+      insurance: { label: "No", value: false },
       color: "",
       avatar: "",
       insuranceValidTill: null,
@@ -139,7 +139,7 @@ const VehicleAdd = () => {
     }
   };
 
-  
+  console.log("insurance", watch('insurance'))
 
   if (addVehicleStat.loading || editVehicleStat.loading) return <Loader />;
   return (
@@ -164,7 +164,7 @@ const VehicleAdd = () => {
             setValue("avatar", result);
           }}
         />
-        
+
         <CustomInput
           name="make"
           control={control}
@@ -201,7 +201,7 @@ const VehicleAdd = () => {
           placeholder="Enter Number Plate"
           required={true}
         />
-       
+
 
         <CustomDatePicker
           control={control}
@@ -219,13 +219,17 @@ const VehicleAdd = () => {
           placeholder="Select Gender"
           options={InsuranceDropdown}
         />
+        {watch('insurance') === 'yes' && (
+          <CustomDatePicker
+            control={control}
+            name="insuranceValidTill"
+            label="Insurance Date"
+            mode="date"
+          />
+        )}
 
-        <CustomDatePicker
-          control={control}
-          name="insuranceValidTill"
-          label="Insurance Date"
-          mode="date"
-        />
+
+
 
       </ScrollView>
       <View
@@ -237,7 +241,7 @@ const VehicleAdd = () => {
           width: "100%",
         }}
       >
-       
+
         <CustomButton
           title="Submit"
           onPress={handleSubmit(onSubmit)}
