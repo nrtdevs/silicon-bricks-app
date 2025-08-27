@@ -19,6 +19,8 @@ import {
 } from "@/graphql/generated";
 import Loader from "@/components/ui/Loader";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import CustomInput from "@/components/CustomInput";
+import { Button } from "@rneui/themed";
 
 const VehicleAdd = () => {
   const insuranceOptions = [
@@ -34,14 +36,7 @@ const VehicleAdd = () => {
     }));
   }, []); 
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    watch,
-    setValue,
-  } = useForm<any>({
+  const { control, handleSubmit, formState: { errors }, reset, watch, setValue, } = useForm<any>({
     defaultValues: {
       make: "",
       model: "",
@@ -166,6 +161,14 @@ const VehicleAdd = () => {
             const result = await uploadImage(image?.uri);
             setValue("avatar", result);
           }}
+        />
+        <CustomInput
+          name="email"
+          control={control}
+          label="Email"
+          placeholder="Enter Email"
+          type="password"
+          required={true}
         />
         <CustomValidation
           type="input"

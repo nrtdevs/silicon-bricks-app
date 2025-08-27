@@ -64,9 +64,6 @@ const VehicleList = () => {
   ];
   const {
     control,
-    handleSubmit,
-    formState: { errors },
-    reset,
     watch,
     setValue,
   } = useForm<{ status: any }>({
@@ -226,10 +223,6 @@ const VehicleList = () => {
     );
   };
 
-  // console.log('loading',loading);
-  // console.log('page',page);
-  // console.log('refreshing',refreshing);
-
   if (
     (loading && page == 1 && !refreshing) ||
     deleteVehicleStat.loading ||
@@ -265,7 +258,7 @@ const VehicleList = () => {
       )}
       <FlatList
         data={vehicleList}
-        keyExtractor={(item, index) => item?.id?.toString()}
+        keyExtractor={(item) => item?.id?.toString()}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           !isLoading ? (

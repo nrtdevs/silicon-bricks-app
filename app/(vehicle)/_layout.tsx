@@ -22,7 +22,6 @@ const CustomDrawerContent = (props: any) => {
             style={styles.userImage}
           />
         </View>
-        <ThemedText type='subtitle' style={styles.userName}>User name</ThemedText>
         <ThemedText type='default' style={styles.drawerTitle}>Vehicle Management</ThemedText>
       </View>
       <DrawerItem
