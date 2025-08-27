@@ -25,19 +25,19 @@ const CustomDrawerContent = (props: any) => {
         <ThemedText type='subtitle' style={styles.userName}>User name</ThemedText>
         <ThemedText type='default' style={styles.drawerTitle}>Vehicle Management</ThemedText>
       </View>
-
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="home" size={ms(24)} color={Colors[theme].primary.main} />}
+        label="Dashboard"
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/(vehicle)/(tabs)/home')}
+      />
       <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="directions-car" size={ms(24)} color={Colors[theme].primary.main} />}
-        label="Vehicle List"
+        label="Vehicle"
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(vehicle)/vehicle-list')}
       />
-      <DrawerItem
-        icon={({ color, size }) => <MaterialIcons name="add-circle-outline" size={ms(24)} color={Colors[theme].primary.main} />}
-        label="Add/Edit Vehicle"
-        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-        onPress={() => router.push('/(vehicle)/add-edit-vehicle')}
-      />
+
       <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="build" size={ms(24)} color={Colors[theme].primary.main} />}
         label="Service Center"
