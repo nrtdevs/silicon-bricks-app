@@ -1,26 +1,24 @@
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { SafeAreaView } from "react-native";
-import { useForm } from "react-hook-form";
-import CustomValidation from "@/components/CustomValidation";
-import { ms, vs } from "react-native-size-matters";
 import CustomButton from "@/components/CustomButton";
-import { Fontisto } from "@expo/vector-icons";
-import { Colors } from "@/constants/Colors";
-import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
-import { useTheme } from "@/context/ThemeContext";
+import CustomInput from "@/components/CustomInput";
+import CustomValidation from "@/components/CustomValidation";
 import DateTimePickerModal from "@/components/DateTimePickerModal";
-import { formatTimeForAPI } from "@/utils/formatDateTime";
-import uploadImage from "@/utils/imageUpload";
-import { useMutation } from "@apollo/client";
+import Loader from "@/components/ui/Loader";
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/context/ThemeContext";
 import {
   CreateVehicleDocument,
   UpdateVehicleDocument,
 } from "@/graphql/generated";
-import Loader from "@/components/ui/Loader";
+import { formatTimeForAPI } from "@/utils/formatDateTime";
+import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
+import uploadImage from "@/utils/imageUpload";
+import { useMutation } from "@apollo/client";
+import { Fontisto } from "@expo/vector-icons";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import CustomInput from "@/components/CustomInput";
-import { Button } from "@rneui/themed";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Alert, SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
+import { ms, vs } from "react-native-size-matters";
 
 const VehicleAdd = () => {
   const insuranceOptions = [
@@ -162,49 +160,45 @@ const VehicleAdd = () => {
             setValue("avatar", result);
           }}
         />
+        
         <CustomInput
-          name="email"
+          name="make"
           control={control}
-          label="Email"
-          placeholder="Enter Email"
-          type="password"
+          label="Brand"
+          placeholder="Enter Brand Name"
           required={true}
         />
-        <CustomValidation
-          type="input"
+
+        <CustomInput
+          name="model"
           control={control}
-          name={"make"}
-          label={"Brand"}
-          rules={{ required: "Brand is required" }}
+          label="Model"
+          placeholder="Enter Model Name"
+          required={true}
         />
-        <CustomValidation
-          type="input"
+        <CustomInput
+          name="chassisNumber"
           control={control}
-          name={"model"}
-          label={"Model"}
-          rules={{ required: "Model is required" }}
+          label="Chassis Number"
+          placeholder="Enter Chassis Number"
+          required={true}
         />
-        <CustomValidation
-          type="input"
+        <CustomInput
+          name="color"
           control={control}
-          name={"chassisNumber"}
-          label={"Chassis Number"}
-          rules={{ required: "Chassis Number is required" }}
+          label="Color"
+          placeholder="Enter Color"
+          required={true}
         />
-        <CustomValidation
-          type="input"
+        <CustomInput
+          name="numberPlate"
           control={control}
-          name={"color"}
-          label={"Color"}
-          rules={{ required: "Color is required" }}
+          label="Number Plate"
+          placeholder="Enter Number Plate"
+          required={true}
         />
-        <CustomValidation
-          type="input"
-          control={control}
-          name={"numberPlate"}
-          label={"Number"}
-          rules={{ required: "Number is required" }}
-        />
+       
+       
         <CustomValidation
           type="picker"
           control={control}
@@ -265,7 +259,7 @@ const VehicleAdd = () => {
           width: "100%",
         }}
       >
-        <CustomButton title="Clear" onPress={reset} style={{ width: "48%" }} />
+       
         <CustomButton
           title="Submit"
           onPress={handleSubmit(onSubmit)}
