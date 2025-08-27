@@ -1,4 +1,6 @@
 import CustomButton from "@/components/CustomButton";
+import CustomDatePicker from "@/components/CustomDatePicker";
+import CustomDropdown from "@/components/CustomDropdown";
 import CustomInput from "@/components/CustomInput";
 import CustomValidation from "@/components/CustomValidation";
 import DateTimePickerModal from "@/components/DateTimePickerModal";
@@ -20,11 +22,13 @@ import { useForm } from "react-hook-form";
 import { Alert, SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
 import { ms, vs } from "react-native-size-matters";
 
+
+const InsuranceDropdown = [
+  { label: "Yes", value: "yes" },
+  { label: "No", value: "no" },
+]
+
 const VehicleAdd = () => {
-  const insuranceOptions = [
-    { label: "Yes", value: true },
-    { label: "No", value: false },
-  ];
 
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear();
@@ -57,7 +61,7 @@ const VehicleAdd = () => {
       const yearValue = years?.find(
         (item: any) => item.value === parsedData?.year
       );
-      const insuranceValue = insuranceOptions?.find(
+      const insuranceValue = InsuranceDropdown?.find(
         (item) => item.value === parsedData?.insurance
       );
       setValue("make", parsedData?.make);
@@ -198,57 +202,31 @@ const VehicleAdd = () => {
           required={true}
         />
        
-       
-        <CustomValidation
-          type="picker"
+
+        <CustomDatePicker
           control={control}
-          name={"year"}
-          label={"Model Year"}
-          data={years}
-          rules={{ required: "Model Year is required" }}
-          isSearch={true}
+          name="year"
+          label="Model Year"
+          required
+          mode="year"
         />
-        <CustomValidation
-          type="picker"
+
+        <CustomDropdown
           control={control}
-          name={"insurance"}
-          label={"Insurance"}
-          data={[
-            { label: "Yes", value: true },
-            { label: "No", value: false },
-          ]}
+          name="insurance"
+          label="Insurance"
+          required
+          placeholder="Select Gender"
+          options={InsuranceDropdown}
         />
-        {watch("insurance")?.value && (
-          <CustomValidation
-            type="input"
-            control={control}
-            placeholder="Start Date"
-            name="insuranceValidTill"
-            label="Insurance Valid Till"
-            editable={false}
-            rightIcon={
-              <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
-            }
-            onPress={() => {
-              setDateTimePickerProps(getDateTimePickerProps(true));
-            }}
-            pointerEvents="none"
-            rules={{ required: "Insurance Valid Till is required" }}
-          />
-        )}
-        <DateTimePickerModal
+
+        <CustomDatePicker
+          control={control}
+          name="insuranceValidTill"
+          label="Insurance Date"
           mode="date"
-          dateTimePickerProps={dateTimePickerProps}
-          setDateTimePickerProps={setDateTimePickerProps}
-          onDateTimeSelection={(event: any, selectedDate: any) => {
-            if (event.type != "dismissed")
-              setValue(
-                "insuranceValidTill",
-                formatTimeForAPI(selectedDate, "yyyy-mm-dd") || ""
-              );
-            setDateTimePickerProps(getDateTimePickerProps(false));
-          }}
         />
+
       </ScrollView>
       <View
         style={{
