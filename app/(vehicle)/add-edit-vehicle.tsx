@@ -3,7 +3,6 @@ import CustomDatePicker from "@/components/CustomDatePicker";
 import CustomDropdown from "@/components/CustomDropdown";
 import CustomInput from "@/components/CustomInput";
 import CustomValidation from "@/components/CustomValidation";
-import DateTimePickerModal from "@/components/DateTimePickerModal";
 import Loader from "@/components/ui/Loader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
@@ -11,11 +10,9 @@ import {
   CreateVehicleDocument,
   UpdateVehicleDocument,
 } from "@/graphql/generated";
-import { formatTimeForAPI } from "@/utils/formatDateTime";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import uploadImage from "@/utils/imageUpload";
 import { useMutation } from "@apollo/client";
-import { Fontisto } from "@expo/vector-icons";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -144,108 +141,94 @@ const VehicleAdd = () => {
   if (addVehicleStat.loading || editVehicleStat.loading) return <Loader />;
   return (
     <SafeAreaView
-      style={{
-        padding: ms(12),
-        alignItems: "center",
-        backgroundColor: Colors[theme].background,
-      }}
+      style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: vs(60) }}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
       >
-        <CustomValidation
-          type="image"
-          control={control}
-          name={"avatar"}
-          label={"Avatar"}
-          defaultValue={""}
-          imageResponseHandler={async (image: any) => {
-            const result = await uploadImage(image?.uri);
-            setValue("avatar", result);
-          }}
-        />
+        <View style={styles.formContainer}>
+          <CustomValidation
+            type="image"
+            control={control}
+            name={"avatar"}
+            label={"Avatar"}
+            defaultValue={""}
+            imageResponseHandler={async (image: any) => {
+              const result = await uploadImage(image?.uri);
+              setValue("avatar", result);
+            }}
+          />
 
-        <CustomInput
-          name="make"
-          control={control}
-          label="Brand"
-          placeholder="Enter Brand Name"
-          required={true}
-        />
+          <CustomInput
+            name="make"
+            control={control}
+            label="Brand"
+            placeholder="Enter Brand Name"
+            required={true}
+          />
 
-        <CustomInput
-          name="model"
-          control={control}
-          label="Model"
-          placeholder="Enter Model Name"
-          required={true}
-        />
-        <CustomInput
-          name="chassisNumber"
-          control={control}
-          label="Chassis Number"
-          placeholder="Enter Chassis Number"
-          required={true}
-        />
-        <CustomInput
-          name="color"
-          control={control}
-          label="Color"
-          placeholder="Enter Color"
-          required={true}
-        />
-        <CustomInput
-          name="numberPlate"
-          control={control}
-          label="Number Plate"
-          placeholder="Enter Number Plate"
-          required={true}
-        />
+          <CustomInput
+            name="model"
+            control={control}
+            label="Model"
+            placeholder="Enter Model Name"
+            required={true}
+          />
+          <CustomInput
+            name="chassisNumber"
+            control={control}
+            label="Chassis Number"
+            placeholder="Enter Chassis Number"
+            required={true}
+          />
+          <CustomInput
+            name="color"
+            control={control}
+            label="Color"
+            placeholder="Enter Color"
+            required={true}
+          />
+          <CustomInput
+            name="numberPlate"
+            control={control}
+            label="Number Plate"
+            placeholder="Enter Number Plate"
+            required={true}
+          />
 
 
-        <CustomDatePicker
-          control={control}
-          name="year"
-          label="Model Year"
-          required
-          mode="year"
-        />
-
-        <CustomDropdown
-          control={control}
-          name="insurance"
-          label="Insurance"
-          required
-          placeholder="Select Gender"
-          options={InsuranceDropdown}
-        />
-        {watch('insurance') === 'yes' && (
           <CustomDatePicker
             control={control}
-            name="insuranceValidTill"
-            label="Insurance Date"
-            mode="date"
+            name="year"
+            label="Model Year"
+            required
+            mode="year"
           />
-        )}
 
-
-
-
+          <CustomDropdown
+            control={control}
+            name="insurance"
+            label="Insurance"
+            required
+            placeholder="Select Insurance Option"
+            options={InsuranceDropdown}
+          />
+          {watch('insurance')?.value === 'yes' && (
+            <CustomDatePicker
+              control={control}
+              name="insuranceValidTill"
+              label="Insurance Date"
+              mode="date"
+            />
+          )}
+        </View>
       </ScrollView>
-      <View
-        style={{
-          position: "absolute",
-          bottom: vs(10),
-          flexDirection: "row",
-          justifyContent: "space-between",
-          width: "100%",
-        }}
-      >
-
+      <View style={styles.bottomButtonContainer}>
         <CustomButton
           title="Submit"
           onPress={handleSubmit(onSubmit)}
-          style={{ width: "48%" }}
+          style={styles.submitButton}
         />
       </View>
     </SafeAreaView>
@@ -254,4 +237,27 @@ const VehicleAdd = () => {
 
 export default VehicleAdd;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    padding: ms(12),
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingBottom: vs(80),
+  },
+  formContainer: {
+    flex: 1,
+    width: "100%",
+  },
+  bottomButtonContainer: {
+    position: "absolute",
+    bottom: vs(10),
+    width: "100%",
+    alignSelf: "center",
+    paddingHorizontal: ms(12),
+  },
+  submitButton: {
+    width: "100%",
+  },
+});
