@@ -203,12 +203,12 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
       {/* Title */}
-      <Text style={styles.mainTitle}>
+      <Text style={[styles.mainTitle, { color: Colors[theme].textPrimary }]}>
         {type === "single" ? "Upload Image" : "Upload Images"}
       </Text>
-      <Text style={styles.subtitle}>
+      <Text style={[styles.subtitle, { color: Colors[theme].textSecondary }]}>
         Select {type === "single" ? "an image" : "images"} from your gallery
       </Text>
 
@@ -222,13 +222,12 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
         {/* Plus Button - Always show if not at max limit */}
         {(type === "single" ? images.length === 0 : images.length < maxFiles) && (
           <TouchableOpacity
-            style={styles.addButton}
+            style={[styles.addButton, { shadowColor: Colors[theme].primary.main }]}
             onPress={pickImages}
             activeOpacity={0.8}
           >
             <LinearGradient
-              // colors={["#667eea", "#764ba2"]}
-              colors={[Colors[theme].cart]}
+              colors={[Colors[theme].primary.main, Colors[theme].secondary.main]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.addButtonGradient}
@@ -248,8 +247,8 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
                   },
                 ]}
               >
-                <Text style={styles.plusIcon}>+</Text>
-                <Text style={styles.addText}>Add</Text>
+                <Text style={[styles.plusIcon, { color: Colors.white }]}>+</Text>
+                <Text style={[styles.addText, { color: Colors.white }]}>Add</Text>
               </Animated.View>
             </LinearGradient>
           </TouchableOpacity>
@@ -257,16 +256,16 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
 
         {/* Image Cards */}
         {images.map((image) => (
-          <View key={image.id} style={styles.imageCard}>
+          <View key={image.id} style={[styles.imageCard, { backgroundColor: Colors[theme].cart, shadowColor: Colors[theme].shadow }]}>
             {/* Image Container */}
             <View style={styles.imageContainer}>
-              <Image source={{ uri: image.uri }} style={styles.image} />
+              <Image source={{ uri: image.uri }} style={[styles.image, { backgroundColor: Colors[theme].gray }]} />
 
               {/* Upload Overlay */}
               {image.status === "uploading" && (
                 <View style={styles.uploadOverlay}>
-                  <ActivityIndicator size="small" color="#fff" />
-                  <Text style={styles.progressText}>
+                  <ActivityIndicator size="small" color={Colors.white} />
+                  <Text style={[styles.progressText, { color: Colors.white }]}>
                     {Math.round(image.progress)}%
                   </Text>
                 </View>
@@ -274,20 +273,20 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
 
               {/* Success Badge */}
               {image.status === "success" && (
-                <View style={styles.successBadge}>
-                  <Text style={styles.successIcon}>✓</Text>
+                <View style={[styles.successBadge, { backgroundColor: Colors[theme].success.main }]}>
+                  <Text style={[styles.successIcon, { color: Colors.white }]}>✓</Text>
                 </View>
               )}
 
               {/* Error Overlay */}
               {image.status === "error" && (
-                <View style={styles.errorOverlay}>
-                  <Text style={styles.errorIcon}>⚠️</Text>
+                <View style={[styles.errorOverlay, { backgroundColor: Colors[theme].danger.bg }]}>
+                  <Text style={[styles.errorIcon, { color: Colors[theme].danger.text }]}>⚠️</Text>
                   <TouchableOpacity
-                    style={styles.retryButton}
+                    style={[styles.retryButton, { backgroundColor: Colors.white }]}
                     onPress={() => retryUpload(image.id)}
                   >
-                    <Text style={styles.retryText}>Retry</Text>
+                    <Text style={[styles.retryText, { color: Colors[theme].danger.main }]}>Retry</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -297,17 +296,17 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
                 style={styles.deleteButton}
                 onPress={() => removeImage(image.id)}
               >
-                <Text style={styles.deleteIcon}>×</Text>
+                <Text style={[styles.deleteIcon, { color: Colors.white }]}>×</Text>
               </TouchableOpacity>
             </View>
 
             {/* Progress Bar */}
             {image.status === "uploading" && (
-              <View style={styles.progressBar}>
+              <View style={[styles.progressBar, { backgroundColor: Colors[theme].border }]}>
                 <View
                   style={[
                     styles.progressFill,
-                    { width: `${image.progress}%` },
+                    { width: `${image.progress}%`, backgroundColor: Colors[theme].primary.main },
                   ]}
                 />
               </View>
@@ -315,7 +314,7 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
 
             {/* File Info */}
             <View style={styles.fileInfo}>
-              <Text style={styles.fileSize}>
+              <Text style={[styles.fileSize, { color: Colors[theme].textSecondary }]}>
                 {formatFileSize(image.size)}
               </Text>
             </View>
@@ -323,9 +322,9 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
             {/* Name Input */}
             <View style={styles.nameInputContainer}>
               <TextInput
-                style={styles.nameInput}
+                style={[styles.nameInput, { borderColor: Colors[theme].border, color: Colors[theme].textPrimary, backgroundColor: Colors[theme].background }]}
                 placeholder="Enter image name"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={Colors[theme].placeholder}
                 value={image.customName}
                 onChangeText={(text) => updateImageName(image.id, text)}
                 maxLength={30}
@@ -336,12 +335,12 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
       </ScrollView>
 
       {/* Upload Info */}
-      <View style={styles.uploadInfo}>
-        <Text style={styles.infoText}>
+      <View style={[styles.uploadInfo, { backgroundColor: Colors[theme].cart, shadowColor: Colors[theme].shadow }]}>
+        <Text style={[styles.infoText, { color: Colors[theme].textSecondary }]}>
           Max {maxSizeMB}MB per image • JPG, PNG, GIF supported
         </Text>
         {type === "multiple" && (
-          <Text style={styles.infoText}>
+          <Text style={[styles.infoText, { color: Colors[theme].textSecondary }]}>
             {images.length}/{maxFiles} images selected
           </Text>
         )}
@@ -356,18 +355,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#f8fafc",
   },
   mainTitle: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#1e293b",
     marginBottom: 8,
     textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
-    color: "#64748b",
     textAlign: "center",
     marginBottom: 30,
   },
@@ -382,7 +378,6 @@ const styles = StyleSheet.create({
     marginRight: 15,
     borderRadius: 16,
     elevation: 6,
-    shadowColor: "#667eea",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -399,22 +394,18 @@ const styles = StyleSheet.create({
   },
   plusIcon: {
     fontSize: 32,
-    color: "#fff",
     fontWeight: "300",
     marginBottom: 4,
   },
   addText: {
     fontSize: 14,
-    color: "#fff",
     fontWeight: "600",
   },
   imageCard: {
     width: 120,
     marginRight: 15,
-    backgroundColor: "#fff",
     borderRadius: 16,
     elevation: 4,
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -431,7 +422,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#f1f5f9",
   },
   uploadOverlay: {
     position: "absolute",
@@ -444,7 +434,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   progressText: {
-    color: "#fff",
     fontSize: 12,
     fontWeight: "600",
     marginTop: 6,
@@ -456,12 +445,10 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#10b981",
     alignItems: "center",
     justifyContent: "center",
   },
   successIcon: {
-    color: "#fff",
     fontSize: 12,
     fontWeight: "bold",
   },
@@ -471,7 +458,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(239, 68, 68, 0.9)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -480,13 +466,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   retryButton: {
-    backgroundColor: "rgba(255,255,255,0.9)",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   retryText: {
-    color: "#ef4444",
     fontSize: 10,
     fontWeight: "600",
   },
@@ -508,12 +492,10 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 2,
-    backgroundColor: "#e2e8f0",
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#667eea",
   },
   fileInfo: {
     padding: 8,
@@ -521,7 +503,6 @@ const styles = StyleSheet.create({
   },
   fileSize: {
     fontSize: 10,
-    color: "#64748b",
     fontWeight: "500",
   },
   nameInputContainer: {
@@ -530,29 +511,23 @@ const styles = StyleSheet.create({
   },
   nameInput: {
     borderWidth: 1,
-    borderColor: "#e2e8f0",
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
     fontSize: 12,
-    color: "#1e293b",
-    backgroundColor: "#f8fafc",
     textAlign: "center",
   },
   uploadInfo: {
-    backgroundColor: "#fff",
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
     elevation: 2,
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
   },
   infoText: {
     fontSize: 12,
-    color: "#6b7280",
     textAlign: "center",
     marginBottom: 2,
   },
