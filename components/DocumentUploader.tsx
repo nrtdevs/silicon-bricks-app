@@ -1,455 +1,3 @@
-// import { Colors } from "@/constants/Colors";
-// import { useTheme } from "@/context/ThemeContext";
-// import * as DocumentPicker from "expo-document-picker";
-// import { LinearGradient } from "expo-linear-gradient";
-// import React, { useState } from "react";
-// import {
-//   ActivityIndicator,
-//   Alert,
-//   Animated,
-//   ScrollView,
-//   StyleSheet,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   View,
-//   Image, // Added Image import
-// } from "react-native";
-
-// import MaterialIcons from '@expo/vector-icons/MaterialIcons'; // Temporarily import MaterialIcons for icons
-
-// type DocumentUploaderProps = {
-//   type?: "single" | "multiple";
-//   onChange?: (docs: string[]) => void;
-//   maxFiles?: number;
-//   maxSizeMB?: number;
-// };
-
-// interface UploadingDoc {
-//   id: string;
-//   uri: string;
-//   name: string;
-//   size?: number;
-//   progress: number;
-//   status: "uploading" | "success" | "error";
-//   customName?: string;
-// }
-
-// const DocumentUploader = ({
-//   type = "single",
-//   onChange,
-//   maxFiles = 10,
-//   maxSizeMB = 5,
-// }: DocumentUploaderProps) => {
-//   const [docs, setDocs] = useState<UploadingDoc[]>([]);
-//   const [uploadAnimation] = useState(new Animated.Value(0));
-//   const { theme } = useTheme();
-
-//   const generateId = () => Math.random().toString(36).substr(2, 9);
-
-//   const getFileType = (fileName: string) => {
-//     const extension = fileName.split(".").pop()?.toLowerCase();
-//     if (!extension) return "unknown";
-//     if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(extension)) {
-//       return "image";
-//     }
-//     if (extension === "pdf") {
-//       return "pdf";
-//     }
-//     if (["doc", "docx", "xls", "xlsx", "txt"].includes(extension)) {
-//       return "document";
-//     }
-//     return "unknown";
-//   };
-
-//   // Fake upload simulation
-//   const simulateUpload = (docId: string): Promise<void> => {
-//     return new Promise((resolve, reject) => {
-//       let progress = 0;
-//       const interval = setInterval(() => {
-//         progress += Math.random() * 25 + 5;
-//         if (progress >= 100) {
-//           progress = 100;
-//           clearInterval(interval);
-
-//           if (Math.random() < 0.1) {
-//             setDocs((prev) =>
-//               prev.map((d) =>
-//                 d.id === docId ? { ...d, status: "error", progress: 0 } : d
-//               )
-//             );
-//             reject(new Error("Upload failed"));
-//           } else {
-//             setDocs((prev) =>
-//               prev.map((d) =>
-//                 d.id === docId ? { ...d, progress: 100, status: "success" } : d
-//               )
-//             );
-//             resolve();
-//           }
-//         } else {
-//           setDocs((prev) =>
-//             prev.map((d) => (d.id === docId ? { ...d, progress } : d))
-//           );
-//         }
-//       }, 200);
-//     });
-//   };
-
-//   const pickDocuments = async () => {
-//     const result = await DocumentPicker.getDocumentAsync({
-//       type: [
-//         "application/pdf",
-//         "image/*",
-//         "application/msword",
-//         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-//         "application/vnd.ms-excel",
-//         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-//         "text/plain",
-//       ],
-//       multiple: type === "multiple",
-//       copyToCacheDirectory: true,
-//     });
-
-//     if (result.canceled) return;
-
-//     Animated.spring(uploadAnimation, {
-//       toValue: 1,
-//       useNativeDriver: true,
-//     }).start();
-
-//     let newDocs: UploadingDoc[] = [];
-
-//     if (type === "single") {
-//       const asset = result.assets[0];
-//       newDocs = [
-//         {
-//           id: generateId(),
-//           uri: asset.uri,
-//           name: asset.name,
-//           size: asset.size,
-//           progress: 0,
-//           status: "uploading",
-//           customName: "",
-//         },
-//       ];
-//       setDocs(newDocs);
-//     } else {
-//       const currentUris = new Set(docs.map((d) => d.uri));
-//       const availableSlots = maxFiles - docs.length;
-//       const assetsToAdd = result.assets
-//         .filter((a) => !currentUris.has(a.uri))
-//         .slice(0, availableSlots);
-
-//       if (assetsToAdd.length > 0) {
-//         newDocs = assetsToAdd.map((a) => ({
-//           id: generateId(),
-//           uri: a.uri,
-//           name: a.name,
-//           size: a.size,
-//           progress: 0,
-//           status: "uploading" as const,
-//           customName: "",
-//         }));
-//         setDocs((prev) => [...prev, ...newDocs]);
-//       } else {
-//         Alert.alert(
-//           "No New Files",
-//           "These documents are already added or exceed max limit."
-//         );
-//       }
-//     }
-
-//     newDocs.forEach((doc) => {
-//       simulateUpload(doc.id).catch(() => {});
-//     });
-
-//     if (onChange) {
-//       const allUris =
-//         type === "single"
-//           ? [newDocs[0].uri]
-//           : [...docs.map((d) => d.uri), ...newDocs.map((d) => d.uri)];
-//       onChange(allUris);
-//     }
-
-//     Animated.spring(uploadAnimation, {
-//       toValue: 0,
-//       useNativeDriver: true,
-//     }).start();
-//   };
-
-//   const removeDoc = (docId: string) => {
-//     setDocs((prev) => {
-//       const updated = prev.filter((d) => d.id !== docId);
-//       onChange?.(updated.map((d) => d.uri));
-//       return updated;
-//     });
-//   };
-
-//   const retryUpload = (docId: string) => {
-//     setDocs((prev) =>
-//       prev.map((d) =>
-//         d.id === docId ? { ...d, status: "uploading", progress: 0 } : d
-//       )
-//     );
-//     simulateUpload(docId).catch(() => {});
-//   };
-
-//   const updateDocName = (docId: string, newName: string) => {
-//     setDocs((prev) =>
-//       prev.map((d) => (d.id === docId ? { ...d, customName: newName } : d))
-//     );
-//   };
-
-//   const formatFileSize = (bytes?: number): string => {
-//     if (!bytes) return "Unknown size";
-//     const mb = bytes / (1024 * 1024);
-//     return `${mb.toFixed(1)} MB`;
-//   };
-
-//   return (
-//     <View
-//       style={[
-//         styles.container,
-//         { backgroundColor: Colors[theme].background },
-//       ]}
-//     >
-//       <Text
-//         style={[styles.mainTitle, { color: Colors[theme].textPrimary }]}
-//       >
-//         {type === "single" ? "Upload Document" : "Upload Documents"}
-//       </Text>
-//       <Text
-//         style={[styles.subtitle, { color: Colors[theme].textSecondary }]}
-//       >
-//         Select {type === "single" ? "a document" : "documents"} (PDF, Word, Excel, TXT)
-//       </Text>
-
-//       <ScrollView
-//         horizontal
-//         showsHorizontalScrollIndicator={false}
-//         contentContainerStyle={styles.row}
-//         style={styles.scroll}
-//       >
-//         {(type === "single" ? docs.length === 0 : docs.length < maxFiles) && (
-//           <TouchableOpacity
-//             style={[
-//               styles.addButton,
-//               { shadowColor: Colors[theme].primary.main },
-//             ]}
-//             onPress={pickDocuments}
-//           >
-//             <LinearGradient
-//               colors={[Colors[theme].primary.main, Colors[theme].secondary.main]}
-//               start={{ x: 0, y: 0 }}
-//               end={{ x: 1, y: 1 }}
-//               style={styles.addButtonGradient}
-//             >
-//               <Animated.View
-//                 style={[
-//                   styles.addButtonContent,
-//                   {
-//                     transform: [
-//                       {
-//                         scale: uploadAnimation.interpolate({
-//                           inputRange: [0, 1],
-//                           outputRange: [1, 0.9],
-//                         }),
-//                       },
-//                     ],
-//                   },
-//                 ]}
-//               >
-//                 <Text style={[styles.plusIcon, { color: Colors.white }]}>
-//                   +
-//                 </Text>
-//                 <Text style={[styles.addText, { color: Colors.white }]}>
-//                   Add
-//                 </Text>
-//               </Animated.View>
-//             </LinearGradient>
-//           </TouchableOpacity>
-//         )}
-
-//         {docs.map((doc) => (
-//           <View
-//             key={doc.id}
-//             style={[
-//               styles.card,
-//               { backgroundColor: Colors[theme].cart, shadowColor: Colors[theme].shadow },
-//             ]}
-//           >
-//             <View style={styles.docContainer}>
-//               {getFileType(doc.name) === "image" ? (
-//                 <Image source={{ uri: doc.uri }} style={styles.docImagePreview} />
-//               ) : getFileType(doc.name) === "pdf" ? (
-//                 <View style={styles.iconContainer}>
-//                   <MaterialIcons name="picture-as-pdf" size={60} color={Colors[theme].textPrimary} />
-//                 </View>
-//               ) : (
-//                 <View style={styles.iconContainer}>
-//                   <MaterialIcons name="description" size={60} color={Colors[theme].textPrimary} />
-//                 </View>
-//               )}
-
-//               <Text
-//                 style={[
-//                   styles.docName,
-//                   { color: Colors[theme].textPrimary },
-//                 ]}
-//                 numberOfLines={2}
-//               >
-//                 {doc.name}
-//               </Text>
-
-//               {doc.status === "uploading" && (
-//                 <View style={styles.uploadOverlay}>
-//                   <ActivityIndicator size="small" color={Colors.white} />
-//                   <Text style={[styles.progressText, { color: Colors.white }]}>
-//                     {Math.round(doc.progress)}%
-//                   </Text>
-//                 </View>
-//               )}
-
-//               {doc.status === "success" && (
-//                 <View
-//                   style={[
-//                     styles.successBadge,
-//                     { backgroundColor: Colors[theme].success.main },
-//                   ]}
-//                 >
-//                   <Text style={[styles.successIcon, { color: Colors.white }]}>
-//                     ✓
-//                   </Text>
-//                 </View>
-//               )}
-
-//               {doc.status === "error" && (
-//                 <View
-//                   style={[
-//                     styles.errorOverlay,
-//                     { backgroundColor: Colors[theme].danger.bg },
-//                   ]}
-//                 >
-//                   <Text
-//                     style={[
-//                       styles.errorIcon,
-//                       { color: Colors[theme].danger.text },
-//                     ]}
-//                   >
-//                     ⚠️
-//                   </Text>
-//                   <TouchableOpacity
-//                     style={[styles.retryButton, { backgroundColor: Colors.white }]}
-//                     onPress={() => retryUpload(doc.id)}
-//                   >
-//                     <Text
-//                       style={[
-//                         styles.retryText,
-//                         { color: Colors[theme].danger.main },
-//                       ]}
-//                     >
-//                       Retry
-//                     </Text>
-//                   </TouchableOpacity>
-//                 </View>
-//               )}
-
-//               <TouchableOpacity
-//                 style={styles.deleteButton}
-//                 onPress={() => removeDoc(doc.id)}
-//               >
-//                 <Text style={[styles.deleteIcon, { color: Colors.white }]}>
-//                   ×
-//                 </Text>
-//               </TouchableOpacity>
-//             </View>
-
-//             {doc.status === "uploading" && (
-//               <View
-//                 style={[styles.progressBar, { backgroundColor: Colors[theme].border }]}
-//               >
-//                 <View
-//                   style={[
-//                     styles.progressFill,
-//                     {
-//                       width: `${doc.progress}%`,
-//                       backgroundColor: Colors[theme].primary.main,
-//                     },
-//                   ]}
-//                 />
-//               </View>
-//             )}
-
-//             <View style={styles.fileInfo}>
-//               <Text style={[styles.fileSize, { color: Colors[theme].textSecondary }]}>
-//                 {formatFileSize(doc.size)}
-//               </Text>
-//             </View>
-
-//             <View style={styles.nameInputContainer}>
-//               <TextInput
-//                 style={[
-//                   styles.nameInput,
-//                   {
-//                     borderColor: Colors[theme].border,
-//                     color: Colors[theme].textPrimary,
-//                     backgroundColor: Colors[theme].background,
-//                   },
-//                 ]}
-//                 placeholder="Enter file name"
-//                 placeholderTextColor={Colors[theme].placeholder}
-//                 value={doc.customName}
-//                 onChangeText={(t) => updateDocName(doc.id, t)}
-//                 maxLength={30}
-//               />
-//             </View>
-//           </View>
-//         ))}
-//       </ScrollView>
-//     </View>
-//   );
-// };
-
-// export default DocumentUploader;
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, padding: 20 },
-//   mainTitle: { fontSize: 24, fontWeight: "800", marginBottom: 8, textAlign: "center" },
-//   subtitle: { fontSize: 16, textAlign: "center", marginBottom: 30 },
-//   scroll: { marginBottom: 20 },
-//   row: { paddingVertical: 10, alignItems: "flex-start" },
-//   addButton: { marginRight: 15, borderRadius: 16, elevation: 6 },
-//   addButtonGradient: {
-//     width: 120, height: 120, borderRadius: 16, alignItems: "center", justifyContent: "center",
-//   },
-//   addButtonContent: { alignItems: "center" },
-//   plusIcon: { fontSize: 32, fontWeight: "300", marginBottom: 4 },
-//   addText: { fontSize: 14, fontWeight: "600" },
-//   card: { width: 140, marginRight: 15, borderRadius: 16, elevation: 4, overflow: "hidden" },
-//   docContainer: { position: "relative", width: "100%", height: 100, padding: 10, alignItems: "center", justifyContent: "center" },
-//   docImagePreview: { width: "100%", height: "100%", resizeMode: "cover", borderRadius: 10 },
-//   iconContainer: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" },
-//   docName: { fontSize: 12, fontWeight: "600", position: "absolute", bottom: 5, left: 5, right: 5, backgroundColor: "rgba(255,255,255,0.7)", paddingHorizontal: 5, borderRadius: 5, textAlign: "center" },
-//   uploadOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.7)", alignItems: "center", justifyContent: "center" },
-//   progressText: { fontSize: 12, fontWeight: "600", marginTop: 6 },
-//   successBadge: { position: "absolute", top: 8, left: 8, width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-//   successIcon: { fontSize: 12, fontWeight: "bold" },
-//   errorOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center" },
-//   errorIcon: { fontSize: 20, marginBottom: 6 },
-//   retryButton: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-//   retryText: { fontSize: 10, fontWeight: "600" },
-//   deleteButton: { position: "absolute", top: 6, right: 6, width: 20, height: 20, borderRadius: 10, backgroundColor: "rgba(0,0,0,0.7)", alignItems: "center", justifyContent: "center" },
-//   deleteIcon: { fontSize: 14, fontWeight: "bold" },
-//   progressBar: { height: 2, overflow: "hidden" },
-//   progressFill: { height: "100%" },
-//   fileInfo: { padding: 6, alignItems: "center" },
-//   fileSize: { fontSize: 10, fontWeight: "500" },
-//   nameInputContainer: { paddingHorizontal: 8, paddingBottom: 10 },
-//   nameInput: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 6, fontSize: 12, textAlign: "center" },
-// });
-
-
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import * as DocumentPicker from "expo-document-picker";
@@ -525,17 +73,17 @@ const DocumentUploader = ({
   const getFileIcon = (fileType: string) => {
     switch (fileType) {
       case "pdf":
-        return <Ionicons name="document-text" size={40} color="#e74c3c" />;
+        return <Ionicons name="document-text" size={40} color={Colors[theme].danger.main} />;
       case "word":
-        return <Ionicons name="document" size={40} color="#2980b9" />;
+        return <Ionicons name="document" size={40} color={Colors[theme].primary.main} />;
       case "excel":
-        return <Ionicons name="grid" size={40} color="#27ae60" />;
+        return <Ionicons name="grid" size={40} color={Colors[theme].success.main} />;
       case "text":
-        return <Feather name="file-text" size={40} color="#9b59b6" />;
+        return <Feather name="file-text" size={40} color={Colors[theme].secondary.main} />;
       case "image":
-        return <Ionicons name="image" size={40} color="#f39c12" />;
+        return <Ionicons name="image" size={40} color={Colors[theme].warning.main} />;
       default:
-        return <Ionicons name="document-outline" size={40} color="#7f8c8d" />;
+        return <Ionicons name="document-outline" size={40} color={Colors[theme].textSecondary} />;
     }
   };
 
@@ -739,9 +287,10 @@ const DocumentUploader = ({
 
       {/* Documents Grid */}
       <ScrollView 
-        style={styles.scroll}
-        showsVerticalScrollIndicator={false}
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        style={styles.scroll}
       >
         <View style={styles.grid}>
           {/* Add Button */}
@@ -919,7 +468,7 @@ export default DocumentUploader;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: Colors.light.background, // Default background, will be overridden by theme
   },
   
   // Header Styles
@@ -941,13 +490,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: Colors.white,
     marginTop: 8,
     textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
+    color: Colors.white, // Changed to white, as gradient provides contrast
     marginTop: 4,
     textAlign: 'center',
   },
@@ -979,28 +528,31 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    backgroundColor: '#e9ecef',
+    backgroundColor: Colors.light.border, // Dynamic border color
     marginHorizontal: 16,
   },
 
   // Scroll and Grid
   scroll: {
-    flex: 1,
-    paddingHorizontal: 20,
+    flexGrow: 0, // Ensure it doesn't take full vertical space
+    height: 280, // Give it a fixed height to scroll horizontally
+    paddingVertical: 10,
   },
   scrollContent: {
-    paddingBottom: 20,
+    alignItems: 'flex-start', // Align items to the start for horizontal scroll
+    paddingHorizontal: 20,
   },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: 'row', // Arrange items in a row
+    // flexWrap: 'wrap', // Removed for horizontal scroll
+    // justifyContent: 'space-between', // Removed for horizontal scroll
   },
 
   // Add Card
   addCard: {
-    width: (width - 60) / 2,
-    height: 200,
+    width: 160, // Fixed width for horizontal scroll
+    height: 220, // Adjusted height
+    marginRight: 15, // Spacing between cards
     marginBottom: 15,
     borderRadius: 16,
     elevation: 6,
@@ -1022,7 +574,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.2)', // Keep white for contrast on gradient
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -1030,29 +582,31 @@ const styles = StyleSheet.create({
   addTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'white',
+    color: Colors.white,
     marginBottom: 4,
   },
   addSubtitle: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.9)',
+    color: Colors.white, // Keep white for contrast on gradient
     marginBottom: 12,
   },
   supportedFormats: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.2)', // Keep white for contrast on gradient
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
   },
   formatText: {
     fontSize: 10,
-    color: 'white',
+    color: Colors.white,
     fontWeight: '500',
   },
 
   // Document Cards
   docCard: {
-    width: (width - 60) / 2,
+    width: 160, // Fixed width for horizontal scroll
+    height: 220, // Adjusted height
+    marginRight: 15, // Spacing between cards
     marginBottom: 15,
     borderRadius: 16,
     elevation: 4,
