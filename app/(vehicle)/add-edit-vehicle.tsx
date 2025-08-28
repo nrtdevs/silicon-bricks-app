@@ -55,6 +55,7 @@ const VehicleAdd = () => {
           <ImageUploader
             type="multiple"
             onChange={async (imgs) => {
+              console.log("Fsfdfds", imgs)
               const result = await uploadImage(imgs);
               setValue("avatar", result);
             }}

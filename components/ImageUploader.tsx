@@ -1,3 +1,5 @@
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/context/ThemeContext";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
@@ -26,6 +28,7 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
   const [uploadAnimation] = useState(new Animated.Value(0));
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
+  const { theme } = useTheme();
 
   const simulateUpload = (imageId: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -118,20 +121,31 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
         setImages(newImages);
       } else {
         // Check if we exceed max files
+        const currentImageUris = new Set(images.map((img) => img.uri));
         const availableSlots = maxFiles - images.length;
-        const assetsToAdd = result.assets.slice(0, availableSlots);
 
-        newImages = assetsToAdd.map((asset) => ({
-          id: generateId(),
-          uri: asset.uri,
-          progress: 0,
-          status: "uploading" as const,
-          size: asset.fileSize,
-          fileName: asset.fileName || "image.jpg",
-          customName: "",
-        }));
+        const assetsToAdd = result.assets.filter(
+          (asset) => !currentImageUris.has(asset.uri)
+        ).slice(0, availableSlots);
 
-        setImages((prev) => [...prev, ...newImages]);
+        if (assetsToAdd.length > 0) {
+          newImages = assetsToAdd.map((asset) => ({
+            id: generateId(),
+            uri: asset.uri,
+            progress: 0,
+            status: "uploading" as const,
+            size: asset.fileSize,
+            fileName: asset.fileName || "image.jpg",
+            customName: "",
+          }));
+
+          setImages((prev) => [...prev, ...newImages]);
+        } else {
+          Alert.alert(
+            "No New Images",
+            "The images you selected are already in the list or exceed the maximum file limit."
+          );
+        }
       }
 
       // Start upload simulation for all new images
@@ -213,7 +227,8 @@ const ImageUploader = ({ type = "single", onChange, maxFiles = 10, maxSizeMB = 5
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={["#667eea", "#764ba2"]}
+              // colors={["#667eea", "#764ba2"]}
+              colors={[Colors[theme].cart]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.addButtonGradient}
