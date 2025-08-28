@@ -2,22 +2,13 @@ import CustomButton from "@/components/CustomButton";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import CustomDropdown from "@/components/CustomDropdown";
 import CustomInput from "@/components/CustomInput";
-import CustomValidation from "@/components/CustomValidation";
 import ImageUploader from "@/components/ImageUploader";
-import Loader from "@/components/ui/Loader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import {
-  CreateVehicleDocument,
-  UpdateVehicleDocument,
-} from "@/graphql/generated";
-import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import uploadImage from "@/utils/imageUpload";
-import { useMutation } from "@apollo/client";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { Alert, SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
 import { ms, vs } from "react-native-size-matters";
 
 
@@ -26,120 +17,30 @@ const InsuranceDropdown = [
   { label: "No", value: "no" },
 ]
 
-const VehicleAdd = () => {
-
-  const years = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: currentYear - 1996 }, (_, index) => ({
-      label: (1997 + index).toString(),
-      value: (1997 + index).toString(),
-    }));
-  }, []);
-
-  const { control, handleSubmit, formState: { errors }, reset, watch, setValue, } = useForm<any>({
-    defaultValues: {
+const defaultValues = {
       make: "",
       model: "",
       chassisNumber: "",
       numberPlate: "",
       year: "",
-      insurance: { label: "No", value: false },
+      insurance: "",
       color: "",
       avatar: "",
-      insuranceValidTill: null,
-    },
+  insuranceValidTill: null,
+}
+
+const VehicleAdd = () => {
+
+  const { control, handleSubmit, formState: { errors }, reset, watch, setValue, } = useForm<any>({
+    defaultValues: defaultValues
   });
 
   const { theme } = useTheme();
-  const { data: editedData } = useLocalSearchParams<any>();
 
-  useEffect(() => {
-    if (editedData) {
-      const parsedData = JSON.parse(editedData);
-      const yearValue = years?.find(
-        (item: any) => item.value === parsedData?.year
-      );
-      const insuranceValue = InsuranceDropdown?.find(
-        (item) => item.value === parsedData?.insurance
-      );
-      setValue("make", parsedData?.make);
-      setValue("model", parsedData?.model);
-      setValue("chassisNumber", parsedData?.chassisNumber);
-      setValue("numberPlate", parsedData?.numberPlate);
-      setValue("year", yearValue);
-      setValue("insurance", insuranceValue);
-      setValue("insuranceExpiry", parsedData?.insuranceExpiry);
-      setValue("color", parsedData?.color);
-      setValue("avatar", parsedData?.avatar);
-    }
-  }, [editedData]);
-
-  const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
-    getDateTimePickerProps(false)
-  );
-  const navigation = useNavigation();
-
-  useLayoutEffect(() => {
-    if (editedData) {
-      navigation.setOptions({ title: 'Edit Vehicle' });
-    } else {
-      navigation.setOptions({ title: 'Add Vehicle' });
-    }
-  }, [editedData]);
-
-  const [addVehicleApi, addVehicleStat] = useMutation<any>(
-    CreateVehicleDocument,
-    {
-      onCompleted: (data) => {
-        reset();
-        router.back();
-      },
-      onError: (error) => {
-        console.log(error);
-        Alert.alert("Error", error.message);
-      },
-    }
-  );
-
-  const [editVehicleApi, editVehicleStat] = useMutation<any>(
-    UpdateVehicleDocument,
-    {
-      onCompleted: (data) => {
-        reset();
-        router.back();
-      },
-      onError: (error) => {
-        console.log(error);
-        Alert.alert("Error", error.message);
-      },
-    }
-  );
   const onSubmit = (data: any) => {
-    let params = {
-      ...data,
-      year: data?.year?.value,
-      insurance: data?.insurance?.value,
-      ...(editedData ? { id: Number(JSON.parse(editedData)?.id) } : {}),
-    };
 
-    if (editedData) {
-      editVehicleApi({
-        variables: {
-          updateVehicleInput: params,
-        },
-      });
-    } else {
-      addVehicleApi({
-        variables: {
-          createVehicleInput: params,
-        },
-      });
-    }
   };
 
-  console.log("insurance", watch('insurance'))
-
-  if (addVehicleStat.loading || editVehicleStat.loading) return <Loader />;
   return (
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}
