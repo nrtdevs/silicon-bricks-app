@@ -293,10 +293,7 @@ const ImageUploader = ({  type = "single",onChange,maxFiles = 10, maxSizeMB = 5}
                       style={styles.deleteButton}
                       onPress={() => removeImage(image.id)}
                     >
-                      <Text style={styles.deleteIcon}>×
-
-                        
-                      </Text>
+                      <Text style={styles.deleteIcon}>×</Text>
                     </TouchableOpacity>
                   </View>
 

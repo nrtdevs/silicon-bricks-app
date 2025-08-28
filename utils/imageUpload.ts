@@ -2,7 +2,7 @@ import * as FileSystem from "expo-file-system";
 import { Env } from "@/constants/ApiEndpoints";
   
   
-  const uploadImage = async (uri: string) => {
+  const uploadImage = async (uri: any) => {
     try {
       const fileInfo = await FileSystem.getInfoAsync(uri);
       if (!fileInfo.exists) {
@@ -19,7 +19,7 @@ import { Env } from "@/constants/ApiEndpoints";
         uri,
         name: `upload.${fileExtension}`,
         type: mimeType,
-      } as unknown as Blob); 
+      } as unknown as Blob);
 
       const uploadResponse = await fetch(`${Env.SERVER_URL}/api/files/upload`, {
         method: "POST",
@@ -32,7 +32,7 @@ import { Env } from "@/constants/ApiEndpoints";
         const err = await uploadResponse.text();
         throw new Error(`Upload failed: ${err}`);
       }
-      const responseData = await uploadResponse.json(); 
+      const responseData = await uploadResponse.json();
       return responseData?.files[0];
     } catch (error) {
       console.error("Upload failed:", error);

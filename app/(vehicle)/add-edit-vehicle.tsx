@@ -149,25 +149,13 @@ const VehicleAdd = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.formContainer}>
-          {/* <CustomValidation
-            type="image"
-            control={control}
-            name={"avatar"}
-            label={"Avatar"}
-            defaultValue={""}
-            imageResponseHandler={async (image: any) => {
-              console.log("purana", image)
-
-            }}
-          /> */}
-
 
           {/* Multiple Image Upload */}
           <ImageUploader
             type="multiple"
-            onChange={async (imgs: string[]) => {
+            onChange={async (imgs) => {
               const result = await uploadImage(imgs);
-              setValue("avatar", result); 
+              setValue("avatar", result);
             }}
           />
 
