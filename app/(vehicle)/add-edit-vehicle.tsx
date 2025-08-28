@@ -2,10 +2,13 @@ import CustomButton from "@/components/CustomButton";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import CustomDropdown from "@/components/CustomDropdown";
 import CustomInput from "@/components/CustomInput";
+import DocumentUploader from "@/components/DocumentUploader";
 import ImageUploader from "@/components/ImageUploader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
+import { CreateVehicleDocument, UpdateVehicleDocument } from "@/graphql/generated";
 import uploadImage from "@/utils/imageUpload";
+import { useMutation } from "@apollo/client";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
@@ -18,14 +21,14 @@ const InsuranceDropdown = [
 ]
 
 const defaultValues = {
-      make: "",
-      model: "",
-      chassisNumber: "",
-      numberPlate: "",
-      year: "",
-      insurance: "",
-      color: "",
-      avatar: "",
+  make: "",
+  model: "",
+  chassisNumber: "",
+  numberPlate: "",
+  year: "",
+  insurance: "",
+  color: "",
+  avatar: "",
   insuranceValidTill: null,
 }
 
@@ -37,9 +40,13 @@ const VehicleAdd = () => {
 
   const { theme } = useTheme();
 
+  const [CreateVehicle] = useMutation(CreateVehicleDocument);
+  const [UpdateVehicle] = useMutation(UpdateVehicleDocument)
+
   const onSubmit = (data: any) => {
 
   };
+
 
   return (
     <SafeAreaView
@@ -52,10 +59,9 @@ const VehicleAdd = () => {
         <View style={styles.formContainer}>
 
           {/* Multiple Image Upload */}
-          <ImageUploader
+          <DocumentUploader
             type="multiple"
             onChange={async (imgs) => {
-              console.log("Fsfdfds", imgs)
               const result = await uploadImage(imgs);
               setValue("avatar", result);
             }}
@@ -115,7 +121,7 @@ const VehicleAdd = () => {
             placeholder="Select Insurance Option"
             options={InsuranceDropdown}
           />
-          {watch('insurance')?.value === 'yes' && (
+          {watch('insurance') === 'yes' && (
             <CustomDatePicker
               control={control}
               name="insuranceValidTill"
