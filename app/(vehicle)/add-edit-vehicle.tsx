@@ -3,6 +3,7 @@ import CustomDatePicker from "@/components/CustomDatePicker";
 import CustomDropdown from "@/components/CustomDropdown";
 import CustomInput from "@/components/CustomInput";
 import CustomValidation from "@/components/CustomValidation";
+import ImageUploader from "@/components/ImageUploader";
 import Loader from "@/components/ui/Loader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
@@ -148,15 +149,25 @@ const VehicleAdd = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.formContainer}>
-          <CustomValidation
+          {/* <CustomValidation
             type="image"
             control={control}
             name={"avatar"}
             label={"Avatar"}
             defaultValue={""}
             imageResponseHandler={async (image: any) => {
-              const result = await uploadImage(image?.uri);
-              setValue("avatar", result);
+              console.log("purana", image)
+
+            }}
+          /> */}
+
+
+          {/* Multiple Image Upload */}
+          <ImageUploader
+            type="multiple"
+            onChange={async (imgs: string[]) => {
+              const result = await uploadImage(imgs);
+              setValue("avatar", result); 
             }}
           />
 
