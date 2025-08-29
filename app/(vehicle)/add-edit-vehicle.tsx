@@ -75,15 +75,14 @@ const VehicleAdd = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.formContainer}>
-
-            {/* Multiple Image Upload */}
             <DocumentUploader
-              type="multiple"
+              type="single"
               onChange={async (imgs) => {
                 const result = await uploadImage(imgs);
                 setValue("avatar", result);
               }}
             />
+
 
             <CustomInput
               name="make"
@@ -147,6 +146,14 @@ const VehicleAdd = () => {
                 mode="date"
               />
             )}
+            {/* Multiple Image Upload */}
+            <DocumentUploader
+              type="multiple"
+              onChange={async (imgs) => {
+                const result = await uploadImage(imgs);
+                setValue("avatar", result);
+              }}
+            />
           </View>
           <View style={styles.bottomButtonContainer}>
             <CustomButton
