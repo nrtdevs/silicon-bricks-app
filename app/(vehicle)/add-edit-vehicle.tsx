@@ -1,17 +1,19 @@
 import CustomButton from "@/components/CustomButton";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import CustomDropdown from "@/components/CustomDropdown";
+import CustomHeader from "@/components/CustomHeader";
 import CustomInput from "@/components/CustomInput";
 import DocumentUploader from "@/components/DocumentUploader";
-import ImageUploader from "@/components/ImageUploader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateVehicleDocument, UpdateVehicleDocument } from "@/graphql/generated";
 import uploadImage from "@/utils/imageUpload";
 import { useMutation } from "@apollo/client";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router, useNavigation } from "expo-router";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
 import { ms, vs } from "react-native-size-matters";
 
 
@@ -39,6 +41,7 @@ const VehicleAdd = () => {
   });
 
   const { theme } = useTheme();
+  const navigation = useNavigation();
 
   const [CreateVehicle] = useMutation(CreateVehicleDocument);
   const [UpdateVehicle] = useMutation(UpdateVehicleDocument)
@@ -49,96 +52,113 @@ const VehicleAdd = () => {
 
 
   return (
-    <SafeAreaView
-      style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}
+    <CustomHeader
+      title="Create Vehicle"
+      leftComponent={
+        <Pressable
+          style={styles.menuButton}
+          onPress={() => {
+            router.navigate({
+              pathname: "/(vehicle)/vehicle-list",
+            })
+          }}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors[theme].text} />
+        </Pressable>
+      }
     >
-      <ScrollView
-        contentContainerStyle={styles.scrollViewContent}
-        showsVerticalScrollIndicator={false}
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}
       >
-        <View style={styles.formContainer}>
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.formContainer}>
 
-          {/* Multiple Image Upload */}
-          <DocumentUploader
-            type="multiple"
-            onChange={async (imgs) => {
-              const result = await uploadImage(imgs);
-              setValue("avatar", result);
-            }}
-          />
+            {/* Multiple Image Upload */}
+            <DocumentUploader
+              type="multiple"
+              onChange={async (imgs) => {
+                const result = await uploadImage(imgs);
+                setValue("avatar", result);
+              }}
+            />
 
-          <CustomInput
-            name="make"
-            control={control}
-            label="Brand"
-            placeholder="Enter Brand Name"
-            required={true}
-          />
+            <CustomInput
+              name="make"
+              control={control}
+              label="Brand"
+              placeholder="Enter Brand Name"
+              required={true}
+            />
 
-          <CustomInput
-            name="model"
-            control={control}
-            label="Model"
-            placeholder="Enter Model Name"
-            required={true}
-          />
-          <CustomInput
-            name="chassisNumber"
-            control={control}
-            label="Chassis Number"
-            placeholder="Enter Chassis Number"
-            required={true}
-          />
-          <CustomInput
-            name="color"
-            control={control}
-            label="Color"
-            placeholder="Enter Color"
-            required={true}
-          />
-          <CustomInput
-            name="numberPlate"
-            control={control}
-            label="Number Plate"
-            placeholder="Enter Number Plate"
-            required={true}
-          />
+            <CustomInput
+              name="model"
+              control={control}
+              label="Model"
+              placeholder="Enter Model Name"
+              required={true}
+            />
+            <CustomInput
+              name="chassisNumber"
+              control={control}
+              label="Chassis Number"
+              placeholder="Enter Chassis Number"
+              required={true}
+            />
+            <CustomInput
+              name="color"
+              control={control}
+              label="Color"
+              placeholder="Enter Color"
+              required={true}
+            />
+            <CustomInput
+              name="numberPlate"
+              control={control}
+              label="Number Plate"
+              placeholder="Enter Number Plate"
+              required={true}
+            />
 
 
-          <CustomDatePicker
-            control={control}
-            name="year"
-            label="Model Year"
-            required
-            mode="year"
-          />
-
-          <CustomDropdown
-            control={control}
-            name="insurance"
-            label="Insurance"
-            required
-            placeholder="Select Insurance Option"
-            options={InsuranceDropdown}
-          />
-          {watch('insurance') === 'yes' && (
             <CustomDatePicker
               control={control}
-              name="insuranceValidTill"
-              label="Insurance Date"
-              mode="date"
+              name="year"
+              label="Model Year"
+              required
+              mode="year"
             />
-          )}
-        </View>
-      </ScrollView>
-      <View style={styles.bottomButtonContainer}>
-        <CustomButton
-          title="Submit"
-          onPress={handleSubmit(onSubmit)}
-          style={styles.submitButton}
-        />
-      </View>
-    </SafeAreaView>
+
+            <CustomDropdown
+              control={control}
+              name="insurance"
+              label="Insurance"
+              required
+              placeholder="Select Insurance Option"
+              options={InsuranceDropdown}
+            />
+            {watch('insurance') === 'yes' && (
+              <CustomDatePicker
+                control={control}
+                name="insuranceValidTill"
+                label="Insurance Date"
+                mode="date"
+              />
+            )}
+          </View>
+          <View style={styles.bottomButtonContainer}>
+            <CustomButton
+              title="Submit"
+              onPress={handleSubmit(onSubmit)}
+              style={styles.submitButton}
+            />
+          </View>
+        </ScrollView>
+
+      </SafeAreaView>
+    </CustomHeader>
   );
 };
 
@@ -149,6 +169,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: ms(12),
   },
+  menuButton: {
+    padding: ms(10),
+  },
   scrollViewContent: {
     flexGrow: 1,
     paddingBottom: vs(80),
@@ -158,11 +181,11 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   bottomButtonContainer: {
-    position: "absolute",
+    marginTop: 15,
+    position: "relative",
     bottom: vs(10),
     width: "100%",
     alignSelf: "center",
-    paddingHorizontal: ms(12),
   },
   submitButton: {
     width: "100%",

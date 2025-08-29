@@ -17,6 +17,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
+import { color } from "@rneui/base";
 
 const { width } = Dimensions.get('window');
 
@@ -234,57 +235,6 @@ const DocumentUploader = ({
 
   return (
     <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
-      {/* Header Section */}
-      <View style={styles.header}>
-        <LinearGradient
-          colors={['#667eea', '#764ba2']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.headerGradient}
-        >
-          <Ionicons name="cloud-upload" size={32} color="white" />
-          <Text style={styles.headerTitle}>
-            {type === "single" ? "Upload Document" : "Upload Documents"}
-          </Text>
-          <Text style={styles.headerSubtitle}>
-            Select {type === "single" ? "a document" : "documents"} to upload
-          </Text>
-        </LinearGradient>
-      </View>
-
-      {/* Stats Bar */}
-      <View style={[styles.statsBar, { backgroundColor: Colors[theme].cart }]}>
-        <View style={styles.statItem}>
-          <Ionicons name="documents" size={20} color={Colors[theme].primary.main} />
-          <Text style={[styles.statText, { color: Colors[theme].textPrimary }]}>
-            {docs.length}/{maxFiles}
-          </Text>
-          <Text style={[styles.statLabel, { color: Colors[theme].textSecondary }]}>
-            Files
-          </Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Ionicons name="checkmark-circle" size={20} color="#27ae60" />
-          <Text style={[styles.statText, { color: Colors[theme].textPrimary }]}>
-            {docs.filter(d => d.status === 'success').length}
-          </Text>
-          <Text style={[styles.statLabel, { color: Colors[theme].textSecondary }]}>
-            Ready
-          </Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Ionicons name="time" size={20} color="#f39c12" />
-          <Text style={[styles.statText, { color: Colors[theme].textPrimary }]}>
-            {docs.filter(d => d.status === 'uploading').length}
-          </Text>
-          <Text style={[styles.statLabel, { color: Colors[theme].textSecondary }]}>
-            Uploading
-          </Text>
-        </View>
-      </View>
-
       {/* Documents Grid */}
       <ScrollView 
         horizontal={true}
@@ -376,13 +326,13 @@ const DocumentUploader = ({
 
                 {doc.status === "success" && (
                   <View style={styles.successOverlay}>
-                    <Ionicons name="checkmark-circle" size={24} color="#27ae60" />
+                    <Ionicons name="checkmark-circle" size={24} style={{ color: Colors[theme].success.border }} />
                   </View>
                 )}
 
                 {doc.status === "error" && (
                   <View style={styles.errorOverlay}>
-                    <Ionicons name="alert-circle" size={24} color="#e74c3c" />
+                    <Ionicons name="alert-circle" size={24} style={{ color: Colors[theme].danger.border }} />
                     <TouchableOpacity
                       style={styles.retryButton}
                       onPress={() => retryUpload(doc.id)}
@@ -468,7 +418,7 @@ export default DocumentUploader;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background, // Default background, will be overridden by theme
+    backgroundColor: Colors.light.background, 
   },
   
   // Header Styles
@@ -496,7 +446,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 14,
-    color: Colors.white, // Changed to white, as gradient provides contrast
+    color: Colors.white, 
     marginTop: 4,
     textAlign: 'center',
   },
@@ -528,31 +478,29 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    backgroundColor: Colors.light.border, // Dynamic border color
+    backgroundColor: Colors.light.border, 
     marginHorizontal: 16,
   },
 
   // Scroll and Grid
   scroll: {
-    flexGrow: 0, // Ensure it doesn't take full vertical space
-    height: 280, // Give it a fixed height to scroll horizontally
+    flexGrow: 0,
+    height: 280, 
     paddingVertical: 10,
   },
   scrollContent: {
-    alignItems: 'flex-start', // Align items to the start for horizontal scroll
+    alignItems: 'flex-start', 
     paddingHorizontal: 20,
   },
   grid: {
-    flexDirection: 'row', // Arrange items in a row
-    // flexWrap: 'wrap', // Removed for horizontal scroll
-    // justifyContent: 'space-between', // Removed for horizontal scroll
+    flexDirection: 'row', 
   },
 
   // Add Card
   addCard: {
-    width: 160, // Fixed width for horizontal scroll
-    height: 220, // Adjusted height
-    marginRight: 15, // Spacing between cards
+    width: 160,
+    height: 220,
+    marginRight: 15, 
     marginBottom: 15,
     borderRadius: 16,
     elevation: 6,
@@ -574,7 +522,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: 'rgba(255,255,255,0.2)', // Keep white for contrast on gradient
+    backgroundColor: 'rgba(255,255,255,0.2)', 
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -587,11 +535,11 @@ const styles = StyleSheet.create({
   },
   addSubtitle: {
     fontSize: 12,
-    color: Colors.white, // Keep white for contrast on gradient
+    color: Colors.white, 
     marginBottom: 12,
   },
   supportedFormats: {
-    backgroundColor: 'rgba(255,255,255,0.2)', // Keep white for contrast on gradient
+    backgroundColor: 'rgba(255,255,255,0.2)', 
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -604,9 +552,9 @@ const styles = StyleSheet.create({
 
   // Document Cards
   docCard: {
-    width: 160, // Fixed width for horizontal scroll
-    height: 230, // Increased height to accommodate input
-    marginRight: 15, // Spacing between cards
+    width: 160,
+    height: 230,
+    marginRight: 15, 
     marginBottom: 15,
     borderRadius: 16,
     elevation: 4,
@@ -619,7 +567,7 @@ const styles = StyleSheet.create({
 
   // Document Preview
   docPreview: {
-    height: 125, // Slightly increased height
+    height: 125, 
     position: 'relative',
   },
   imagePreviewContainer: {
@@ -721,7 +669,7 @@ const styles = StyleSheet.create({
 
   // Document Info
   docInfo: {
-    flex: 1, // Allow docInfo to take available vertical space
+    flex: 1, 
     padding: 12,
   },
   docTitle: {
@@ -759,7 +707,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     fontSize: 12,
     textAlign: 'left',
-    minHeight: 40, // Ensure a minimum height for visibility
-    flexShrink: 1, // Allow the input to shrink if needed
+    minHeight: 40,
+    flexShrink: 1, 
   },
 });
