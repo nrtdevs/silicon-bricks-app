@@ -449,7 +449,7 @@ const DocumentUploader = ({
                     },
                   ]}
                   placeholder="Enter custom name (optional)"
-                  placeholderTextColor={Colors[theme].placeholder}
+                  placeholderTextColor={Colors[theme].textSecondary}
                   value={doc.customName}
                   onChangeText={(text) => updateDocName(doc.id, text)}
                   maxLength={30}
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
   // Document Cards
   docCard: {
     width: 160, // Fixed width for horizontal scroll
-    height: 220, // Adjusted height
+    height: 230, // Increased height to accommodate input
     marginRight: 15, // Spacing between cards
     marginBottom: 15,
     borderRadius: 16,
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
 
   // Document Preview
   docPreview: {
-    height: 120,
+    height: 125, // Slightly increased height
     position: 'relative',
   },
   imagePreviewContainer: {
@@ -721,6 +721,7 @@ const styles = StyleSheet.create({
 
   // Document Info
   docInfo: {
+    flex: 1, // Allow docInfo to take available vertical space
     padding: 12,
   },
   docTitle: {
@@ -758,5 +759,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     fontSize: 12,
     textAlign: 'left',
+    minHeight: 40, // Ensure a minimum height for visibility
+    flexShrink: 1, // Allow the input to shrink if needed
   },
 });
