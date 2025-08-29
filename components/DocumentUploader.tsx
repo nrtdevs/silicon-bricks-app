@@ -146,26 +146,47 @@ const DocumentUploader = ({
 
     let newDocs: UploadingDoc[] = [];
 
+    const currentFiles = new Set(docs.map((d) => `${d.name}-${d.size}`));
+
+    const processAssets = (assets: DocumentPicker.DocumentPickerAsset[]) => {
+      const filteredAssets = assets.filter((asset) => {
+        const key = `${asset.name}-${asset.size}`;
+        if (currentFiles.has(key)) {
+          Alert.alert(
+            "Duplicate File Detected",
+            "This file has already been uploaded. Please select a new file."
+          );
+          return false;
+        }
+        return true;
+      });
+      return filteredAssets;
+    };
+
+
     if (type === "single") {
-      const asset = result.assets[0];
-      newDocs = [
-        {
-          id: generateId(),
-          uri: asset.uri,
-          name: asset.name,
-          size: asset.size,
-          progress: 0,
-          status: "uploading",
-          customName: "",
-        },
-      ];
-      setDocs(newDocs);
+      const filteredAsset = processAssets(result.assets);
+      if (filteredAsset.length > 0) {
+        const asset = filteredAsset[0];
+        newDocs = [
+          {
+            id: generateId(),
+            uri: asset.uri,
+            name: asset.name,
+            size: asset.size,
+            progress: 0,
+            status: "uploading",
+            customName: "",
+          },
+        ];
+        setDocs(newDocs);
+        if (onChange) {
+          onChange(newDocs.map((d) => d.uri));
+        }
+      }
     } else {
-      const currentUris = new Set(docs.map((d) => d.uri));
       const availableSlots = maxFiles - docs.length;
-      const assetsToAdd = result.assets
-        .filter((a) => !currentUris.has(a.uri))
-        .slice(0, availableSlots);
+      const assetsToAdd = processAssets(result.assets).slice(0, availableSlots);
 
       if (assetsToAdd.length > 0) {
         newDocs = assetsToAdd.map((a) => ({
@@ -177,26 +198,29 @@ const DocumentUploader = ({
           status: "uploading" as const,
           customName: "",
         }));
-        setDocs((prev) => [...prev, ...newDocs]);
-      } else {
+        setDocs((prev) => {
+          const updatedDocs = [...newDocs, ...prev];
+          if (onChange) {
+            onChange(updatedDocs.map((d) => d.uri));
+          }
+          return updatedDocs;
+        });
+      } else if (result.assets.length > 0 && availableSlots === 0) {
         Alert.alert(
-          "No New Files",
-          "These documents are already added or exceed max limit."
+          "Max Files Reached",
+          "You have reached the maximum number of files allowed."
         );
       }
     }
 
     newDocs.forEach((doc) => {
-      simulateUpload(doc.id).catch(() => {});
+      simulateUpload(doc.id).catch(() => { });
     });
 
-    if (onChange) {
-      const allUris =
-        type === "single"
-          ? [newDocs[0].uri]
-          : [...docs.map((d) => d.uri), ...newDocs.map((d) => d.uri)];
-      onChange(allUris);
-    }
+    Animated.spring(uploadAnimation, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
 
     Animated.spring(uploadAnimation, {
       toValue: 0,
@@ -218,7 +242,7 @@ const DocumentUploader = ({
         d.id === docId ? { ...d, status: "uploading", progress: 0 } : d
       )
     );
-    simulateUpload(docId).catch(() => {});
+    simulateUpload(docId).catch(() => { });
   };
 
   const updateDocName = (docId: string, newName: string) => {
@@ -236,7 +260,7 @@ const DocumentUploader = ({
   return (
     <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
       {/* Documents Grid */}
-      <ScrollView 
+      <ScrollView
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -292,11 +316,11 @@ const DocumentUploader = ({
               key={doc.id}
               style={[
                 styles.docCard,
-                { 
+                {
                   backgroundColor: Colors[theme].cart,
                   shadowColor: Colors[theme].shadow,
-                  borderColor: doc.status === 'success' ? '#27ae60' : 
-                              doc.status === 'error' ? '#e74c3c' : Colors[theme].border
+                  borderColor: doc.status === 'success' ? '#27ae60' :
+                    doc.status === 'error' ? '#e74c3c' : Colors[theme].border
                 },
               ]}
             >
@@ -376,7 +400,7 @@ const DocumentUploader = ({
                 >
                   {doc.name}
                 </Text>
-                
+
                 <View style={styles.docMeta}>
                   <Text style={[styles.docSize, { color: Colors[theme].textSecondary }]}>
                     {formatFileSize(doc.size)}
@@ -418,9 +442,9 @@ export default DocumentUploader;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background, 
+    backgroundColor: Colors.light.background,
   },
-  
+
   // Header Styles
   header: {
     marginHorizontal: 20,
@@ -446,7 +470,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 14,
-    color: Colors.white, 
+    color: Colors.white,
     marginTop: 4,
     textAlign: 'center',
   },
@@ -478,28 +502,28 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    backgroundColor: Colors.light.border, 
+    backgroundColor: Colors.light.border,
     marginHorizontal: 16,
   },
 
   // Scroll and Grid
   scroll: {
     flexGrow: 0,
-    height: 280, 
+    height: 280,
     paddingVertical: 10,
   },
   scrollContent: {
-    alignItems: 'flex-start', 
+    alignItems: 'flex-start',
     paddingHorizontal: 20,
   },
   grid: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
   },
 
   // Add Card
   addCard: {
     width: 160,
-    height: 220,
+    height: 250,
     marginRight: 15, 
     marginBottom: 15,
     borderRadius: 16,
@@ -522,7 +546,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: 'rgba(255,255,255,0.2)', 
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -535,11 +559,11 @@ const styles = StyleSheet.create({
   },
   addSubtitle: {
     fontSize: 12,
-    color: Colors.white, 
+    color: Colors.white,
     marginBottom: 12,
   },
   supportedFormats: {
-    backgroundColor: 'rgba(255,255,255,0.2)', 
+    backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -547,14 +571,14 @@ const styles = StyleSheet.create({
   formatText: {
     fontSize: 10,
     color: Colors.white,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 
   // Document Cards
   docCard: {
     width: 160,
     height: 250,
-    marginRight: 15, 
+    marginRight: 15,
     marginBottom: 15,
     borderRadius: 16,
     elevation: 4,
@@ -567,7 +591,7 @@ const styles = StyleSheet.create({
 
   // Document Preview
   docPreview: {
-    height: 125, 
+    height: 125,
     position: 'relative',
   },
   imagePreviewContainer: {
@@ -669,7 +693,7 @@ const styles = StyleSheet.create({
 
   // Document Info
   docInfo: {
-    flex: 1, 
+    flex: 1,
     padding: 8,
   },
   docTitle: {
@@ -706,8 +730,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     fontSize: 12,
+    marginHorizontal: 1,
     minHeight: 40,
-    flexShrink: 1, 
+    flexShrink: 1,
     marginBottom: 10
   },
 });
