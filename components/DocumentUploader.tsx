@@ -398,7 +398,7 @@ const DocumentUploader = ({
                       backgroundColor: Colors[theme].background,
                     },
                   ]}
-                  placeholder="Enter custom name (optional)"
+                  placeholder="Enter Name"
                   placeholderTextColor={Colors[theme].textSecondary}
                   value={doc.customName}
                   onChangeText={(text) => updateDocName(doc.id, text)}
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
   // Document Cards
   docCard: {
     width: 160,
-    height: 230,
+    height: 250,
     marginRight: 15, 
     marginBottom: 15,
     borderRadius: 16,
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
   // Document Info
   docInfo: {
     flex: 1, 
-    padding: 12,
+    padding: 8,
   },
   docTitle: {
     fontSize: 13,
@@ -706,8 +706,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     fontSize: 12,
-    textAlign: 'left',
     minHeight: 40,
     flexShrink: 1, 
+    marginBottom: 10
   },
 });
