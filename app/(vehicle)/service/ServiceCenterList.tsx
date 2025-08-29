@@ -1,31 +1,38 @@
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
-import VehicleCard from "@/components/vehicle/VehicleCart";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
+import { PaginatedVehiclesDocument } from "@/graphql/generated";
+import { useLazyQuery } from "@apollo/client";
 import { Entypo } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { FAB } from "@rneui/themed";
 import { router, useNavigation } from "expo-router";
-import { FlatList, Pressable, StyleSheet } from "react-native";
+import { useEffect } from "react";
+import { Pressable, StyleSheet } from "react-native";
 import { ms } from "react-native-size-matters";
 
 const ServiceCenter = () => {
     const navigation = useNavigation();
     const { theme } = useTheme();
+    const [getVehicleListApi, data] = useLazyQuery(PaginatedVehiclesDocument);
 
-    // <VehicleCard
-    //     brand="Brand"
-    //     model="model"
-    //     chassisNumber="Ch8542"
-    //     number="Mp 04 UH 5245"
-    //     createdAt=""
-    //     status="active"
-    //     onEdit={() => { }}
-    //     onDelete={() => { }}
-    //     onChangeStatus={() => { }}
-    //     onView={() => { }}
-    // />
+    useEffect(() => {
+        getVehicleListApi({
+            variables: {
+                listInputDto: {
+                    limit: 10,
+                    page: 1
+                }
+            }
+        }
+        );
+    }, []);
+
+    const vehicles = data?.data?.paginatedVehicles?.data ?? []
+
+    console.log("service list", vehicles)
+
     return (
         <CustomHeader
             title="Service Center "
@@ -39,10 +46,10 @@ const ServiceCenter = () => {
             }
         >
             <ThemedView style={{ flex: 1 }}>
-                
-                {/* <FlatList 
-                data={}
-                  keyExtractor={(item) => item?.id?.toString()}
+
+                {/* <FlatList
+                    data={ }
+                    keyExtractor={(item) => item?.id?.toString()}
                 /> */}
                 <FAB
                     size="large"

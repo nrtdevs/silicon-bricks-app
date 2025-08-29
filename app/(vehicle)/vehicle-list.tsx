@@ -62,15 +62,12 @@ const VehicleList = () => {
       value: "maintenance",
     },
   ];
-  const {
-    control,
-    watch,
-    setValue,
-  } = useForm<{ status: any }>({
+  const { control, watch, setValue, } = useForm<{ status: any }>({
     defaultValues: {
       status: "",
     },
   });
+
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
