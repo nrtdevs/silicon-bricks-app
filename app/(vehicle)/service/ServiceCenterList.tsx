@@ -1,37 +1,106 @@
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
+import VehicleCard from "@/components/vehicle/VehicleCart";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { PaginatedVehiclesDocument } from "@/graphql/generated";
+import { PaginatedServiceCentersDocument } from "@/graphql/generated";
 import { useLazyQuery } from "@apollo/client";
 import { Entypo } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { FAB } from "@rneui/themed";
 import { router, useNavigation } from "expo-router";
-import { useEffect } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet } from "react-native";
 import { ms } from "react-native-size-matters";
 
 const ServiceCenter = () => {
     const navigation = useNavigation();
     const { theme } = useTheme();
-    const [getVehicleListApi, data] = useLazyQuery(PaginatedVehiclesDocument);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit] = useState(10);
+    const [allVehicles, setAllVehicles] = useState<any[]>([]);
+    const [hasMore, setHasMore] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const [getVehicleListApi, { data, loading }] = useLazyQuery(PaginatedServiceCentersDocument);
 
     useEffect(() => {
-        getVehicleListApi({
-            variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1
+        if (hasMore) {
+            getVehicleListApi({
+                variables: {
+                    listInputDto: {
+                        limit: limit,
+                        page: currentPage
+                    }
                 }
+            });
+        }
+    }, [currentPage, hasMore]);
+
+    useEffect(() => {
+        if (data?.paginatedServiceCenters?.data) {
+            setAllVehicles(prevVehicles => [...prevVehicles, ...data.paginatedServiceCenters.data]);
+            if (data.paginatedServiceCenters.data.length < limit) {
+                setHasMore(false);
             }
         }
+    }, [data]);
+
+    const loadMore = () => {
+        if (!loading && hasMore) {
+            setCurrentPage(prevPage => prevPage + 1);
+        }
+    };
+
+    const handleRefresh = () => {
+        setRefreshing(true);
+        setCurrentPage(1);
+        setAllVehicles([]);
+        setHasMore(true);
+        getVehicleListApi({
+            variables: { listInputDto: { limit, page: 1 } },
+        }).finally(() => setRefreshing(false));
+    };
+
+    const renderItems = (item: any) => {
+        return (
+            <VehicleCard
+                brand={item?.name}
+                model=""
+                chassisNumber=""
+                number=""
+                createdAt=""
+                status="active"
+                onEdit={() =>
+                    router.navigate({
+                        pathname: "/add-edit-vehicle",
+                        params: { data: JSON.stringify(item) },
+                    })
+                }
+                onDelete={() => { }}
+                onChangeStatus={() => { }}
+                // onDelete={() =>
+                //     deleteVehicleApi({
+                //         variables: {
+                //             deleteVehicleId: Number(item?.id),
+                //         },
+                //     })
+                // }
+                // onChangeStatus={() => {
+                //     let find = statusArr?.find((i: any) => i.value === item?.status);
+                //     setValue("status", find);
+                //     setSelectedVehicle(item);
+                //     setIsModalVisible(true);
+                // }}
+                onView={() =>
+                    router.navigate({
+                        pathname: "/vehicle-details",
+                        params: { data: JSON.stringify(item) },
+                    })
+                }
+            />
         );
-    }, []);
-
-    const vehicles = data?.data?.paginatedVehicles?.data ?? []
-
-    console.log("service list", vehicles)
+    };
 
     return (
         <CustomHeader
@@ -47,10 +116,18 @@ const ServiceCenter = () => {
         >
             <ThemedView style={{ flex: 1 }}>
 
-                {/* <FlatList
-                    data={ }
+                <FlatList
+                    data={allVehicles}
                     keyExtractor={(item) => item?.id?.toString()}
-                /> */}
+                    onEndReached={loadMore}
+                    onEndReachedThreshold={0.5}
+                    refreshing={refreshing}
+                    onRefresh={handleRefresh}
+                    renderItem={({ item }: any) => renderItems(item)}
+                    ListFooterComponent={() =>
+                        loading ? <ActivityIndicator size="large" color={Colors[theme].text} /> : null
+                    }
+                />
                 <FAB
                     size="large"
                     title="Add Service"

@@ -1094,3 +1094,13 @@ mutation RestoreMeetingType($ids: [Int!]!) {
 mutation HardDeleteMeetingType($ids: [Int!]!) {
   hardDeleteMeetingType(ids: $ids)
 }
+
+# create service center 
+mutation CreateServiceCenter($createServiceCenterInput: CreateServiceCenterDto!) {
+  createServiceCenter(createServiceCenterInput: $createServiceCenterInput) {
+    id
+    name
+    longitude
+    latitude
+  }
+}
