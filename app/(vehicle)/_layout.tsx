@@ -1,14 +1,14 @@
-import React from 'react'
-import { Drawer } from 'expo-router/drawer';
-import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
-import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { ThemedText } from '@/components/ThemedText';
+import { Colors } from '@/constants/Colors';
 import { labels } from '@/constants/Labels';
 import { useTheme } from '@/context/ThemeContext';
-import { Colors } from '@/constants/Colors';
+import { MaterialIcons } from '@expo/vector-icons';
+import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
+import { router } from 'expo-router';
+import { Drawer } from 'expo-router/drawer';
+import React from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 import { ms } from 'react-native-size-matters';
-import { View, Image, StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
 
 const CustomDrawerContent = (props: any) => {
   const { theme } = useTheme();
@@ -41,7 +41,7 @@ const CustomDrawerContent = (props: any) => {
         icon={({ color, size }) => <MaterialIcons name="build" size={ms(24)} color={Colors[theme].primary.main} />}
         label="Service Center"
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-        onPress={() => router.push('/(vehicle)/service-center')}
+        onPress={() => router.push('/(vehicle)/service/ServiceCenterList')}
       />
       <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="attach-money" size={ms(24)} color={Colors[theme].primary.main} />}
