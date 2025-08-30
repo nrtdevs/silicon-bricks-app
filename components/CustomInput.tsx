@@ -16,9 +16,10 @@ type CustomInputProps = {
   type?: "text" | "email" | "number" | "password";
   multiline?: boolean;
   numberOfLines?: number;
+  error?: string | undefined; // Add error prop to the type definition
 };
 
-const CustomInput = ({ control, name, label, placeholder, multiline = false, numberOfLines = 4, secureTextEntry, type = "text", required = false, }: CustomInputProps) => {
+const CustomInput = ({ control, name, label, placeholder, multiline = false, numberOfLines = 4, secureTextEntry, type = "text", required = false, error }: CustomInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
   // Detect theme
@@ -40,7 +41,7 @@ const CustomInput = ({ control, name, label, placeholder, multiline = false, num
     <Controller
       control={control}
       name={name}
-      render={({ field: { value, onChange, onBlur }, fieldState: { error } }) => (
+      render={({ field: { value, onChange, onBlur } }) => (
         <View style={{ marginBottom: 20 }}>
           {/* Label */}
           <Text
@@ -86,7 +87,7 @@ const CustomInput = ({ control, name, label, placeholder, multiline = false, num
           />
 
           {/* Error Message */}
-          {error && <Text style={[styles.errorText, { color: Colors[theme].danger.main }]}>{error.message || "Invalid input"}</Text>}
+          {error && <Text style={[styles.errorText, { color: Colors[theme].danger.main }]}>{error}</Text>}
         </View>
       )}
     />

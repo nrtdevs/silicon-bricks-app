@@ -14,19 +14,36 @@ import { useMutation } from '@apollo/client';
 import CustomToast from '@/components/CustomToast';
 import { CreateServiceCenterDocument, ServiceCenterStatus, ServiceCenterType } from '@/graphql/generated'
 import { ScrollView } from 'react-native'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 
-const defaultValues = {
+const serviceCenterSchema = z.object({
+  name: z.string().min(1, "Center Name is required"),
+  contactNo: z
+    .string()
+    .min(1, "Contact Number is required")
+    .regex(/^(\+91)?[0-9]{10}$/, "Enter a valid 10-digit mobile number"),
+
+  latitude: z.number().min(-90, "Invalid Latitude").max(90, "Invalid Latitude"),
+  longitude: z.number().min(-180, "Invalid Longitude").max(180, "Invalid Longitude"),
+  address: z.string().min(1, "Address is required"),
+});
+
+type ServiceCenterFormValues = z.infer<typeof serviceCenterSchema>;
+
+const defaultValues: ServiceCenterFormValues = {
   name: "",
   contactNo: "",
-  latitude: 28.6139,
-  longitude: 77.2090,
+  latitude: 0,
+  longitude: 0,
   address: ""
 }
 
 const AddService = () => {
   const { theme } = useTheme();
-  const { control, handleSubmit, formState: { errors }, reset, watch, setValue, } = useForm<any>({
+  const { control, handleSubmit, formState: { errors }, reset, watch, setValue, } = useForm<ServiceCenterFormValues>({
+    resolver: zodResolver(serviceCenterSchema),
     defaultValues: defaultValues
   });
   const latitude = watch("latitude") || 28.6139;
@@ -84,6 +101,7 @@ const AddService = () => {
               label="Center Name"
               placeholder="Enter Center Name"
               required={true}
+              error={errors.name?.message}
             />
             <CustomInput
               name="contactNo"
@@ -92,6 +110,7 @@ const AddService = () => {
               placeholder="Enter Contact Number"
               required={true}
               type='number'
+              error={errors.contactNo?.message}
             />
             <CustomInput
               name="latitude"
@@ -100,6 +119,7 @@ const AddService = () => {
               placeholder="Enter Latitude"
               required={true}
               type='number'
+              error={errors.latitude?.message}
             />
             <CustomInput
               name="longitude"
@@ -108,6 +128,7 @@ const AddService = () => {
               placeholder="Enter Longitude"
               required={true}
               type='number'
+              error={errors.longitude?.message}
             />
             <CustomInput
               name="address"
@@ -117,22 +138,23 @@ const AddService = () => {
               required={true}
               multiline={true}
               numberOfLines={5}
+              error={errors.address?.message}
             />
             {/* Map View */}
             <View style={styles.mapContainer}>
               <MapView
                 style={styles.map}
                 region={{
-                  latitude: parseFloat(latitude),
-                  longitude: parseFloat(longitude),
+                  latitude: latitude,
+                  longitude: longitude,
                   latitudeDelta: 0.01,
                   longitudeDelta: 0.01,
                 }}
               >
                 <Marker
                   coordinate={{
-                    latitude: parseFloat(latitude),
-                    longitude: parseFloat(longitude),
+                    latitude: latitude,
+                    longitude: longitude,
                   }}
                 />
               </MapView>
