@@ -13,7 +13,7 @@ import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
 import { ms } from 'react-native-size-matters'
-import { string, z } from 'zod'
+import { z } from 'zod'
 
 
 const serviceCenterSchema = z.object({
@@ -102,7 +102,7 @@ const AddService = () => {
       if (response.data?.createServiceCenter?.id || response.data?.updateServiceCenter?.id) {
         CustomToast("success");
         reset(defaultValues);
-        router.navigate("/(vehicle)/service/ServiceCenterList");
+        router.navigate({ pathname: "/(vehicle)/service/ServiceCenterList", params: { refresh: "true" } });
       }
     } catch (error: any) {
       CustomToast("error");

@@ -9,7 +9,7 @@ import { useLazyQuery } from "@apollo/client";
 import { Entypo } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { FAB } from "@rneui/themed";
-import { router, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet } from "react-native";
 import { ms } from "react-native-size-matters";
@@ -17,6 +17,7 @@ import { ms } from "react-native-size-matters";
 const ServiceCenter = () => {
     const navigation = useNavigation();
     const { theme } = useTheme();
+    const { refresh } = useLocalSearchParams();
     const [currentPage, setCurrentPage] = useState(1);
     const [limit] = useState(10);
     const [allVehicles, setAllVehicles] = useState<any[]>([]);
@@ -37,6 +38,12 @@ const ServiceCenter = () => {
             });
         }
     }, [currentPage, hasMore]);
+
+    useEffect(() => {
+        if (refresh === "true") {
+            handleRefresh();
+        }
+    }, [refresh]);
 
     useEffect(() => {
         if (data?.paginatedServiceCenters?.data) {
@@ -65,7 +72,7 @@ const ServiceCenter = () => {
 
     const renderItems = (item: any) => {
         return (
-            <ServiceCard
+            <VehicleCard
                 brand={item?.name}
                 model=""
                 chassisNumber=""
