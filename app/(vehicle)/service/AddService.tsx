@@ -4,16 +4,16 @@ import CustomInput from '@/components/CustomInput'
 import CustomToast from '@/components/CustomToast'
 import { Colors } from '@/constants/Colors'
 import { useTheme } from '@/context/ThemeContext'
-import { CreateServiceCenterDocument, ServiceCenterStatus, ServiceCenterType } from '@/graphql/generated'
+import { CreateServiceCenterDocument, ServiceCenterStatus, ServiceCenterType, UpdateServiceCenterDocument } from '@/graphql/generated'
 import { useMutation } from '@apollo/client'
 import { Ionicons } from '@expo/vector-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { router } from 'expo-router'
-import React from 'react'
+import { router, useLocalSearchParams } from 'expo-router'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
 import { ms } from 'react-native-size-matters'
-import { z } from 'zod'
+import { string, z } from 'zod'
 
 
 const serviceCenterSchema = z.object({
@@ -30,15 +30,9 @@ const serviceCenterSchema = z.object({
   address: z.string().min(1, "Address is required"),
 });
 
-type ServiceCenterFormValues = {
-  name: string;
-  contactNo: string;
-  latitude: string;
-  longitude: string;
-  address: string;
-};
+type ServiceCenterFormValues = z.infer<typeof serviceCenterSchema>;
 
-const defaultValues: ServiceCenterFormValues = {
+const defaultValues = {
   name: "",
   contactNo: "",
   latitude: "",
@@ -48,31 +42,64 @@ const defaultValues: ServiceCenterFormValues = {
 
 const AddService = () => {
   const { theme } = useTheme();
+  const { data } = useLocalSearchParams();
+  const parsedData = data ? JSON.parse(data as string) : null;
   const { control, handleSubmit, formState: { errors }, reset, watch, setValue, } = useForm<ServiceCenterFormValues>({
     resolver: zodResolver(serviceCenterSchema),
     defaultValues: defaultValues
   });
 
   const [createServiceCenterApi, { loading }] = useMutation(CreateServiceCenterDocument);
+  const [UpdateServiceCenterApi, { loading: updateLoading }] = useMutation(UpdateServiceCenterDocument)
+
+  useEffect(() => {
+    if (parsedData?.id) {
+      setValue('name', parsedData?.name)
+      setValue('address', parsedData?.address)
+      setValue('contactNo', String(parsedData?.contactNo))
+      setValue('latitude', parsedData?.latitude)
+      setValue('longitude', parsedData?.longitude)
+    } else {
+      reset(defaultValues);
+    }
+  }, [parsedData?.id]);
 
   const onSubmit = async (data: ServiceCenterFormValues) => {
-    console.log("daTA", data)
     try {
-      const response = await createServiceCenterApi({
-        variables: {
-          createServiceCenterInput: {
-            name: data.name,
-            contactNo: Number(data.contactNo),
-            latitude: (data.latitude),
-            longitude: (data.longitude),
-            address: data.address,
-            status: ServiceCenterStatus.Active,
-            type: ServiceCenterType.InHouse,
+      let response;
+
+      if (parsedData?.id) {
+        response = await UpdateServiceCenterApi({
+          variables: {
+            updateServiceCenterInput: {
+              id: Number(parsedData?.id),
+              address: data?.address,
+              contactNo: Number(data.contactNo),
+              latitude: data?.latitude,
+              longitude: data?.longitude,
+              name: data?.name,
+              status: ServiceCenterStatus.Active,
+              type: ServiceCenterType.InHouse,
+            },
           },
-        },
-      });
-      console.log("response", response)
-      if (response.data?.createServiceCenter?.id) {
+        });
+      } else {
+        response = await createServiceCenterApi({
+          variables: {
+            createServiceCenterInput: {
+              name: data.name,
+              contactNo: Number(data.contactNo),
+              latitude: data.latitude,
+              longitude: data.longitude,
+              address: data.address,
+              status: ServiceCenterStatus.Active,
+              type: ServiceCenterType.InHouse,
+            },
+          },
+        });
+      }
+      // ✅ Now response exists in both cases
+      if (response.data?.createServiceCenter?.id || response.data?.updateServiceCenter?.id) {
         CustomToast("success");
         reset(defaultValues);
         router.navigate("/(vehicle)/service/ServiceCenterList");
@@ -82,9 +109,10 @@ const AddService = () => {
     }
   };
 
+
   return (
     <CustomHeader
-      title="Create Service"
+      title={parsedData?.id ? "Update Service" : "Create Service"}
       leftComponent={
         <Pressable
           style={styles.menuButton}
@@ -147,9 +175,9 @@ const AddService = () => {
               error={errors.address?.message}
             />
             <CustomButton
-              title="Create Service"
+              title="Submit"
               onPress={handleSubmit(onSubmit)}
-              isLoading={loading}
+              isLoading={loading || updateLoading}
               disabled={loading}
               style={styles.button}
             />

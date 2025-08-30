@@ -16,7 +16,7 @@ type CustomInputProps = {
   type?: "text" | "email" | "number" | "password";
   multiline?: boolean;
   numberOfLines?: number;
-  error?: string | undefined; // Add error prop to the type definition
+  error?: string | undefined;
 };
 
 const CustomInput = ({ control, name, label, placeholder, multiline = false, numberOfLines = 4, secureTextEntry, type = "text", required = false, error }: CustomInputProps) => {

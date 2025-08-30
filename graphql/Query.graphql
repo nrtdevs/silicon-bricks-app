@@ -1134,6 +1134,10 @@ query PaginatedServiceCenters($listInputDto: ListInputDTO!) {
     data {
       id
       name
+      contactNo
+      latitude
+      longitude
+      address
     }
   }
 }

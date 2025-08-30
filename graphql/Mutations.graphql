@@ -1104,3 +1104,11 @@ mutation CreateServiceCenter($createServiceCenterInput: CreateServiceCenterDto!)
     latitude
   }
 }
+
+# update service center 
+mutation UpdateServiceCenter($updateServiceCenterInput: UpdateServiceCenterDto!) {
+  updateServiceCenter(updateServiceCenterInput: $updateServiceCenterInput) {
+    id
+    name
+  }
+}

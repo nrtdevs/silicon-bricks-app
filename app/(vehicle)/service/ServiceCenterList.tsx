@@ -1,5 +1,6 @@
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
+import ServiceCard from "@/components/vehicle/ServiceCard";
 import VehicleCard from "@/components/vehicle/VehicleCart";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
@@ -64,7 +65,7 @@ const ServiceCenter = () => {
 
     const renderItems = (item: any) => {
         return (
-            <VehicleCard
+            <ServiceCard
                 brand={item?.name}
                 model=""
                 chassisNumber=""
@@ -73,7 +74,7 @@ const ServiceCenter = () => {
                 status="active"
                 onEdit={() =>
                     router.navigate({
-                        pathname: "/add-edit-vehicle",
+                        pathname: "/(vehicle)/service/AddService",
                         params: { data: JSON.stringify(item) },
                     })
                 }
