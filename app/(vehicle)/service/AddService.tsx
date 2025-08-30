@@ -1,42 +1,48 @@
+import CustomButton from '@/components/CustomButton'
 import CustomHeader from '@/components/CustomHeader'
 import CustomInput from '@/components/CustomInput'
+import CustomToast from '@/components/CustomToast'
 import { Colors } from '@/constants/Colors'
 import { useTheme } from '@/context/ThemeContext'
+import { CreateServiceCenterDocument, ServiceCenterStatus, ServiceCenterType } from '@/graphql/generated'
+import { useMutation } from '@apollo/client'
 import { Ionicons } from '@expo/vector-icons'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { router } from 'expo-router'
-import CustomButton from '@/components/CustomButton'
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { Pressable, SafeAreaView, StyleSheet, View } from 'react-native'
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
 import { ms } from 'react-native-size-matters'
-import MapView, { Marker } from 'react-native-maps';
-import { useMutation } from '@apollo/client';
-import CustomToast from '@/components/CustomToast';
-import { CreateServiceCenterDocument, ServiceCenterStatus, ServiceCenterType } from '@/graphql/generated'
-import { ScrollView } from 'react-native'
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { z } from 'zod'
 
 
 const serviceCenterSchema = z.object({
   name: z.string().min(1, "Center Name is required"),
-  contactNo: z
-    .string()
-    .min(1, "Contact Number is required")
-    .regex(/^(\+91)?[0-9]{10}$/, "Enter a valid 10-digit mobile number"),
-
-  latitude: z.number().min(-90, "Invalid Latitude").max(90, "Invalid Latitude"),
-  longitude: z.number().min(-180, "Invalid Longitude").max(180, "Invalid Longitude"),
+  contactNo: z.string().min(1, "Contact Number is required").regex(/^(\+91)?[0-9]{10}$/, "Enter a valid 10-digit mobile number"),
+  latitude: z.string().min(1, "Latitude is required").refine((val) => {
+    const num = parseFloat(val);
+    return !isNaN(num) && num >= -90 && num <= 90;
+  }, { message: "Invalid Latitude" }),
+  longitude: z.string().min(1, "Longitude is required").refine((val) => {
+    const num = parseFloat(val);
+    return !isNaN(num) && num >= -180 && num <= 180;
+  }, { message: "Invalid Longitude" }),
   address: z.string().min(1, "Address is required"),
 });
 
-type ServiceCenterFormValues = z.infer<typeof serviceCenterSchema>;
+type ServiceCenterFormValues = {
+  name: string;
+  contactNo: string;
+  latitude: string;
+  longitude: string;
+  address: string;
+};
 
 const defaultValues: ServiceCenterFormValues = {
   name: "",
   contactNo: "",
-  latitude: 0,
-  longitude: 0,
+  latitude: "",
+  longitude: "",
   address: ""
 }
 
@@ -46,26 +52,26 @@ const AddService = () => {
     resolver: zodResolver(serviceCenterSchema),
     defaultValues: defaultValues
   });
-  const latitude = watch("latitude") || 28.6139;
-  const longitude = watch("longitude") || 77.2090;
 
   const [createServiceCenterApi, { loading }] = useMutation(CreateServiceCenterDocument);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: ServiceCenterFormValues) => {
+    console.log("daTA", data)
     try {
       const response = await createServiceCenterApi({
         variables: {
           createServiceCenterInput: {
             name: data.name,
-            contactNo: data.contactNo,
-            latitude: data.latitude,
-            longitude: data.longitude,
+            contactNo: Number(data.contactNo),
+            latitude: (data.latitude),
+            longitude: (data.longitude),
             address: data.address,
             status: ServiceCenterStatus.Active,
             type: ServiceCenterType.InHouse,
           },
         },
       });
+      console.log("response", response)
       if (response.data?.createServiceCenter?.id) {
         CustomToast("success");
         reset(defaultValues);
@@ -140,25 +146,6 @@ const AddService = () => {
               numberOfLines={5}
               error={errors.address?.message}
             />
-            {/* Map View */}
-            <View style={styles.mapContainer}>
-              <MapView
-                style={styles.map}
-                region={{
-                  latitude: latitude,
-                  longitude: longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: latitude,
-                    longitude: longitude,
-                  }}
-                />
-              </MapView>
-            </View>
             <CustomButton
               title="Create Service"
               onPress={handleSubmit(onSubmit)}
@@ -186,15 +173,6 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     width: "100%",
-  },
-  mapContainer: {
-    marginTop: ms(12),
-    height: 200,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  map: {
-    flex: 1,
   },
   button: {
     marginTop: ms(10),
