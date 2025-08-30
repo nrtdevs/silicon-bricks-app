@@ -4,7 +4,7 @@ import CustomInput from '@/components/CustomInput'
 import CustomToast from '@/components/CustomToast'
 import { Colors } from '@/constants/Colors'
 import { useTheme } from '@/context/ThemeContext'
-import { CreateServiceCenterDocument, ServiceCenterStatus, ServiceCenterType, UpdateServiceCenterDocument } from '@/graphql/generated'
+import { CreateServiceCenterDocument, PaginatedServiceCentersDocument, ServiceCenterStatus, ServiceCenterType, UpdateServiceCenterDocument } from '@/graphql/generated'
 import { useMutation } from '@apollo/client'
 import { Ionicons } from '@expo/vector-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -49,8 +49,12 @@ const AddService = () => {
     defaultValues: defaultValues
   });
 
-  const [createServiceCenterApi, { loading }] = useMutation(CreateServiceCenterDocument);
-  const [UpdateServiceCenterApi, { loading: updateLoading }] = useMutation(UpdateServiceCenterDocument)
+  const [createServiceCenterApi, { loading }] = useMutation(CreateServiceCenterDocument, {
+    refetchQueries: [{ query: PaginatedServiceCentersDocument, variables: { listInputDto: { limit: 10, page: 1 } } }],
+  });
+  const [UpdateServiceCenterApi, { loading: updateLoading }] = useMutation(UpdateServiceCenterDocument, {
+    refetchQueries: [{ query: PaginatedServiceCentersDocument, variables: { listInputDto: { limit: 10, page: 1 } } }],
+  });
 
   useEffect(() => {
     if (parsedData?.id) {
@@ -102,7 +106,7 @@ const AddService = () => {
       if (response.data?.createServiceCenter?.id || response.data?.updateServiceCenter?.id) {
         CustomToast("success");
         reset(defaultValues);
-        router.navigate({ pathname: "/(vehicle)/service/ServiceCenterList", params: { refresh: "true" } });
+        router.navigate("/(vehicle)/service/ServiceCenterList");
       }
     } catch (error: any) {
       CustomToast("error");
