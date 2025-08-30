@@ -14,9 +14,11 @@ type CustomInputProps = {
   placeholder?: string;
   secureTextEntry?: boolean;
   type?: "text" | "email" | "number" | "password";
+  multiline?: boolean;
+  numberOfLines?: number;
 };
 
-const CustomInput = ({ control, name, label, placeholder, secureTextEntry, type = "text", required = false, }: CustomInputProps) => {
+const CustomInput = ({ control, name, label, placeholder, multiline = false, numberOfLines = 4, secureTextEntry, type = "text", required = false, }: CustomInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
   // Detect theme
@@ -66,8 +68,11 @@ const CustomInput = ({ control, name, label, placeholder, secureTextEntry, type 
             placeholder={placeholder}
             placeholderTextColor={Colors[theme].lightText}
             secureTextEntry={secureTextEntry}
+            multiline={multiline}
+            numberOfLines={multiline ? numberOfLines : 1} 
             style={[
               styles.input,
+              multiline && { height: numberOfLines * 24, textAlignVertical: "top" }, 
               {
                 borderColor: error
                   ? Colors[theme].danger.main

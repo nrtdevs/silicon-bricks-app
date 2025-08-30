@@ -9,10 +9,12 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Pressable, SafeAreaView, StyleSheet, View } from 'react-native'
 import { ms } from 'react-native-size-matters'
-import MapView, { Marker, UrlTile } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { useMutation } from '@apollo/client';
 import CustomToast from '@/components/CustomToast';
 import { CreateServiceCenterDocument, ServiceCenterStatus, ServiceCenterType } from '@/graphql/generated'
+import { ScrollView } from 'react-native'
+
 
 const defaultValues = {
   name: "",
@@ -39,8 +41,8 @@ const AddService = () => {
           createServiceCenterInput: {
             name: data.name,
             contactNo: data.contactNo,
-            latitude: parseFloat(data.latitude).toString(),
-            longitude: parseFloat(data.longitude).toString(),
+            latitude: data.latitude,
+            longitude: data.longitude,
             address: data.address,
             status: ServiceCenterStatus.Active,
             type: ServiceCenterType.InHouse,
@@ -74,70 +76,76 @@ const AddService = () => {
       }
     >
       <SafeAreaView style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}>
-        <View style={styles.formContainer}>
-          <CustomInput
-            name="name"
-            control={control}
-            label="Center Name"
-            placeholder="Enter Center Name"
-            required={true}
-          />
-          <CustomInput
-            name="contactNo"
-            control={control}
-            label="Contact Number"
-            placeholder="Enter Contact Number"
-            required={true}
-            type='number'
-          />
-          <CustomInput
-            name="latitude"
-            control={control}
-            label="Latitude"
-            placeholder="Enter Latitude"
-            required={true}
-            type='number'
-          />
-          <CustomInput
-            name="longitude"
-            control={control}
-            label="Longitude"
-            placeholder="Enter Longitude"
-            required={true}
-            type='number'
-          />
-          <CustomInput
-            name="address"
-            control={control}
-            label="address"
-            placeholder="Enter address"
-            required={true}
-          />
-          {/* Map View */}
-          <View style={styles.mapContainer}>
-            <MapView
-              style={styles.map}
-              region={{
-                latitude: parseFloat(latitude),
-                longitude: parseFloat(longitude),
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-            >
-              <UrlTile
-                urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                maximumZ={19}
-              />
-            </MapView>
+        <ScrollView>
+          <View style={styles.formContainer}>
+            <CustomInput
+              name="name"
+              control={control}
+              label="Center Name"
+              placeholder="Enter Center Name"
+              required={true}
+            />
+            <CustomInput
+              name="contactNo"
+              control={control}
+              label="Contact Number"
+              placeholder="Enter Contact Number"
+              required={true}
+              type='number'
+            />
+            <CustomInput
+              name="latitude"
+              control={control}
+              label="Latitude"
+              placeholder="Enter Latitude"
+              required={true}
+              type='number'
+            />
+            <CustomInput
+              name="longitude"
+              control={control}
+              label="Longitude"
+              placeholder="Enter Longitude"
+              required={true}
+              type='number'
+            />
+            <CustomInput
+              name="address"
+              control={control}
+              label="Address"
+              placeholder="Enter address"
+              required={true}
+              multiline={true}
+              numberOfLines={5}
+            />
+            {/* Map View */}
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                region={{
+                  latitude: parseFloat(latitude),
+                  longitude: parseFloat(longitude),
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: parseFloat(latitude),
+                    longitude: parseFloat(longitude),
+                  }}
+                />
+              </MapView>
+            </View>
+            <CustomButton
+              title="Create Service"
+              onPress={handleSubmit(onSubmit)}
+              isLoading={loading}
+              disabled={loading}
+              style={styles.button}
+            />
           </View>
-          <CustomButton
-            title="Create Service Center"
-            onPress={handleSubmit(onSubmit)}
-            isLoading={loading}
-            disabled={loading}
-            style={{ marginTop: ms(20) }}
-          />
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </CustomHeader>
   )
@@ -166,4 +174,8 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+  button: {
+    marginTop: ms(10),
+    marginBottom: ms(20)
+  }
 })
