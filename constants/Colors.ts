@@ -16,7 +16,7 @@ export const Colors = {
     shadow: "rgba(0, 0, 0, 0.06)",
     lightText: "#7E7E7E",
     placeholder: "#A8A8A8",
-    cart: "#FFFFFF", // Light modern card background
+    cart: "#F8F8F8", // Changed to a light gray to be visible against white background
     primary: {
       bg: "#EFF6FF", // Very light blue background
       text: "#1E40AF", // Dark blue text
@@ -86,6 +86,7 @@ export const Colors = {
     border: "#2C2C2E",
     shadow: "rgba(255, 255, 255, 0.05)",
     lightText: "#9E9E9F",
+    placeholder: "#A8A8A8", // Added for consistency with light theme
     inputColor: "#4D4D4D",
     cart: "#1e1e1e", // Elegant dark card
     primary: {

@@ -7,7 +7,7 @@ import {
   RefreshControl,
   Text,
 } from "react-native";
-import React, { useCallback,useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   DeleteVehicleDocument,
@@ -27,7 +27,7 @@ import NoDataFound from "@/components/NoDataFound";
 import StatusModal from "@/components/vehicle/StatusModal";
 import CustomValidation from "@/components/CustomValidation";
 import { useForm } from "react-hook-form";
-import { Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import CustomSearchBar from "@/components/CustomSearchBar";
 
 import debounce from "lodash.debounce";
@@ -35,6 +35,8 @@ import { Colors } from "@/constants/Colors";
 import { Env } from "@/constants/ApiEndpoints";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/context/ThemeContext";
+import CustomHeader from "@/components/CustomHeader";
+import { DrawerActions } from "@react-navigation/native";
 
 const VehicleList = () => {
   const [getVehicleListApi, { data, loading, error, refetch }] =
@@ -60,18 +62,12 @@ const VehicleList = () => {
       value: "maintenance",
     },
   ];
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    watch,
-    setValue,
-  } = useForm<{ status: any }>({
+  const { control, watch, setValue, } = useForm<{ status: any }>({
     defaultValues: {
       status: "",
     },
   });
+
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
@@ -224,10 +220,6 @@ const VehicleList = () => {
     );
   };
 
-  // console.log('loading',loading);
-  // console.log('page',page);
-  // console.log('refreshing',refreshing);
-
   if (
     (loading && page == 1 && !refreshing) ||
     deleteVehicleStat.loading ||
@@ -236,88 +228,104 @@ const VehicleList = () => {
     return <Loader />;
 
   return (
-    <ThemedView style={{ flex: 1 }}>
-      {isSearch && (
-        <CustomSearchBar
-          searchQuery={searchValue}
-          onChangeText={(text) => {
-            setSearchValue(text);
-            debounceSearch(text);
-          }}
-          placeholder={"Search..."}
-          loading={loading && searchValue.length > 0}
-          setSearchQuery={setSearchValue}
-          containerStyle={{ margin: ms(10), marginBottom: ms(0) }}
-        />
-      )}
-      <FlatList
-        data={vehicleList}
-        keyExtractor={(item, index) => item?.id?.toString()}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          !isLoading ? (
-            <NoDataFound onPress={() => fetchVehicleList(true)} />
-          ) : null
-        }
-        renderItem={({ item }: any) => renderItems(item)}
-        contentContainerStyle={{ paddingVertical: ms(10) }}
-        ListFooterComponent={
-          hasMore ? (
-            <ActivityIndicator size="small" color={Colors.primary} />
-          ) : null
-        }
-        onEndReached={() => {
-          if (hasMore && !isLoading) {
-            fetchVehicleList(false, searchValue);
+    <CustomHeader
+      title="Vehicle List"
+      leftComponent={
+        <Pressable
+          style={styles.menuButton}
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        >
+          <Entypo name="menu" size={ms(28)} color={Colors[theme].text} />
+        </Pressable>
+      }
+    >
+      <ThemedView style={{ flex: 1 }}>
+        {isSearch && (
+          <CustomSearchBar
+            searchQuery={searchValue}
+            onChangeText={(text) => {
+              setSearchValue(text);
+              debounceSearch(text);
+            }}
+            placeholder={"Search..."}
+            loading={loading && searchValue.length > 0}
+            setSearchQuery={setSearchValue}
+            containerStyle={{ margin: ms(10), marginBottom: ms(0) }}
+          />
+        )}
+        <FlatList
+          data={vehicleList}
+          keyExtractor={(item) => item?.id?.toString()}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            !isLoading ? (
+              <NoDataFound onPress={() => fetchVehicleList(true)} />
+            ) : null
           }
-        }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing && !isLoading}
-            onRefresh={() => fetchVehicleList(true)}
-          />
-        }
-        onEndReachedThreshold={0.5}
-        initialNumToRender={8}
-        maxToRenderPerBatch={5}
-        windowSize={7}
-        removeClippedSubviews={true}
-      />
-      <FAB
-        size="large"
-        title="Add Vehicle"
-        style={{
-          position: "absolute",
-          margin: 16,
-          right: 0,
-          bottom: 0,
-        }}
-        icon={{
-          name: "add",
-          color: "white",
-        }}
-        onPress={() => router.navigate("/add-edit-vehicle")}
-      />
+          renderItem={({ item }: any) => renderItems(item)}
+          contentContainerStyle={{ paddingVertical: ms(10) }}
+          ListFooterComponent={
+            hasMore ? (
+              <ActivityIndicator size="small" color={Colors.primary} />
+            ) : null
+          }
+          onEndReached={() => {
+            if (hasMore && !isLoading) {
+              fetchVehicleList(false, searchValue);
+            }
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing && !isLoading}
+              onRefresh={() => fetchVehicleList(true)}
+            />
+          }
+          onEndReachedThreshold={0.5}
+          initialNumToRender={8}
+          maxToRenderPerBatch={5}
+          windowSize={7}
+          removeClippedSubviews={true}
+        />
+        <FAB
+          size="large"
+          title="Add Vehicle"
+          style={{
+            position: "absolute",
+            margin: 16,
+            right: 0,
+            bottom: 0,
+          }}
+          icon={{
+            name: "add",
+            color: "white",
+          }}
+          onPress={() => router.navigate("/add-edit-vehicle")}
+        />
 
-      <StatusModal
-        title="Change Vehicle Status"
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        onSubmit={() => handleStatusUpdate(selectedVehicle?.id)}
-        dropdown={
-          <CustomValidation
-            type="picker"
-            control={control}
-            name={"status"}
-            label={"Status"}
-            data={statusArr}
-          />
-        }
-      />
-    </ThemedView>
+        <StatusModal
+          title="Change Vehicle Status"
+          visible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+          onSubmit={() => handleStatusUpdate(selectedVehicle?.id)}
+          dropdown={
+            <CustomValidation
+              type="picker"
+              control={control}
+              name={"status"}
+              label={"Status"}
+              data={statusArr}
+            />
+          }
+        />
+      </ThemedView>
+    </CustomHeader>
   );
 };
 
 export default VehicleList;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  menuButton: {
+    padding: ms(10),
+  },
+});

@@ -34,17 +34,7 @@ const statusIcons = {
   maintenance: 'construct'
 } as const;
 
-const VehicleCard: React.FC<VehicleCardProps> = ({
-  brand,
-  model,
-  chassisNumber,
-  number,
-  status,
-  onEdit,
-  onDelete,
-  onChangeStatus,
-  onView,
-}) => {
+const ServiceCard: React.FC<VehicleCardProps> = ({brand,model,chassisNumber,  number,status,onEdit,onDelete,onChangeStatus,onView,}) => {
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const [scaleValue] = useState(new Animated.Value(1));
@@ -199,12 +189,7 @@ interface ActionButtonProps {
   onPress: () => void;
 }
 
-const ActionButton: React.FC<ActionButtonProps> = ({
-  icon,
-  text,
-  onPress,
-  bgColor,
-}) => {
+const ActionButton: React.FC<ActionButtonProps> = ({ icon,text,onPress,bgColor}) => {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -216,7 +201,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   );
 };
 
-export default VehicleCard;
+export default ServiceCard;
 
 const styles = ScaledSheet.create({
   container: {

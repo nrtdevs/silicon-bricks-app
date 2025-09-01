@@ -27,45 +27,25 @@ const CustomHeader = ({
         },
       ]}
     >
-      {(leftComponent || rightComponent || title) &&<View
-        style={[
-          styles.iconView,
-          {
-            flexDirection: "row",
-            justifyContent: leftComponent ? "space-between" : "flex-end",
-            alignItems: "center",
-            backgroundColor: Colors[theme].background,
-            paddingHorizontal: 10,
-            marginBottom: vs(8),
-            // Bottom border only
-            borderBottomWidth: 1,
-            borderBottomColor: "rgba(0, 0, 0, 0.1)",
-
-            // iOS shadow only at bottom
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-
-            // Android shadow (bottom only simulation)
-            elevation: 4,
-          },
-        ]}
-      >
-        {leftComponent ? leftComponent : <View style={{ width: 24 }} />}
-        <ThemedText
-          style={{
-            color: Colors[theme].text,
-            fontSize: ms(20),
-            fontWeight: "bold",
-            flex: 1,
-            textAlign: "center",
-          }}
+      {(leftComponent || rightComponent || title) && (
+        <View
+          style={[
+            styles.headerContent,
+            {
+              backgroundColor: Colors[theme].background,
+              borderBottomColor: Colors[theme].border,
+              shadowColor: Colors[theme].shadow,
+            },
+            leftComponent ? styles.headerContentWithLeft : styles.headerContentWithoutLeft,
+          ]}
         >
-          {title}
-        </ThemedText>
-        {rightComponent ? rightComponent : <View style={{ width: 24 }} />}
-      </View>}
+          {leftComponent ? leftComponent : <View style={styles.emptyComponentPlaceholder} />}
+          <ThemedText style={[styles.title, { color: Colors[theme].text }]}>
+            {title}
+          </ThemedText>
+          {rightComponent ? rightComponent : <View style={styles.emptyComponentPlaceholder} />}
+        </View>
+      )}
 
       {children}
     </SafeAreaView>
@@ -75,15 +55,33 @@ const CustomHeader = ({
 export default CustomHeader;
 
 const styles = ScaledSheet.create({
-  logo: {
-    width: "25@ms",
-    height: "25@ms",
-  },
   container: {
     flex: 1,
   },
-  iconView: {
+  headerContent: {
     flexDirection: "row",
-    paddingHorizontal: "12@ms",
+    alignItems: "center",
+    paddingHorizontal: ms(10),
+    marginBottom: vs(8),
+    borderBottomWidth: 1,
+    shadowOffset: { width: 0, height: ms(2) },
+    shadowOpacity: 0.1,
+    shadowRadius: ms(3),
+    elevation: ms(3),
+  },
+  headerContentWithLeft: {
+    justifyContent: "space-between",
+  },
+  headerContentWithoutLeft: {
+    justifyContent: "flex-end",
+  },
+  title: {
+    fontSize: ms(20),
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+  },
+  emptyComponentPlaceholder: {
+    width: ms(24),
   },
 });

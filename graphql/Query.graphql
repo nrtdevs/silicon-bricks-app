@@ -1121,3 +1121,23 @@ query ListTrashedMeetingType($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+# paginated service center 
+query PaginatedServiceCenters($listInputDto: ListInputDTO!) {
+  paginatedServiceCenters(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      name
+      contactNo
+      latitude
+      longitude
+      address
+    }
+  }
+}

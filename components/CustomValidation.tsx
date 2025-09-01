@@ -1,24 +1,23 @@
-import {
-  TouchableOpacity,
-  Image,
-  View,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
+import { Env } from "@/constants/ApiEndpoints";
+import { Colors } from "@/constants/Colors";
+import { useTheme } from "@/context/ThemeContext";
+import { AntDesign, Feather } from "@expo/vector-icons";
+import { CheckBox, Input } from "@rneui/themed";
+import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import { Controller, FieldError } from "react-hook-form";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { ms, mvs, ScaledSheet, vs } from "react-native-size-matters";
+import CustomButton from "./CustomButton";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
-import { Input, CheckBox } from "@rneui/themed";
-import { ms, mvs, ScaledSheet, vs } from "react-native-size-matters";
-import { Colors } from "@/constants/Colors";
-import * as ImagePicker from "expo-image-picker";
-import { useTheme } from "@/context/ThemeContext";
-import { checkUrlFormat } from "@/utils/checkUrlFormat";
-import CustomButton from "./CustomButton";
-import { Env } from "@/constants/ApiEndpoints";
 
 type RequiredProps = {
   name: string;
