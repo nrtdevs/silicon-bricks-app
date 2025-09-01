@@ -22,7 +22,8 @@ const CustomHeader = ({
         styles.container,
         {
           backgroundColor: Colors[theme].background,
-          paddingTop: insets.top + vs(0),
+          paddingTop: insets.top,
+          paddingBottom : insets.bottom
         },
       ]}
     >

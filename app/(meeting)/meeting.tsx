@@ -11,11 +11,14 @@ import { useTheme } from '@/context/ThemeContext';
 import { DeleteMetingDocument, EnableMeetingStatusDocument, PaginatedMeetingDocument } from '@/graphql/generated';
 import { useLazyQuery, useMutation, } from '@apollo/client';
 import { Entypo, Feather, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { View, Pressable, Alert, Modal, FlatList, TouchableOpacity } from 'react-native';
+import { View, Pressable, Alert, Modal, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { ms, s, ScaledSheet, vs } from 'react-native-size-matters';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { Env } from '@/constants/ApiEndpoints';
+import debounce from 'lodash.debounce';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const statusData = [
     { label: "Active", value: "active" },
@@ -25,8 +28,14 @@ const statusData = [
 
 const MeetingScreen = () => {
     const { theme } = useTheme();
+    const insets = useSafeAreaInsets();
+    const [page, setPage] = useState<number>(1);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [meetingList, setMeetingList] = useState();
+    const [hasMore, setHasMore] = useState<boolean>(true);
     /// serach state 
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [search, setSearch] = useState<boolean>(false);
     /// View meeting data 
     const [meetingId, setMeetingId] = useState<string>("");
     const [isNotesModalVisible, setNotesModalVisible] = useState(false);
@@ -56,17 +65,8 @@ const MeetingScreen = () => {
 
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm();
     /// fetch meeting api 
-    const [getMeeting, { data, refetch, loading: listLoading }] = useLazyQuery(PaginatedMeetingDocument);
-    useEffect(() => {
-        getMeeting({
-            variables: {
-                listInputDto: {
-                    page: 1,
-                    limit: 10,
-                },
-            },
-        });
-    }, [])
+
+    const [getMeeting, { data, refetch, loading }] = useLazyQuery<any>(PaginatedMeetingDocument);
 
     /// delete meeting api 
     const [deleteMeeting, deleteMeetingState] = useMutation(DeleteMetingDocument, {
@@ -78,8 +78,66 @@ const MeetingScreen = () => {
             Alert.alert("error", error.message)
         }
     });
-    const filteredData = data?.paginatedMeeting?.data?.filter((item) =>
-        item?.title?.toLowerCase().includes(searchQuery.toLowerCase())
+    useFocusEffect(
+        useCallback(() => {
+            getMeeting();
+            setSearch(false);
+        }, [])
+    );
+
+    /// pagination and pull to refresh
+    const fetchMeeting = async (isRefreshing = false, searchParams = "") => {
+        if (loading && !isRefreshing) return;
+        const currentPage = isRefreshing ? 1 : page;
+        if (isRefreshing) {
+            setRefreshing(true);
+            setPage(1);
+        }
+        const params = {
+            limit: Env?.LIMIT as number,
+            page: currentPage,
+            search: searchParams,
+        };
+
+        try {
+            const res: any = await getMeeting({
+                variables: {
+                    listInputDto: params,
+                },
+                fetchPolicy: "network-only",
+            });
+
+            if (res?.data?.paginatedMeeting) {
+                const data: any = res?.data?.paginatedMeeting;
+                const newItems = data?.data || [];
+                setMeetingList((prev: any) => {
+                    return isRefreshing || currentPage == 1
+                        ? newItems
+                        : [...prev, ...newItems];
+                });
+                const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+                if (!isRefreshing && currentPage < lastPage) {
+                    setPage(currentPage + 1);
+                }
+                if (isRefreshing) setRefreshing(false);
+                setHasMore(currentPage < lastPage);
+                setRefreshing(false);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
+    };
+    const debouncedSearch = useCallback(
+        debounce((text) => {
+            fetchMeeting(true, text);
+        }, 500),
+        [searchQuery]
     );
     return (
         <CustomHeader
@@ -95,8 +153,8 @@ const MeetingScreen = () => {
             rightComponent={
                 <FontAwesome5
                     name="trash" size={20} color="#EF4444"
-                    onPress={() => router.push("/(meeting)/deletedMeeting")} 
-                    style={{ padding: ms(10)}}/>
+                    onPress={() => router.push("/(meeting)/deletedMeeting")}
+                    style={{ padding: ms(10) }} />
             }
         >
             <ThemedView style={styles.contentContainer}>
@@ -107,12 +165,14 @@ const MeetingScreen = () => {
                             placeholder="Search Meeting"
                             onChangeText={(text) => {
                                 setSearchQuery(text);
+                                debouncedSearch(text);
                             }}
                         />
                     </View>
                 </View>
                 <FlatList
-                    data={filteredData}
+                    // data={filteredData}
+                    data={meetingList}
                     renderItem={({ item }) => (
                         <Pressable
                             onPress={() => {
@@ -248,7 +308,24 @@ const MeetingScreen = () => {
                             </View>
                         </Pressable>
                     )}
-                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+                    showsVerticalScrollIndicator={false}
+                    refreshing={refreshing && !loading}
+                    onRefresh={() => {
+                        fetchMeeting(true);
+                    }}
+                    keyExtractor={(item: any, index: number) => index.toString()}
+                    ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                    ListFooterComponent={
+                        hasMore ? (
+                            <ActivityIndicator size="small" color={Colors.primary} />
+                        ) : null
+                    }
+                    onEndReached={() => {
+                        if (hasMore && !loading) {
+                            fetchMeeting();
+                        }
+                    }}
+                    onEndReachedThreshold={0.5}
                 />
             </ThemedView>
             {/* Add Status modal */}
@@ -327,7 +404,7 @@ const MeetingScreen = () => {
                     position: "absolute",
                     margin: 10,
                     right: 0,
-                    bottom: 0,
+                    bottom: insets.bottom,
                 }}
                 icon={{
                     name: "add",

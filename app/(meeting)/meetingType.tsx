@@ -10,12 +10,14 @@ import { useTheme } from "@/context/ThemeContext";
 import { CreateMeetingTypeDocument, DeleteMetingTypeDocument, PaginatedMeetingTypeDocument, UpdateMeetingTypeDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, FlatList, Modal, Pressable, TouchableOpacity, View, } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Modal, Pressable, TouchableOpacity, View, } from "react-native";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import { FAB } from "@rneui/themed";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { Env } from "@/constants/ApiEndpoints";
+import debounce from "lodash.debounce";
 
 const defaultValue = {
     name: "",
@@ -24,6 +26,11 @@ const defaultValue = {
 
 const MeetingType = () => {
     const { theme } = useTheme();
+    const [page, setPage] = useState<number>(1);
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [meetingTypeList, setMeetingTypeList] = useState();
+    const [search, setSearch] = useState(false);
     /// serach state 
     const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -90,17 +97,69 @@ const MeetingType = () => {
         setValue("name", currentMeetingType?.name)
     }, [currentMeetingType])
     /// fetch meeting type Api
-    const [getMeetingTypeData, { data, refetch, loading: listLoading }] = useLazyQuery(PaginatedMeetingTypeDocument);
-    useEffect(() => {
-        getMeetingTypeData({
-            variables: {
-                listInputDto: {
-                    page: 1,
-                    limit: 10,
+
+    const [getMeetingType, { data, refetch, loading }] = useLazyQuery<any>(PaginatedMeetingTypeDocument);
+   
+    const fetchMeetingType = async (isRefreshing = false, searchParams = "") => {
+        if (loading && !isRefreshing) return;
+        const currentPage = isRefreshing ? 1 : page;
+        if (isRefreshing) {
+            setRefreshing(true);
+            setPage(1);
+        }
+        const params = {
+            limit: Env?.LIMIT as number,
+            page: currentPage,
+            search: searchParams,
+        };
+
+        try {
+            const res: any = await getMeetingType({
+                variables: {
+                    listInputDto: params,
                 },
-            },
-        });
-    }, [])
+                fetchPolicy: "network-only",
+            });
+
+            if (res?.data?.paginatedMeetingType) {
+                const data: any = res?.data?.paginatedMeetingType;
+                const newItems = data?.data || [];
+                setMeetingTypeList((prev: any) => {
+                    return isRefreshing || currentPage == 1
+                        ? newItems
+                        : [...prev, ...newItems];
+                });
+                const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+                if (!isRefreshing && currentPage < lastPage) {
+                    setPage(currentPage + 1);
+                }
+                if (isRefreshing) setRefreshing(false);
+                setHasMore(currentPage < lastPage);
+                setRefreshing(false);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
+    };
+    const debouncedSearch = useCallback(
+        debounce((text) => {
+            fetchMeetingType(true, text);
+        }, 500),
+        [searchQuery]
+    );
+    useFocusEffect(
+        useCallback(() => {
+            getMeetingType();
+            setSearch(false);
+        }, [])
+    );
+
     /// delete meeting api 
     const [deleteMeetingType, deleteMeetingTypeState] = useMutation(DeleteMetingTypeDocument, {
         onCompleted: (data) => {
@@ -139,12 +198,18 @@ const MeetingType = () => {
                             placeholder="Search Type"
                             onChangeText={(text) => {
                                 setSearchQuery(text);
+                                debouncedSearch(text);
                             }}
                         />
                     </View>
                 </View>
                 <FlatList
-                    data={filteredData}
+                    data={meetingTypeList}
+                    showsVerticalScrollIndicator={false}
+                    refreshing={refreshing && !loading}
+                    onRefresh={() => {
+                        fetchMeetingType(true);
+                    }}
                     renderItem={({ item }) => (
                         <View style={styles.scrollContainer}>
                             <View style={[
@@ -217,7 +282,18 @@ const MeetingType = () => {
                             </View>
                         </View>
                     )}
-                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+                    ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                    ListFooterComponent={
+                        hasMore ? (
+                            <ActivityIndicator size="small" color={Colors.primary} />
+                        ) : null
+                    }
+                    onEndReached={() => {
+                        if (hasMore && !loading) {
+                            fetchMeetingType();
+                        }
+                    }}
+                    onEndReachedThreshold={0.5}
                 />
             </ThemedView>
             {/* Create and Edit modal */}

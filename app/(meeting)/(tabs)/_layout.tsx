@@ -1,4 +1,4 @@
-import { View, Text, Platform } from 'react-native'
+import {Text, Platform } from 'react-native'
 import React from 'react'
 import { Tabs } from 'expo-router'
 import { labels } from '@/constants/Labels'
@@ -6,28 +6,28 @@ import { Entypo, MaterialIcons } from '@expo/vector-icons'
 import { Colors } from '@/constants/Colors'
 import { useTheme } from '@/context/ThemeContext'
 import { ms, vs } from 'react-native-size-matters'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const _layout = () => {
   const { theme } = useTheme();
-
+  const insets = useSafeAreaInsets();
   return (
     <Tabs screenOptions={{
       headerShown: false,
       tabBarStyle: Platform.select({
         ios: {
-
+          
         },
         default: {
-          height: vs(45),
+          paddingBottom: insets.bottom,
+          // height: vs(45),
           backgroundColor: Colors[theme].cart,
           alignItems: "center",
           justifyContent: "center",
         },
       }),
-      
     }}>
       <Tabs.Screen name="index"
-
         options={{
           tabBarLabel: ({ focused }: any) => (
             <Text style={{ color: focused ? Colors.gradient1 : theme == 'dark' ? Colors.white : Colors.gray }}>{labels?.home}</Text>

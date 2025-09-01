@@ -5,16 +5,18 @@ import CustomValidation from "@/components/CustomValidation";
 import NoDataFound from "@/components/NoDataFound";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Env } from "@/constants/ApiEndpoints";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateNotePadDocument, DeleteNotePadDocument, PaginatedNotePadDocument, UpdateNotePadDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { FAB } from "@rneui/themed";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import debounce from "lodash.debounce";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, FlatList, Modal, Pressable, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Modal, Pressable, TouchableOpacity, View } from "react-native";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 
 
@@ -24,20 +26,75 @@ const defaultValue = {
 }
 const MyNotes = () => {
     const { theme } = useTheme();
+    const [page,setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [myNoteList, setMyNotesList] = useState();
+    const [search, setSearch] = useState(false);
     /// serach state 
     const [searchQuery, setSearchQuery] = useState<string>("");
     /// fetch notes data 
-    const [getNotesData, { data, refetch, loading }] = useLazyQuery(PaginatedNotePadDocument);
-    useEffect(() => {
-        getNotesData({
-            variables: {
-                listInputDto: {
-                    page: 1,
-                    limit: 10,
+
+    const [getNotesData, { data, refetch, loading }] = useLazyQuery<any>(PaginatedNotePadDocument);
+
+    const fetchMyNotos = async (isRefreshing = false, searchParams = "") => {
+        if (loading && !isRefreshing) return;
+        const currentPage = isRefreshing ? 1 : page;
+        if (isRefreshing) {
+            setRefreshing(true);
+            setPage(1);
+        }
+        const params = {
+            limit: Env?.LIMIT as number,
+            page: currentPage,
+            search: searchParams,
+        };
+        try {
+            const res: any = await getNotesData({
+                variables: {
+                    listInputDto: params,
                 },
-            },
-        });
-    }, [])
+                fetchPolicy: "network-only",
+            });
+            if (res?.data?.paginatedNotePad) {
+                const data: any = res?.data?.paginatedNotePad;
+                const newItems = data?.data || [];
+                setMyNotesList((prev: any) => {
+                    return isRefreshing || currentPage == 1
+                        ? newItems
+                        : [...prev, ...newItems];
+                });
+                const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+                if (!isRefreshing && currentPage < lastPage) {
+                    setPage(currentPage + 1);
+                }
+                if (isRefreshing) setRefreshing(false);
+                setHasMore(currentPage < lastPage);
+                setRefreshing(false);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
+    };
+    const debouncedSearch = useCallback(
+        debounce((text) => {
+            fetchMyNotos(true, text);
+        }, 500),
+        [searchQuery]
+    );
+    useFocusEffect(
+        useCallback(() => {
+            getNotesData();
+            setSearch(false);
+        }, [])
+    );
+
     /// delete meeting api 
     const [deleteNotesApi, deleteMeetingTypeState] = useMutation(DeleteNotePadDocument, {
         onCompleted: (data) => {
@@ -106,9 +163,6 @@ const MyNotes = () => {
                 },
             });
     };
-    const filteredData = data?.paginatedNotePad?.data?.filter((item) =>
-        item?.notesField?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
     return (
         <CustomHeader
             title="My Notes"
@@ -117,16 +171,16 @@ const MyNotes = () => {
                 size={ms(20)}
                 color={Colors[theme]?.text}
                 onPress={() => router.back()}
-                style ={{padding : 10}}
-                />
-                }
-                rightComponent={
+                style={{ padding: 10 }}
+            />
+            }
+            rightComponent={
                 <FontAwesome5
                     name="trash" size={20} color="#EF4444"
                     onPress={() => router.push("/(meeting)/trashedNotes")}
                     style={{ padding: ms(10) }} />
             }
-                >
+        >
             <ThemedView style={styles.contentContainer}>
                 <View style={styles.searchContainer}>
                     <View style={{ width: "100%", paddingHorizontal: 10 }}>
@@ -135,12 +189,18 @@ const MyNotes = () => {
                             placeholder="Search notes"
                             onChangeText={(text) => {
                                 setSearchQuery(text);
+                                debouncedSearch(text);
                             }}
                         />
                     </View>
                 </View>
                 <FlatList
-                    data={filteredData}
+                    data={myNoteList}
+                    showsVerticalScrollIndicator={false}
+                    refreshing={refreshing && !loading}
+                    onRefresh={() => {
+                        fetchMyNotos(true);
+                    }}
                     renderItem={({ item }) => (
                         <View style={styles.scrollContainer}>
                             <View style={[
@@ -227,6 +287,17 @@ const MyNotes = () => {
                         </View>
                     )}
                     ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                    ListFooterComponent={
+                        hasMore ? (
+                            <ActivityIndicator size="small" color={Colors.primary} />
+                        ) : null
+                    }
+                    onEndReached={() => {
+                        if (hasMore && !loading) {
+                            fetchMyNotos();
+                        }
+                    }}
+                    onEndReachedThreshold={0.5}
                 />
             </ThemedView>
             {/* Create and Edit modal */}

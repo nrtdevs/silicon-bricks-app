@@ -121,8 +121,8 @@ export type Attendees = {
   email?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   isPresent: Scalars['Boolean']['output'];
-  latitude: Scalars['Float']['output'];
-  longitude: Scalars['Float']['output'];
+  latitude?: Maybe<Scalars['Float']['output']>;
+  longitude?: Maybe<Scalars['Float']['output']>;
   meetingId?: Maybe<Scalars['Float']['output']>;
   token?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
@@ -276,6 +276,17 @@ export type ChangePasswordDto = {
   newPassword: Scalars['String']['input'];
 };
 
+export type Chat = {
+  __typename?: 'Chat';
+  content: Scalars['String']['output'];
+  createdBy?: Maybe<User>;
+  id: Scalars['ID']['output'];
+  organization?: Maybe<Organization>;
+  organizationId: Scalars['Float']['output'];
+  receiver: User;
+  sender: User;
+};
+
 export type Contact = {
   __typename?: 'Contact';
   email: Scalars['String']['output'];
@@ -334,6 +345,14 @@ export type CreateAssignServiceCenterDto = {
   serviceCenterId: Scalars['Int']['input'];
 };
 
+export type CreateAttendeesDto = {
+  checkInTime?: InputMaybe<Scalars['String']['input']>;
+  isPresent: Scalars['Boolean']['input'];
+  latitude: Scalars['Float']['input'];
+  longitude: Scalars['Float']['input'];
+  uploadedImage: Scalars['String']['input'];
+};
+
 export type CreateBreakdownDto = {
   breakdownDate: Scalars['String']['input'];
   breakdownDescription: Scalars['String']['input'];
@@ -343,6 +362,11 @@ export type CreateBreakdownDto = {
   longitude: Scalars['String']['input'];
   mediaUrl?: InputMaybe<Array<MediaDto>>;
   vehicleId: Scalars['Float']['input'];
+};
+
+export type CreateChatInput = {
+  content: Scalars['String']['input'];
+  receiverId: Scalars['Int']['input'];
 };
 
 export type CreateContactDto = {
@@ -490,7 +514,6 @@ export type CreatePlanDto = {
 export type CreateProjectDto = {
   description: Scalars['String']['input'];
   name: Scalars['String']['input'];
-  organizationId: Scalars['Float']['input'];
 };
 
 export type CreateRoleDto = {
@@ -1133,7 +1156,9 @@ export type Mutation = {
   changeUserStatus: UserUnion;
   changeVehicleExpenseStatus: VehicleExpenseStatus;
   changeWarehouseStatus: Warehouse;
+  checkInAttendee: Scalars['String']['output'];
   createBreakdown: Breakdown;
+  createChat: Chat;
   createContact: Contact;
   createCoupon: Coupon;
   createDynamicPage: About;
@@ -1398,8 +1423,20 @@ export type MutationChangeWarehouseStatusArgs = {
 };
 
 
+export type MutationCheckInAttendeeArgs = {
+  attendeeId: Scalars['Int']['input'];
+  input: CreateAttendeesDto;
+  meetingId: Scalars['Int']['input'];
+};
+
+
 export type MutationCreateBreakdownArgs = {
   data: CreateBreakdownDto;
+};
+
+
+export type MutationCreateChatArgs = {
+  input: CreateChatInput;
 };
 
 
@@ -2701,6 +2738,7 @@ export type Query = {
   getBreakdownStatusCounts: Array<Scalars['JSON']['output']>;
   getBreakdownStatuses: Array<BreakdownStatus>;
   getBreakdownTypeSuggestions: Array<Scalars['JSON']['output']>;
+  getChats: Array<Chat>;
   getContactById: Contact;
   getDynamicPageById: About;
   getFollowUpById: FollowUp;
@@ -3043,6 +3081,11 @@ export type QueryGetBreakdownStatusesArgs = {
 
 export type QueryGetBreakdownTypeSuggestionsArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryGetChatsArgs = {
+  otherUserId: Scalars['Int']['input'];
 };
 
 
@@ -3905,7 +3948,6 @@ export type UpdateProjectDto = {
   description?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['Float']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
-  organizationId?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type UpdateRoleDto = {
@@ -3999,7 +4041,9 @@ export type User = {
   parent?: Maybe<User>;
   parentId?: Maybe<Scalars['Float']['output']>;
   posts: Array<Post>;
+  receivedMessages?: Maybe<Array<Chat>>;
   roles?: Maybe<Array<Role>>;
+  sentMessages?: Maybe<Array<Chat>>;
   status: Scalars['String']['output'];
   subordinates?: Maybe<Array<User>>;
   updatedAt: Scalars['DateTime']['output'];
@@ -4883,7 +4927,7 @@ export type CreateMilestoneMutationVariables = Exact<{
 }>;
 
 
-export type CreateMilestoneMutation = { __typename?: 'Mutation', createMilestone: { __typename?: 'Milestone', id: string, projectId: number, name: string, startDate: any, endDate: any, projectName?: string | null, totalTaskCompleteMilestone?: number | null, status: string } };
+export type CreateMilestoneMutation = { __typename?: 'Mutation', createMilestone: { __typename?: 'Milestone', id: string, projectId: number, name: string, startDate: any, endDate: any, projectName?: string | null, totalTaskCompleteMilestone?: number | null, status: string, description?: string | null } };
 
 export type DeleteMilestoneMutationVariables = Exact<{
   ids: Array<Scalars['Int']['input']> | Scalars['Int']['input'];
@@ -5356,7 +5400,9 @@ export type PaginatedMilestoneQueryVariables = Exact<{
 }>;
 
 
-export type PaginatedMilestoneQuery = { __typename?: 'Query', paginatedMilestone: { __typename?: 'PaginatedMilestone', data: Array<{ __typename?: 'Milestone', id: string, projectId: number, name: string, startDate: any, endDate: any, projectName?: string | null, totalTaskCompleteMilestone?: number | null, status: string }> } };
+export type PaginatedMilestoneQuery = { __typename?: 'Query', paginatedMilestone: { __typename?: 'PaginatedMilestone', data: Array<{
+    description: string; __typename?: 'Milestone', id: string, projectId: number, name: string, startDate: any, endDate: any, projectName?: string | null, totalTaskCompleteMilestone?: number | null, status: string 
+}> } };
 
 export type ListTrashedMilestoneQueryVariables = Exact<{
   listInputDto: ListInputDto;
@@ -5482,7 +5528,7 @@ export const UpdateMeetingTaskDocument = {"kind":"Document","definitions":[{"kin
 export const UpdateNotesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateNotes"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"updateNotesInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateNotesDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateNotes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"updateNotesInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"updateNotesInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdByUserId"}},{"kind":"Field","name":{"kind":"Name","value":"meetingId"}},{"kind":"Field","name":{"kind":"Name","value":"decision"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"uploadDoc"}}]}}]}}]} as unknown as DocumentNode<UpdateNotesMutation, UpdateNotesMutationVariables>;
 export const RestoreMeetingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"RestoreMeeting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"restoreMeeting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<RestoreMeetingMutation, RestoreMeetingMutationVariables>;
 export const HardDeleteMeetingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"HardDeleteMeeting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hardDeleteMeeting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<HardDeleteMeetingMutation, HardDeleteMeetingMutationVariables>;
-export const CreateMilestoneDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMilestone"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MilestoneDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createMilestone"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"totalTaskCompleteMilestone"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<CreateMilestoneMutation, CreateMilestoneMutationVariables>;
+export const CreateMilestoneDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMilestone"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MilestoneDto"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createMilestone"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"startDate"}},{"kind":"Field","name":{"kind":"Name","value":"endDate"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"totalTaskCompleteMilestone"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}}]} as unknown as DocumentNode<CreateMilestoneMutation, CreateMilestoneMutationVariables>;
 export const DeleteMilestoneDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteMilestone"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteMilestone"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<DeleteMilestoneMutation, DeleteMilestoneMutationVariables>;
 export const DeleteFollowUpDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteFollowUp"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteFollowUp"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<DeleteFollowUpMutation, DeleteFollowUpMutationVariables>;
 export const HardDeleteFollowUpDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"HardDeleteFollowUp"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hardDeleteFollowUp"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<HardDeleteFollowUpMutation, HardDeleteFollowUpMutationVariables>;

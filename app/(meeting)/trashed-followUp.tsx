@@ -47,7 +47,7 @@ const FollowUpTrashed = () => {
     });
     return (
         <CustomHeader
-            title="Foloow Up"
+            title="Follow Up"
             leftComponent={(
                 <MaterialCommunityIcons
                     name="arrow-left"

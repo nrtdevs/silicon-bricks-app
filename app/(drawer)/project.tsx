@@ -44,6 +44,7 @@ import Loader from "@/components/ui/Loader";
 import { FAB } from "@rneui/themed";
 import { router, useFocusEffect } from "expo-router";
 
+
 interface ProjectData {
   id: number;
   name: string;
@@ -198,9 +199,7 @@ const Project = () => {
 
   const fetchProject = async (isRefreshing = false, searchParams = "") => {
     if (loading && !isRefreshing) return;
-
     const currentPage = isRefreshing ? 1 : page;
-
     if (isRefreshing) {
       setRefreshing(true);
       setPage(1);

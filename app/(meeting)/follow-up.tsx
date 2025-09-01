@@ -6,10 +6,10 @@ import { FAB } from "@rneui/themed";
 import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { router } from "expo-router";
-import { FlatList, Modal, Pressable, ScrollView, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, View } from "react-native";
 import CustomSearchBar from "@/components/CustomSearchBar";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Alert } from "react-native";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
@@ -19,6 +19,8 @@ import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
 import { useForm } from "react-hook-form";
 import * as SecureStore from "expo-secure-store";
+import { Env } from "@/constants/ApiEndpoints";
+import debounce from "lodash.debounce";
 
 const defaultValue = {
     body: "",
@@ -31,17 +33,85 @@ const FollowUp = () => {
     const [userId, setUserId] = useState<number>(0);
     const [addEditManage, setAddEditManage] = useState(false);
     const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
-    const [getFollowUp, { data, refetch, loading: listLoading }] = useLazyQuery(PaginatedFollowUpDocument);
-    useEffect(() => {
-        getFollowUp({
-            variables: {
-                listInputDto: {
-                    page: 1,
-                    limit: 10,
+    const [page, setPage] = useState<number>(1);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [followList, setFollowList] = useState();
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const [search, setSearch] = useState<boolean>(false);
+    /// follow up list api 
+    const [getFollowUp, { data, refetch, loading }] = useLazyQuery<any>(PaginatedFollowUpDocument);
+
+    const fetchFollowup = async (isRefreshing = false, searchParams = "") => {
+        if (loading && !isRefreshing) return;
+        const currentPage = isRefreshing ? 1 : page;
+        if (isRefreshing) {
+            setRefreshing(true);
+            setPage(1);
+        }
+        const params = {
+            limit: Env?.LIMIT as number,
+            page: currentPage,
+            search: searchParams,
+        };
+
+        try {
+            const res: any = await getFollowUp({
+                variables: {
+                    listInputDto: params,
                 },
-            },
-        });
-    }, [])
+                fetchPolicy: "network-only",
+            });
+
+            if (res?.data?.paginatedFollowUp) {
+                const data: any = res?.data?.paginatedFollowUp;
+                const newItems = data?.data || [];
+                setFollowList((prev: any) => {
+                    return isRefreshing || currentPage == 1
+                        ? newItems
+                        : [...prev, ...newItems];
+                });
+                const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+                if (!isRefreshing && currentPage < lastPage) {
+                    setPage(currentPage + 1);
+                }
+                if (isRefreshing) setRefreshing(false);
+                setHasMore(currentPage < lastPage);
+                setRefreshing(false);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
+    };
+    const debouncedSearch = useCallback(
+        debounce((text) => {
+            fetchFollowup(true, text);
+        }, 500),
+        [searchQuery]
+    );
+    useFocusEffect(
+        useCallback(() => {
+            getFollowUp();
+            setSearch(false);
+        }, [])
+    );
+
+    // const [getFollowUp, { data, refetch, loading: listLoading }] = useLazyQuery(PaginatedFollowUpDocument);
+    // useEffect(() => {
+    //     getFollowUp({
+    //         variables: {
+    //             listInputDto: {
+    //                 page: 1,
+    //                 limit: 10,
+    //             },
+    //         },
+    //     });
+    // }, [])
     const filteredData = data?.paginatedFollowUp?.data?.filter((item) =>
         item?.subject?.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -159,7 +229,7 @@ const FollowUp = () => {
     }, [currentFollowNote])
     return (
         <CustomHeader
-            title="Foloow Up"
+            title="Follow Up"
             leftComponent={(
                 <MaterialCommunityIcons
                     name="arrow-left"
@@ -183,12 +253,18 @@ const FollowUp = () => {
                             placeholder="Search Follow up"
                             onChangeText={(text) => {
                                 setSearchQuery(text);
+                                debouncedSearch(text);
                             }}
                         />
                     </View>
                 </View>
                 <FlatList
-                    data={filteredData}
+                    data={followList}
+                    showsVerticalScrollIndicator={false}
+                    refreshing={refreshing && !loading}
+                    onRefresh={() => {
+                        fetchFollowup(true);
+                    }}
                     renderItem={({ item }) => (
                         <View style={[
                             styles.followContainer,
@@ -263,7 +339,18 @@ const FollowUp = () => {
                             </View>
                         </View>
                     )}
-                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+                    ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                    ListFooterComponent={
+                        hasMore ? (
+                            <ActivityIndicator size="small" color={Colors.primary} />
+                        ) : null
+                    }
+                    onEndReached={() => {
+                        if (hasMore && !loading) {
+                            fetchFollowup();
+                        }
+                    }}
+                    onEndReachedThreshold={0.5}
                 />
             </ThemedView>
 

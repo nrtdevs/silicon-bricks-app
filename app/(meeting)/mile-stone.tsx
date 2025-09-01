@@ -7,10 +7,10 @@ import { useTheme } from "@/context/ThemeContext";
 import { CreateMilestoneDocument, DeleteMilestoneDocument, PaginatedMilestoneDocument, PaginatedProjectsDocument, UpdateMilestoneDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import { Entypo, Feather, FontAwesome5, Fontisto, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { FAB } from "@rneui/themed";
-import { useEffect, useMemo, useState } from "react";
-import { Alert, FlatList, Modal, Pressable, ScrollView, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Alert, FlatList, Modal, Pressable, ScrollView, TouchableOpacity, View } from "react-native";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 import CustomValidation from "@/components/CustomValidation";
 import CustomButton from "@/components/CustomButton";
@@ -18,6 +18,10 @@ import { useForm } from "react-hook-form";
 import { getDateTimePickerProps } from "@/utils/getDateTimePickerProps";
 import DateTimePickerModal from "@/components/DateTimePickerModal";
 import { formatTimeForAPI } from "@/utils/formatDateTime";
+import { Env } from "@/constants/ApiEndpoints";
+import debounce from "lodash.debounce";
+import CustomSearchBar from "@/components/CustomSearchBar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const defaultValue = {
     id: "",
@@ -25,29 +29,84 @@ const defaultValue = {
     name: "",
     startDate: "",
     endDate: "",
+    description: ""
 }
 const Milestone = () => {
     const { theme } = useTheme();
+    const insets = useSafeAreaInsets();
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
     const [addEditManage, setAddEditManage] = useState(false);
+    const [page, setPage] = useState<number>(1);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [milestoneList, setMilestoneList] = useState();
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const [search, setSearch] = useState<boolean>(false);
     /// mile stone api 
-    const [getFollowUp, { data, refetch, loading: listLoading }] = useLazyQuery(PaginatedMilestoneDocument);
-    useEffect(() => {
-        getFollowUp({
-            variables: {
-                listInputDto: {
-                    page: 1,
-                    limit: 10,
+
+    const [getMilestone, { data, refetch, loading }] = useLazyQuery<any>(PaginatedMilestoneDocument);
+    const fetchMeeting = async (isRefreshing = false, searchParams = "") => {
+        if (loading && !isRefreshing) return;
+        const currentPage = isRefreshing ? 1 : page;
+        if (isRefreshing) {
+            setRefreshing(true);
+            setPage(1);
+        }
+        const params = {
+            limit: Env?.LIMIT as number,
+            page: currentPage,
+            search: searchParams,
+        };
+
+        try {
+            const res: any = await getMilestone({
+                variables: {
+                    listInputDto: params,
                 },
-            },
-        });
-    }, [])
-    const filteredData = data?.paginatedMilestone.data?.filter((item) =>
-        item?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+                fetchPolicy: "network-only",
+            });
+
+            if (res?.data?.paginatedMilestone) {
+                const data: any = res?.data?.paginatedMilestone;
+                const newItems = data?.data || [];
+                setMilestoneList((prev: any) => {
+                    return isRefreshing || currentPage == 1
+                        ? newItems
+                        : [...prev, ...newItems];
+                });
+                const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+                if (!isRefreshing && currentPage < lastPage) {
+                    setPage(currentPage + 1);
+                }
+                if (isRefreshing) setRefreshing(false);
+                setHasMore(currentPage < lastPage);
+                setRefreshing(false);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
+    };
+    const debouncedSearch = useCallback(
+        debounce((text) => {
+            fetchMeeting(true, text);
+        }, 500),
+        [searchQuery]
     );
+    useFocusEffect(
+        useCallback(() => {
+            getMilestone();
+            setSearch(false);
+        }, [])
+    );
+
     const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{
-        name: string, startDate: string, endDate: string,
+        name: string, startDate: string, endDate: string, description: string
     }>({ defaultValues: {} });
     const onSubmit = (data: any) => {
         let param = {
@@ -55,6 +114,7 @@ const Milestone = () => {
             "projectId": Number(data?.project?.value),
             "startDate": data.startDate,
             "endDate": data.endDate,
+            "description": data.description,
         }
         addEditManage
             ? updateMilestone({
@@ -65,6 +125,7 @@ const Milestone = () => {
                         startDate: data.startDate,
                         endDate: data.endDate,
                         name: data.subject,
+                        description: data.description,
                     }
                 }
             }) :
@@ -81,7 +142,8 @@ const Milestone = () => {
         name: string,
         projectId: string,
         startDate: string,
-        endDate: string
+        endDate: string,
+        description: string
     }>(defaultValue);
     /// api create and update 
     const [updateMilestone, updateMilestoneState] = useMutation(UpdateMilestoneDocument, {
@@ -160,8 +222,25 @@ const Milestone = () => {
             )}
         >
             <ThemedView style={styles.contentContainer}>
+                <View style={styles.searchContainer}>
+                    <View style={{ width: "100%" }}>
+                        <CustomSearchBar
+                            searchQuery={searchQuery}
+                            placeholder="Search Milestone"
+                            onChangeText={(text) => {
+                                setSearchQuery(text);
+                                debouncedSearch(text);
+                            }}
+                        />
+                    </View>
+                </View>
                 <FlatList
-                    data={filteredData}
+                    data={milestoneList}
+                    showsVerticalScrollIndicator={false}
+                    refreshing={refreshing && !loading}
+                    onRefresh={() => {
+                        fetchMeeting(true);
+                    }}
                     renderItem={({ item }) => (
                         <View style={[
                             styles.milestoneContainer,
@@ -195,7 +274,8 @@ const Milestone = () => {
                                             name: item.name,
                                             projectId: `${item.projectId}`,
                                             startDate: item.startDate,
-                                            endDate: item.endDate
+                                            endDate: item.endDate,
+                                            description: item.description
                                         });
                                     }}
                                     style={{
@@ -248,7 +328,18 @@ const Milestone = () => {
                             </View>
                         </View>
                     )}
-                    ListEmptyComponent={!listLoading ? <NoDataFound /> : null}
+                    ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                    ListFooterComponent={
+                        hasMore ? (
+                            <ActivityIndicator size="small" color={Colors.primary} />
+                        ) : null
+                    }
+                    onEndReached={() => {
+                        if (hasMore && !loading) {
+                            fetchMeeting();
+                        }
+                    }}
+                    onEndReachedThreshold={0.5}
                 />
             </ThemedView>
             {/* Create and Edit modal */}
@@ -365,6 +456,18 @@ const Milestone = () => {
                                 }}
                                 pointerEvents="none"
                             />
+                            <CustomValidation
+                                type="input"
+                                control={control}
+                                labelStyle={styles.label}
+                                name={"description"}
+                                label="Description"
+                                inputStyle={[{ lineHeight: ms(20) }]}
+                                rules={{
+                                    required: "Enter Description",
+                                }}
+                                autoCapitalize="none"
+                            />
                             <CustomButton
                                 title="Submit"
                                 isLoading={createMilestoneState?.loading}
@@ -402,7 +505,7 @@ const Milestone = () => {
                     position: "absolute",
                     margin: 10,
                     right: 0,
-                    bottom: 0,
+                    bottom: insets.bottom,
                 }}
                 icon={{
                     name: "add",
@@ -420,6 +523,13 @@ const styles = ScaledSheet.create({
     contentContainer: {
         flex: 1,
         padding: "12@ms"
+    },
+    searchContainer: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "12@ms",
     },
     milestoneContainer: {
         borderRadius: "20@ms",

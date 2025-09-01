@@ -2,7 +2,6 @@ import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import CustomValidation from "@/components/CustomValidation";
 import DateTimePickerModal from "@/components/DateTimePickerModal";
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
@@ -33,13 +32,14 @@ const CreateMeeting = () => {
         meetingTypeId,
         projectId,
         meetingVenueId,
+        meetingReference,
     } = useLocalSearchParams();
     /// create and edit state
     const [activeDateField, setActiveDateField] = useState<any>(null);
     const [dateTimePickerProps, setDateTimePickerProps] = useState<any>(
-        getDateTimePickerProps(false)
+        getDateTimePickerProps(false) 
     );
-    const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{title:string, startTime:string, endTime:string, meetingDate:any, projectId:any, meetingTypeId:any, meetingVenueId:any, meetingAgenda:any, meetingUrl:any, attendees:any,}>();
+    const { control, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm<{title:string, startTime:string, endTime:string, meetingDate:any, projectId:any, meetingTypeId:any, meetingVenueId:any, meetingAgenda:any, meetingUrl:any, attendees:any,meetingReference : string}>();
     const [dateModal, setDateModal] = useState({
         start: false,
         end: false,
@@ -71,7 +71,6 @@ const CreateMeeting = () => {
         }
     });
     const onSubmit = (data: any) => {
-        console.log(data);
         let param = {
             "title": data?.title,
             "attendees": data?.attendees.map((id: number) => Number(id)),
@@ -79,7 +78,7 @@ const CreateMeeting = () => {
             "endTime": data?.endTime,
             "meetingDate": data?.meetingDate,
             "meetingAgenda": data?.meetingAgenda,
-            "meetingReference": "",
+            "meetingReference": data?.meetingReference,
             "meetingUrl": data?.meetingUrl,
             "meetingTypeId": Number(data?.meetingTypeId?.value),
             "meetingVenueId": Number(data?.meetingVenueId?.value),
@@ -102,7 +101,7 @@ const CreateMeeting = () => {
                         "endTime": data.endTime,
                         "meetingDate": data.meetingDate,
                         "meetingAgenda": data.meetingAgenda,
-                        "meetingReference": "",
+                        "meetingReference": data.meetingReference,
                         "meetingUrl": data.meetingUrl,
                         "meetingTypeId": Number(data.meetingTypeId.value),
                         "meetingVenueId": Number(data.meetingVenueId.value),
@@ -126,8 +125,8 @@ const CreateMeeting = () => {
             setValue('meetingTypeId', meetingTypeId as string);
             setValue('meetingVenueId', meetingVenueId?.toString() ?? "");
             setValue('projectId', projectId as string);
+            setValue('meetingReference', meetingReference as string);
         }
-
     }, [isCreate])
     /// fetch project data
     const { data: projectData, loading: packageLoading, error: packageError, } = useQuery(PaginatedProjectsDocument, {
@@ -254,11 +253,39 @@ const CreateMeeting = () => {
                         labelStyle={styles.label}
                         name={"title"}
                         inputStyle={[{ lineHeight: ms(20) }]}
-                        label="Title"
+                        label="Name"
                         rules={{
                             required: "Enter title",
                         }}
                         autoCapitalize="none"
+                    />
+
+                    <CustomValidation
+                        type="input"
+                        control={control}
+                        placeholder={"Meeting Date"}
+                        name="meetingDate"
+                        editable={false}
+                        label='Meeting Date'
+                        rightIcon={
+                            <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
+                        }
+                        onPress={() => {
+                            setDateModal({
+                                start: !dateModal.start,
+                                end: false,
+                            });
+                            setActiveDateField("meetingDate");
+                            setDateTimePickerProps(getDateTimePickerProps(true),
+                            );
+                        }}
+                        pointerEvents="none"
+                        rules={{
+                            required: {
+                                value: true,
+                                message: "Enter meeting date",
+                            },
+                        }}
                     />
                     <CustomValidation
                         type="input"
@@ -321,32 +348,6 @@ const CreateMeeting = () => {
                         pointerEvents="none"
                     />
                     <CustomValidation
-                        type="input"
-                        control={control}
-                        placeholder={"Meeting Date"}
-                        name="meetingDate"
-                        editable={false}
-                        label='Meeting Date'
-                        rightIcon={
-                            <Fontisto name="date" size={ms(20)} color={Colors[theme]?.text} />
-                        }
-                        onPress={() => {
-                            setDateModal({
-                                start: !dateModal.start,
-                                end: false,
-                            });
-                            setActiveDateField("meetingDate");
-                            setDateTimePickerProps(getDateTimePickerProps(true));
-                        }}
-                        pointerEvents="none"
-                        rules={{
-                            required: {
-                                value: true,
-                                message: "Enter meeting date",
-                            },
-                        }}
-                    />
-                    <CustomValidation
                         data={projectPickerData}
                         type="picker"
                         hideStar
@@ -394,7 +395,7 @@ const CreateMeeting = () => {
                         label={`Meeting Agenda`}
                         autoCapitalize="none"
                     />
-                    <CustomValidation
+                    {/* <CustomValidation
                         type="input"
                         control={control}
                         labelStyle={styles.label}
@@ -404,6 +405,16 @@ const CreateMeeting = () => {
                         rules={{
                             required: "Enter meeting link",
                         }}
+                        autoCapitalize="none"
+                    /> */}
+
+                    <CustomValidation
+                        type="input"
+                        control={control}
+                        labelStyle={styles.label}
+                        name={"meetingReference"}
+                        inputStyle={[{ lineHeight: ms(20) }]}
+                        label={`Meeting Reference`}
                         autoCapitalize="none"
                     />
                     <CustomValidation

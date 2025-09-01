@@ -1033,6 +1033,7 @@ mutation CreateMilestone($input: MilestoneDto!) {
     projectName
     totalTaskCompleteMilestone
     status
+    description
   }
 }
 mutation DeleteMilestone($ids: [Int!]!) {

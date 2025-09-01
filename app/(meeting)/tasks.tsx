@@ -5,35 +5,104 @@ import CustomValidation from "@/components/CustomValidation";
 import NoDataFound from "@/components/NoDataFound";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Env } from "@/constants/ApiEndpoints";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateFollowUpDocument, DeleteMetingTaskDocument, PaginatedMeetingTaskDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { FAB } from "@rneui/themed";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import debounce from "lodash.debounce";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, FlatList, Modal, Pressable, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Modal, Pressable, TouchableOpacity, View } from "react-native";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 
 const TaskScreen = () => {
     const { theme } = useTheme();
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [neetingTaskList, setMeetingTaskList] = useState();
+    const [search, setSearch] = useState(false);
     /// serach state 
     const [searchQuery, setSearchQuery] = useState<string>("");
     /// fetch Meeting task api 
-    const [getMeetingTaskData, { data, refetch, loading }] = useLazyQuery(PaginatedMeetingTaskDocument);
 
-    useEffect(() => {
-        getMeetingTaskData({
-            variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1
+    const [getMeetingTasks, { data, refetch, loading }] = useLazyQuery<any>(PaginatedMeetingTaskDocument);
+
+    const fetchMeetingTask = async (isRefreshing = false, searchParams = "") => {
+        if (loading && !isRefreshing) return;
+        const currentPage = isRefreshing ? 1 : page;
+        if (isRefreshing) {
+            setRefreshing(true);
+            setPage(1);
+        }
+        const params = {
+            limit: Env?.LIMIT as number,
+            page: currentPage,
+            search: searchParams,
+        };
+        try {
+            const res: any = await getMeetingTasks({
+                variables: {
+                    listInputDto: params,
+                },
+                fetchPolicy: "network-only",
+            });
+            if (res?.data?.paginatedMeetingTask) {
+                const data: any = res?.data?.paginatedMeetingTask;
+                const newItems = data?.data || [];
+                setMeetingTaskList((prev: any) => {
+                    return isRefreshing || currentPage == 1
+                        ? newItems
+                        : [...prev, ...newItems];
+                });
+                const lastPage = Math.ceil(data?.meta?.totalItems / Env?.LIMIT);
+                if (!isRefreshing && currentPage < lastPage) {
+                    setPage(currentPage + 1);
                 }
+                if (isRefreshing) setRefreshing(false);
+                setHasMore(currentPage < lastPage);
+                setRefreshing(false);
+            } else {
+                console.log("API call failed or returned no data:", res?.errors);
+                setRefreshing(false);
+                setHasMore(false);
             }
-        });
-    }, [])
+        } catch (error) {
+            console.error("Fetch failed:", error);
+            setRefreshing(false);
+            setHasMore(false);
+        }
+    };
+    const debouncedSearch = useCallback(
+        debounce((text) => {
+            fetchMeetingTask(true, text);
+        }, 500),
+        [searchQuery]
+    );
+    useFocusEffect(
+        useCallback(() => {
+            getMeetingTasks();
+            setSearch(false);
+        }, [])
+    );
+
+
+    // const [getMeetingTaskData, { data, refetch, loading }] = useLazyQuery(PaginatedMeetingTaskDocument);
+
+    // useEffect(() => {
+    //     getMeetingTaskData({
+    //         variables: {
+    //             listInputDto: {
+    //                 limit: 10,
+    //                 page: 1
+    //             }
+    //         }
+    //     });
+    // }, [])
     /// Create and  Edit State
     const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
     /// delete meeting task api 
@@ -97,11 +166,17 @@ const TaskScreen = () => {
                         placeholder="Search Task"
                         onChangeText={(text) => {
                             setSearchQuery(text);
+                            debouncedSearch(text);
                         }}
                     />
                 </View>
                 <FlatList
-                    data={filteredData}
+                    data={neetingTaskList}
+                    showsVerticalScrollIndicator={false}
+                    refreshing={refreshing && !loading}
+                    onRefresh={() => {
+                        fetchMeetingTask(true);
+                    }}
                     renderItem={({ item }) => {
                         return (
                             <View style={[styles.scrollContainer,
@@ -207,6 +282,17 @@ const TaskScreen = () => {
                         );
                     }}
                     ListEmptyComponent={!loading ? <NoDataFound /> : null}
+                    ListFooterComponent={
+                        hasMore ? (
+                            <ActivityIndicator size="small" color={Colors.primary} />
+                        ) : null
+                    }
+                    onEndReached={() => {
+                        if (hasMore && !loading) {
+                            fetchMeetingTask();
+                        }
+                    }}
+                    onEndReachedThreshold={0.5}
                 />
             </ThemedView>
             {/* follow up add modal */}

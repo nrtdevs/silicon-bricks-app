@@ -96,6 +96,12 @@ const CustomDrawerContent = (props: any) => {
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(meeting)/tasks')}
       />
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="chat" size={ms(24)} color="#3B82F6" />}
+        label={labels?.chat}
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/(meeting)/chats')}
+      />
       {/* <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="task" size={ms(24)} color={Colors.primary} />}
         label={labels?.upcomingTasks}
