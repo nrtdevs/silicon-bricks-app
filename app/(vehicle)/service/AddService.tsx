@@ -14,7 +14,8 @@ import { useForm } from 'react-hook-form'
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
 import { ms } from 'react-native-size-matters'
 import { z } from 'zod'
-
+import { WebView } from 'react-native-webview';
+import CustomMap from '@/components/CustomMap'
 
 const serviceCenterSchema = z.object({
   name: z.string().min(1, "Center Name is required"),
@@ -178,11 +179,23 @@ const AddService = () => {
               numberOfLines={5}
               error={errors.address?.message}
             />
+
+            <CustomMap
+              latitude={parseFloat(watch("latitude")) || 28.6139}
+              longitude={parseFloat(watch("longitude")) || 77.2090}
+              height={400}
+              zoom={14}
+              onMapClick={(lat, lng, addr) => {
+                setValue("latitude", String(lat), { shouldValidate: true });
+                setValue("longitude", String(lng), { shouldValidate: true });
+                setValue("address", addr, { shouldValidate: true });
+              }}
+            />
+
             <CustomButton
-              title="Submit"
+              title={parsedData?.id ? "Update Service" : "Create Service"}
               onPress={handleSubmit(onSubmit)}
               isLoading={loading || updateLoading}
-              disabled={loading}
               style={styles.button}
             />
           </View>

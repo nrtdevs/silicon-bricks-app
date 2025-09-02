@@ -59,6 +59,7 @@
     "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-maps": "1.20.1",
     "react-native-modal": "^14.0.0-rc.1",
     "react-native-paper": "^5.13.1",
     "react-native-razorpay": "^2.3.0",
@@ -70,9 +71,8 @@
     "react-native-toggle-element": "^2.1.1",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "^0.20.0",
-    "react-native-webview": "13.13.5",
-    "zod": "^3.24.2",
-    "react-native-maps": "1.20.1"
+    "react-native-webview": "^13.13.5",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
