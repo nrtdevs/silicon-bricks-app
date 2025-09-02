@@ -37,18 +37,55 @@ const statusIcons = {
   maintenance: 'construct'
 } as const;
 
+
+interface DetailRowProps { icon: 'location'; label: string; value: string; theme: 'light' | 'dark'; }
+
+const DetailRow: React.FC<DetailRowProps> = ({ icon, label, value, theme }) => (
+  <View style={styles.detailRow}>
+    <Ionicons
+      name={icon}
+      size={ms(14)}
+      color={Colors[theme].text}
+      style={styles.detailIcon}
+    />
+    <ThemedText type="default" style={styles.detailLabel}>
+      {label}
+    </ThemedText>
+    <ThemedText type="defaultSemiBold" style={styles.detailValue}>
+      {value}
+    </ThemedText>
+  </View>
+);
+
+interface ActionButtonProps {
+  icon: 'eye' | 'create-outline' | 'swap-vertical' | 'trash';
+  text: string;
+  bgColor: string;
+  onPress: () => void;
+}
+
+const ActionButton: React.FC<ActionButtonProps> = ({ icon, text, onPress, bgColor }) => {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.actionButton, { backgroundColor: bgColor }]}
+    >
+      <Ionicons name={icon} size={ms(16)} color={Colors.white} />
+      <Text style={styles.actionButtonText}>{text}</Text>
+    </TouchableOpacity>
+  );
+};
+
 const ServiceCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onChangeStatus, onView }) => {
   if (!item) {
-    return null; // Render nothing if item is not provided
+    return null; 
   }
 
-  console.log("item", item)
 
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const [scaleValue] = useState(new Animated.Value(1));
 
-  // Safely get status, defaulting to 'inactive' if item.status is undefined/invalid
   const currentStatus = item.status && statusColors[item.status] ? item.status : 'inactive';
 
   const toggleExpand = () => {
@@ -123,15 +160,16 @@ const ServiceCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onCha
         {/* Vehicle Details */}
         <View style={styles.detailsContainer}>
           <DetailRow
-            icon="finger-print"
+            icon="location"
             label="Longitude"
-            value={item?.longitude}
+            value={String(item?.longitude?.toFixed(2))}
             theme={theme}
           />
           <DetailRow
-            icon="car-sport"
+            icon="location"
             label="Latitude"
-            value={item?.latitude}
+            // value={Math.round(item?.latitude)}
+            value={String(Math.round(parseFloat(item?.latitude)))}
             theme={theme}
           />
         </View>
@@ -167,49 +205,6 @@ const ServiceCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onCha
         </Animated.View>
       </TouchableOpacity>
     </Animated.View>
-  );
-};
-
-interface DetailRowProps {
-  icon: 'finger-print' | 'car-sport' | 'calendar';
-  label: string;
-  value: string;
-  theme: 'light' | 'dark';
-}
-
-const DetailRow: React.FC<DetailRowProps> = ({ icon, label, value, theme }) => (
-  <View style={styles.detailRow}>
-    <Ionicons
-      name={icon}
-      size={ms(14)}
-      color={Colors[theme].text}
-      style={styles.detailIcon}
-    />
-    <ThemedText type="default" style={styles.detailLabel}>
-      {label}
-    </ThemedText>
-    <ThemedText type="defaultSemiBold" style={styles.detailValue}>
-      {value}
-    </ThemedText>
-  </View>
-);
-
-interface ActionButtonProps {
-  icon: 'eye' | 'create-outline' | 'swap-vertical' | 'trash';
-  text: string;
-  bgColor: string;
-  onPress: () => void;
-}
-
-const ActionButton: React.FC<ActionButtonProps> = ({ icon, text, onPress, bgColor }) => {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[styles.actionButton, { backgroundColor: bgColor }]}
-    >
-      <Ionicons name={icon} size={ms(16)} color={Colors.white} />
-      <Text style={styles.actionButtonText}>{text}</Text>
-    </TouchableOpacity>
   );
 };
 
