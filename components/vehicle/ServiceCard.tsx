@@ -7,20 +7,23 @@ import { Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
 import { ms, ScaledSheet } from 'react-native-size-matters';
 import { ThemedText } from '../ThemedText';
 
-interface VehicleCardProps {
-  brand: string;
-  model: string;
-  chassisNumber: string;
-  number: string;
-  createdAt: string;
+interface ServiceItem {
+  name: string;
+  contactNo: string;
+  longitude: string;
+  latitude: string;
   status: 'active' | 'inactive' | 'breakdown' | 'maintenance';
+}
+
+interface VehicleCardProps {
+  item: ServiceItem;
   onEdit: () => void;
   onDelete: () => void;
   onChangeStatus: () => void;
   onView: () => void;
 }
 
-const statusColors: Record<VehicleCardProps['status'], readonly [string, string]> = {
+const statusColors: Record<ServiceItem['status'], readonly [string, string]> = {
   active: ['#10B981', '#059669'],
   inactive: ['#EF4444', '#DC2626'],
   breakdown: ['#F59E0B', '#D97706'],
@@ -34,10 +37,19 @@ const statusIcons = {
   maintenance: 'construct'
 } as const;
 
-const ServiceCard: React.FC<VehicleCardProps> = ({brand,model,chassisNumber,  number,status,onEdit,onDelete,onChangeStatus,onView,}) => {
+const ServiceCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onChangeStatus, onView }) => {
+  if (!item) {
+    return null; // Render nothing if item is not provided
+  }
+
+  console.log("item", item)
+
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const [scaleValue] = useState(new Animated.Value(1));
+
+  // Safely get status, defaulting to 'inactive' if item.status is undefined/invalid
+  const currentStatus = item.status && statusColors[item.status] ? item.status : 'inactive';
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -83,24 +95,24 @@ const ServiceCard: React.FC<VehicleCardProps> = ({brand,model,chassisNumber,  nu
         {/* Header with status badge */}
         <View style={styles.header}>
           <View style={styles.titleContainer}>
-            <ThemedText type='title' style={styles.brandText}>{brand}</ThemedText>
-            <ThemedText type='subtitle' style={styles.modelText}>{model}</ThemedText>
+            <ThemedText type='title' style={styles.brandText}>Name : {item?.name}</ThemedText>
+            <ThemedText type='subtitle' style={styles.modelText}>Contact No : {item?.contactNo}</ThemedText>
           </View>
 
           <LinearGradient
-            colors={statusColors[status]}
+            colors={statusColors[currentStatus]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.statusBadge}
           >
             <Ionicons
-              name={statusIcons[status]}
+              name={statusIcons[currentStatus]}
               size={ms(12)}
               color={Colors.white}
               style={styles.statusIcon}
             />
             <ThemedText style={styles.statusText} type='default'>
-              {status.toUpperCase()}
+              {currentStatus.toUpperCase()}
             </ThemedText>
           </LinearGradient>
         </View>
@@ -112,14 +124,14 @@ const ServiceCard: React.FC<VehicleCardProps> = ({brand,model,chassisNumber,  nu
         <View style={styles.detailsContainer}>
           <DetailRow
             icon="finger-print"
-            label="Chassis No:"
-            value={chassisNumber}
+            label="Longitude"
+            value={item?.longitude}
             theme={theme}
           />
           <DetailRow
             icon="car-sport"
-            label="Vehicle No:"
-            value={number}
+            label="Latitude"
+            value={item?.latitude}
             theme={theme}
           />
         </View>
@@ -189,7 +201,7 @@ interface ActionButtonProps {
   onPress: () => void;
 }
 
-const ActionButton: React.FC<ActionButtonProps> = ({ icon,text,onPress,bgColor}) => {
+const ActionButton: React.FC<ActionButtonProps> = ({ icon, text, onPress, bgColor }) => {
   return (
     <TouchableOpacity
       onPress={onPress}

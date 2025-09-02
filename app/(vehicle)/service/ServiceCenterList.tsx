@@ -1,6 +1,6 @@
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
-import VehicleCard from "@/components/vehicle/VehicleCart";
+import ServiceCard from "@/components/vehicle/ServiceCard";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { PaginatedServiceCentersDocument } from "@/graphql/generated";
@@ -91,12 +91,8 @@ const ServiceCenter = () => {
 
     const renderItems = (item: any) => {
         return (
-            <VehicleCard
-                brand={item?.name}
-                model=""
-                chassisNumber=""
-                number=""
-                createdAt=""
+            <ServiceCard
+                item={item}
                 status="active"
                 onEdit={() =>
                     router.navigate({
