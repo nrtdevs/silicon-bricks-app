@@ -1,6 +1,7 @@
 import CustomButton from '@/components/CustomButton'
 import CustomHeader from '@/components/CustomHeader'
 import CustomInput from '@/components/CustomInput'
+import CustomMap from '@/components/CustomMap'
 import CustomToast from '@/components/CustomToast'
 import { Colors } from '@/constants/Colors'
 import { useTheme } from '@/context/ThemeContext'
@@ -14,8 +15,6 @@ import { useForm } from 'react-hook-form'
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
 import { ms } from 'react-native-size-matters'
 import { z } from 'zod'
-import { WebView } from 'react-native-webview';
-import CustomMap from '@/components/CustomMap'
 
 const serviceCenterSchema = z.object({
   name: z.string().min(1, "Center Name is required"),

@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from "react";
 import { WebView } from "react-native-webview";
 import { StyleSheet, Platform, View, TouchableOpacity, Text } from "react-native";
@@ -33,7 +34,7 @@ const CustomMap: React.FC<CustomMapProps> = ({
           
           // Update popup with new location
           (function() {
-            fetch("https://apis.mapmyindia.com/advancedmaps/v1/uqyarlgtrfyopiiryieprrpclbqlekjyrkfx/rev_geocode?lat=${latitude}&lng=${longitude}")
+            fetch("https://apis.mapmyindia.com/advancedmaps/v1/342748db5cfde95bfbb15d76c2e29dba/rev_geocode?lat=${latitude}&lng=${longitude}")
               .then(res => res.json())
               .then(data => {
                 let address = data?.results?.[0]?.formatted_address || "Unknown Location";
@@ -150,7 +151,7 @@ const CustomMap: React.FC<CustomMapProps> = ({
 
             // Function to perform reverse geocoding
             function reverseGeocode(latitude, longitude, callback) {
-              fetch("https://apis.mapmyindia.com/advancedmaps/v1/uqyarlgtrfyopiiryieprrpclbqlekjyrkfx/rev_geocode?lat=" + latitude + "&lng=" + longitude)
+              fetch("https://apis.mapmyindia.com/advancedmaps/v1/342748db5cfde95bfbb15d76c2e29dba/rev_geocode?lat=" + latitude + "&lng=" + longitude)
                 .then(res => res.json())
                 .then(data => {
                   let address = data?.results?.[0]?.formatted_address || "Unknown Location";
