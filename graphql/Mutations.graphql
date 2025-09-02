@@ -1113,3 +1113,11 @@ mutation UpdateServiceCenter($updateServiceCenterInput: UpdateServiceCenterDto!)
     name
   }
 }
+
+# service center status 
+mutation EnableServiceCenterStatus($data: ServiceCenterStatusDto!) {
+  enableServiceCenterStatus(data: $data) {
+    id
+    status
+  }
+}

@@ -162,7 +162,7 @@ const ServiceCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onCha
           <DetailRow
             icon="location"
             label="Longitude"
-            value={String(item?.longitude?.toFixed(2))}
+            value={String(parseFloat(item?.longitude).toFixed(2))}
             theme={theme}
           />
           <DetailRow
@@ -265,6 +265,8 @@ const styles = ScaledSheet.create({
   },
   detailsContainer: {
     marginBottom: "15@vs",
+    flexDirection: 'row',
+    justifyContent: 'space-around'
   },
   detailRow: {
     flexDirection: 'row',
