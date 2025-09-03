@@ -263,18 +263,12 @@ const NotificationList = () => {
                     ))}
                 </ScrollView>
                 
-                {unreadCount > 0 && (
-                    <TouchableOpacity
-                        onPress={markAllAsRead}
-                        style={[styles.markAllButton, { backgroundColor: Colors[theme].tint }]}
-                    >
-                        <Text style={styles.markAllText}>Mark All Read</Text>
-                    </TouchableOpacity>
-                )}
+
             </View>
         );
     };
 
+    //list
     const renderNotificationItem = ({ item }: { item: any }) => {
         const moduleColor = getModuleColor(item.module);
         const timeAgo = formatDate(item.createdAt);
@@ -360,6 +354,7 @@ const NotificationList = () => {
         );
     };
 
+    //model
     const renderNotificationDetailModal = () => {
         if (!selectedNotification) return null;
 
@@ -582,7 +577,16 @@ const NotificationList = () => {
                     <Text style={[styles.headerSubtitle, { color: Colors[theme].text + '80' }]}>
                         {filteredNotifications.length} {filteredNotifications.length === 1 ? 'notification' : 'notifications'}
                     </Text>
+                    {unreadCount > 0 && (
+                        <TouchableOpacity
+                            onPress={markAllAsRead}
+                            style={[styles.markAllButton, { backgroundColor: Colors[theme].tint }]}
+                        >
+                            <Text style={styles.markAllText}>Mark All Read</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
+
 
                 <FlatList
                     data={filteredNotifications}
@@ -620,7 +624,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginHorizontal: ms(16),
-        marginTop: ms(16),
         marginBottom: ms(12),
         paddingHorizontal: ms(16),
         borderRadius: ms(12),
@@ -639,7 +642,7 @@ const styles = StyleSheet.create({
     },
     filterContainer: {
         paddingHorizontal: ms(16),
-        marginBottom: ms(16),
+        marginBottom: ms(12),
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -663,7 +666,7 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
     },
     markAllButton: {
-        paddingHorizontal: ms(12),
+        padding: 10,
         paddingVertical: ms(6),
         borderRadius: ms(12),
     },
@@ -673,6 +676,9 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     headerInfo: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         paddingHorizontal: ms(16),
         paddingBottom: ms(12),
     },
