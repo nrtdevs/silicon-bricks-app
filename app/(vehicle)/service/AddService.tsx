@@ -1,6 +1,7 @@
 import CustomButton from '@/components/CustomButton'
 import CustomHeader from '@/components/CustomHeader'
 import CustomInput from '@/components/CustomInput'
+import GoogleMapView from '@/components/CustomMap'
 import CustomMap from '@/components/CustomMap'
 import CustomToast from '@/components/CustomToast'
 import { Colors } from '@/constants/Colors'
@@ -49,6 +50,8 @@ const AddService = () => {
     defaultValues: defaultValues
   });
 
+  console.log(parsedData, "parsedData")
+
   const [createServiceCenterApi, { loading }] = useMutation(CreateServiceCenterDocument, {
     refetchQueries: [{ query: PaginatedServiceCentersDocument, variables: { listInputDto: { limit: 10, page: 1 } } }],
   });
@@ -63,8 +66,6 @@ const AddService = () => {
       setValue('contactNo', String(parsedData?.contactNo))
       setValue('latitude', parsedData?.latitude)
       setValue('longitude', parsedData?.longitude)
-    } else {
-      reset(defaultValues);
     }
   }, [parsedData?.id]);
 
@@ -134,6 +135,7 @@ const AddService = () => {
         <ScrollView>
           <View style={styles.formContainer}>
             <CustomInput
+              key={`${parsedData?.name}-name`}
               name="name"
               control={control}
               label="Center Name"
@@ -179,16 +181,15 @@ const AddService = () => {
               error={errors.address?.message}
             />
 
-            <CustomMap
-              latitude={parseFloat(watch("latitude")) || 28.6139}
-              longitude={parseFloat(watch("longitude")) || 77.2090}
+            <GoogleMapView
+              latitude={28.6139}
+              longitude={77.2090}
+              address="New Delhi, India"
+              zoom={12}
               height={400}
-              zoom={14}
-              onMapClick={(lat, lng, addr) => {
-                setValue("latitude", String(lat), { shouldValidate: true });
-                setValue("longitude", String(lng), { shouldValidate: true });
-                setValue("address", addr, { shouldValidate: true });
-              }}
+              onLocationSelect={(lat, lng, addr) =>
+                console.log("tino ", lat, lng, addr)
+              }
             />
 
             <CustomButton

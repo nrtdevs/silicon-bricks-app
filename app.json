@@ -19,6 +19,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBWlnddv4XMNNaUND-dqN-h-M39F2npMok"
+        }
+      },
       "package": "com.ashoksahu21649.siliconbricks"
     },
     "web": {
