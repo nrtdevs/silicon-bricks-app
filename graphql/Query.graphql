@@ -1168,3 +1168,29 @@ query PaginatedLogs($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+# pagianted vehiclew notification 
+query PaginatedVehicleNotification($listInputDto: ListInputDTO!) {
+  paginatedVehicleNotification(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      isRead
+      actionUrl
+      createdAt
+      createdBy {
+        id
+        status
+        username
+      }
+      message
+      module
+      title
+    }
+  }
+}

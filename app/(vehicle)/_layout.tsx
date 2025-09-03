@@ -49,6 +49,13 @@ const CustomDrawerContent = (props: any) => {
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(vehicle)/activity/ActivityList')}
       />
+
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="notifications" size={ms(24)} color={Colors[theme].primary.main} />}
+        label="Notifications"
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/(vehicle)/Notification')}
+      />
     </DrawerContentScrollView>
   )
 }
