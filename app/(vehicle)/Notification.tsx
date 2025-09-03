@@ -456,24 +456,6 @@ const NotificationList = () => {
                                 </View>
                             )}
 
-                            <View style={styles.detailRow}>
-                                <Text style={[styles.detailLabel, { color: Colors[theme].text + '80' }]}>
-                                    Entity ID
-                                </Text>
-                                <Text style={[styles.detailValue, { color: Colors[theme].text }]}>
-                                    {selectedNotification.entityId}
-                                </Text>
-                            </View>
-
-                            <View style={styles.detailRow}>
-                                <Text style={[styles.detailLabel, { color: Colors[theme].text + '80' }]}>
-                                    Notification ID
-                                </Text>
-                                <Text style={[styles.detailValue, { color: Colors[theme].text }]}>
-                                    {selectedNotification.id}
-                                </Text>
-                            </View>
-
                             {selectedNotification.actionUrl && (
                                 <TouchableOpacity 
                                     style={[styles.actionButton, { backgroundColor: Colors[theme].tint }]}
