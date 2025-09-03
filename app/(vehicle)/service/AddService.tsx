@@ -182,15 +182,17 @@ const AddService = () => {
             />
 
             <GoogleMapView
-              latitude={28.6139}
-              longitude={77.2090}
-              address="New Delhi, India"
-              zoom={12}
+              latitude={37.78825}
+              longitude={-122.4324}
               height={400}
-              onLocationSelect={(lat, lng, addr) =>
-                console.log("tino ", lat, lng, addr)
-              }
+              onLocationSelect={(lat, lng, address) => {
+                console.log("Selected location:", lat, lng, address);
+              }}
+              showControls={true}
+              enableDrawing={true}
             />
+
+
 
             <CustomButton
               title={parsedData?.id ? "Update Service" : "Create Service"}

@@ -44,36 +44,10 @@ const CustomDrawerContent = (props: any) => {
         onPress={() => router.push('/(vehicle)/service/ServiceCenterList')}
       />
       <DrawerItem
-        icon={({ color, size }) => <MaterialIcons name="attach-money" size={ms(24)} color={Colors[theme].primary.main} />}
-        label="Vehicle Expense"
-        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-        onPress={() => router.push('/(vehicle)/vehicle-expense')}
-      />
-      <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="history" size={ms(24)} color={Colors[theme].primary.main} />}
         label="Activity Log"
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-        onPress={() => router.push('/(vehicle)/activity-log')}
-      />
-      <DrawerItem
-        icon={({ color, size }) => <MaterialIcons name="warning" size={ms(24)} color={Colors[theme].primary.main} />}
-        label="Vehicle Breakdown List"
-        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-        onPress={() => router.push('/(vehicle)/vehicle-breakdown-list')}
-      />
-      {/* Original meeting and milestone items - kept for reference, but might be removed if not relevant to vehicle context */}
-      <DrawerItem
-        icon={({ color, size }) => <MaterialIcons name="event" size={ms(24)} color={Colors[theme].primary.main} />}
-        label={labels?.meeting}
-        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-        onPress={() => router.push('/(meeting)/meeting')}
-      />
-
-      <DrawerItem
-        icon={({ color, size }) => <MaterialIcons name="flag" size={ms(24)} color={Colors[theme].primary.main} />}
-        label={labels?.mileStone}
-        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
-        onPress={() => router.push('/(meeting)/mile-stone')}
+        onPress={() => router.push('/(vehicle)/activity/ActivityList')}
       />
     </DrawerContentScrollView>
   )

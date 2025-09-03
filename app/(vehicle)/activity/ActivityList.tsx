@@ -13,7 +13,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
 
-const ServiceCenter = () => {
+const ActivityLogs = () => {
     const navigation = useNavigation();
     const { theme } = useTheme();
     const [currentPage, setCurrentPage] = useState(1);
@@ -134,7 +134,7 @@ const ServiceCenter = () => {
 
     return (
         <CustomHeader
-            title="Service Center"
+            title="Activity Logs"
             leftComponent={
                 <Pressable
                     style={styles.menuButton}
@@ -166,26 +166,11 @@ const ServiceCenter = () => {
                         ) : null
                     }
                 />
-                <FAB
-                    size="large"
-                    title="Add Service"
-                    style={{
-                        position: "absolute",
-                        margin: 16,
-                        right: 0,
-                        bottom: 0,
-                    }}
-                    icon={{
-                        name: "add",
-                        color: "white",
-                    }}
-                    onPress={() => router.navigate("/(vehicle)/service/AddService")}
-                />
             </ThemedView>
         </CustomHeader>
     );
 }
-export default ServiceCenter;
+export default ActivityLogs;
 
 const styles = StyleSheet.create({
     menuButton: {
