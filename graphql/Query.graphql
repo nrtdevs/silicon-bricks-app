@@ -1141,3 +1141,30 @@ query PaginatedServiceCenters($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+# activity logs in vehicle 
+query PaginatedLogs($listInputDto: ListInputDTO!) {
+  paginatedLogs(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      ipAddress
+      action
+      createdAt
+      deletedAt
+      description
+      module
+      updatedAt
+      user {
+        id
+        name
+      }
+      userAgent
+    }
+  }
+}
