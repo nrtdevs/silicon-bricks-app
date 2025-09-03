@@ -580,7 +580,7 @@ const NotificationList = () => {
                     {unreadCount > 0 && (
                         <TouchableOpacity
                             onPress={markAllAsRead}
-                            style={[styles.markAllButton, { backgroundColor: Colors[theme].tint }]}
+                            style={[styles.markAllButton, { backgroundColor: Colors[theme].success.bg }]}
                         >
                             <Text style={styles.markAllText}>Mark All Read</Text>
                         </TouchableOpacity>
