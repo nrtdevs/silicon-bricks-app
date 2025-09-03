@@ -36,7 +36,12 @@ const CustomDrawerContent = (props: any) => {
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(vehicle)/vehicle-list')}
       />
-
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="directions-car" size={ms(24)} color={Colors[theme].primary.main} />}
+        label="Break Down"
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/(vehicle)/breakdown/BreakdownList')}
+      />
       <DrawerItem
         icon={({ color, size }) => <MaterialIcons name="build" size={ms(24)} color={Colors[theme].primary.main} />}
         label="Service Center"

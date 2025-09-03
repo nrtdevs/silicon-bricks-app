@@ -67,6 +67,7 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-size-matters": "^0.4.2",
+    "react-native-step-indicator": "^1.0.3",
     "react-native-toast-message": "^2.2.1",
     "react-native-toggle-element": "^2.1.1",
     "react-native-vector-icons": "^10.2.0",
