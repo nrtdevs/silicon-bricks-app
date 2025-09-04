@@ -149,9 +149,8 @@ export default CustomDropdownApi;
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 15,
-        width: '90%',
-        alignSelf: 'center',
+        marginBottom: 20,
+        width: '100%',
         zIndex: 1000,
     },
     dropdownHeader: {
@@ -216,10 +215,10 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     label: {
-        fontSize: 16,
+        marginBottom: 6,
+        fontSize: 14,
+        fontWeight: "500",
         color: '#333',
-        marginBottom: 8,
-        fontWeight: 'bold',
     },
     requiredStar: {
         color: 'red',

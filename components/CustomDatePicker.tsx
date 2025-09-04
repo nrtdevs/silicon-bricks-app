@@ -91,12 +91,20 @@ const styles = StyleSheet.create({
         marginBottom: 6,
         fontSize: 14,
         fontWeight: "500",
+        color: '#333', // Added to match CustomDropdownApi
     },
     input: {
-        borderWidth: 1.5,
-        borderRadius: 8,
-        padding: 12,
+        borderWidth: 1, // Changed from 1.5 to 1 to match CustomDropdownApi
+        borderRadius: 10, // Changed from 8 to 10 to match CustomDropdownApi
+        paddingHorizontal: 15, // Changed from 12 to 15 to match CustomDropdownApi
+        paddingVertical: 15, // Changed from 12 to 15 to match CustomDropdownApi
         fontSize: 16,
+        backgroundColor: 'white', // Added to match CustomDropdownApi
+        shadowColor: '#000', // Added to match CustomDropdownApi
+        shadowOffset: { width: 0, height: 2 }, // Added to match CustomDropdownApi
+        shadowOpacity: 0.1, // Added to match CustomDropdownApi
+        shadowRadius: 4, // Added to match CustomDropdownApi
+        elevation: 3, // Added to match CustomDropdownApi
     },
     errorText: {
         marginTop: 4,
