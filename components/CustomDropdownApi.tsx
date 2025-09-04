@@ -1,16 +1,14 @@
-import React, { useState, useRef } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useRef, useState } from 'react';
 import {
-    View,
+    Animated,
+    Dimensions,
+    FlatList,
+    StyleSheet,
     Text,
     TouchableOpacity,
-    StyleSheet,
-    Animated,
-    FlatList,
-    Dimensions,
-    Platform,
-    StatusBar
+    View
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
@@ -86,7 +84,9 @@ const CustomDropdownApi = ({
                     <Ionicons name="chevron-down" size={20} color="#666" />
                 </Animated.View>
             </TouchableOpacity>
-
+            <View>
+                <Text>{label}</Text>
+            </View>
             {isOpen && (
                 <Animated.View style={[styles.dropdownList, { height: dropdownHeight }]}>
                     <FlatList
