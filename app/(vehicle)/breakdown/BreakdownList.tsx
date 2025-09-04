@@ -142,7 +142,7 @@ const BreakdownList = () => {
 
     return (
         <CustomHeader
-            title="Service Center"
+            title="Break Down"
             leftComponent={
                 <Pressable
                     style={styles.menuButton}
@@ -176,7 +176,7 @@ const BreakdownList = () => {
                 />
                 <FAB
                     size="large"
-                    title="Add Service"
+                    title="Add Breakdown"
                     style={{
                         position: "absolute",
                         margin: 16,
