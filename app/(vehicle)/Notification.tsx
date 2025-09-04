@@ -24,7 +24,6 @@ import {
 } from "react-native";
 import { ms } from "react-native-size-matters";
 
-const { width } = Dimensions.get('window');
 
 const NotificationList = () => {
     const navigation = useNavigation();
