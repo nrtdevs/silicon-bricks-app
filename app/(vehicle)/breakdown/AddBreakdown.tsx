@@ -11,17 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  Animated,
-  Dimensions,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from "react-native";
+import { Animated, Dimensions, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
 import StepIndicator from "react-native-step-indicator";
 import { z } from 'zod';
@@ -189,6 +179,7 @@ const AddBreakdown = () => {
                 name="insuranceValidTill"
                 label="Breakdown Date"
                 mode="date"
+                required
               />
               <CustomInput
                 name="address"
@@ -347,8 +338,8 @@ const AddBreakdown = () => {
                   onPress={onPrevStep}
                   android_ripple={{ color: 'rgba(0,0,0,0.1)' }}
                 >
-                  <Ionicons name="chevron-back" size={20} color="#6B7280" />
-                  <Text style={styles.navButtonText}>Previous</Text>
+                  <Ionicons name="chevron-back" size={20} color="#f8faffff" />
+                  <Text style={styles.ButtonText}>Previous</Text>
                 </Pressable>
               )}
 
@@ -360,7 +351,7 @@ const AddBreakdown = () => {
                   onPress={onNextStep}
                   android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
                 >
-                  <Text style={styles.nextButtonText}>Next</Text>
+                  <Text style={styles.ButtonText}>Next</Text>
                   <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
                 </Pressable>
               ) : (
@@ -370,7 +361,7 @@ const AddBreakdown = () => {
                   android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
                 >
                   <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
-                  <Text style={styles.submitButtonText}>
+                    <Text style={styles.ButtonText}>
                     {parsedData?.id ? "Update" : "Create"}
                   </Text>
                 </Pressable>
@@ -544,7 +535,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   prevButton: {
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#b9b9caff',
   },
   nextButton: {
     backgroundColor: '#007AFF',
@@ -552,24 +543,13 @@ const styles = StyleSheet.create({
   submitButton: {
     backgroundColor: '#34C759',
   },
-  navButtonText: {
+  ButtonText: {
     fontSize: ms(16),
     fontWeight: '600',
-    color: '#6B7280',
+    color: '#fbfbfbff',
     marginLeft: ms(4),
   },
-  nextButtonText: {
-    fontSize: ms(16),
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginRight: ms(4),
-  },
-  submitButtonText: {
-    fontSize: ms(16),
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginLeft: ms(4),
-  },
+
 });
 
 const customStyles = {
