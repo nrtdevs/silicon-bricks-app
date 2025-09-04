@@ -75,6 +75,20 @@ const AddBreakdown = () => {
 
   console.log("Maindata", Maindata)
 
+  const dropdownOptions = [
+    { label: 'React Native', value: 'rn' },
+    { label: 'JavaScript', value: 'js' },
+    { label: 'TypeScript', value: 'ts' },
+    { label: 'Python', value: 'py' },
+    { label: 'Java', value: 'java' },
+    { label: 'Swift', value: 'swift' },
+    { label: 'Kotlin', value: 'kotlin' },
+  ];
+
+  const handleSelect = (item) => {
+    console.log('Selected:', item);
+  };
+
   return (
     <CustomHeader
       title={parsedData?.id ? "Update Service" : "Create Service"}
@@ -104,21 +118,11 @@ const AddBreakdown = () => {
             <View style={styles.content}>
               {currentPosition === 0 &&
                 <>
-                  <View>
-                    <CustomDropdownApi
-                      control={control}
-                      name="fruit"
-                      placeholder="Choose a fruit"
-                      searchPlaceholder="Search fruits..."
-                      search={search}
-                      onSearchChange={setSearch}
-                    options={Maindata?.map((item: any) => ({
-                      label: item.name,
-                      value: item.id,
-                    }))}
-                      rules={{ required: "Please select a fruit" }}
-                    />
-                  </View>
+                <CustomDropdownApi
+                  options={dropdownOptions}
+                  onSelect={handleSelect}
+                  placeholder="Select a language"
+                />
                 </>}
             </View>
           </ScrollView>
@@ -138,7 +142,6 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    padding: ms(12),
   },
   menuButton: {
     padding: ms(10),
@@ -146,7 +149,6 @@ const styles = StyleSheet.create({
   content: {
     marginTop: 40,
     alignItems: "center",
-    paddingHorizontal: 20,
   },
   title: {
     fontSize: 22,
