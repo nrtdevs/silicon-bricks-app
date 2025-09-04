@@ -12,13 +12,27 @@ import {
 
 const { width, height } = Dimensions.get('window');
 
+interface DropdownOption {
+    label: string;
+    value: string | number;
+}
+
+interface CustomDropdownApiProps {
+    options: DropdownOption[];
+    onSelect: (item: DropdownOption) => void;
+    placeholder?: string;
+    defaultValue?: DropdownOption | null;
+    label?: string;
+}
+
 const CustomDropdownApi = ({
     options, 
     onSelect,
     placeholder = "Select an option",
-    defaultValue = null
-}) => {
-    const [selected, setSelected] = useState(defaultValue);
+    defaultValue = null,
+    label,
+}: CustomDropdownApiProps) => {
+    const [selected, setSelected] = useState<DropdownOption | null>(defaultValue);
     const [isOpen, setIsOpen] = useState(false);
     const animatedValue = useRef(new Animated.Value(0)).current;
     const dropdownHeight = animatedValue.interpolate({
@@ -47,31 +61,32 @@ const CustomDropdownApi = ({
         }
     };
 
-    const onItemPress = (item) => {
-        setSelected(item);
-        onSelect(item);
-        toggleDropdown();
-    };
+const onItemPress = (item: DropdownOption) => {
+    setSelected(item);
+    onSelect(item);
+    toggleDropdown();
+};
 
-    const renderItem = ({ item }) => (
-        <TouchableOpacity
-            style={[
-                styles.item,
-                selected && selected.value === item.value && styles.selectedItem
-            ]} 
-            onPress={() => onItemPress(item)}
-        >
-            <Text style={[
-                styles.itemText,
-                selected && selected.value === item.value && styles.selectedItemText
-            ]}>
-                {item.label}
-            </Text>
-        </TouchableOpacity>
-    );
+const renderItem = ({ item }: { item: DropdownOption }) => (
+    <TouchableOpacity
+        style={[
+            styles.item,
+            selected && selected.value === item.value && styles.selectedItem
+        ]} 
+        onPress={() => onItemPress(item)}
+    >
+        <Text style={[
+            styles.itemText,
+            selected && selected.value === item.value && styles.selectedItemText
+        ]}>
+            {item.label}
+        </Text>
+    </TouchableOpacity>
+);
 
     return (
         <View style={styles.container}>
+            {label && <Text style={styles.label}>{label}</Text>} 
             <TouchableOpacity 
                 style={styles.dropdownHeader}
                 onPress={toggleDropdown}
@@ -84,9 +99,6 @@ const CustomDropdownApi = ({
                     <Ionicons name="chevron-down" size={20} color="#666" />
                 </Animated.View>
             </TouchableOpacity>
-            <View>
-                <Text>{label}</Text>
-            </View>
             {isOpen && (
                 <Animated.View style={[styles.dropdownList, { height: dropdownHeight }]}>
                     <FlatList
@@ -163,5 +175,11 @@ const styles = StyleSheet.create({
     selectedItemText: {
         color: '#0066cc',
         fontWeight: '500',
+    },
+    label: {
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 8,
+        fontWeight: 'bold',
     },
 });

@@ -73,20 +73,14 @@ const AddBreakdown = () => {
 
   const Maindata = DropdownData?.paginatedServiceCenters.data || []
 
-  console.log("Maindata", Maindata)
+  const dropdownOptions = Maindata?.map((item) => ({
+    label: item?.name || "",
+    value: item?.id || item?.name || "",
+  }));
 
-  const dropdownOptions = [
-    { label: 'React Native', value: 'rn' },
-    { label: 'JavaScript', value: 'js' },
-    { label: 'TypeScript', value: 'ts' },
-    { label: 'Python', value: 'py' },
-    { label: 'Java', value: 'java' },
-    { label: 'Swift', value: 'swift' },
-    { label: 'Kotlin', value: 'kotlin' },
-  ];
-
-  const handleSelect = (item) => {
+  const handleSelect = (item: { label: string; value: string | number }) => {
     console.log('Selected:', item);
+    // You might want to set a form value here, e.g., setValue("name", item.value);
   };
 
   return (
@@ -121,7 +115,7 @@ const AddBreakdown = () => {
                 <CustomDropdownApi
                   options={dropdownOptions}
                   onSelect={handleSelect}
-                  placeholder="Select a language"
+                  placeholder="Select Service Center"
                 />
                 </>}
             </View>
