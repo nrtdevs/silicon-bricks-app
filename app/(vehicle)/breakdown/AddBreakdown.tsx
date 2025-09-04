@@ -155,7 +155,7 @@ const AddBreakdown = () => {
                 Breakdown Details
               </Text>
             </View>
-            <View style={styles.formSection}>
+            <View >
               <CustomDropdownApi
                 options={dropdownOptions}
                 placeholder="Select Breakdown Type"
@@ -203,7 +203,7 @@ const AddBreakdown = () => {
                 Location Information
               </Text>
             </View>
-            <View style={styles.formSection}>
+            <View >
               <CustomInput
                 name="name"
                 control={control}
@@ -429,9 +429,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: ms(12),
     color: '#1C1C1E',
-  },
-  formSection: {
-    gap: ms(20),
   },
   coordinateRow: {
     flexDirection: 'row',
