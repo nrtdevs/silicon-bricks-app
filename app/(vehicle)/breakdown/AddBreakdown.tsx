@@ -2,9 +2,10 @@ import CustomDatePicker from "@/components/CustomDatePicker";
 import CustomDropdownApi from "@/components/CustomDropdownApi";
 import CustomHeader from "@/components/CustomHeader";
 import CustomInput from "@/components/CustomInput";
+import GoogleMapView from "@/components/CustomMap";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { PaginatedServiceCentersDocument } from "@/graphql/generated";
+import { PaginatedServiceCentersDocument, VehiclesDropdownDocument } from "@/graphql/generated";
 import { useLazyQuery } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,7 +58,7 @@ const AddBreakdown = () => {
   const parsedData = data ? JSON.parse(data as string) : null;
   const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState("");
-  const [getVehicleListApi, { data: DropdownData, loading, error }] = useLazyQuery(PaginatedServiceCentersDocument);
+  const [VehiclesDropdownApi, { data: DropdownData, loading, error }] = useLazyQuery(VehiclesDropdownDocument);
 
   const { control, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<z.infer<typeof BreakDownSchema>>({
     resolver: zodResolver(BreakDownSchema),
@@ -67,7 +68,7 @@ const AddBreakdown = () => {
   // Fetch data function
   const fetchData = useCallback(() => {
     if (hasMore) {
-      getVehicleListApi({
+      VehiclesDropdownApi({
         variables: {
           listInputDto: {
             limit: limit,
@@ -82,11 +83,11 @@ const AddBreakdown = () => {
     fetchData();
   }, [fetchData]);
 
-  const Maindata = DropdownData?.paginatedServiceCenters.data || []
+  const Maindata = DropdownData?.vehiclesDropdown.data || []
 
   const dropdownOptions = Maindata?.map((item) => ({
-    label: item?.name || "",
-    value: item?.id || item?.name || "",
+    label: item?.model || "",
+    value: item?.id || "",
   }));
 
   const animateStepTransition = (direction: 'next' | 'prev') => {
@@ -205,46 +206,24 @@ const AddBreakdown = () => {
             </View>
             <View >
               <CustomInput
-                name="name"
+                name="longitude"
                 control={control}
-                label="Service Center Name"
-                placeholder="Enter service center name"
-                required={true}
-                error={errors.name?.message}
-              />
-              <CustomInput
-                name="contactNo"
-                control={control}
-                label="Contact Number"
-                placeholder="Enter contact number"
+                label="Longitude"
+                placeholder="Longitude"
                 required={true}
                 type="number"
-                error={errors.contactNo?.message}
+                error={errors.longitude?.message}
               />
-              <View style={styles.coordinateRow}>
-                <View style={styles.coordinateInput}>
-                  <CustomInput
-                    name="latitude"
-                    control={control}
-                    label="Latitude"
-                    placeholder="Latitude"
-                    required={true}
-                    type="number"
-                    error={errors.latitude?.message}
-                  />
-                </View>
-                <View style={styles.coordinateInput}>
-                  <CustomInput
-                    name="longitude"
-                    control={control}
-                    label="Longitude"
-                    placeholder="Longitude"
-                    required={true}
-                    type="number"
-                    error={errors.longitude?.message}
-                  />
-                </View>
-              </View>
+              <CustomInput
+                name="latitude"
+                control={control}
+                label="Latitude"
+                placeholder="Latitude"
+                required={true}
+                type="number"
+                error={errors.latitude?.message}
+              />
+
               <CustomInput
                 name="address"
                 control={control}
@@ -254,6 +233,17 @@ const AddBreakdown = () => {
                 multiline={true}
                 numberOfLines={4}
                 error={errors.address?.message}
+              />
+
+              <GoogleMapView
+                latitude={37.78825}
+                longitude={-122.4324}
+                height={400}
+                onLocationSelect={(lat, lng, address) => {
+                  console.log("Selected location:", lat, lng, address);
+                }}
+                showControls={true}
+                enableDrawing={true}
               />
               <Pressable style={styles.locationButton}>
                 <Ionicons name="locate" size={20} color="#007AFF" />

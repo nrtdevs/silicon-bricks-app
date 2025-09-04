@@ -1194,3 +1194,20 @@ query PaginatedVehicleNotification($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+# VehiclesDropdown
+query VehiclesDropdown($listInputDto: ListInputDTO!) {
+  vehiclesDropdown(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      model
+      numberPlate
+    }
+  }
+}
