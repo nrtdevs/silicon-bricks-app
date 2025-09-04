@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import { Control, Controller, FieldError, RegisterOptions } from 'react-hook-form';
 
 const { width, height } = Dimensions.get('window');
 
@@ -19,21 +20,32 @@ interface DropdownOption {
 
 interface CustomDropdownApiProps {
     options: DropdownOption[];
-    onSelect: (item: DropdownOption) => void;
+    onSelect?: (item: DropdownOption) => void; // Made optional for react-hook-form
     placeholder?: string;
     defaultValue?: DropdownOption | null;
     label?: string;
+    control: Control<any>; // For react-hook-form
+    name: string; // For react-hook-form
+    rules?: Omit<RegisterOptions, 'valueAsNumber' | 'valueAsDate' | 'setValueAs'>; // For react-hook-form
+    error?: FieldError; // For react-hook-form
+    required?: boolean; // To show star for required fields
 }
 
 const CustomDropdownApi = ({
-    options, 
+    options,
     onSelect,
     placeholder = "Select an option",
     defaultValue = null,
     label,
+    control,
+    name,
+    rules,
+    error,
+    required = false,
 }: CustomDropdownApiProps) => {
     const [selected, setSelected] = useState<DropdownOption | null>(defaultValue);
     const [isOpen, setIsOpen] = useState(false);
+    const [isFocused, setIsFocused] = useState(false); // For focus styling
     const animatedValue = useRef(new Animated.Value(0)).current;
     const dropdownHeight = animatedValue.interpolate({
         inputRange: [0, 1],
@@ -61,62 +73,83 @@ const CustomDropdownApi = ({
         }
     };
 
-const onItemPress = (item: DropdownOption) => {
-    setSelected(item);
-    onSelect(item);
-    toggleDropdown();
-};
+    const onItemPress = (item: DropdownOption, onChange: (value: DropdownOption) => void) => {
+        setSelected(item);
+        onChange(item); // Notify react-hook-form
+        onSelect && onSelect(item); // Call original onSelect if provided
+        toggleDropdown();
+    };
 
-const renderItem = ({ item }: { item: DropdownOption }) => (
-    <TouchableOpacity
-        style={[
-            styles.item,
-            selected && selected.value === item.value && styles.selectedItem
-        ]} 
-        onPress={() => onItemPress(item)}
-    >
-        <Text style={[
-            styles.itemText,
-            selected && selected.value === item.value && styles.selectedItemText
-        ]}>
-            {item.label}
-        </Text>
-    </TouchableOpacity>
-);
+    const renderItem = (item: DropdownOption, onChange: (value: DropdownOption) => void) => (
+        <TouchableOpacity
+            style={[
+                styles.item,
+                selected && selected.value === item.value && styles.selectedItem
+            ]}
+            onPress={() => onItemPress(item, onChange)}
+        >
+            <Text style={[
+                styles.itemText,
+                selected && selected.value === item.value && styles.selectedItemText
+            ]}>
+                {item.label}
+            </Text>
+        </TouchableOpacity>
+    );
 
     return (
-        <View style={styles.container}>
-            {label && <Text style={styles.label}>{label}</Text>} 
-            <TouchableOpacity 
-                style={styles.dropdownHeader}
-                onPress={toggleDropdown}
-                activeOpacity={0.7}
-            >
-                <Text style={selected ? styles.selectedText : styles.placeholderText}>
-                    {selected ? selected.label : placeholder}
-                </Text>
-                <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
-                    <Ionicons name="chevron-down" size={20} color="#666" />
-                </Animated.View>
-            </TouchableOpacity>
-            {isOpen && (
-                <Animated.View style={[styles.dropdownList, { height: dropdownHeight }]}>
-                    <FlatList
-                        data={options}
-                        renderItem={renderItem}
-                        keyExtractor={(item) => item.value.toString()}
-                        showsVerticalScrollIndicator={false}
-                    />
-                </Animated.View>
+        <Controller
+            control={control}
+            name={name}
+            rules={rules}
+            render={({ field: { onChange, value } }) => (
+                <View style={styles.container}>
+                    {label && (
+                        <Text style={styles.label}>
+                            {label}
+                            {required && <Text style={styles.requiredStar}> *</Text>}
+                        </Text>
+                    )}
+                    <TouchableOpacity
+                        style={[
+                            styles.dropdownHeader,
+                            isFocused && styles.focusedBorder,
+                            error && styles.errorBorder,
+                        ]}
+                        onPress={toggleDropdown}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={selected ? styles.selectedText : styles.placeholderText}>
+                            {selected ? selected.label : placeholder}
+                        </Text>
+                        <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+                            <Ionicons name="chevron-down" size={20} color="#666" />
+                        </Animated.View>
+                    </TouchableOpacity>
+                    {error && <Text style={styles.errorText}>{error.message}</Text>}
+                    {isOpen && (
+                        <Animated.View style={[styles.dropdownList, { height: dropdownHeight }]}>
+                            <FlatList
+                                data={options}
+                                renderItem={({ item }) => renderItem(item, onChange)}
+                                keyExtractor={(item) => item.value.toString()}
+                                showsVerticalScrollIndicator={false}
+                            />
+                        </Animated.View>
+                    )}
+                </View>
             )}
-        </View>
+        />
     );
 };
 
-export default CustomDropdownApi
+export default CustomDropdownApi;
 
 const styles = StyleSheet.create({
     container: {
+        marginTop: 15,
         width: '90%',
         alignSelf: 'center',
         zIndex: 1000,
@@ -136,6 +169,12 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+    },
+    focusedBorder: {
+        borderColor: '#007bff', // Blue border on focus
+    },
+    errorBorder: {
+        borderColor: 'red', // Red border on error
     },
     placeholderText: {
         color: '#999',
@@ -181,5 +220,15 @@ const styles = StyleSheet.create({
         color: '#333',
         marginBottom: 8,
         fontWeight: 'bold',
+    },
+    requiredStar: {
+        color: 'red',
+        fontSize: 16,
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
+        marginTop: 5,
+        marginLeft: 5,
     },
 });

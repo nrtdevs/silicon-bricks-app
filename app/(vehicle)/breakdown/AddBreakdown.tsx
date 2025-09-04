@@ -1,5 +1,7 @@
+import CustomDatePicker from "@/components/CustomDatePicker";
 import CustomDropdownApi from "@/components/CustomDropdownApi";
 import CustomHeader from "@/components/CustomHeader";
+import CustomInput from "@/components/CustomInput";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { PaginatedServiceCentersDocument } from "@/graphql/generated";
@@ -16,6 +18,10 @@ import { z } from 'zod'
 const labels = ["Details", "Location", "Media"];
 
 const BreakDownSchema = z.object({
+  serviceCenter: z.object({
+    label: z.string(),
+    value: z.union([z.string(), z.number()]),
+  }).nullable().refine(val => val !== null, { message: "Service Center is required" }),
   name: z.string().min(1, "Center Name is required"),
   contactNo: z.string().min(1, "Contact Number is required").regex(/^(\+91)?[0-9]{10}$/, "Enter a valid 10-digit mobile number"),
   latitude: z.string().min(1, "Latitude is required").refine((val) => {
@@ -31,6 +37,7 @@ const BreakDownSchema = z.object({
 
 
 const defaultValues = {
+  serviceCenter: undefined, // Changed to undefined to match nullable object in schema
   name: "",
   contactNo: "",
   latitude: "",
@@ -78,10 +85,10 @@ const AddBreakdown = () => {
     value: item?.id || item?.name || "",
   }));
 
-  const handleSelect = (item: { label: string; value: string | number }) => {
-    console.log('Selected:', item);
-    // You might want to set a form value here, e.g., setValue("name", item.value);
-  };
+  // No longer needed as CustomDropdownApi handles onChange internally with Controller
+  // const handleSelect = (item: { label: string; value: string | number }) => {
+  //   console.log('Selected:', item);
+  // };
 
   return (
     <CustomHeader
@@ -114,8 +121,37 @@ const AddBreakdown = () => {
                 <>
                 <CustomDropdownApi
                   options={dropdownOptions}
-                  onSelect={handleSelect}
-                  placeholder="Select Service Center"
+                  placeholder="Select Breakdown Type"
+                  control={control}
+                  name="serviceCenter"
+                  error={errors.serviceCenter as any}
+                  label="Breakdown Type"
+                  required={true}
+                />
+                <CustomDropdownApi
+                  options={dropdownOptions}
+                  placeholder="Select Breakdown Type"
+                  control={control}
+                  name="serviceCenter"
+                  error={errors.serviceCenter as any}
+                  label="Vehicles"
+                  required={true}
+                />
+                <CustomDatePicker
+                  control={control}
+                  name="insuranceValidTill"
+                  label="Breakdown Date"
+                  mode="date"
+                />
+                <CustomInput
+                  name="address"
+                  control={control}
+                  label="Descriptions"
+                  placeholder="Enter Descriptions"
+                  required={true}
+                  multiline={true}
+                  numberOfLines={5}
+                  error={errors.address?.message}
                 />
                 </>}
             </View>
