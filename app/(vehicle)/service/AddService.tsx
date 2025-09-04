@@ -49,7 +49,6 @@ const AddService = () => {
     defaultValues: defaultValues
   });
 
-  console.log(parsedData, "parsedData")
 
   const [createServiceCenterApi, { loading }] = useMutation(CreateServiceCenterDocument, {
     refetchQueries: [{ query: PaginatedServiceCentersDocument, variables: { listInputDto: { limit: 10, page: 1 } } }],

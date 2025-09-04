@@ -2,10 +2,12 @@ import CustomDropdownApi from "@/components/CustomDropdownApi";
 import CustomHeader from "@/components/CustomHeader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
+import { PaginatedServiceCentersDocument } from "@/graphql/generated";
+import { useLazyQuery } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
@@ -40,14 +42,38 @@ const AddBreakdown = () => {
   const [currentPosition, setCurrentPosition] = useState(0);
   const { theme } = useTheme();
   const { data } = useLocalSearchParams();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(10);
   const parsedData = data ? JSON.parse(data as string) : null;
-
+  const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState("");
-
+  const [getVehicleListApi, { data: DropdownData, loading, error }] = useLazyQuery(PaginatedServiceCentersDocument);
   const { control, handleSubmit, formState: { errors }, reset, watch, setValue, } = useForm<z.infer<typeof BreakDownSchema>>({
     resolver: zodResolver(BreakDownSchema),
     defaultValues: defaultValues
   });
+
+  // Fetch data function
+  const fetchData = useCallback(() => {
+    if (hasMore) {
+      getVehicleListApi({
+        variables: {
+          listInputDto: {
+            limit: limit,
+            page: currentPage
+          }
+        }
+      });
+    }
+  }, [currentPage, hasMore, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const Maindata = DropdownData?.paginatedServiceCenters.data || []
+
+  console.log("Maindata", Maindata)
 
   return (
     <CustomHeader
@@ -86,7 +112,10 @@ const AddBreakdown = () => {
                       searchPlaceholder="Search fruits..."
                       search={search}
                       onSearchChange={setSearch}
-                      options={[]}
+                    options={Maindata?.map((item: any) => ({
+                      label: item.name,
+                      value: item.id,
+                    }))}
                       rules={{ required: "Please select a fruit" }}
                     />
                   </View>

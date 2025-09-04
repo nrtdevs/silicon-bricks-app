@@ -9,6 +9,7 @@ import {
     FlatList,
     ActivityIndicator,
     StyleSheet,
+    Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -44,6 +45,8 @@ const CustomDropdownApi = ({
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+
+    console.log("data land ka", data)
 
     // reset data when search changes
     useEffect(() => {
@@ -110,7 +113,7 @@ const CustomDropdownApi = ({
                     {error && <Text style={styles.errorText}>{error.message}</Text>}
 
                     {/* Modal */}
-                    <Modal visible={modalVisible} animationType="slide" transparent>
+                    <Modal visible={modalVisible} animationType="fade" transparent>
                         <View style={styles.modalOverlay}>
                             <View style={styles.modalContent}>
                                 {/* Search box (controlled by parent) */}
@@ -140,14 +143,14 @@ const CustomDropdownApi = ({
                                         </TouchableOpacity>
                                     )}
                                     ListEmptyComponent={
-                                        loading ? (
-                                            <ActivityIndicator size="small" color="blue" style={{ margin: 10 }} />
+                                        loading && page === 1 ? (
+                                            <ActivityIndicator size="small" color="#007AFF" style={{ margin: 10 }} />
                                         ) : null
                                     }
                                     onEndReached={handleEndReached}
                                     onEndReachedThreshold={0.5}
                                     ListFooterComponent={
-                                        loading ? (
+                                        loading && page > 1 ? (
                                             <ActivityIndicator size="small" style={{ margin: 10 }} />
                                         ) : null
                                     }
@@ -174,6 +177,8 @@ const CustomDropdownApi = ({
 
 export default CustomDropdownApi;
 
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
     dropdown: {
         flexDirection: "row",
@@ -190,14 +195,20 @@ const styles = StyleSheet.create({
     modalOverlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "flex-end",
+        justifyContent: "center",
+        alignItems: "center",
     },
     modalContent: {
         backgroundColor: "#fff",
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        maxHeight: "70%",
+        borderRadius: 20,
+        maxHeight: height * 0.7,
+        width: width * 0.9,
         padding: 16,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
     searchInput: {
         borderWidth: 1,
