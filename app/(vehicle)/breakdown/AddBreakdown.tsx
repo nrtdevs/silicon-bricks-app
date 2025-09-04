@@ -11,10 +11,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  Dimensions,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
+} from "react-native";
 import { ms } from "react-native-size-matters";
 import StepIndicator from "react-native-step-indicator";
-import { z } from 'zod'
+import { z } from 'zod';
+
+const { width } = Dimensions.get('window');
 const labels = ["Details", "Location", "Media"];
 
 const BreakDownSchema = z.object({
@@ -35,9 +47,8 @@ const BreakDownSchema = z.object({
   address: z.string().min(1, "Address is required"),
 });
 
-
 const defaultValues = {
-  serviceCenter: undefined, // Changed to undefined to match nullable object in schema
+  serviceCenter: undefined,
   name: "",
   contactNo: "",
   latitude: "",
@@ -47,6 +58,8 @@ const defaultValues = {
 
 const AddBreakdown = () => {
   const [currentPosition, setCurrentPosition] = useState(0);
+  const [slideAnim] = useState(new Animated.Value(0));
+  const [fadeAnim] = useState(new Animated.Value(1));
   const { theme } = useTheme();
   const { data } = useLocalSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,7 +68,8 @@ const AddBreakdown = () => {
   const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState("");
   const [getVehicleListApi, { data: DropdownData, loading, error }] = useLazyQuery(PaginatedServiceCentersDocument);
-  const { control, handleSubmit, formState: { errors }, reset, watch, setValue, } = useForm<z.infer<typeof BreakDownSchema>>({
+
+  const { control, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<z.infer<typeof BreakDownSchema>>({
     resolver: zodResolver(BreakDownSchema),
     defaultValues: defaultValues
   });
@@ -85,10 +99,211 @@ const AddBreakdown = () => {
     value: item?.id || item?.name || "",
   }));
 
-  // No longer needed as CustomDropdownApi handles onChange internally with Controller
-  // const handleSelect = (item: { label: string; value: string | number }) => {
-  //   console.log('Selected:', item);
-  // };
+  const animateStepTransition = (direction: 'next' | 'prev') => {
+    const toValue = direction === 'next' ? -width : width;
+
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: toValue,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      slideAnim.setValue(direction === 'next' ? width : -width);
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+  };
+
+  const onNextStep = () => {
+    if (currentPosition < labels.length - 1) {
+      animateStepTransition('next');
+      setCurrentPosition(prev => prev + 1);
+    }
+  };
+
+  const onPrevStep = () => {
+    if (currentPosition > 0) {
+      animateStepTransition('prev');
+      setCurrentPosition(prev => prev - 1);
+    }
+  };
+
+  const onSubmit = (data: z.infer<typeof BreakDownSchema>) => {
+    console.log("Form Data:", data);
+    // Handle form submission logic here
+  };
+
+  const renderStepContent = () => {
+    const animatedStyle = {
+      transform: [{ translateX: slideAnim }],
+      opacity: fadeAnim,
+    };
+
+    return (
+      <Animated.View style={[styles.stepContent, animatedStyle]}>
+        {currentPosition === 0 && (
+          <View style={styles.formContainer}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="information-circle-outline" size={24} color="#007AFF" />
+              <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
+                Breakdown Details
+              </Text>
+            </View>
+            <View style={styles.formSection}>
+              <CustomDropdownApi
+                options={dropdownOptions}
+                placeholder="Select Breakdown Type"
+                control={control}
+                name="serviceCenter"
+                error={errors.serviceCenter as any}
+                label="Breakdown Type"
+                required={true}
+              />
+              <CustomDropdownApi
+                options={dropdownOptions}
+                placeholder="Select Vehicle"
+                control={control}
+                name="serviceCenter"
+                error={errors.serviceCenter as any}
+                label="Vehicle"
+                required={true}
+              />
+              <CustomDatePicker
+                control={control}
+                name="insuranceValidTill"
+                label="Breakdown Date"
+                mode="date"
+              />
+              <CustomInput
+                name="address"
+                control={control}
+                label="Description"
+                placeholder="Describe the breakdown issue..."
+                required={true}
+                multiline={true}
+                numberOfLines={5}
+                error={errors.address?.message}
+              />
+            </View>
+          </View>
+        )}
+
+        {currentPosition === 1 && (
+          <View style={styles.formContainer}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="location-outline" size={24} color="#007AFF" />
+              <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
+                Location Information
+              </Text>
+            </View>
+            <View style={styles.formSection}>
+              <CustomInput
+                name="name"
+                control={control}
+                label="Service Center Name"
+                placeholder="Enter service center name"
+                required={true}
+                error={errors.name?.message}
+              />
+              <CustomInput
+                name="contactNo"
+                control={control}
+                label="Contact Number"
+                placeholder="Enter contact number"
+                required={true}
+                type="number"
+                error={errors.contactNo?.message}
+              />
+              <View style={styles.coordinateRow}>
+                <View style={styles.coordinateInput}>
+                  <CustomInput
+                    name="latitude"
+                    control={control}
+                    label="Latitude"
+                    placeholder="Latitude"
+                    required={true}
+                    type="number"
+                    error={errors.latitude?.message}
+                  />
+                </View>
+                <View style={styles.coordinateInput}>
+                  <CustomInput
+                    name="longitude"
+                    control={control}
+                    label="Longitude"
+                    placeholder="Longitude"
+                    required={true}
+                    type="number"
+                    error={errors.longitude?.message}
+                  />
+                </View>
+              </View>
+              <CustomInput
+                name="address"
+                control={control}
+                label="Full Address"
+                placeholder="Enter complete address"
+                required={true}
+                multiline={true}
+                numberOfLines={3}
+                error={errors.address?.message}
+              />
+              <Pressable style={styles.locationButton}>
+                <Ionicons name="locate" size={20} color="#007AFF" />
+                <Text style={styles.locationButtonText}>Use Current Location</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        {currentPosition === 2 && (
+          <View style={styles.formContainer}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="camera-outline" size={24} color="#007AFF" />
+              <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
+                Media Upload
+              </Text>
+            </View>
+            <View style={styles.mediaSection}>
+              <View style={styles.mediaUploadArea}>
+                <Ionicons name="cloud-upload-outline" size={48} color="#C7C7CC" />
+                <Text style={styles.mediaUploadTitle}>Upload Photos & Videos</Text>
+                <Text style={styles.mediaUploadSubtitle}>
+                  Add images or videos of the breakdown
+                </Text>
+                <Pressable style={styles.uploadButton}>
+                  <Ionicons name="add-circle-outline" size={20} color="#007AFF" />
+                  <Text style={styles.uploadButtonText}>Choose Files</Text>
+                </Pressable>
+              </View>
+              <View style={styles.mediaPreview}>
+                <Text style={[styles.previewTitle, { color: Colors[theme].text }]}>
+                  Uploaded Files
+                </Text>
+                <Text style={styles.previewSubtitle}>No files uploaded yet</Text>
+              </View>
+            </View>
+          </View>
+        )}
+      </Animated.View>
+    );
+  };
 
   return (
     <CustomHeader
@@ -106,7 +321,7 @@ const AddBreakdown = () => {
         </Pressable>
       }
     >
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
         <StepIndicator
           customStyles={customStyles}
           currentPosition={currentPosition}
@@ -114,51 +329,55 @@ const AddBreakdown = () => {
           stepCount={labels.length}
           onPress={setCurrentPosition}
         />
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}>
-          <ScrollView>
-            <View style={styles.content}>
-              {currentPosition === 0 &&
-                <>
-                <CustomDropdownApi
-                  options={dropdownOptions}
-                  placeholder="Select Breakdown Type"
-                  control={control}
-                  name="serviceCenter"
-                  error={errors.serviceCenter as any}
-                  label="Breakdown Type"
-                  required={true}
-                />
-                <CustomDropdownApi
-                  options={dropdownOptions}
-                  placeholder="Select Breakdown Type"
-                  control={control}
-                  name="serviceCenter"
-                  error={errors.serviceCenter as any}
-                  label="Vehicles"
-                  required={true}
-                />
-                <CustomDatePicker
-                  control={control}
-                  name="insuranceValidTill"
-                  label="Breakdown Date"
-                  mode="date"
-                />
-                <CustomInput
-                  name="address"
-                  control={control}
-                  label="Descriptions"
-                  placeholder="Enter Descriptions"
-                  required={true}
-                  multiline={true}
-                  numberOfLines={5}
-                  error={errors.address?.message}
-                />
-                </>}
-            </View>
+
+        <SafeAreaView style={styles.safeArea}>
+          <ScrollView
+            contentContainerStyle={styles.scrollViewContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {renderStepContent()}
           </ScrollView>
+
+          <View>
+            <View style={styles.navigationButtons}>
+              {currentPosition > 0 && (
+                <Pressable
+                  style={[styles.navButton, styles.prevButton]}
+                  onPress={onPrevStep}
+                  android_ripple={{ color: 'rgba(0,0,0,0.1)' }}
+                >
+                  <Ionicons name="chevron-back" size={20} color="#6B7280" />
+                  <Text style={styles.navButtonText}>Previous</Text>
+                </Pressable>
+              )}
+
+              <View style={styles.buttonSpacer} />
+
+              {currentPosition < labels.length - 1 ? (
+                <Pressable
+                  style={[styles.navButton, styles.nextButton]}
+                  onPress={onNextStep}
+                  android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                >
+                  <Text style={styles.nextButtonText}>Next</Text>
+                  <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+                </Pressable>
+              ) : (
+                <Pressable
+                  style={[styles.navButton, styles.submitButton]}
+                  onPress={handleSubmit(onSubmit)}
+                  android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                >
+                  <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                  <Text style={styles.submitButtonText}>
+                    {parsedData?.id ? "Update" : "Create"}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
         </SafeAreaView>
-
-
       </View>
     </CustomHeader>
   );
@@ -170,49 +389,209 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  stepIndicatorContainer: {
+    paddingHorizontal: ms(20),
+    paddingVertical: ms(25),
+    backgroundColor: '#FFFFFF',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
   safeArea: {
     flex: 1,
   },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingBottom: ms(100), // Space for navigation
+  },
   menuButton: {
-    padding: ms(10),
+    padding: ms(8),
+    borderRadius: ms(20),
+    backgroundColor: 'rgba(0,0,0,0.05)',
   },
-  content: {
-    marginTop: 40,
-    alignItems: "center",
+  stepContent: {
+    flex: 1,
+    paddingHorizontal: ms(20),
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 8,
+  formContainer: {
+    flex: 1,
+    paddingTop: ms(20),
   },
-  subtitle: {
-    fontSize: 16,
-    color: "#6B7280",
-    textAlign: "center",
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: ms(24),
+    paddingBottom: ms(12),
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5EA',
+  },
+  sectionTitle: {
+    fontSize: ms(20),
+    fontWeight: '600',
+    marginLeft: ms(12),
+    color: '#1C1C1E',
+  },
+  formSection: {
+    gap: ms(20),
+  },
+  coordinateRow: {
+    flexDirection: 'row',
+    gap: ms(12),
+  },
+  coordinateInput: {
+    flex: 1,
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: ms(12),
+    paddingHorizontal: ms(16),
+    backgroundColor: '#F2F2F7',
+    borderRadius: ms(10),
+    marginTop: ms(8),
+  },
+  locationButtonText: {
+    marginLeft: ms(8),
+    fontSize: ms(16),
+    color: '#007AFF',
+    fontWeight: '500',
+  },
+  mediaSection: {
+    gap: ms(24),
+  },
+  mediaUploadArea: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: ms(40),
+    paddingHorizontal: ms(20),
+    backgroundColor: '#F9F9F9',
+    borderRadius: ms(16),
+    borderWidth: 2,
+    borderColor: '#E5E5EA',
+    borderStyle: 'dashed',
+  },
+  mediaUploadTitle: {
+    fontSize: ms(18),
+    fontWeight: '600',
+    color: '#1C1C1E',
+    marginTop: ms(16),
+    marginBottom: ms(8),
+  },
+  mediaUploadSubtitle: {
+    fontSize: ms(14),
+    color: '#8E8E93',
+    textAlign: 'center',
+    marginBottom: ms(20),
+  },
+  uploadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: ms(10),
+    paddingHorizontal: ms(20),
+    backgroundColor: '#FFFFFF',
+    borderRadius: ms(8),
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  uploadButtonText: {
+    marginLeft: ms(6),
+    fontSize: ms(16),
+    color: '#007AFF',
+    fontWeight: '500',
+  },
+  mediaPreview: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: ms(12),
+    padding: ms(20),
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+  },
+  previewTitle: {
+    fontSize: ms(16),
+    fontWeight: '600',
+    marginBottom: ms(8),
+  },
+  previewSubtitle: {
+    fontSize: ms(14),
+    color: '#8E8E93',
+  },
+  navigationButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: ms(12),
+    marginLeft: 8,
+    marginRight: 8
+  },
+  buttonSpacer: {
+    flex: 1,
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: ms(12),
+    paddingHorizontal: ms(20),
+    borderRadius: ms(25),
+    minWidth: ms(100),
+    justifyContent: 'center',
+  },
+  prevButton: {
+    backgroundColor: '#F2F2F7',
+  },
+  nextButton: {
+    backgroundColor: '#007AFF',
+  },
+  submitButton: {
+    backgroundColor: '#34C759',
+  },
+  navButtonText: {
+    fontSize: ms(16),
+    fontWeight: '600',
+    color: '#6B7280',
+    marginLeft: ms(4),
+  },
+  nextButtonText: {
+    fontSize: ms(16),
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginRight: ms(4),
+  },
+  submitButtonText: {
+    fontSize: ms(16),
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginLeft: ms(4),
   },
 });
 
 const customStyles = {
-  stepIndicatorSize: 35,
-  currentStepIndicatorSize: 40,
-  separatorStrokeWidth: 3,
+  stepIndicatorSize: ms(30),
+  currentStepIndicatorSize: ms(40),
+  separatorStrokeWidth: 2,
   currentStepStrokeWidth: 3,
-  stepStrokeCurrentColor: "#3B82F6",
-  stepStrokeWidth: 2,
-  stepStrokeFinishedColor: "#3B82F6",
-  stepStrokeUnFinishedColor: "#D1D5DB",
-  separatorFinishedColor: "#3B82F6",
-  separatorUnFinishedColor: "#D1D5DB",
-  stepIndicatorFinishedColor: "#3B82F6",
-  stepIndicatorUnFinishedColor: "#F3F4F6",
+  stepStrokeCurrentColor: "#007BFF", // Primary blue
+  stepStrokeWidth: 1,
+  stepStrokeFinishedColor: "#28A745", // Green for finished steps
+  stepStrokeUnFinishedColor: "#CED4DA", // Light grey for unfinished
+  separatorFinishedColor: "#28A745",
+  separatorUnFinishedColor: "#CED4DA",
+  stepIndicatorFinishedColor: "#28A745",
+  stepIndicatorUnFinishedColor: "#F8F9FA", // Light background
   stepIndicatorCurrentColor: "#FFFFFF",
-  stepIndicatorLabelFontSize: 14,
-  currentStepIndicatorLabelFontSize: 14,
-  stepIndicatorLabelCurrentColor: "#3B82F6",
+  stepIndicatorLabelFontSize: ms(12),
+  currentStepIndicatorLabelFontSize: ms(14),
+  stepIndicatorLabelCurrentColor: "#007BFF",
   stepIndicatorLabelFinishedColor: "#FFFFFF",
-  stepIndicatorLabelUnFinishedColor: "#9CA3AF",
-  labelColor: "#9CA3AF",
-  labelSize: 13,
-  currentStepLabelColor: "#3B82F6",
+  stepIndicatorLabelUnFinishedColor: "#6C757D", // Dark grey for unfinished labels
+  labelColor: "#6C757D",
+  labelSize: ms(12),
+  currentStepLabelColor: "#007BFF",
 };
