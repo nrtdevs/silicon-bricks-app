@@ -252,7 +252,7 @@ const AddBreakdown = () => {
                 placeholder="Enter complete address"
                 required={true}
                 multiline={true}
-                numberOfLines={3}
+                numberOfLines={4}
                 error={errors.address?.message}
               />
               <Pressable style={styles.locationButton}>
