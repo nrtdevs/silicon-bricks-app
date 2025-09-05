@@ -3,11 +3,9 @@ import CustomDropdownApi from "@/components/CustomDropdownApi";
 import CustomHeader from "@/components/CustomHeader";
 import CustomInput from "@/components/CustomInput";
 import GoogleMapView from "@/components/CustomMap";
-import DocumentUploader from "@/components/DocumentUploader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
-import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,15 +27,21 @@ const BreakDownSchema = z.object({
   breakdownType: z.object({
     label: z.string(),
     value: z.string(),
-  }).nullable().refine(val => val !== null, { message: "Breakdown Type is required" }),
-  latitude: z.string().min(1, "Latitude is required").refine((val) => {
-    const num = parseFloat(val);
-    return !isNaN(num) && num >= -90 && num <= 90;
-  }, { message: "Invalid Latitude" }),
-  longitude: z.string().min(1, "Longitude is required").refine((val) => {
-    const num = parseFloat(val);
-    return !isNaN(num) && num >= -180 && num <= 180;
-  }, { message: "Invalid Longitude" }),
+  }, { required_error: "Breakdown Type is required" }),
+
+  latitude: z.string()
+    .min(1, "Latitude is required")
+    .refine((val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= -90 && num <= 90;
+    }, { message: "Invalid Latitude" }),
+
+  longitude: z.string()
+    .min(1, "Longitude is required")
+    .refine((val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= -180 && num <= 180;
+    }, { message: "Invalid Longitude" }),
   mediaUrl: z.array(z.object({
     mediaType: z.string().nullable(),
     url: z.string().nullable(),
@@ -45,7 +49,7 @@ const BreakDownSchema = z.object({
   vehicleId: z.object({
     label: z.string(),
     value: z.string(),
-  }).nullable().refine(val => val !== null, { message: "Vehicle is required" }),
+  }, { required_error: "Vehicle is required" }),
 });
 
 const defaultValues = {
@@ -80,6 +84,8 @@ const AddBreakdown = () => {
   const watchedBreakdownType = watch("breakdownType");
   const watchedVehicleId = watch("vehicleId");
 
+  console.log("dara =====>", watchedBreakdownType, watchedVehicleId)
+
   // Fetch data function
   const fetchData = useCallback(() => {
     if (hasMore) {
@@ -96,7 +102,7 @@ const AddBreakdown = () => {
 
   useEffect(() => {
     fetchData();
-    VehiclesBreakdownType(); // Call to fetch breakdown types
+    VehiclesBreakdownType(); 
   }, [fetchData, VehiclesBreakdownType]);
 
   const Maindata = DropdownData?.vehiclesDropdown.data || []
