@@ -3,9 +3,11 @@ import CustomDropdownApi from "@/components/CustomDropdownApi";
 import CustomHeader from "@/components/CustomHeader";
 import CustomInput from "@/components/CustomInput";
 import GoogleMapView from "@/components/CustomMap";
+import DocumentUploader from "@/components/DocumentUploader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { GetBreakdownTypeSuggestionsDocument, PaginatedServiceCentersDocument, VehiclesDropdownDocument } from "@/graphql/generated";
+import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -288,9 +290,16 @@ const AddBreakdown = () => {
                 <Text style={[styles.previewTitle, { color: Colors[theme].text }]}>
                   Uploaded Files
                 </Text>
+
                 <Text style={styles.previewSubtitle}>No files uploaded yet</Text>
               </View>
             </View>
+            <DocumentUploader
+              type="single"
+              onChange={async (imgs) => {
+                const result = await uploadImage(imgs);
+              }}
+            />
           </View>
         )}
       </Animated.View>
