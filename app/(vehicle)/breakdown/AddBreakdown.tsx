@@ -17,6 +17,7 @@ import { ms } from "react-native-size-matters";
 import StepIndicator from "react-native-step-indicator";
 import { z } from 'zod';
 import * as DocumentPicker from "expo-document-picker";
+import uploadImage from "@/utils/imageUpload";
 
 const { width } = Dimensions.get('window');
 const labels = ["Details", "Location", "Media"];
@@ -173,9 +174,7 @@ const AddBreakdown = () => {
     }
   };
 
-  const [uploadedFiles, setUploadedFiles] = useState<
-    { mediaType: string; url: string }[]
-  >([]);
+  const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
 
   const pickMedia = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -200,6 +199,7 @@ const AddBreakdown = () => {
       }));
 
       setUploadedFiles((prev) => [...prev, ...newFiles]);
+      const result = await uploadImage(imgs);
       setValue("mediaUrl", [...uploadedFiles, ...newFiles]);
     }
   };
@@ -340,8 +340,7 @@ const AddBreakdown = () => {
 
 
 
-            {
-              uploadedFiles.map((file, index) => (
+            {uploadedFiles.map((file, index) => (
                 <View style={styles.mediaPreview}>
                   <View key={index} style={styles.mediaItem}>
                     {file.mediaType === "image" ? (
@@ -352,9 +351,9 @@ const AddBreakdown = () => {
                     ) : file.mediaType === "video" ? (
                       <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
                     ) : file.mediaType === "audio" ? (
-                      <Ionicons name="musical-notes-outline" size={32} color="#34C759" />
+                        <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
                     ) : (
-                      <Ionicons name="document-outline" size={32} color="#8E8E93" />
+                          <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
                     )}
                     <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
                       {file.url.split("/").pop()}
