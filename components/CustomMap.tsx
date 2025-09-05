@@ -5,6 +5,7 @@ import {
     Alert,
     StyleSheet,
     Text,
+    TouchableOpacity,
     View
 } from "react-native";
 import MapView, {
@@ -122,6 +123,35 @@ const GoogleMapView: React.FC<GoogleMapViewProps> = ({
         }
     };
 
+    const zoomIn = () => {
+        setRegion((prevRegion) => ({
+            ...prevRegion,
+            latitudeDelta: prevRegion.latitudeDelta / 2,
+            longitudeDelta: prevRegion.longitudeDelta / 2,
+        }));
+    };
+
+    const zoomOut = () => {
+        setRegion((prevRegion) => ({
+            ...prevRegion,
+            latitudeDelta: prevRegion.latitudeDelta * 2,
+            longitudeDelta: prevRegion.longitudeDelta * 2,
+        }));
+    };
+
+    const goToUserLocation = () => {
+        if (userLocation) {
+            mapRef.current?.animateToRegion({
+                latitude: userLocation.latitude,
+                longitude: userLocation.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+            }, 1000);
+        } else {
+            Alert.alert("Location not available", "Could not retrieve your current location.");
+        }
+    };
+
     return (
 
         <View style={[styles.mapContainer, { height }]}>
@@ -180,6 +210,18 @@ const GoogleMapView: React.FC<GoogleMapViewProps> = ({
                     {selectedLocation ? selectedLocation.address : address}
                     </Text>
             </View>
+
+            <View style={styles.controlsContainer}>
+                <TouchableOpacity style={styles.controlButton} onPress={goToUserLocation}>
+                    <MaterialIcons name="my-location" size={24} color="#333" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.controlButton} onPress={zoomIn}>
+                    <MaterialIcons name="add" size={24} color="#333" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.controlButton} onPress={zoomOut}>
+                    <MaterialIcons name="remove" size={24} color="#333" />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -236,6 +278,27 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#333",
         flexShrink: 1,
+    },
+    controlsContainer: {
+        position: "absolute",
+        bottom: 16,
+        right: 16,
+        gap: 10,
+    },
+    controlButton: {
+        backgroundColor: "white",
+        borderRadius: 10,
+        padding: 10,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+        alignItems: "center",
+        justifyContent: "center",
     },
 });
 
