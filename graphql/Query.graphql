@@ -1211,3 +1211,8 @@ query VehiclesDropdown($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+# getBreakdownTypeSuggestions 
+query GetBreakdownTypeSuggestions($search: String) {
+  getBreakdownTypeSuggestions(search: $search)
+}

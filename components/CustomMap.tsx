@@ -17,6 +17,7 @@ import MapView, {
 } from "react-native-maps";
 import * as Location from "expo-location";
 import { MaterialIcons } from "@expo/vector-icons";
+import { LocationGeocodedAddress } from "expo-location";
 
 
 type GoogleMapViewProps = {

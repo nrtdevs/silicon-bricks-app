@@ -5,7 +5,7 @@ import CustomInput from "@/components/CustomInput";
 import GoogleMapView from "@/components/CustomMap";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { PaginatedServiceCentersDocument, VehiclesDropdownDocument } from "@/graphql/generated";
+import { GetBreakdownTypeSuggestionsDocument, PaginatedServiceCentersDocument, VehiclesDropdownDocument } from "@/graphql/generated";
 import { useLazyQuery } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,6 +58,7 @@ const AddBreakdown = () => {
   const parsedData = data ? JSON.parse(data as string) : null;
   const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState("");
+  const [VehiclesBreakdownType, { data: BreakdownTypeData, loading, error }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading, error }] = useLazyQuery(VehiclesDropdownDocument);
 
   const { control, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<z.infer<typeof BreakDownSchema>>({
