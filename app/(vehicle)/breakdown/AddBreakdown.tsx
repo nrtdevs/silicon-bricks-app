@@ -93,7 +93,7 @@ const AddBreakdown = () => {
   const Maindata = DropdownData?.vehiclesDropdown.data || []
   const BreakDownData = BreakdownTypeData?.getBreakdownTypeSuggestions
 
-  console.log("BreakDownData", BreakDownData)
+  console.log("BreakDownData ====>", Maindata)
 
   const dropdownOptions = Maindata?.map((item) => ({
     label: item?.model || "",

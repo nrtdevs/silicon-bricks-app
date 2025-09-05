@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
-import { Animated, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Control, Controller, FieldError, RegisterOptions } from 'react-hook-form';
+import { Animated, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
 interface DropdownOption {
@@ -31,7 +31,7 @@ const CustomDropdownApi = ({ options, onSelect, placeholder = "Select an option"
 
     const dropdownHeight = animatedValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, options.length * 50 > 200 ? 200 : options.length * 50]
+        outputRange: [0, options.length * 50 > 200 ? 200 + 50 : options.length * 50 + 50] // Added 50 for search input height
     });
     const arrowRotation = animatedValue.interpolate({
         inputRange: [0, 1],
