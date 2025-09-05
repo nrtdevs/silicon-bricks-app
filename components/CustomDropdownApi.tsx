@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Control, Controller, FieldError, RegisterOptions } from 'react-hook-form';
 import { Animated, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, Modal, Dimensions, TouchableWithoutFeedback } from 'react-native';
 
@@ -13,23 +13,27 @@ interface CustomDropdownApiProps {
     options: DropdownOption[];
     onSelect?: (item: DropdownOption) => void; 
     placeholder?: string;
-    defaultValue?: DropdownOption | null;
     label?: string;
     control: Control<any>;
     name: string;
     rules?: Omit<RegisterOptions, 'valueAsNumber' | 'valueAsDate' | 'setValueAs'>;
     error?: FieldError;
     required?: boolean;
+    value?: DropdownOption | null; // Add value prop for controlled component
 }
 
 const { height: screenHeight } = Dimensions.get('window');
 
-const CustomDropdownApi = ({ options, onSelect, placeholder = "Select an option", defaultValue = null, label, control, name, rules, error, required = false, }: CustomDropdownApiProps) => {
-    const [selected, setSelected] = useState<DropdownOption | null>(defaultValue);
+const CustomDropdownApi = ({ options, onSelect, placeholder = "Select an option", label, control, name, rules, error, required = false, value = null }: CustomDropdownApiProps) => {
+    const [selected, setSelected] = useState<DropdownOption | null>(value);
     const [modalVisible, setModalVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const [searchText, setSearchText] = useState('');
     const slideAnim = useRef(new Animated.Value(screenHeight)).current; // Initial position off-screen
+
+    useEffect(() => {
+        setSelected(value);
+    }, [value]);
 
     const openModal = () => {
         setModalVisible(true);

@@ -69,14 +69,16 @@ const AddBreakdown = () => {
   const [limit] = useState(10);
   const parsedData = data ? JSON.parse(data as string) : null;
   const [hasMore, setHasMore] = useState(true);
-  const [search, setSearch] = useState("");
   const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
 
-  const { control, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<z.infer<typeof BreakDownSchema>>({
+  const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger } = useForm<z.infer<typeof BreakDownSchema>>({
     resolver: zodResolver(BreakDownSchema),
     defaultValues: defaultValues
   });
+
+  const watchedBreakdownType = watch("breakdownType");
+  const watchedVehicleId = watch("vehicleId");
 
   // Fetch data function
   const fetchData = useCallback(() => {
@@ -99,8 +101,6 @@ const AddBreakdown = () => {
 
   const Maindata = DropdownData?.vehiclesDropdown.data || []
   const BreakDownData = BreakdownTypeData?.getBreakdownTypeSuggestions
-
-  console.log("BreakDownData ====>", Maindata)
 
   const dropdownOptions = Maindata?.map((item) => ({
     label: item?.model || "",
@@ -143,8 +143,18 @@ const AddBreakdown = () => {
     });
   };
 
-  const onNextStep = () => {
-    if (currentPosition < labels.length - 1) {
+  const onNextStep = async () => {
+    let isValid = false;
+    if (currentPosition === 0) {
+      isValid = await trigger(["breakdownType", "vehicleId", "breakdownDate", "breakdownDescription"]);
+    } else if (currentPosition === 1) {
+      isValid = await trigger(["longitude", "latitude", "breakdownLocation"]);
+    } else if (currentPosition === 2) {
+      // Media upload is optional, so no validation needed to proceed
+      isValid = true;
+    }
+
+    if (isValid && currentPosition < labels.length - 1) {
       animateStepTransition('next');
       setCurrentPosition(prev => prev + 1);
     }
@@ -187,6 +197,7 @@ const AddBreakdown = () => {
                 error={errors.breakdownType as any}
                 label="Breakdown Type"
                 required={true}
+                value={watchedBreakdownType}
               />
               <CustomDropdownApi
                 options={dropdownOptions}
@@ -196,6 +207,7 @@ const AddBreakdown = () => {
                 error={errors.vehicleId as any}
                 label="Vehicle"
                 required={true}
+                value={watchedVehicleId}
               />
               <CustomDatePicker
                 control={control}
@@ -262,8 +274,8 @@ const AddBreakdown = () => {
                 longitude={-122.4324}
                 height={400}
                 onLocationSelect={(lat, lng, address) => {
-                  setValue('longitude', lat?.toFixed(3))
-                  setValue('latitude', lng?.toFixed(3))
+                  setValue('longitude', lng?.toFixed(3))
+                  setValue('latitude', lat?.toFixed(3))
                   setValue('breakdownLocation', address)
                 }}
               />
