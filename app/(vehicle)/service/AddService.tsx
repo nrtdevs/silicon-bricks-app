@@ -186,8 +186,6 @@ const AddService = () => {
               onLocationSelect={(lat, lng, address) => {
                 console.log("Selected location:", lat, lng, address);
               }}
-              showControls={true}
-              enableDrawing={true}
             />
 
 
