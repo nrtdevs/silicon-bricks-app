@@ -1,18 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
-import {
-    Animated,
-    Dimensions,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput, // Import TextInput
-    TouchableOpacity,
-    View
-} from 'react-native';
+import { Animated, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Control, Controller, FieldError, RegisterOptions } from 'react-hook-form';
 
-const { width, height } = Dimensions.get('window');
 
 interface DropdownOption {
     label: string;
@@ -21,34 +11,24 @@ interface DropdownOption {
 
 interface CustomDropdownApiProps {
     options: DropdownOption[];
-    onSelect?: (item: DropdownOption) => void; // Made optional for react-hook-form
+    onSelect?: (item: DropdownOption) => void; 
     placeholder?: string;
     defaultValue?: DropdownOption | null;
     label?: string;
-    control: Control<any>; // For react-hook-form
-    name: string; // For react-hook-form
-    rules?: Omit<RegisterOptions, 'valueAsNumber' | 'valueAsDate' | 'setValueAs'>; // For react-hook-form
-    error?: FieldError; // For react-hook-form
-    required?: boolean; // To show star for required fields
+    control: Control<any>;
+    name: string;
+    rules?: Omit<RegisterOptions, 'valueAsNumber' | 'valueAsDate' | 'setValueAs'>;
+    error?: FieldError;
+    required?: boolean;
 }
 
-const CustomDropdownApi = ({
-    options,
-    onSelect,
-    placeholder = "Select an option",
-    defaultValue = null,
-    label,
-    control,
-    name,
-    rules,
-    error,
-    required = false,
-}: CustomDropdownApiProps) => {
+const CustomDropdownApi = ({ options, onSelect, placeholder = "Select an option", defaultValue = null, label, control, name, rules, error, required = false, }: CustomDropdownApiProps) => {
     const [selected, setSelected] = useState<DropdownOption | null>(defaultValue);
     const [isOpen, setIsOpen] = useState(false);
-    const [isFocused, setIsFocused] = useState(false); // For focus styling
-    const [searchText, setSearchText] = useState(''); // New state for search input
+    const [isFocused, setIsFocused] = useState(false);
+    const [searchText, setSearchText] = useState(''); 
     const animatedValue = useRef(new Animated.Value(0)).current;
+
     const dropdownHeight = animatedValue.interpolate({
         inputRange: [0, 1],
         outputRange: [0, options.length * 50 > 200 ? 200 : options.length * 50]
@@ -66,7 +46,7 @@ const CustomDropdownApi = ({
                 useNativeDriver: false
             }).start(() => {
                 setIsOpen(false);
-                setSearchText(''); // Clear search text when closing
+                setSearchText(''); 
             });
         } else {
             setIsOpen(true);
@@ -84,8 +64,8 @@ const CustomDropdownApi = ({
 
     const onItemPress = (item: DropdownOption, onChange: (value: DropdownOption) => void) => {
         setSelected(item);
-        onChange(item); // Notify react-hook-form
-        onSelect && onSelect(item); // Call original onSelect if provided
+        onChange(item);
+        onSelect && onSelect(item); 
         toggleDropdown();
     };
 
@@ -133,9 +113,20 @@ const CustomDropdownApi = ({
                         <Text style={selected ? styles.selectedText : styles.placeholderText}>
                             {selected ? selected.label : placeholder}
                         </Text>
-                        <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
-                            <Ionicons name="chevron-down" size={20} color="#666" />
-                        </Animated.View>
+                        {selected ? <> <TouchableOpacity onPress={() => {
+                            setSelected(null);
+                            onChange(null); // Clear react-hook-form value
+                            setSearchText('');
+                            toggleDropdown();
+                        }} style={styles.closeButton}>
+                            <Ionicons name="close-circle" size={20} color="#666" />
+                        </TouchableOpacity></> : <>
+                                <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+                                    <Ionicons name="chevron-down" size={20} color="#666" />
+                                </Animated.View>
+                        </>}
+
+
                     </TouchableOpacity>
                     {error && <Text style={styles.errorText}>{error.message}</Text>}
                     {isOpen && (
@@ -150,6 +141,7 @@ const CustomDropdownApi = ({
                                     onFocus={() => setIsFocused(true)}
                                     onBlur={() => setIsFocused(false)}
                                 />
+
                             </View>
                             <FlatList
                                 data={filteredOptions}
@@ -191,10 +183,10 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     focusedBorder: {
-        borderColor: '#007bff', // Blue border on focus
+        borderColor: '#007bff', 
     },
     errorBorder: {
-        borderColor: 'red', // Red border on error
+        borderColor: 'red',
     },
     placeholderText: {
         color: '#999',
@@ -265,6 +257,9 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         fontSize: 16,
-        paddingVertical: 0, // Adjust for consistent height
+        paddingVertical: 0,
+    },
+    closeButton: {
+        marginLeft: 10,
     },
 });
