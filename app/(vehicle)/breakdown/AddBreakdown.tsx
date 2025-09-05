@@ -198,9 +198,13 @@ const AddBreakdown = () => {
         url: asset.uri,
       }));
 
+      console.log("newfiles", newFiles)
+
       setUploadedFiles((prev) => [...prev, ...newFiles]);
-      const result = await uploadImage(imgs);
-      setValue("mediaUrl", [...uploadedFiles, ...newFiles]);
+      const urldata = newFiles.map(file => file.url)
+      const UploadUrl = await uploadImage(urldata);
+      console.log("UploadUrl", UploadUrl)
+      setValue("mediaUrl", [UploadUrl]);
     }
   };
 
