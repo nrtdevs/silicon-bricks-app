@@ -12,10 +12,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Animated, Dimensions, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Animated, Dimensions, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View, Image } from "react-native";
 import { ms } from "react-native-size-matters";
 import StepIndicator from "react-native-step-indicator";
 import { z } from 'zod';
+import * as DocumentPicker from "expo-document-picker";
 
 const { width } = Dimensions.get('window');
 const labels = ["Details", "Location", "Media"];
@@ -84,7 +85,6 @@ const AddBreakdown = () => {
   const watchedBreakdownType = watch("breakdownType");
   const watchedVehicleId = watch("vehicleId");
 
-  console.log("dara =====>", watchedBreakdownType, watchedVehicleId)
 
   // Fetch data function
   const fetchData = useCallback(() => {
@@ -102,7 +102,7 @@ const AddBreakdown = () => {
 
   useEffect(() => {
     fetchData();
-    VehiclesBreakdownType(); 
+    VehiclesBreakdownType();
   }, [fetchData, VehiclesBreakdownType]);
 
   const Maindata = DropdownData?.vehiclesDropdown.data || []
@@ -172,6 +172,38 @@ const AddBreakdown = () => {
       setCurrentPosition(prev => prev - 1);
     }
   };
+
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { mediaType: string; url: string }[]
+  >([]);
+
+  const pickMedia = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: [
+        "image/*",   // images
+        "video/*",   // videos (mp4, mov, etc.)
+        "audio/mpeg" // mp3
+      ],
+      multiple: true,
+    });
+
+    if (!result.canceled && result.assets) {
+      const newFiles = result.assets.map((asset) => ({
+        mediaType: asset.mimeType?.includes("image")
+          ? "image"
+          : asset.mimeType?.includes("video")
+            ? "video"
+            : asset.mimeType?.includes("audio")
+              ? "audio"
+              : "file",
+        url: asset.uri,
+      }));
+
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+      setValue("mediaUrl", [...uploadedFiles, ...newFiles]);
+    }
+  };
+
 
   const onSubmit = (data: z.infer<typeof BreakDownSchema>) => {
     console.log("Form Data:", data);
@@ -290,34 +322,60 @@ const AddBreakdown = () => {
         )}
 
         {currentPosition === 2 && (
-          <View style={styles.formContainer}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="camera-outline" size={24} color="#007AFF" />
-              <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
-                Media Upload
+          <>
+            <View style={styles.mediaUploadArea}>
+              <Ionicons name="cloud-upload-outline" size={48} color="#C7C7CC" />
+              <Text style={styles.mediaUploadTitle}>Upload Photos, Videos & Audio</Text>
+              <Text style={styles.mediaUploadSubtitle}>
+                Add images, videos, or mp3 recordings of the breakdown
               </Text>
-            </View>
-            <View style={styles.mediaSection}>
-              <View style={styles.mediaUploadArea}>
-                <Ionicons name="cloud-upload-outline" size={48} color="#C7C7CC" />
-                <Text style={styles.mediaUploadTitle}>Upload Photos & Videos</Text>
-                <Text style={styles.mediaUploadSubtitle}>
-                  Add images or videos of the breakdown
-                </Text>
-                <Pressable style={styles.uploadButton}>
-                  <Ionicons name="add-circle-outline" size={20} color="#007AFF" />
-                  <Text style={styles.uploadButtonText}>Choose Files</Text>
-                </Pressable>
-              </View>
-              <View style={styles.mediaPreview}>
-                <Text style={[styles.previewTitle, { color: Colors[theme].text }]}>
-                  Uploaded Files
-                </Text>
 
-                <Text style={styles.previewSubtitle}>No files uploaded yet</Text>
-              </View>
+              {/* Image Upload */}
+              <Pressable style={styles.uploadButton} onPress={pickMedia}>
+                <Ionicons name="cloud-upload-outline" size={20} color="#007AFF" />
+                <Text style={styles.uploadButtonText}>Upload Media</Text>
+              </Pressable>
+
             </View>
-          </View>
+
+
+
+            {
+              uploadedFiles.map((file, index) => (
+                <View style={styles.mediaPreview}>
+                  <View key={index} style={styles.mediaItem}>
+                    {file.mediaType === "image" ? (
+                      <Image
+                        source={{ uri: file.url }}
+                        style={styles.mediaThumbnail}
+                      />
+                    ) : file.mediaType === "video" ? (
+                      <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
+                    ) : file.mediaType === "audio" ? (
+                      <Ionicons name="musical-notes-outline" size={32} color="#34C759" />
+                    ) : (
+                      <Ionicons name="document-outline" size={32} color="#8E8E93" />
+                    )}
+                    <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
+                      {file.url.split("/").pop()}
+                    </Text>
+                    <Pressable
+                      onPress={() => {
+                        const newFiles = uploadedFiles.filter((_, i) => i !== index);
+                        setUploadedFiles(newFiles);
+                        setValue("mediaUrl", newFiles);
+                      }}
+                      style={styles.closeButton}
+                    >
+                      <Ionicons name="close-circle" size={30} color="#FF3B30" />
+                    </Pressable>
+                  </View>
+                </View>
+              ))
+            }
+
+
+          </>
         )}
       </Animated.View>
     );
@@ -359,40 +417,44 @@ const AddBreakdown = () => {
 
           <View>
             <View style={styles.navigationButtons}>
-              {currentPosition > 0 && (
-                <Pressable
-                  style={[styles.navButton, styles.prevButton]}
-                  onPress={onPrevStep}
-                  android_ripple={{ color: 'rgba(0,0,0,0.1)' }}
-                >
-                  <Ionicons name="chevron-back" size={20} color="#f8faffff" />
-                  <Text style={styles.ButtonText}>Previous</Text>
-                </Pressable>
-              )}
-
-              <View style={styles.buttonSpacer} />
-
-              {currentPosition < labels.length - 1 ? (
-                <Pressable
-                  style={[styles.navButton, styles.nextButton]}
-                  onPress={onNextStep}
-                  android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
-                >
-                  <Text style={styles.ButtonText}>Next</Text>
-                  <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
-                </Pressable>
-              ) : (
-                <Pressable
-                  style={[styles.navButton, styles.submitButton]}
-                  onPress={handleSubmit(onSubmit)}
-                  android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
-                >
-                  <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
-                    <Text style={styles.ButtonText}>
-                    {parsedData?.id ? "Update" : "Create"}
-                  </Text>
-                </Pressable>
-              )}
+              <>
+                {currentPosition > 0 && (
+                  <Pressable
+                    style={[styles.navButton, styles.prevButton]}
+                    onPress={onPrevStep}
+                    android_ripple={{ color: 'rgba(0,0,0,0.1)' }}
+                  >
+                    <Ionicons name="chevron-back" size={20} color="#f8faffff" />
+                    <Text style={styles.ButtonText}>Previous</Text>
+                  </Pressable>
+                )}
+                <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-end' }}>
+                  <>
+                    <View style={styles.buttonSpacer} />
+                    {currentPosition < labels.length - 1 ? (
+                      <Pressable
+                        style={[styles.navButton, styles.nextButton]}
+                        onPress={onNextStep}
+                        android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                      >
+                        <Text style={styles.ButtonText}>Next</Text>
+                        <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+                      </Pressable>
+                    ) : (
+                      <Pressable
+                        style={[styles.navButton, styles.submitButton]}
+                        onPress={handleSubmit(onSubmit)}
+                        android_ripple={{ color: 'rgba(255,255,255,0.1)' }}
+                      >
+                        <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                        <Text style={styles.ButtonText}>
+                          {parsedData?.id ? "Update" : "Create"}
+                        </Text>
+                      </Pressable>
+                    )}
+                  </>
+                </View>
+              </>
             </View>
           </View>
         </SafeAreaView>
@@ -524,6 +586,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   mediaPreview: {
+    marginTop: 8,
     backgroundColor: '#FFFFFF',
     borderRadius: ms(12),
     padding: ms(20),
@@ -566,6 +629,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: '#34C759',
+
   },
   ButtonText: {
     fontSize: ms(16),
@@ -573,7 +637,33 @@ const styles = StyleSheet.create({
     color: '#fbfbfbff',
     marginLeft: ms(4),
   },
-
+  mediaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: ms(10),
+    backgroundColor: '#F2F2F7',
+    padding: ms(8),
+    borderRadius: ms(8),
+  },
+  mediaThumbnail: {
+    width: ms(60),
+    height: ms(60),
+    borderRadius: ms(8),
+    marginRight: ms(12),
+  },
+  mediaFileName: {
+    flex: 1,
+    fontSize: ms(14),
+    fontWeight: '500',
+    marginLeft: 40
+  },
+  closeButton: {
+    marginLeft: ms(12),
+    padding: ms(2),
+  },
+  IconStyle: {
+    marginRight: ms(12),
+  },
 });
 
 const customStyles = {

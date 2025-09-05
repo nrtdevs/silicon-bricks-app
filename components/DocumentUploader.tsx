@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
@@ -7,19 +8,16 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  Image,
-  Dimensions,
 } from "react-native";
-import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
-import { color } from "@rneui/base";
-
-const { width } = Dimensions.get('window');
+import { ms } from "react-native-size-matters";
 
 type DocumentUploaderProps = {
   type?: "single" | "multiple";
@@ -56,35 +54,63 @@ const DocumentUploader = ({
     if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(extension)) {
       return "image";
     }
-    if (extension === "pdf") {
-      return "pdf";
-    }
-    if (["doc", "docx"].includes(extension)) {
-      return "word";
-    }
-    if (["xls", "xlsx"].includes(extension)) {
-      return "excel";
-    }
-    if (extension === "txt") {
-      return "text";
-    }
+    if (extension === "pdf") return "pdf";
+    if (["doc", "docx"].includes(extension)) return "word";
+    if (["xls", "xlsx"].includes(extension)) return "excel";
+    if (extension === "txt") return "text";
     return "unknown";
   };
 
   const getFileIcon = (fileType: string) => {
     switch (fileType) {
       case "pdf":
-        return <Ionicons name="document-text" size={40} color={Colors[theme].danger.main} />;
+        return (
+          <Ionicons
+            name="document-text"
+            size={40}
+            color={Colors[theme].danger.main}
+          />
+        );
       case "word":
-        return <Ionicons name="document" size={40} color={Colors[theme].primary.main} />;
+        return (
+          <Ionicons
+            name="document"
+            size={40}
+            color={Colors[theme].primary.main}
+          />
+        );
       case "excel":
-        return <Ionicons name="grid" size={40} color={Colors[theme].success.main} />;
+        return (
+          <Ionicons
+            name="grid"
+            size={40}
+            color={Colors[theme].success.main}
+          />
+        );
       case "text":
-        return <Feather name="file-text" size={40} color={Colors[theme].secondary.main} />;
+        return (
+          <Feather
+            name="file-text"
+            size={40}
+            color={Colors[theme].secondary.main}
+          />
+        );
       case "image":
-        return <Ionicons name="image" size={40} color={Colors[theme].warning.main} />;
+        return (
+          <Ionicons
+            name="image"
+            size={40}
+            color={Colors[theme].warning.main}
+          />
+        );
       default:
-        return <Ionicons name="document-outline" size={40} color={Colors[theme].textSecondary} />;
+        return (
+          <Ionicons
+            name="document-outline"
+            size={40}
+            color={Colors[theme].textSecondary}
+          />
+        );
     }
   };
 
@@ -149,7 +175,7 @@ const DocumentUploader = ({
     const currentFiles = new Set(docs.map((d) => `${d.name}-${d.size}`));
 
     const processAssets = (assets: DocumentPicker.DocumentPickerAsset[]) => {
-      const filteredAssets = assets.filter((asset) => {
+      return assets.filter((asset) => {
         const key = `${asset.name}-${asset.size}`;
         if (currentFiles.has(key)) {
           Alert.alert(
@@ -160,9 +186,7 @@ const DocumentUploader = ({
         }
         return true;
       });
-      return filteredAssets;
     };
-
 
     if (type === "single") {
       const filteredAsset = processAssets(result.assets);
@@ -180,9 +204,7 @@ const DocumentUploader = ({
           },
         ];
         setDocs(newDocs);
-        if (onChange) {
-          onChange(newDocs.map((d) => d.uri));
-        }
+        onChange?.(newDocs.map((d) => d.uri));
       }
     } else {
       const availableSlots = maxFiles - docs.length;
@@ -200,9 +222,7 @@ const DocumentUploader = ({
         }));
         setDocs((prev) => {
           const updatedDocs = [...newDocs, ...prev];
-          if (onChange) {
-            onChange(updatedDocs.map((d) => d.uri));
-          }
+          onChange?.(updatedDocs.map((d) => d.uri));
           return updatedDocs;
         });
       } else if (result.assets.length > 0 && availableSlots === 0) {
@@ -216,11 +236,6 @@ const DocumentUploader = ({
     newDocs.forEach((doc) => {
       simulateUpload(doc.id).catch(() => { });
     });
-
-    Animated.spring(uploadAnimation, {
-      toValue: 0,
-      useNativeDriver: true,
-    }).start();
 
     Animated.spring(uploadAnimation, {
       toValue: 0,
@@ -254,185 +269,160 @@ const DocumentUploader = ({
   const formatFileSize = (bytes?: number): string => {
     if (!bytes) return "Unknown size";
     const mb = bytes / (1024 * 1024);
-    return mb < 1 ? `${(bytes / 1024).toFixed(0)} KB` : `${mb.toFixed(1)} MB`;
+    return mb < 1
+      ? `${(bytes / 1024).toFixed(0)} KB`
+      : `${mb.toFixed(1)} MB`;
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
-      {/* Documents Grid */}
-      <ScrollView
-        horizontal={true}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        style={styles.scroll}
-      >
-        <View style={styles.grid}>
-          {/* Add Button */}
-          {(type === "single" ? docs.length === 0 : docs.length < maxFiles) && (
-            <TouchableOpacity
-              style={[styles.addCard, { shadowColor: Colors[theme].primary.main }]}
-              onPress={pickDocuments}
-              activeOpacity={0.8}
+    <View style={styles.formContainer}>
+      <View style={styles.mediaSection}>
+        <View style={styles.mediaUploadArea}>
+          <Ionicons
+            name="cloud-upload-outline"
+            size={52}
+            color={Colors[theme].primary.main}
+          />
+          <Text style={styles.mediaUploadTitle}>Upload Documents</Text>
+          <Text style={styles.mediaUploadSubtitle}>
+            Attach images, PDFs, or files for reference
+          </Text>
+
+          {/* Upload Button */}
+          <Pressable style={styles.uploadButton} onPress={pickDocuments}>
+            <LinearGradient
+              colors={[Colors[theme].primary.main, Colors[theme].primary.main]}
+              style={styles.uploadGradientBtn}
             >
-              <LinearGradient
-                colors={[Colors[theme].primary.main, Colors[theme].secondary.main]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.addCardGradient}
-              >
-                <Animated.View
+              <Ionicons name="add-circle-outline" size={22} color="white" />
+              <Text style={styles.uploadButtonText}>Browse Files</Text>
+            </LinearGradient>
+          </Pressable>
+
+          {docs.length === 0 ? (
+            <Text style={styles.previewSubtitle}>No files uploaded yet</Text>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
+            >
+              {docs.map((doc) => (
+                <View
+                  key={doc.id}
                   style={[
-                    styles.addCardContent,
+                    styles.docCard,
                     {
-                      transform: [
-                        {
-                          scale: uploadAnimation.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [1, 0.95],
-                          }),
-                        },
-                      ],
+                      borderColor:
+                        doc.status === "success"
+                          ? "#27ae60"
+                          : doc.status === "error"
+                            ? "#e74c3c"
+                            : "rgba(255,255,255,0.2)",
                     },
                   ]}
                 >
-                  <View style={styles.addIconContainer}>
-                    <Ionicons name="add" size={28} color="white" />
-                  </View>
-                  <Text style={styles.addTitle}>Add Files</Text>
-                  <Text style={styles.addSubtitle}>
-                    Tap to browse
-                  </Text>
-                  <View style={styles.supportedFormats}>
-                    <Text style={styles.formatText}>PDF • DOC • XLS • IMG</Text>
-                  </View>
-                </Animated.View>
-              </LinearGradient>
-            </TouchableOpacity>
-          )}
+                  {/* Preview */}
+                  <View >
+                    {getFileType(doc.name) === "image" ? (
+                      <Image
+                        source={{ uri: doc.uri }}
+                        style={styles.imagePreview}
+                      />
+                    ) : (
+                      <View style={styles.fileIconContainer}>
+                        {getFileIcon(getFileType(doc.name))}
+                      </View>
+                    )}
 
-          {/* Document Cards */}
-          {docs.map((doc) => (
-            <View
-              key={doc.id}
-              style={[
-                styles.docCard,
-                {
-                  backgroundColor: Colors[theme].cart,
-                  shadowColor: Colors[theme].shadow,
-                  borderColor: doc.status === 'success' ? '#27ae60' :
-                    doc.status === 'error' ? '#e74c3c' : Colors[theme].border
-                },
-              ]}
-            >
-              {/* Document Preview */}
-              <View style={styles.docPreview}>
-                {getFileType(doc.name) === "image" ? (
-                  <View style={styles.imagePreviewContainer}>
-                    <Image source={{ uri: doc.uri }} style={styles.imagePreview} />
-                    <LinearGradient
-                      colors={['transparent', 'rgba(0,0,0,0.6)']}
-                      style={styles.imageOverlay}
-                    />
-                  </View>
-                ) : (
-                  <View style={[styles.fileIconContainer, { backgroundColor: Colors[theme].background }]}>
-                    {getFileIcon(getFileType(doc.name))}
-                  </View>
-                )}
+                    {/* Status overlays */}
+                    {doc.status === "uploading" && (
+                      <View style={styles.uploadingOverlay}>
+                        <ActivityIndicator size="small" color="white" />
+                        <Text style={styles.uploadingText}>
+                          {Math.round(doc.progress)}%
+                        </Text>
+                      </View>
+                    )}
+                    {doc.status === "success" && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={26}
+                        color={Colors[theme].success.main}
+                        style={styles.statusIcon}
+                      />
+                    )}
+                    {doc.status === "error" && (
+                      <View style={styles.errorOverlay}>
+                        <Ionicons
+                          name="alert-circle"
+                          size={26}
+                          color="white"
+                        />
+                        <TouchableOpacity
+                          style={styles.fabRetry}
+                          onPress={() => retryUpload(doc.id)}
+                        >
+                          <Ionicons name="refresh" size={16} color="white" />
+                        </TouchableOpacity>
+                      </View>
+                    )}
 
-                {/* Status Overlays */}
-                {doc.status === "uploading" && (
-                  <View style={styles.uploadingOverlay}>
-                    <ActivityIndicator size="small" color="white" />
-                    <Text style={styles.uploadingText}>{Math.round(doc.progress)}%</Text>
-                  </View>
-                )}
-
-                {doc.status === "success" && (
-                  <View style={styles.successOverlay}>
-                    <Ionicons name="checkmark-circle" size={24} style={{ color: Colors[theme].success.border }} />
-                  </View>
-                )}
-
-                {doc.status === "error" && (
-                  <View style={styles.errorOverlay}>
-                    <Ionicons name="alert-circle" size={24} style={{ color: Colors[theme].danger.border }} />
+                    {/* Delete Button */}
                     <TouchableOpacity
-                      style={styles.retryButton}
-                      onPress={() => retryUpload(doc.id)}
+                      style={styles.fabDelete}
+                      onPress={() => removeDoc(doc.id)}
                     >
-                      <Ionicons name="refresh" size={16} color="white" />
-                      <Text style={styles.retryButtonText}>Retry</Text>
+                      <Ionicons name="close" size={16} color="white" />
                     </TouchableOpacity>
                   </View>
-                )}
 
-                {/* Delete Button */}
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => removeDoc(doc.id)}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="close" size={16} color="white" />
-                </TouchableOpacity>
-              </View>
+                  {/* Progress Bar */}
+                  {doc.status === "uploading" && (
+                    <View style={styles.progressContainer}>
+                      <Animated.View
+                        style={[
+                          styles.progressFill,
+                          { width: `${doc.progress}%` },
+                        ]}
+                      />
+                    </View>
+                  )}
 
-              {/* Progress Bar */}
-              {doc.status === "uploading" && (
-                <View style={[styles.progressContainer, { backgroundColor: Colors[theme].border }]}>
-                  <Animated.View
-                    style={[
-                      styles.progressFill,
-                      {
-                        width: `${doc.progress}%`,
-                        backgroundColor: Colors[theme].primary.main,
-                      },
-                    ]}
-                  />
-                </View>
-              )}
-
-              {/* Document Info */}
-              <View style={styles.docInfo}>
-                <Text
-                  style={[styles.docTitle, { color: Colors[theme].textPrimary }]}
-                  numberOfLines={2}
-                >
-                  {doc.name}
-                </Text>
-
-                <View style={styles.docMeta}>
-                  <Text style={[styles.docSize, { color: Colors[theme].textSecondary }]}>
-                    {formatFileSize(doc.size)}
-                  </Text>
-                  <View style={[styles.docTypeBadge, { backgroundColor: Colors[theme].primary.main }]}>
-                    <Text style={styles.docTypeText}>
-                      {doc.name.split('.').pop()?.toUpperCase()}
+                  {/* Info */}
+                  <View style={styles.docInfo}>
+                    <Text
+                      style={styles.docTitle}
+                      numberOfLines={2}
+                    >
+                      {doc.name}
                     </Text>
+
+                    <View style={styles.docMeta}>
+                      <Text style={styles.docSize}>
+                        {formatFileSize(doc.size)}
+                      </Text>
+                      <View style={styles.docTypeBadge}>
+                        <Text style={styles.docTypeText}>
+                          {doc.name.split(".").pop()?.toUpperCase()}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <TextInput
+                      style={styles.nameInput}
+                      placeholder="Enter Name"
+                      value={doc.customName}
+                      onChangeText={(text) => updateDocName(doc.id, text)}
+                      maxLength={30}
+                    />
                   </View>
                 </View>
-
-                {/* Custom Name Input */}
-                <TextInput
-                  style={[
-                    styles.nameInput,
-                    {
-                      borderColor: Colors[theme].border,
-                      color: Colors[theme].textPrimary,
-                      backgroundColor: Colors[theme].background,
-                    },
-                  ]}
-                  placeholder="Enter Name"
-                  placeholderTextColor={Colors[theme].textSecondary}
-                  value={doc.customName}
-                  onChangeText={(text) => updateDocName(doc.id, text)}
-                  maxLength={30}
-                />
-              </View>
-            </View>
-          ))}
+              ))}
+              </ScrollView>
+          )}
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 };
@@ -440,299 +430,146 @@ const DocumentUploader = ({
 export default DocumentUploader;
 
 const styles = StyleSheet.create({
-  container: {
+  formContainer: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    paddingTop: ms(20),
   },
+  mediaSection: { gap: ms(20) },
 
-  // Header Styles
-  header: {
-    marginHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 15,
-    borderRadius: 16,
-    overflow: 'hidden',
-    elevation: 8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  headerGradient: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.white,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: Colors.white,
-    marginTop: 4,
-    textAlign: 'center',
-  },
-
-  // Stats Bar
-  statsBar: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 12,
-    padding: 16,
-    elevation: 2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: Colors.light.border,
-    marginHorizontal: 16,
-  },
-
-  // Scroll and Grid
-  scroll: {
-    flexGrow: 0,
-    height: 280,
-    paddingVertical: 10,
-  },
-  scrollContent: {
-    alignItems: 'flex-start',
-    paddingHorizontal: 20,
-  },
-  grid: {
-    flexDirection: 'row',
-  },
-
-  // Add Card
-  addCard: {
-    width: 160,
-    height: 250,
-    marginRight: 15, 
-    marginBottom: 15,
-    borderRadius: 16,
-    elevation: 6,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-  },
-  addCardGradient: {
-    flex: 1,
-    borderRadius: 16,
-    padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addCardContent: {
-    alignItems: 'center',
-  },
-  addIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  addTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.white,
-    marginBottom: 4,
-  },
-  addSubtitle: {
-    fontSize: 12,
-    color: Colors.white,
-    marginBottom: 12,
-  },
-  supportedFormats: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  formatText: {
-    fontSize: 10,
-    color: Colors.white,
-    fontWeight: '600',
-  },
-
-  // Document Cards
-  docCard: {
-    width: 160,
-    height: 250,
-    marginRight: 15,
-    marginBottom: 15,
-    borderRadius: 16,
-    elevation: 4,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+  mediaUploadArea: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: ms(40),
+    paddingHorizontal: ms(20),
+    backgroundColor: "#F9F9F9",
+    borderRadius: ms(20),
     borderWidth: 1,
-    overflow: 'hidden',
+    borderColor: "#E5E5EA",
+    borderStyle: "dashed",
   },
 
-  // Document Preview
-  docPreview: {
-    height: 125,
-    position: 'relative',
+  mediaUploadTitle: {
+    fontSize: ms(18),
+    fontWeight: "600",
+    marginTop: ms(16),
+    marginBottom: ms(8),
   },
-  imagePreviewContainer: {
-    flex: 1,
-    position: 'relative',
+  mediaUploadSubtitle: {
+    fontSize: ms(14),
+    color: "#8E8E93",
+    textAlign: "center",
+    marginBottom: ms(20),
   },
-  imagePreview: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+
+  uploadButton: { marginBottom: 12 },
+  uploadGradientBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: ms(12),
+    paddingHorizontal: ms(22),
+    borderRadius: ms(30),
   },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 40,
+  uploadButtonText: {
+    marginLeft: ms(8),
+    fontSize: ms(16),
+    fontWeight: "600",
+    color: "white",
   },
+
+  previewSubtitle: { fontSize: 14, color: "#8E8E93" },
+  scrollContent: { paddingHorizontal: 20 },
+
+  docCard: {
+    width: 170,
+    height: 260,
+    marginRight: ms(16),
+    borderRadius: ms(18),
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderWidth: 1,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+
+  docPreview: { height: 130, position: "relative" },
+  imagePreview: { width: "100%", height: "100%", resizeMode: "cover" },
   fileIconContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 12,
-    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  // Status Overlays
   uploadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  uploadingText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginTop: 8,
+  uploadingText: { color: "white", fontWeight: "bold", marginTop: 6 },
+
+  errorOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(231,76,60,0.9)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  successOverlay: {
-    position: 'absolute',
+  statusIcon: {
+    position: "absolute",
     top: 8,
     left: 8,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 12,
-    padding: 4,
-  },
-  errorOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(231,76,60,0.9)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  retryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginTop: 8,
-  },
-  retryButtonText: {
-    color: '#e74c3c',
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginLeft: 4,
   },
 
-  // Delete Button
-  deleteButton: {
-    position: 'absolute',
+  fabDelete: {
+    position: "absolute",
     top: 8,
     right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-
-  // Progress Bar
-  progressContainer: {
-    height: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-  },
-
-  // Document Info
-  docInfo: {
-    flex: 1,
+  fabRetry: {
+    marginTop: 12,
+    backgroundColor: "#e74c3c",
     padding: 8,
+    borderRadius: 20,
   },
-  docTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 8,
-    lineHeight: 16,
+
+  progressContainer: { height: 3, backgroundColor: "#ddd" },
+  progressFill: {
+    height: "100%",
+    borderRadius: 2,
+    backgroundColor: "#007AFF",
   },
+
+  docInfo: { flex: 1, padding: 10 },
+  docTitle: { fontSize: 13, fontWeight: "600", marginBottom: 6 },
   docMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
   },
-  docSize: {
-    fontSize: 11,
-    fontWeight: '500',
-  },
+  docSize: { fontSize: 11, color: "#666" },
   docTypeBadge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
+    backgroundColor: "#007AFF",
   },
-  docTypeText: {
-    color: 'white',
-    fontSize: 9,
-    fontWeight: 'bold',
-  },
+  docTypeText: { color: "white", fontSize: 10, fontWeight: "bold" },
 
-  // Name Input
   nameInput: {
     borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     fontSize: 12,
-    marginHorizontal: 1,
-    minHeight: 40,
-    flexShrink: 1,
-    marginBottom: 10
+    borderColor: "#ddd",
   },
 });
