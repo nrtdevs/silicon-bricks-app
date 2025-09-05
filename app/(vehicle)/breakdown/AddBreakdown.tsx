@@ -21,6 +21,10 @@ const { width } = Dimensions.get('window');
 const labels = ["Details", "Location", "Media"];
 
 const BreakDownSchema = z.object({
+  breakdownType: z.object({
+    label: z.string(),
+    value: z.string(),
+  }).nullable().refine(val => val !== null, { message: "Breakdown Type is required" }),
   serviceCenter: z.object({
     label: z.string(),
     value: z.union([z.string(), z.number()]),
@@ -39,6 +43,7 @@ const BreakDownSchema = z.object({
 });
 
 const defaultValues = {
+  breakdownType: undefined,
   serviceCenter: undefined,
   name: "",
   contactNo: "",
@@ -58,8 +63,8 @@ const AddBreakdown = () => {
   const parsedData = data ? JSON.parse(data as string) : null;
   const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState("");
-  const [VehiclesBreakdownType, { data: BreakdownTypeData, loading, error }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
-  const [VehiclesDropdownApi, { data: DropdownData, loading, error }] = useLazyQuery(VehiclesDropdownDocument);
+  const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
+  const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
 
   const { control, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<z.infer<typeof BreakDownSchema>>({
     resolver: zodResolver(BreakDownSchema),
@@ -78,18 +83,25 @@ const AddBreakdown = () => {
         }
       });
     }
-  }, [currentPage, hasMore, limit]);
+  }, [currentPage, hasMore, limit, VehiclesDropdownApi]);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    VehiclesBreakdownType(); // Call to fetch breakdown types
+  }, [fetchData, VehiclesBreakdownType]);
 
   const Maindata = DropdownData?.vehiclesDropdown.data || []
+  const BreakDownData = BreakdownTypeData?.getBreakdownTypeSuggestions
 
   const dropdownOptions = Maindata?.map((item) => ({
     label: item?.model || "",
     value: item?.id || "",
   }));
+
+  const DropdownBreakType = BreakDownData?.map((item) => ({
+    label: item || "",
+    value: item || "",
+  })) || [];
 
   const animateStepTransition = (direction: 'next' | 'prev') => {
     const toValue = direction === 'next' ? -width : width;
@@ -159,11 +171,11 @@ const AddBreakdown = () => {
             </View>
             <View >
               <CustomDropdownApi
-                options={dropdownOptions}
+                options={DropdownBreakType}
                 placeholder="Select Breakdown Type"
                 control={control}
-                name="serviceCenter"
-                error={errors.serviceCenter as any}
+                name="breakdownType"
+                error={errors.breakdownType as any}
                 label="Breakdown Type"
                 required={true}
               />
@@ -243,8 +255,6 @@ const AddBreakdown = () => {
                 onLocationSelect={(lat, lng, address) => {
                   console.log("Selected location:", lat, lng, address);
                 }}
-                showControls={true}
-                enableDrawing={true}
               />
               <Pressable style={styles.locationButton}>
                 <Ionicons name="locate" size={20} color="#007AFF" />
