@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
 import { Control, Controller, FieldError, RegisterOptions } from 'react-hook-form';
-import { Animated, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, Modal, Dimensions, TouchableWithoutFeedback } from 'react-native';
 
 
 interface DropdownOption {
@@ -22,39 +22,41 @@ interface CustomDropdownApiProps {
     required?: boolean;
 }
 
+const { height: screenHeight } = Dimensions.get('window');
+
 const CustomDropdownApi = ({ options, onSelect, placeholder = "Select an option", defaultValue = null, label, control, name, rules, error, required = false, }: CustomDropdownApiProps) => {
     const [selected, setSelected] = useState<DropdownOption | null>(defaultValue);
-    const [isOpen, setIsOpen] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
-    const [searchText, setSearchText] = useState(''); 
-    const animatedValue = useRef(new Animated.Value(0)).current;
+    const [searchText, setSearchText] = useState('');
+    const slideAnim = useRef(new Animated.Value(screenHeight)).current; // Initial position off-screen
 
-    const dropdownHeight = animatedValue.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, options.length * 50 > 200 ? 200 + 50 : options.length * 50 + 50] // Added 50 for search input height
-    });
-    const arrowRotation = animatedValue.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0deg', '180deg']
-    });
+    const openModal = () => {
+        setModalVisible(true);
+        Animated.timing(slideAnim, {
+            toValue: 0,  // 👈 modal bottom se 0 position par slide karega
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const closeModal = () => {
+        Animated.timing(slideAnim, {
+            toValue: screenHeight, // 👈 screen ke bahar slide back
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => {
+            setModalVisible(false);
+            setSearchText('');
+        });
+    };
+
 
     const toggleDropdown = () => {
-        if (isOpen) {
-            Animated.timing(animatedValue, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: false
-            }).start(() => {
-                setIsOpen(false);
-                setSearchText(''); 
-            });
+        if (modalVisible) {
+            closeModal();
         } else {
-            setIsOpen(true);
-            Animated.timing(animatedValue, {
-                toValue: 1,
-                duration: 300,
-                useNativeDriver: false
-            }).start();
+            openModal();
         }
     };
 
@@ -117,20 +119,41 @@ const CustomDropdownApi = ({ options, onSelect, placeholder = "Select an option"
                             setSelected(null);
                             onChange(null); // Clear react-hook-form value
                             setSearchText('');
-                            toggleDropdown();
+                            setSelected(null); // Clear selected item
+                            closeModal(); // Close the modal
                         }} style={styles.closeButton}>
                             <Ionicons name="close-circle" size={20} color="#666" />
                         </TouchableOpacity></> : <>
-                                <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
-                                    <Ionicons name="chevron-down" size={20} color="#666" />
-                                </Animated.View>
+                                <Ionicons name={modalVisible ? "chevron-up" : "chevron-down"} size={20} color="#666" />
                         </>}
 
 
                     </TouchableOpacity>
                     {error && <Text style={styles.errorText}>{error.message}</Text>}
-                    {isOpen && (
-                        <Animated.View style={[styles.dropdownList, { height: dropdownHeight }]}>
+
+                    <Modal
+                        transparent={true}
+                        visible={modalVisible}
+                        onRequestClose={closeModal}
+                        animationType="none"
+                    >
+                        <TouchableWithoutFeedback onPress={closeModal}>
+                            <View style={styles.modalOverlay} />
+                        </TouchableWithoutFeedback>
+
+                        <Animated.View
+                            style={[
+                                styles.modalContent,
+                                { transform: [{ translateY: slideAnim }] },
+                            ]}
+                        >
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>{label || placeholder}</Text>
+                                <TouchableOpacity onPress={closeModal} style={styles.modalCloseButton}>
+                                    <Ionicons name="close" size={24} color="#333" />
+                                </TouchableOpacity>
+                            </View>
+
                             <View style={styles.searchContainer}>
                                 <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
                                 <TextInput
@@ -141,17 +164,20 @@ const CustomDropdownApi = ({ options, onSelect, placeholder = "Select an option"
                                     onFocus={() => setIsFocused(true)}
                                     onBlur={() => setIsFocused(false)}
                                 />
-
                             </View>
+
+                            {/* ✅ Scrollable List */}
                             <FlatList
                                 data={filteredOptions}
                                 renderItem={({ item }) => renderItem(item, onChange)}
                                 keyExtractor={(item) => item.value.toString()}
-                                showsVerticalScrollIndicator={false}
-                                nestedScrollEnabled={true}
+                                showsVerticalScrollIndicator={true}
+                                style={styles.flatList}
+                                contentContainerStyle={styles.flatListContent}
                             />
                         </Animated.View>
-                    )}
+                    </Modal>
+
                 </View>
             )}
         />
@@ -164,7 +190,7 @@ const styles = StyleSheet.create({
     container: {
         marginBottom: 20,
         width: '100%',
-        zIndex: 1000,
+        zIndex: 1, // Lower zIndex for the dropdown header itself
     },
     dropdownHeader: {
         flexDirection: 'row',
@@ -183,7 +209,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     focusedBorder: {
-        borderColor: '#007bff', 
+        borderColor: '#007bff',
     },
     errorBorder: {
         borderColor: 'red',
@@ -196,19 +222,7 @@ const styles = StyleSheet.create({
         color: '#333',
         fontSize: 16,
         fontWeight: '500',
-    },
-    dropdownList: {
-        backgroundColor: 'white',
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        marginTop: 5,
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        textTransform: 'capitalize'
     },
     item: {
         paddingHorizontal: 15,
@@ -222,6 +236,7 @@ const styles = StyleSheet.create({
     itemText: {
         color: '#333',
         fontSize: 16,
+        textTransform: 'capitalize'
     },
     selectedItemText: {
         color: '#0066cc',
@@ -250,6 +265,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#f0f0f0',
         paddingHorizontal: 15,
         paddingVertical: 10,
+        flexShrink: 0, // Ensure search container doesn't shrink
     },
     searchIcon: {
         marginRight: 10,
@@ -261,5 +277,48 @@ const styles = StyleSheet.create({
     },
     closeButton: {
         marginLeft: 10,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: screenHeight * 0.4, // 👈 70% screen height, FlatList ke liye jagah milegi
+        backgroundColor: 'white',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        flexDirection: 'column',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 10,
+    },
+    flatList: {
+        flex: 1, // ✅ baki space FlatList ko de do
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+        flexShrink: 0, // Ensure header doesn't shrink
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+    },
+    modalCloseButton: {
+        padding: 5,
+    },
+    flatListContent: {
+        paddingBottom: 20, // Add padding to the bottom of the scrollable content
     },
 });
