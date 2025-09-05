@@ -226,6 +226,8 @@ const GoogleMapView: React.FC<GoogleMapViewProps> = ({
     );
 };
 
+export default GoogleMapView;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -302,4 +304,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default GoogleMapView;
+
