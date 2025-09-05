@@ -1,23 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
+import { MaterialIcons } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import React, { useEffect, useRef, useState } from "react";
 import {
-    StyleSheet,
-    View,
-    Text,
-    TouchableOpacity,
-    Dimensions,
     Alert,
-    Platform,
+    StyleSheet,
+    Text,
+    View
 } from "react-native";
 import MapView, {
     Marker,
-    PROVIDER_GOOGLE,
-    Circle,
-    Polyline,
-    Polygon,
+    PROVIDER_GOOGLE
 } from "react-native-maps";
-import * as Location from "expo-location";
-import { MaterialIcons } from "@expo/vector-icons";
-import { LocationGeocodedAddress } from "expo-location";
 
 
 type GoogleMapViewProps = {
@@ -108,8 +101,16 @@ const GoogleMapView: React.FC<GoogleMapViewProps> = ({
         const { coordinate } = event.nativeEvent;
 
         if (onLocationSelect) {
-            // In a real app, you would use a geocoding service here
-            const newAddress = `Selected Location: ${coordinate.latitude.toFixed(6)}, ${coordinate.longitude.toFixed(6)}`;
+            let newAddress = `Selected Location: ${coordinate.latitude.toFixed(6)}, ${coordinate.longitude.toFixed(6)}`;
+            try {
+                const geocodedAddress = await Location.reverseGeocodeAsync(coordinate);
+                if (geocodedAddress && geocodedAddress.length > 0) {
+                    const { street, name, city, region, country } = geocodedAddress[0];
+                    newAddress = `${name || ''} ${street || ''}, ${city || ''}, ${region || ''}, ${country || ''}`.trim();
+                }
+            } catch (error) {
+                console.error("Error reverse geocoding:", error);
+            }
 
             setSelectedLocation({
                 latitude: coordinate.latitude,
