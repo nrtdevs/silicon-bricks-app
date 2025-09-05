@@ -255,13 +255,11 @@ const AddBreakdown = () => {
                 longitude={-122.4324}
                 height={400}
                 onLocationSelect={(lat, lng, address) => {
-                  console.log("Selected location:", lat, lng, address);
+                  setValue('longitude', lat?.toFixed(3))
+                  setValue('latitude', lng?.toFixed(3))
+                  setValue('address', address)
                 }}
               />
-              <Pressable style={styles.locationButton}>
-                <Ionicons name="locate" size={20} color="#007AFF" />
-                <Text style={styles.locationButtonText}>Use Current Location</Text>
-              </Pressable>
             </View>
           </View>
         )}
