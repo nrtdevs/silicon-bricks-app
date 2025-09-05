@@ -6,6 +6,7 @@ import {
     FlatList,
     StyleSheet,
     Text,
+    TextInput, // Import TextInput
     TouchableOpacity,
     View
 } from 'react-native';
@@ -46,6 +47,7 @@ const CustomDropdownApi = ({
     const [selected, setSelected] = useState<DropdownOption | null>(defaultValue);
     const [isOpen, setIsOpen] = useState(false);
     const [isFocused, setIsFocused] = useState(false); // For focus styling
+    const [searchText, setSearchText] = useState(''); // New state for search input
     const animatedValue = useRef(new Animated.Value(0)).current;
     const dropdownHeight = animatedValue.interpolate({
         inputRange: [0, 1],
@@ -62,7 +64,10 @@ const CustomDropdownApi = ({
                 toValue: 0,
                 duration: 300,
                 useNativeDriver: false
-            }).start(() => setIsOpen(false));
+            }).start(() => {
+                setIsOpen(false);
+                setSearchText(''); // Clear search text when closing
+            });
         } else {
             setIsOpen(true);
             Animated.timing(animatedValue, {
@@ -72,6 +77,10 @@ const CustomDropdownApi = ({
             }).start();
         }
     };
+
+    const filteredOptions = options.filter(option =>
+        option.label.toLowerCase().includes(searchText.toLowerCase())
+    );
 
     const onItemPress = (item: DropdownOption, onChange: (value: DropdownOption) => void) => {
         setSelected(item);
@@ -131,11 +140,23 @@ const CustomDropdownApi = ({
                     {error && <Text style={styles.errorText}>{error.message}</Text>}
                     {isOpen && (
                         <Animated.View style={[styles.dropdownList, { height: dropdownHeight }]}>
+                            <View style={styles.searchContainer}>
+                                <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search..."
+                                    value={searchText}
+                                    onChangeText={setSearchText}
+                                    onFocus={() => setIsFocused(true)}
+                                    onBlur={() => setIsFocused(false)}
+                                />
+                            </View>
                             <FlatList
-                                data={options}
+                                data={filteredOptions}
                                 renderItem={({ item }) => renderItem(item, onChange)}
                                 keyExtractor={(item) => item.value.toString()}
                                 showsVerticalScrollIndicator={false}
+                                nestedScrollEnabled={true}
                             />
                         </Animated.View>
                     )}
@@ -229,5 +250,21 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 5,
         marginLeft: 5,
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+    },
+    searchIcon: {
+        marginRight: 10,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        paddingVertical: 0, // Adjust for consistent height
     },
 });
