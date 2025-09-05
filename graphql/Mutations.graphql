@@ -1121,3 +1121,14 @@ mutation EnableServiceCenterStatus($data: ServiceCenterStatusDto!) {
     status
   }
 }
+
+# create breakdown 
+mutation CreateBreakdown($data: CreateBreakdownDto!) {
+  createBreakdown(data: $data) {
+    id
+    latitude
+    longitude
+    vehicleId
+    breakdownDate
+  }
+}

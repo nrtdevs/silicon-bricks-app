@@ -6,7 +6,7 @@ import GoogleMapView from "@/components/CustomMap";
 import DocumentUploader from "@/components/DocumentUploader";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { GetBreakdownTypeSuggestionsDocument, PaginatedServiceCentersDocument, VehiclesDropdownDocument } from "@/graphql/generated";
+import { GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
 import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,16 +23,13 @@ const { width } = Dimensions.get('window');
 const labels = ["Details", "Location", "Media"];
 
 const BreakDownSchema = z.object({
+  breakdownDate: z.string().min(1, "Breakdown Date is required"),
+  breakdownDescription: z.string().min(1, "Breakdown Description is required"),
+  breakdownLocation: z.string().min(1, "Breakdown Location is required"),
   breakdownType: z.object({
     label: z.string(),
     value: z.string(),
   }).nullable().refine(val => val !== null, { message: "Breakdown Type is required" }),
-  serviceCenter: z.object({
-    label: z.string(),
-    value: z.union([z.string(), z.number()]),
-  }).nullable().refine(val => val !== null, { message: "Service Center is required" }),
-  name: z.string().min(1, "Center Name is required"),
-  contactNo: z.string().min(1, "Contact Number is required").regex(/^(\+91)?[0-9]{10}$/, "Enter a valid 10-digit mobile number"),
   latitude: z.string().min(1, "Latitude is required").refine((val) => {
     const num = parseFloat(val);
     return !isNaN(num) && num >= -90 && num <= 90;
@@ -41,17 +38,25 @@ const BreakDownSchema = z.object({
     const num = parseFloat(val);
     return !isNaN(num) && num >= -180 && num <= 180;
   }, { message: "Invalid Longitude" }),
-  address: z.string().min(1, "Address is required"),
+  mediaUrl: z.array(z.object({
+    mediaType: z.string().nullable(),
+    url: z.string().nullable(),
+  })).optional(),
+  vehicleId: z.object({
+    label: z.string(),
+    value: z.string(),
+  }).nullable().refine(val => val !== null, { message: "Vehicle is required" }),
 });
 
 const defaultValues = {
+  breakdownDate: '',
+  breakdownDescription: '',
+  breakdownLocation: '',
   breakdownType: undefined,
-  serviceCenter: undefined,
-  name: "",
-  contactNo: "",
-  latitude: "",
-  longitude: "",
-  address: ""
+  latitude: '',
+  longitude: '',
+  mediaUrl: [],
+  vehicleId: undefined,
 }
 
 const AddBreakdown = () => {
@@ -187,27 +192,27 @@ const AddBreakdown = () => {
                 options={dropdownOptions}
                 placeholder="Select Vehicle"
                 control={control}
-                name="serviceCenter"
-                error={errors.serviceCenter as any}
+                name="vehicleId"
+                error={errors.vehicleId as any}
                 label="Vehicle"
                 required={true}
               />
               <CustomDatePicker
                 control={control}
-                name="insuranceValidTill"
+                name="breakdownDate"
                 label="Breakdown Date"
                 mode="date"
                 required
               />
               <CustomInput
-                name="address"
+                name="breakdownDescription"
                 control={control}
                 label="Description"
                 placeholder="Describe the breakdown issue..."
                 required={true}
                 multiline={true}
                 numberOfLines={5}
-                error={errors.address?.message}
+                error={errors.breakdownDescription?.message}
               />
             </View>
           </View>
@@ -242,14 +247,14 @@ const AddBreakdown = () => {
               />
 
               <CustomInput
-                name="address"
+                name="breakdownLocation"
                 control={control}
                 label="Full Address"
                 placeholder="Enter complete address"
                 required={true}
                 multiline={true}
                 numberOfLines={4}
-                error={errors.address?.message}
+                error={errors.breakdownLocation?.message}
               />
 
               <GoogleMapView
@@ -259,7 +264,7 @@ const AddBreakdown = () => {
                 onLocationSelect={(lat, lng, address) => {
                   setValue('longitude', lat?.toFixed(3))
                   setValue('latitude', lng?.toFixed(3))
-                  setValue('address', address)
+                  setValue('breakdownLocation', address)
                 }}
               />
             </View>
@@ -294,12 +299,6 @@ const AddBreakdown = () => {
                 <Text style={styles.previewSubtitle}>No files uploaded yet</Text>
               </View>
             </View>
-            <DocumentUploader
-              type="single"
-              onChange={async (imgs) => {
-                const result = await uploadImage(imgs);
-              }}
-            />
           </View>
         )}
       </Animated.View>
