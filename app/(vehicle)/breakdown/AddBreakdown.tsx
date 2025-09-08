@@ -3,11 +3,12 @@ import CustomDropdownApi from "@/components/CustomDropdownApi";
 import CustomHeader from "@/components/CustomHeader";
 import CustomInput from "@/components/CustomInput";
 import GoogleMapView from "@/components/CustomMap";
+import CustomToast from "@/components/CustomToast";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
+import { CreateBreakdownDocument, GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
 import uploadImage from "@/utils/imageUpload";
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as DocumentPicker from "expo-document-picker";
@@ -77,7 +78,7 @@ const AddBreakdown = () => {
   const [hasMore, setHasMore] = useState(true);
   const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
-
+  const [createBreakBownApi, { loading }] = useMutation(CreateBreakdownDocument);
   const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger } = useForm<z.infer<typeof BreakDownSchema>>({
     resolver: zodResolver(BreakDownSchema),
     defaultValues: defaultValues
@@ -215,9 +216,37 @@ const AddBreakdown = () => {
   };
 
 
-  const onSubmit = (data: z.infer<typeof BreakDownSchema>) => {
-    console.log("Form Data:", data);
-    // Handle form submission logic here
+  const onSubmit = async (data: z.infer<typeof BreakDownSchema>) => {
+    try {
+      const response = await createBreakBownApi({
+        variables: {
+          data: {
+            breakdownDate: data?.breakdownDate,
+            breakdownDescription: data?.breakdownDescription,
+            breakdownLocation: data?.breakdownLocation,
+            breakdownType: String(data?.breakdownType),
+            latitude: data?.latitude,
+            longitude: data?.longitude,
+            vehicleId: Number(data?.vehicleId),
+            mediaUrl: [
+              {
+                mediaType: "",
+                url : data?.mediaUrl
+              }
+            ]
+          }
+        },
+      });
+
+      // ✅ Now response exists in both cases
+      if (response.data?.createBreakdown?.id || response.data?.createBreakdown?.id) {
+        CustomToast("success");
+        reset(defaultValues);
+        router.navigate("/(vehicle)/breakdown/BreakdownList");
+      }
+    } catch (error: any) {
+      CustomToast("error");
+    }
   };
 
   const renderStepContent = () => {
