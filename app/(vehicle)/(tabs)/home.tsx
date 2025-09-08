@@ -24,40 +24,32 @@ const CARD_WIDTH = (width - CARD_GAP * 3) / 2;
 const home = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
-  const { loading, error, data } = useQuery(GetMeetingDashboardDocument, {
-    variables: {},
-  });
-
-  if (loading) return <ThemedText style={styles.loadingText}>Loading...</ThemedText>;
-  if (error) return <ThemedText style={styles.errorText}>Error: {error.message}</ThemedText>;
-
-  const dashboardData = data?.getMeetingDashboard || {};
 
   const cards = [
     {
       name: "Active Meetings",
-      count: dashboardData.activeMeetings || 0,
+      count:  20,
       icon: "calendar-check",
       iconColor: "#3B82F6",
       bgColor: '#DBEAFE',
     },
     {
       name: "Upcoming Meetings",
-      count: dashboardData.upComingMeeting || 0,
+      count: 25,
       icon: "calendar-clock",
       iconColor: "#F59E0B",
       bgColor: '#FEF3C7',
     },
     {
       name: "Total Tasks",
-      count: dashboardData.totalTasks || 0,
+      count: 53,
       icon: "clipboard-text-multiple",
       iconColor: "#10B981",
       bgColor: '#D1FAE5',
     },
     {
       name: "Incoming Tasks",
-      count: dashboardData.inComingTasks || 0,
+      count:45,
       icon: "clipboard-arrow-left",
       iconColor: "#EF4444",
       bgColor: '#FEE2E2',

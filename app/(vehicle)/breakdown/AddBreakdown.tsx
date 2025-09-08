@@ -6,18 +6,18 @@ import GoogleMapView from "@/components/CustomMap";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
+import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import * as DocumentPicker from "expo-document-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Animated, Dimensions, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View, Image } from "react-native";
+import { Animated, Dimensions, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
 import StepIndicator from "react-native-step-indicator";
 import { z } from 'zod';
-import * as DocumentPicker from "expo-document-picker";
-import uploadImage from "@/utils/imageUpload";
 
 const { width } = Dimensions.get('window');
 const labels = ["Details", "Location", "Media"];
@@ -198,12 +198,19 @@ const AddBreakdown = () => {
         url: asset.uri,
       }));
 
-      console.log("rahul====>", newFiles)
       setUploadedFiles((prev) => [...prev, ...newFiles]);
-      const urldata = newFiles.map(file => file.url)
-      const UploadUrl = await uploadImage(urldata);
-      console.log("UploadUrl", UploadUrl)
-      setValue("mediaUrl", [UploadUrl]);
+      const urisToUpload = newFiles.map(file => file.url);
+      const uploadedUrls = await uploadImage(urisToUpload);
+
+      console.log("upload image ho gya ====>", uploadedUrls)
+
+      // Map the uploaded URLs back to the schema's expected format, preserving mediaType
+      const formattedUploadedMedia = newFiles.map((file, index) => ({
+        mediaType: file.mediaType,
+        url: uploadedUrls[index] || null,
+      }));
+
+      setValue("mediaUrl", formattedUploadedMedia);
     }
   };
 
@@ -341,11 +348,9 @@ const AddBreakdown = () => {
 
             </View>
 
-
-
             {uploadedFiles.map((file, index) => (
-              <View style={styles.mediaPreview}>
-                <View key={index} style={styles.mediaItem}>
+              <View key={`media-preview-${index}`} style={styles.mediaPreview}>
+                <View key={`media-item-${index}`} style={styles.mediaItem}>
                   {file.mediaType === "image" ? (
                     <Image
                       source={{ uri: file.url }}
@@ -365,7 +370,6 @@ const AddBreakdown = () => {
                     onPress={() => {
                       const newFiles = uploadedFiles.filter((_, i) => i !== index);
                       setUploadedFiles(newFiles);
-                      setValue("mediaUrl", newFiles);
                     }}
                     style={styles.closeButton}
                   >
@@ -373,8 +377,7 @@ const AddBreakdown = () => {
                   </Pressable>
                 </View>
               </View>
-            ))
-            }
+            ))}
 
 
           </>
