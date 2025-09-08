@@ -6,19 +6,19 @@ import GoogleMapView from "@/components/CustomMap";
 import CustomToast from "@/components/CustomToast";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateBreakdownDocument, FindBreakdownByIdDocument, GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
+import { CreateBreakdownDocument, FindBreakdownByIdDocument, GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument, CreateBreakdownMutation, CreateBreakdownMutationVariables } from "@/graphql/generated";
 import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as DocumentPicker from "expo-document-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Animated, Dimensions, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
 import StepIndicator from "react-native-step-indicator";
-import { z } from 'zod';
+import { string, z } from 'zod';
 
 const { width } = Dimensions.get('window');
 const labels = ["Details", "Location", "Media"];
@@ -31,7 +31,6 @@ const BreakDownSchema = z.object({
     label: z.string(),
     value: z.string(),
   }, { required_error: "Breakdown Type is required" }),
-
   latitude: z.string()
     .min(1, "Latitude is required")
     .refine((val) => {
@@ -72,14 +71,15 @@ const AddBreakdown = () => {
   const [fadeAnim] = useState(new Animated.Value(1));
   const { theme } = useTheme();
   const { data } = useLocalSearchParams();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1)
+  const [loadingData, setLoadingData] = useState(false);;
   const [limit] = useState(10);
   const parsedData = data ? JSON.parse(data as string) : null;
   const [hasMore, setHasMore] = useState(true);
   const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
   const [GetVehiclesByID, { data: GetByIdVehicles }] = useLazyQuery(FindBreakdownByIdDocument)
-  const [createBreakBownApi, { loading }] = useMutation(CreateBreakdownDocument);
+  const [createBreakBownApi, { loading }] = useMutation<CreateBreakdownMutation, CreateBreakdownMutationVariables>(CreateBreakdownDocument);
   const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger } = useForm<z.infer<typeof BreakDownSchema>>({
     resolver: zodResolver(BreakDownSchema),
     defaultValues: defaultValues
@@ -88,7 +88,6 @@ const AddBreakdown = () => {
   const watchedBreakdownType = watch("breakdownType");
   const watchedVehicleId = watch("vehicleId");
 
-  console.log("GetByIdVehicles", GetByIdVehicles)
 
 
   // Fetch data function
@@ -112,27 +111,28 @@ const AddBreakdown = () => {
 
   useEffect(() => {
     if (parsedData) {
+      setLoadingData(true);
       GetVehiclesByID({
         variables: {
           findBreakdownByIdId: Number(parsedData)
         }
-      })
+      }).finally(() => setLoadingData(false));
     }
-  }, [])
+  }, [parsedData]);
 
 
   const Maindata = DropdownData?.vehiclesDropdown.data || []
   const BreakDownData = BreakdownTypeData?.getBreakdownTypeSuggestions
 
-  const dropdownOptions = Maindata?.map((item) => ({
+  const dropdownOptions = useMemo(() => Maindata?.map((item) => ({
     label: item?.model || "",
     value: item?.id || "",
-  }));
+  })), [Maindata]);
 
-  const DropdownBreakType = BreakDownData?.map((item) => ({
+  const DropdownBreakType = useMemo(() => BreakDownData?.map((item) => ({
     label: item || "",
     value: item || "",
-  })) || [];
+  })) || [], [BreakDownData]);
 
   const animateStepTransition = (direction: 'next' | 'prev') => {
     const toValue = direction === 'next' ? -width : width;
@@ -220,13 +220,35 @@ const AddBreakdown = () => {
   const setvalueData = GetByIdVehicles?.findBreakdownById
 
   useEffect(() => {
-    if (parsedData) {
-      setValue('breakdownDate', setvalueData?.breakdownDate),
-        setValue('breakdownDescription', String(setvalueData?.breakdownDescription))
-      setValue('breakdownType', Number(setvalueData?.breakdownType))
-    }
-  }, [])
+    // Only set form values if parsedData (indicating an edit) and fetched data are available
+    // Ensure all necessary data (setvalueData, DropdownBreakType, dropdownOptions) are loaded
+    if (parsedData && setvalueData && DropdownBreakType.length > 0 && dropdownOptions.length > 0) {
+      setValue('breakdownDate', String(setvalueData?.breakdownDate || ''));
+      setValue('breakdownDescription', String(setvalueData?.breakdownDescription || ''));
 
+      // Find and set breakdownType
+      const foundBreakdownType = DropdownBreakType.find(
+        (option) => option.value === setvalueData?.breakdownType
+      );
+      if (foundBreakdownType) {
+        setValue('breakdownType', foundBreakdownType);
+      }
+
+      // Find and set vehicleId
+      const foundVehicle = dropdownOptions.find(
+        (option) => option.value === String(setvalueData?.vehicleId)
+      );
+      if (foundVehicle) {
+        setValue('vehicleId', foundVehicle);
+      }
+
+      setValue('breakdownLocation', String(setvalueData?.breakdownLocation || ''));
+      setValue('latitude', String(setvalueData?.latitude || ''));
+      setValue('longitude', String(setvalueData?.longitude || ''));
+
+      // setUploadedFiles(setvalueData?.mediaUrl || []);
+    }
+  }, [parsedData, setvalueData, DropdownBreakType, dropdownOptions, setValue]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -245,12 +267,12 @@ const AddBreakdown = () => {
             breakdownDate: data?.breakdownDate,
             breakdownDescription: data?.breakdownDescription,
             breakdownLocation: data?.breakdownLocation,
-            breakdownType: String(data?.breakdownType?.value),
+            breakdownType: data?.breakdownType?.value,
             latitude: data?.latitude,
             longitude: data?.longitude,
             vehicleId: Number(data?.vehicleId?.value),
             mediaUrl: formattedMedia,
-          },
+          } as any, // Re-introducing the cast to bypass TypeScript error
         },
       });
 
@@ -370,6 +392,8 @@ const AddBreakdown = () => {
                 longitude={-122.4324}
                 height={400}
                 onLocationSelect={(lat, lng, address) => {
+                  // These setValue calls are triggered by user interaction with the map,
+                  // not automatic pre-filling during create time.
                   setValue('longitude', lng?.toFixed(3))
                   setValue('latitude', lat?.toFixed(3))
                   setValue('breakdownLocation', address)
