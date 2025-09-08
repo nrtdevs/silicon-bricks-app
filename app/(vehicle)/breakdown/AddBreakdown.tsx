@@ -47,8 +47,8 @@ const BreakDownSchema = z.object({
     }, { message: "Invalid Longitude" }),
   mediaUrl: z.array(z.object({
     mediaType: z.string(),
-    url: z.string(), // Changed to non-nullable string
-  })).optional(),
+    url: z.string(), 
+  })).optional(), 
   vehicleId: z.object({
     label: z.string(),
     value: z.string(),
@@ -200,25 +200,21 @@ const AddBreakdown = () => {
       }));
 
       setUploadedFiles((prev) => [...prev, ...newFiles]);
-      const urisToUpload = newFiles.map(file => file.url);
-      const uploadedUrls = await uploadImage(urisToUpload);
-
-      console.log("upload image ho gya ====>", uploadedUrls)
-
-      // Map the uploaded URLs back to the schema's expected format, preserving mediaType
-      const formattedUploadedMedia = newFiles.map((file, index): { mediaType: string; url: string } => ({
-        mediaType: file.mediaType || "file", // Ensure mediaType is always a string
-        url: uploadedUrls[index] || "", // Ensure url is always a string
-      }));
-
-      setValue("mediaUrl", formattedUploadedMedia);
     }
   };
 
 
   const onSubmit = async (data: any) => {
-    console.log(data, "data")
     try {
+      const localUris = uploadedFiles.map((file) => file.url);
+
+      const uploadedUrls = await uploadImage(localUris);
+
+      const formattedMedia = uploadedFiles.map((file, index) => ({
+        mediaType: file.mediaType,
+        url: uploadedUrls[index] || "",
+      }));
+
       const response = await createBreakBownApi({
         variables: {
           data: {
@@ -229,23 +225,24 @@ const AddBreakdown = () => {
             latitude: data?.latitude,
             longitude: data?.longitude,
             vehicleId: Number(data?.vehicleId?.value),
-            mediaUrl: data?.mediaUrl
-          }
+            mediaUrl: formattedMedia,
+          },
         },
       });
 
-      console.log("response ===> main data ", response)
 
-      // ✅ Now response exists in both cases
-      if (response.data?.createBreakdown?.id || response.data?.createBreakdown?.id) {
+      if (response.data?.createBreakdown?.id) {
         CustomToast("success");
         reset(defaultValues);
+        setUploadedFiles([]); // reset local files
         router.navigate("/(vehicle)/breakdown/BreakdownList");
       }
-    } catch (error: any) {
+    } catch (error) {
+      console.log("Upload or Submit Error ===>", error);
       CustomToast("error");
     }
   };
+
 
   const renderStepContent = () => {
     const animatedStyle = {
