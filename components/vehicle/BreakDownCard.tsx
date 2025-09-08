@@ -6,13 +6,16 @@ import React, { useState } from 'react';
 import { Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
 import { ms, ScaledSheet } from 'react-native-size-matters';
 import { ThemedText } from '../ThemedText';
+import { BreakdownServiceStatus, BreakdownStatus } from '@/graphql/generated';
 
 interface ServiceItem {
-  name: string;
-  contactNo: string;
+  vehicle: {
+    model: string;
+  };
+  breakdownType: string;
   longitude: string;
   latitude: string;
-  status: 'active' | 'inactive' | 'breakdown' | 'maintenance';
+  status: BreakdownServiceStatus
 }
 
 interface VehicleCardProps {
@@ -134,8 +137,8 @@ const BreakDownCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onC
         {/* Header with status badge */}
         <View style={styles.header}>
           <View style={styles.titleContainer}>
-            <ThemedText type='title' style={styles.brandText}>Name : {item?.name}</ThemedText>
-            <ThemedText type='subtitle' style={styles.modelText}>Contact No : {item?.contactNo}</ThemedText>
+            <ThemedText type='title' style={styles.brandText}>Model : {item?.vehicle?.model}</ThemedText>
+            <ThemedText type='subtitle' style={styles.modelText}>Type : {item?.breakdownType}</ThemedText>
           </View>
 
           <LinearGradient

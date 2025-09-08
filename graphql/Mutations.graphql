@@ -1133,3 +1133,11 @@ mutation CreateBreakdown($data: CreateBreakdownDto!) {
     breakdownDate
   }
 }
+
+# change break down status 
+mutation ChangeBreakdownStatus($data: BreakdownStatusDto!) {
+  changeBreakdownStatus(data: $data) {
+    id
+    status
+  }
+}
