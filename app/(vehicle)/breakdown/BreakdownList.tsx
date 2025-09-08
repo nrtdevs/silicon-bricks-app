@@ -1,8 +1,6 @@
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
 import BreakDownCard from "@/components/vehicle/BreakDownCard";
-import ServiceCard from "@/components/vehicle/ServiceCard";
-import VehicleBreakdownCart from "@/components/VehicleBreakdownCart";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { PaginatedBreakdownsDocument } from "@/graphql/generated";
@@ -46,9 +44,11 @@ const BreakdownList = () => {
         }, [handleRefresh])
     );
 
-    // Fetch data function
-    const fetchData = useCallback(() => {
-        if (hasMore) {
+    // Fetch data when currentPage changes (for pagination)
+    useEffect(() => {
+        // Only fetch if currentPage is greater than 1 (subsequent pages)
+        // and if there's more data to load and not currently loading
+        if (currentPage > 1 && hasMore && !loading) {
             getVehicleListApi({
                 variables: {
                     listInputDto: {
@@ -58,12 +58,7 @@ const BreakdownList = () => {
                 }
             });
         }
-    }, [currentPage, hasMore, limit]);
-
-    useFocusEffect(() => {
-        fetchData();
-    });
-
+    }, [currentPage, hasMore, limit, loading, getVehicleListApi]);
     useEffect(() => {
         if (data?.paginatedBreakdowns?.data) {
             // If we're on page 1, replace the data
