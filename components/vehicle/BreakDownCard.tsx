@@ -1,12 +1,12 @@
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
+import { Breakdown_Status } from '@/graphql/generated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import { Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
 import { ms, ScaledSheet } from 'react-native-size-matters';
 import { ThemedText } from '../ThemedText';
-import { BreakdownServiceStatus, BreakdownStatus } from '@/graphql/generated';
 
 interface ServiceItem {
   vehicle: {
@@ -15,7 +15,7 @@ interface ServiceItem {
   breakdownType: string;
   longitude: string;
   latitude: string;
-  status: BreakdownServiceStatus
+  status: Breakdown_Status
 }
 
 interface VehicleCardProps {
@@ -26,19 +26,29 @@ interface VehicleCardProps {
   onView: () => void;
 }
 
-const statusColors: Record<ServiceItem['status'], readonly [string, string]> = {
-  active: ['#10B981', '#059669'],
-  inactive: ['#EF4444', '#DC2626'],
-  breakdown: ['#F59E0B', '#D97706'],
-  maintenance: ['#3B82F6', '#2563EB']
+const statusColors: Record<Breakdown_Status, readonly [string, string]> = {
+  [Breakdown_Status.Approved]: ['#10B981', '#059669'], // Green
+  [Breakdown_Status.Assigned]: ['#3B82F6', '#2563EB'], // Blue
+  [Breakdown_Status.Cancelled]: ['#EF4444', '#DC2626'], // Red
+  [Breakdown_Status.InService]: ['#3B82F6', '#2563EB'], // Blue
+  [Breakdown_Status.Pending]: ['#F59E0B', '#D97706'], // Orange
+  [Breakdown_Status.Rejected]: ['#EF4444', '#DC2626'], // Red
+  [Breakdown_Status.RepairFailed]: ['#EF4444', '#DC2626'], // Red
+  [Breakdown_Status.Repaired]: ['#10B981', '#059669'], // Green
+  [Breakdown_Status.ServiceScheduled]: ['#8B5CF6', '#7C3AED'], // Purple
 };
 
-const statusIcons = {
-  active: 'checkmark-circle',
-  inactive: 'close-circle',
-  breakdown: 'warning',
-  maintenance: 'construct'
-} as const;
+const statusIcons: Record<Breakdown_Status, keyof typeof Ionicons.glyphMap> = {
+  [Breakdown_Status.Approved]: 'checkmark-circle',
+  [Breakdown_Status.Assigned]: 'person-add',
+  [Breakdown_Status.Cancelled]: 'close-circle',
+  [Breakdown_Status.InService]: 'hammer',
+  [Breakdown_Status.Pending]: 'time',
+  [Breakdown_Status.Rejected]: 'alert-circle',
+  [Breakdown_Status.RepairFailed]: 'warning',
+  [Breakdown_Status.Repaired]: 'build',
+  [Breakdown_Status.ServiceScheduled]: 'calendar',
+};
 
 
 interface DetailRowProps { icon: 'location'; label: string; value: string; theme: 'light' | 'dark'; }
@@ -84,14 +94,11 @@ const BreakDownCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onC
     return null; 
   }
 
-
-  console.log("item",item)
-
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const [scaleValue] = useState(new Animated.Value(1));
 
-  const currentStatus = item.status && statusColors[item.status] ? item.status : 'inactive';
+  const currentStatus: Breakdown_Status = item.status && statusColors[item.status] ? item.status : Breakdown_Status.Pending;
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
