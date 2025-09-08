@@ -27,15 +27,15 @@ interface VehicleCardProps {
 }
 
 const statusColors: Record<Breakdown_Status, readonly [string, string]> = {
-  [Breakdown_Status.Approved]: ['#10B981', '#059669'], // Green
-  [Breakdown_Status.Assigned]: ['#3B82F6', '#2563EB'], // Blue
-  [Breakdown_Status.Cancelled]: ['#EF4444', '#DC2626'], // Red
-  [Breakdown_Status.InService]: ['#3B82F6', '#2563EB'], // Blue
-  [Breakdown_Status.Pending]: ['#F59E0B', '#D97706'], // Orange
-  [Breakdown_Status.Rejected]: ['#EF4444', '#DC2626'], // Red
-  [Breakdown_Status.RepairFailed]: ['#EF4444', '#DC2626'], // Red
-  [Breakdown_Status.Repaired]: ['#10B981', '#059669'], // Green
-  [Breakdown_Status.ServiceScheduled]: ['#8B5CF6', '#7C3AED'], // Purple
+  [Breakdown_Status.Approved]: ['#10B981', '#059669'],
+  [Breakdown_Status.Assigned]: ['#3B82F6', '#2563EB'],
+  [Breakdown_Status.Cancelled]: ['#EF4444', '#DC2626'],
+  [Breakdown_Status.InService]: ['#3B82F6', '#2563EB'],
+  [Breakdown_Status.Pending]: ['#F59E0B', '#D97706'],
+  [Breakdown_Status.Rejected]: ['#EF4444', '#DC2626'],
+  [Breakdown_Status.RepairFailed]: ['#EF4444', '#DC2626'],
+  [Breakdown_Status.Repaired]: ['#10B981', '#059669'],
+  [Breakdown_Status.ServiceScheduled]: ['#8B5CF6', '#7C3AED'],
 };
 
 const statusIcons: Record<Breakdown_Status, keyof typeof Ionicons.glyphMap> = {
@@ -180,7 +180,6 @@ const BreakDownCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onC
           <DetailRow
             icon="location"
             label="Latitude"
-            // value={Math.round(item?.latitude)}
             value={String(Math.round(parseFloat(item?.latitude)))}
             theme={theme}
           />
