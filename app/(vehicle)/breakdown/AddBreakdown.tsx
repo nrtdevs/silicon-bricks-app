@@ -46,8 +46,8 @@ const BreakDownSchema = z.object({
       return !isNaN(num) && num >= -180 && num <= 180;
     }, { message: "Invalid Longitude" }),
   mediaUrl: z.array(z.object({
-    mediaType: z.string().nullable(),
-    url: z.string().nullable(),
+    mediaType: z.string(),
+    url: z.string(), // Changed to non-nullable string
   })).optional(),
   vehicleId: z.object({
     label: z.string(),
@@ -206,9 +206,9 @@ const AddBreakdown = () => {
       console.log("upload image ho gya ====>", uploadedUrls)
 
       // Map the uploaded URLs back to the schema's expected format, preserving mediaType
-      const formattedUploadedMedia = newFiles.map((file, index) => ({
-        mediaType: file.mediaType,
-        url: uploadedUrls[index] || null,
+      const formattedUploadedMedia = newFiles.map((file, index): { mediaType: string; url: string } => ({
+        mediaType: file.mediaType || "file", // Ensure mediaType is always a string
+        url: uploadedUrls[index] || "", // Ensure url is always a string
       }));
 
       setValue("mediaUrl", formattedUploadedMedia);
@@ -216,7 +216,8 @@ const AddBreakdown = () => {
   };
 
 
-  const onSubmit = async (data: z.infer<typeof BreakDownSchema>) => {
+  const onSubmit = async (data: any) => {
+    console.log(data, "data")
     try {
       const response = await createBreakBownApi({
         variables: {
@@ -224,19 +225,16 @@ const AddBreakdown = () => {
             breakdownDate: data?.breakdownDate,
             breakdownDescription: data?.breakdownDescription,
             breakdownLocation: data?.breakdownLocation,
-            breakdownType: String(data?.breakdownType),
+            breakdownType: String(data?.breakdownType?.value),
             latitude: data?.latitude,
             longitude: data?.longitude,
-            vehicleId: Number(data?.vehicleId),
-            mediaUrl: [
-              {
-                mediaType: "",
-                url : data?.mediaUrl
-              }
-            ]
+            vehicleId: Number(data?.vehicleId?.value),
+            mediaUrl: data?.mediaUrl
           }
         },
       });
+
+      console.log("response ===> main data ", response)
 
       // ✅ Now response exists in both cases
       if (response.data?.createBreakdown?.id || response.data?.createBreakdown?.id) {
