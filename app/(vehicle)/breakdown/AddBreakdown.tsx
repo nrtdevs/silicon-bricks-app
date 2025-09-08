@@ -6,19 +6,19 @@ import GoogleMapView from "@/components/CustomMap";
 import CustomToast from "@/components/CustomToast";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateBreakdownDocument, FindBreakdownByIdDocument, GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument, CreateBreakdownMutation, CreateBreakdownMutationVariables } from "@/graphql/generated";
+import { CreateBreakdownDocument, CreateBreakdownMutation, FindBreakdownByIdDocument, GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
 import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as DocumentPicker from "expo-document-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Animated, Dimensions, Image, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
 import StepIndicator from "react-native-step-indicator";
-import { string, z } from 'zod';
+import { z } from 'zod';
 
 const { width } = Dimensions.get('window');
 const labels = ["Details", "Location", "Media"];
@@ -74,13 +74,18 @@ const AddBreakdown = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [loadingData, setLoadingData] = useState(false);;
   const [limit] = useState(10);
-  const parsedData = data ? JSON.parse(data as string) : null;
   const [hasMore, setHasMore] = useState(true);
   const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
-  const [GetVehiclesByID, { data: GetByIdVehicles }] = useLazyQuery(FindBreakdownByIdDocument)
-  const [createBreakBownApi, { loading }] = useMutation<CreateBreakdownMutation, CreateBreakdownMutationVariables>(CreateBreakdownDocument);
-  const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger } = useForm<z.infer<typeof BreakDownSchema>>({
+  const [GetBreakdownByID, { data: GetByIdBreakdown }] = useLazyQuery(FindBreakdownByIdDocument)
+  const [createBreakBownApi, { loading }] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
+
+  // Parse data to determine if it's edit mode
+  const parsedData = data ? JSON.parse(data as string) : null;
+  const isEditMode = Boolean(parsedData);
+  const breakdownId = parsedData
+
+  const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof BreakDownSchema>>({
     resolver: zodResolver(BreakDownSchema),
     defaultValues: defaultValues
   });
@@ -110,15 +115,21 @@ const AddBreakdown = () => {
   }, [fetchData, VehiclesBreakdownType]);
 
   useEffect(() => {
-    if (parsedData) {
+    if (isEditMode && breakdownId) {
       setLoadingData(true);
-      GetVehiclesByID({
+      GetBreakdownByID({
         variables: {
-          findBreakdownByIdId: Number(parsedData)
+          findBreakdownByIdId: Number(breakdownId)
         }
       }).finally(() => setLoadingData(false));
+      clearErrors(); // Clear errors when entering edit mode
+    } else if (!isEditMode) {
+      reset(defaultValues);
+      setUploadedFiles([]);
+      setCurrentPosition(0);
+      clearErrors(); // Clear errors when entering add mode
     }
-  }, [parsedData]);
+  }, [isEditMode, breakdownId, GetBreakdownByID, clearErrors, reset]);
 
 
   const Maindata = DropdownData?.vehiclesDropdown.data || []
@@ -217,14 +228,17 @@ const AddBreakdown = () => {
     }
   };
 
-  const setvalueData = GetByIdVehicles?.findBreakdownById
+  // Set form values for edit mode
+  const setvalueData = GetByIdBreakdown?.findBreakdownById;
 
   useEffect(() => {
-    // Only set form values if parsedData (indicating an edit) and fetched data are available
-    // Ensure all necessary data (setvalueData, DropdownBreakType, dropdownOptions) are loaded
-    if (parsedData && setvalueData && DropdownBreakType.length > 0 && dropdownOptions.length > 0) {
+    if (isEditMode && setvalueData) {
+    // Set basic form values
       setValue('breakdownDate', String(setvalueData?.breakdownDate || ''));
       setValue('breakdownDescription', String(setvalueData?.breakdownDescription || ''));
+      setValue('breakdownLocation', String(setvalueData?.breakdownLocation || ''));
+      setValue('latitude', String(setvalueData?.latitude || ''));
+      setValue('longitude', String(setvalueData?.longitude || ''));
 
       // Find and set breakdownType
       const foundBreakdownType = DropdownBreakType.find(
@@ -242,13 +256,25 @@ const AddBreakdown = () => {
         setValue('vehicleId', foundVehicle);
       }
 
-      setValue('breakdownLocation', String(setvalueData?.breakdownLocation || ''));
-      setValue('latitude', String(setvalueData?.latitude || ''));
-      setValue('longitude', String(setvalueData?.longitude || ''));
+      // Set media files
+      // if (setvalueData?.mediaUrl && Array.isArray(setvalueData.mediaUrl)) {
+      //   setUploadedFiles(setvalueData.mediaUrl);
+      // }
+    } else if (!isEditMode) {
+      // Reset form values when in add mode
+      reset(defaultValues);
 
-      // setUploadedFiles(setvalueData?.mediaUrl || []);
+      setUploadedFiles([]);
+      setCurrentPosition(0);
     }
-  }, [parsedData, setvalueData, DropdownBreakType, dropdownOptions, setValue]);
+  }, [isEditMode, setvalueData, DropdownBreakType, dropdownOptions, setValue, reset]);
+
+  // Reset form function
+  const resetForm = useCallback(() => {
+    reset(defaultValues);
+    setUploadedFiles([]);
+    setCurrentPosition(0);
+  }, [reset]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -272,19 +298,18 @@ const AddBreakdown = () => {
             longitude: data?.longitude,
             vehicleId: Number(data?.vehicleId?.value),
             mediaUrl: formattedMedia,
-          } as any, // Re-introducing the cast to bypass TypeScript error
+          } 
         },
       });
 
 
       if (response.data?.createBreakdown?.id) {
         CustomToast("success");
-        reset(defaultValues);
+        resetForm();
         setUploadedFiles([]); // reset local files
         router.navigate("/(vehicle)/breakdown/BreakdownList");
       }
     } catch (error) {
-      console.log("Upload or Submit Error ===>", error);
       CustomToast("error");
     }
   };
@@ -392,8 +417,6 @@ const AddBreakdown = () => {
                 longitude={-122.4324}
                 height={400}
                 onLocationSelect={(lat, lng, address) => {
-                  // These setValue calls are triggered by user interaction with the map,
-                  // not automatic pre-filling during create time.
                   setValue('longitude', lng?.toFixed(3))
                   setValue('latitude', lat?.toFixed(3))
                   setValue('breakdownLocation', address)
