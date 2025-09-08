@@ -1,5 +1,6 @@
 import CustomHeader from "@/components/CustomHeader";
 import { ThemedView } from "@/components/ThemedView";
+import BreakDownCard from "@/components/vehicle/BreakDownCard";
 import ServiceCard from "@/components/vehicle/ServiceCard";
 import VehicleBreakdownCart from "@/components/VehicleBreakdownCart";
 import { Colors } from "@/constants/Colors";
@@ -90,12 +91,8 @@ const BreakdownList = () => {
 
     const renderItems = (item: any) => {
         return (
-            <VehicleBreakdownCart
-                title={item?.vehicle?.model}
-                subtitle={item?.breakdownType}
-                breakDownDate={item?.breakdownDate}
-                createdAt={item?.createdAt}
-                status={item?.status}
+            <BreakDownCard
+                item={item}
                 onEdit={() =>
                     router.navigate({
                         pathname: "/add-edit-vehicle",

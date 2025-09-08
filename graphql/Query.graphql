@@ -938,46 +938,7 @@ query GetPaginatedMeetingTaskByMeetingId(
   }
 }
 
-query PaginatedBreakdowns($listInputDto: ListInputDTO!) {
-  paginatedBreakdowns(ListInputDTO: $listInputDto) {
-    data {
-      id
-      vehicleId
-      vehicle {
-        id
-        make
-        model
-        year
-        color
-        chassisNumber
-        numberPlate
-        maintenanceHistory
-        avatar
-        insurance
-        insuranceValidTill
-        status
-        latitude
-        longitude
-        createdById
-        organizationId
-        createdAt
-        updatedAt
-        deletedAt
-      }
-      breakdownType
-      breakdownDate
-      breakdownDescription
-      breakdownLocation
-      latitude
-      longitude
-      status
-      organizationId
-      createdById
-      createdAt
-      updatedAt
-    }
-  }
-}
+
 query ListTrashedMeeting($listInputDto: ListInputDTO!) {
   listTrashedMeeting(ListInputDTO: $listInputDto) {
     data {
@@ -1215,4 +1176,24 @@ query VehiclesDropdown($listInputDto: ListInputDTO!) {
 # getBreakdownTypeSuggestions 
 query GetBreakdownTypeSuggestions($search: String) {
   getBreakdownTypeSuggestions(search: $search)
+}
+
+# paginated breakdown 
+query PaginatedBreakdowns($listInputDto: ListInputDTO!, $isTrash: Boolean) {
+  paginatedBreakdowns(ListInputDTO: $listInputDto, isTrash: $isTrash) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      vehicle {
+        id
+        model
+      }
+      breakdownDate
+      status
+    }
+  }
 }
