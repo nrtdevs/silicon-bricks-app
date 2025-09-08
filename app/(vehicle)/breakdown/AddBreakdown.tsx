@@ -6,7 +6,7 @@ import GoogleMapView from "@/components/CustomMap";
 import CustomToast from "@/components/CustomToast";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateBreakdownDocument, GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
+import { CreateBreakdownDocument, FindBreakdownByIdDocument, GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
 import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
@@ -47,8 +47,8 @@ const BreakDownSchema = z.object({
     }, { message: "Invalid Longitude" }),
   mediaUrl: z.array(z.object({
     mediaType: z.string(),
-    url: z.string(), 
-  })).optional(), 
+    url: z.string(),
+  })).optional(),
   vehicleId: z.object({
     label: z.string(),
     value: z.string(),
@@ -78,6 +78,7 @@ const AddBreakdown = () => {
   const [hasMore, setHasMore] = useState(true);
   const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
+  const [GetVehiclesByID, { data: GetByIdVehicles }] = useLazyQuery(FindBreakdownByIdDocument)
   const [createBreakBownApi, { loading }] = useMutation(CreateBreakdownDocument);
   const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger } = useForm<z.infer<typeof BreakDownSchema>>({
     resolver: zodResolver(BreakDownSchema),
@@ -86,6 +87,8 @@ const AddBreakdown = () => {
 
   const watchedBreakdownType = watch("breakdownType");
   const watchedVehicleId = watch("vehicleId");
+
+  console.log("GetByIdVehicles", GetByIdVehicles)
 
 
   // Fetch data function
@@ -106,6 +109,17 @@ const AddBreakdown = () => {
     fetchData();
     VehiclesBreakdownType();
   }, [fetchData, VehiclesBreakdownType]);
+
+  useEffect(() => {
+    if (parsedData) {
+      GetVehiclesByID({
+        variables: {
+          findBreakdownByIdId: Number(parsedData)
+        }
+      })
+    }
+  }, [])
+
 
   const Maindata = DropdownData?.vehiclesDropdown.data || []
   const BreakDownData = BreakdownTypeData?.getBreakdownTypeSuggestions
@@ -202,6 +216,16 @@ const AddBreakdown = () => {
       setUploadedFiles((prev) => [...prev, ...newFiles]);
     }
   };
+
+  const setvalueData = GetByIdVehicles?.findBreakdownById
+
+  useEffect(() => {
+    if (parsedData) {
+      setValue('breakdownDate', setvalueData?.breakdownDate),
+        setValue('breakdownDescription', String(setvalueData?.breakdownDescription))
+      setValue('breakdownType', Number(setvalueData?.breakdownType))
+    }
+  }, [])
 
 
   const onSubmit = async (data: any) => {

@@ -938,7 +938,6 @@ query GetPaginatedMeetingTaskByMeetingId(
   }
 }
 
-
 query ListTrashedMeeting($listInputDto: ListInputDTO!) {
   listTrashedMeeting(ListInputDTO: $listInputDto) {
     data {
@@ -1083,7 +1082,7 @@ query ListTrashedMeetingType($listInputDto: ListInputDTO!) {
   }
 }
 
-# paginated service center 
+# paginated service center
 query PaginatedServiceCenters($listInputDto: ListInputDTO!) {
   paginatedServiceCenters(ListInputDTO: $listInputDto) {
     meta {
@@ -1103,7 +1102,7 @@ query PaginatedServiceCenters($listInputDto: ListInputDTO!) {
   }
 }
 
-# activity logs in vehicle 
+# activity logs in vehicle
 query PaginatedLogs($listInputDto: ListInputDTO!) {
   paginatedLogs(ListInputDTO: $listInputDto) {
     meta {
@@ -1130,7 +1129,7 @@ query PaginatedLogs($listInputDto: ListInputDTO!) {
   }
 }
 
-# pagianted vehiclew notification 
+# pagianted vehiclew notification
 query PaginatedVehicleNotification($listInputDto: ListInputDTO!) {
   paginatedVehicleNotification(ListInputDTO: $listInputDto) {
     meta {
@@ -1173,12 +1172,12 @@ query VehiclesDropdown($listInputDto: ListInputDTO!) {
   }
 }
 
-# getBreakdownTypeSuggestions 
+# getBreakdownTypeSuggestions
 query GetBreakdownTypeSuggestions($search: String) {
   getBreakdownTypeSuggestions(search: $search)
 }
 
-# paginated breakdown 
+# paginated breakdown
 query PaginatedBreakdowns($listInputDto: ListInputDTO!, $isTrash: Boolean) {
   paginatedBreakdowns(ListInputDTO: $listInputDto, isTrash: $isTrash) {
     meta {
@@ -1188,6 +1187,7 @@ query PaginatedBreakdowns($listInputDto: ListInputDTO!, $isTrash: Boolean) {
       limit
     }
     data {
+      id
       breakdownType
       latitude
       longitude
@@ -1198,5 +1198,18 @@ query PaginatedBreakdowns($listInputDto: ListInputDTO!, $isTrash: Boolean) {
       breakdownDate
       status
     }
+  }
+}
+
+# find breakdown by id
+query FindBreakdownById($findBreakdownByIdId: Int!) {
+  findBreakdownById(id: $findBreakdownByIdId) {
+    breakdownType
+    vehicleId
+    breakdownDate
+    breakdownDescription
+    breakdownLocation
+    latitude
+    longitude
   }
 }

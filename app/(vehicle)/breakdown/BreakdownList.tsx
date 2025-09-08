@@ -90,8 +90,8 @@ const BreakdownList = () => {
                 item={item}
                 onEdit={() =>
                     router.navigate({
-                        pathname: "/add-edit-vehicle",
-                        params: { data: JSON.stringify(item) },
+                        pathname: "/(vehicle)/breakdown/AddBreakdown",
+                        params: { data: JSON.stringify(item?.id) },
                     })
                 }
                 onDelete={() => { }}
