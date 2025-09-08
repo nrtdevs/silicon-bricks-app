@@ -198,8 +198,7 @@ const AddBreakdown = () => {
         url: asset.uri,
       }));
 
-      console.log("newfiles", newFiles)
-
+      console.log("rahul====>", newFiles)
       setUploadedFiles((prev) => [...prev, ...newFiles]);
       const urldata = newFiles.map(file => file.url)
       const UploadUrl = await uploadImage(urldata);
@@ -345,36 +344,36 @@ const AddBreakdown = () => {
 
 
             {uploadedFiles.map((file, index) => (
-                <View style={styles.mediaPreview}>
-                  <View key={index} style={styles.mediaItem}>
-                    {file.mediaType === "image" ? (
-                      <Image
-                        source={{ uri: file.url }}
-                        style={styles.mediaThumbnail}
-                      />
-                    ) : file.mediaType === "video" ? (
-                      <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
-                    ) : file.mediaType === "audio" ? (
-                        <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
-                    ) : (
-                          <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
-                    )}
-                    <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
-                      {file.url.split("/").pop()}
-                    </Text>
-                    <Pressable
-                      onPress={() => {
-                        const newFiles = uploadedFiles.filter((_, i) => i !== index);
-                        setUploadedFiles(newFiles);
-                        setValue("mediaUrl", newFiles);
-                      }}
-                      style={styles.closeButton}
-                    >
-                      <Ionicons name="close-circle" size={30} color="#FF3B30" />
-                    </Pressable>
-                  </View>
+              <View style={styles.mediaPreview}>
+                <View key={index} style={styles.mediaItem}>
+                  {file.mediaType === "image" ? (
+                    <Image
+                      source={{ uri: file.url }}
+                      style={styles.mediaThumbnail}
+                    />
+                  ) : file.mediaType === "video" ? (
+                    <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
+                  ) : file.mediaType === "audio" ? (
+                    <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
+                  ) : (
+                    <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
+                  )}
+                  <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
+                    {file.url.split("/").pop()}
+                  </Text>
+                  <Pressable
+                    onPress={() => {
+                      const newFiles = uploadedFiles.filter((_, i) => i !== index);
+                      setUploadedFiles(newFiles);
+                      setValue("mediaUrl", newFiles);
+                    }}
+                    style={styles.closeButton}
+                  >
+                    <Ionicons name="close-circle" size={30} color="#FF3B30" />
+                  </Pressable>
                 </View>
-              ))
+              </View>
+            ))
             }
 
 

@@ -1,8 +1,9 @@
 #Request OTP
 mutation RequestOtp($otpRequestData: OtpRequestDto!) {
   requestOtp(otpRequestData: $otpRequestData) {
-    otpGeneratedSuccessfully
+    message
     otp
+    otpGeneratedSuccessfully
   }
 }
 
