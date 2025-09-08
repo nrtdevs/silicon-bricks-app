@@ -4,6 +4,7 @@ import CustomHeader from "@/components/CustomHeader";
 import CustomInput from "@/components/CustomInput";
 import GoogleMapView from "@/components/CustomMap";
 import CustomToast from "@/components/CustomToast";
+import { Env } from "@/constants/ApiEndpoints";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { CreateBreakdownDocument, CreateBreakdownMutation, FindBreakdownByIdDocument, GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
@@ -202,6 +203,8 @@ const AddBreakdown = () => {
 
   const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
 
+  console.log("uploadedFiles", uploadedFiles)
+
   const pickMedia = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: [
@@ -231,6 +234,7 @@ const AddBreakdown = () => {
   // Set form values for edit mode
   const setvalueData = GetByIdBreakdown?.findBreakdownById;
 
+
   useEffect(() => {
     if (isEditMode && setvalueData) {
     // Set basic form values
@@ -257,9 +261,13 @@ const AddBreakdown = () => {
       }
 
       // Set media files
-      // if (setvalueData?.mediaUrl && Array.isArray(setvalueData.mediaUrl)) {
-      //   setUploadedFiles(setvalueData.mediaUrl);
-      // }
+      if (setvalueData?.media && Array.isArray(setvalueData.media)) {
+        const formattedMedia = setvalueData.media.map(mediaItem => ({
+          mediaType: mediaItem.mediaType,
+          url: mediaItem.mediaUrl,
+        }));
+        setUploadedFiles(formattedMedia);
+      }
     } else if (!isEditMode) {
       // Reset form values when in add mode
       reset(defaultValues);
@@ -448,7 +456,11 @@ const AddBreakdown = () => {
                 <View key={`media-item-${index}`} style={styles.mediaItem}>
                   {file.mediaType === "image" ? (
                     <Image
-                      source={{ uri: file.url }}
+                      source={{
+                        uri: file.url.startsWith("http") || file.url.startsWith("file:")
+                          ? file.url // full URL or local file path
+                          : Env.IMAGEURL + file.url, // relative path from backend
+                      }}
                       style={styles.mediaThumbnail}
                     />
                   ) : file.mediaType === "video" ? (

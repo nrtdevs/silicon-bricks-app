@@ -1211,5 +1211,10 @@ query FindBreakdownById($findBreakdownByIdId: Int!) {
     breakdownLocation
     latitude
     longitude
+    media {
+      id
+      mediaType
+      mediaUrl
+    }
   }
 }
