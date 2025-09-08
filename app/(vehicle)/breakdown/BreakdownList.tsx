@@ -59,9 +59,9 @@ const BreakdownList = () => {
         }
     }, [currentPage, hasMore, limit]);
 
-    useEffect(() => {
+    useFocusEffect(() => {
         fetchData();
-    }, [fetchData]);
+    });
 
     useEffect(() => {
         if (data?.paginatedBreakdowns?.data) {

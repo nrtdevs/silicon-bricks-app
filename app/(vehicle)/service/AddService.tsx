@@ -50,12 +50,8 @@ const AddService = () => {
   });
 
 
-  const [createServiceCenterApi, { loading }] = useMutation(CreateServiceCenterDocument, {
-    refetchQueries: [{ query: PaginatedServiceCentersDocument, variables: { listInputDto: { limit: 10, page: 1 } } }],
-  });
-  const [UpdateServiceCenterApi, { loading: updateLoading }] = useMutation(UpdateServiceCenterDocument, {
-    refetchQueries: [{ query: PaginatedServiceCentersDocument, variables: { listInputDto: { limit: 10, page: 1 } } }],
-  });
+  const [createServiceCenterApi, { loading }] = useMutation(CreateServiceCenterDocument);
+  const [UpdateServiceCenterApi, { loading: updateLoading }] = useMutation(UpdateServiceCenterDocument);
 
   useEffect(() => {
     if (parsedData?.id) {
@@ -184,7 +180,9 @@ const AddService = () => {
               longitude={-122.4324}
               height={400}
               onLocationSelect={(lat, lng, address) => {
-                console.log("Selected location:", lat, lng, address);
+                setValue('address', address)
+                setValue('latitude', String(lat))
+                setValue('longitude', String(lng))
               }}
             />
 

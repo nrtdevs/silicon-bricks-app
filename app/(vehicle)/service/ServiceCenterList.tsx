@@ -58,9 +58,9 @@ const ServiceCenter = () => {
         }
     }, [currentPage, hasMore, limit]);
 
-    useEffect(() => {
+    useFocusEffect(() => {
         fetchData();
-    }, [fetchData]);
+    });
 
     useEffect(() => {
         if (data?.paginatedServiceCenters?.data) {
