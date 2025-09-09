@@ -76,14 +76,15 @@ const AddBreakdown = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [limit] = useState(10);
   const [hasMore, setHasMore] = useState(true);
-  const [serverImage, setserverUploadedFiles] = useState<Array<{ mediaType: string; url: string }>>([])
+  const [serverImage, setserverUploadedFiles] = useState<Array<{ mediaType: string; url: string; id?: string }>>([])
+  const [removedFileIds, setRemovedFileIds] = useState<string[]>([]);
   const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
   const [GetBreakdownByID, { data: GetByIdBreakdown }] = useLazyQuery(FindBreakdownByIdDocument)
   const [createBreakDownApi, { loading, data: datacreate }] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
   const [updateBreakDownApi, { loading: updateloading, data: updatedata, error }] = useMutation<UpdateBreakdownMutation>(UpdateBreakdownDocument)
 
-  console.log("serverImage", serverImage)
+  console.log("serverImage", removedFileIds)
   // Parse data to determine if it's edit mode
   const parsedData = data ? JSON.parse(data as string) : null;
   const isEditMode = Boolean(parsedData);
@@ -309,7 +310,7 @@ const AddBreakdown = () => {
               longitude: data?.longitude,
               vehicleId: Number(data?.vehicleId?.value),
               mediaUrl: newFormattedMedia,
-              removedFileIds: []
+              removedFileIds: removedFileIds
             },
           },
         });
@@ -320,6 +321,7 @@ const AddBreakdown = () => {
           setserverUploadedFiles(newFormattedMedia);
           setUploadedFiles([]);
           reset(data);
+          setRemovedFileIds([])
         }
       } else {
         const response = await createBreakDownApi({
@@ -342,6 +344,7 @@ const AddBreakdown = () => {
           resetForm();
           setUploadedFiles([]);
           setserverUploadedFiles([]);
+          setRemovedFileIds([])
         }
       }
 
@@ -499,6 +502,18 @@ const AddBreakdown = () => {
                     <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
                       {file.url.split("/").pop()}
                     </Text>
+                    <Pressable
+                      onPress={() => {
+                        const id = file?.id;
+                        if (id) {
+                          setRemovedFileIds((prev) => [...prev, String(id)]);
+                          setserverUploadedFiles((prev) => prev.filter((item) => item.id !== id));
+                        }
+                      }}
+                      style={styles.closeButton}
+                    >
+                      <Ionicons name="close-circle" size={30} color="#FF3B30" />
+                    </Pressable>
                   </View>
                 ))}
               </View>
