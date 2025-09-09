@@ -73,9 +73,10 @@ const AddBreakdown = () => {
   const { theme } = useTheme();
   const { data } = useLocalSearchParams();
   const [currentPage, setCurrentPage] = useState(1)
-  const [loadingData, setLoadingData] = useState(false);;
+  const [loadingData, setLoadingData] = useState(false);
   const [limit] = useState(10);
   const [hasMore, setHasMore] = useState(true);
+  const [serverImage, setserverUploadedFiles] = useState<Array<{ mediaType: string; url: string }>>([])
   const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
   const [GetBreakdownByID, { data: GetByIdBreakdown }] = useLazyQuery(FindBreakdownByIdDocument)
@@ -94,8 +95,6 @@ const AddBreakdown = () => {
 
   const watchedBreakdownType = watch("breakdownType");
   const watchedVehicleId = watch("vehicleId");
-
-
 
   // Fetch data function
   const fetchData = useCallback(() => {
@@ -124,12 +123,12 @@ const AddBreakdown = () => {
           findBreakdownByIdId: Number(breakdownId)
         }
       }).finally(() => setLoadingData(false));
-      clearErrors(); // Clear errors when entering edit mode
+      clearErrors();
     } else if (!isEditMode) {
       reset(defaultValues);
       setUploadedFiles([]);
       setCurrentPosition(0);
-      clearErrors(); // Clear errors when entering add mode
+      clearErrors(); 
     }
   }, [isEditMode, breakdownId, GetBreakdownByID, clearErrors, reset]);
 
@@ -185,7 +184,6 @@ const AddBreakdown = () => {
     } else if (currentPosition === 1) {
       isValid = await trigger(["longitude", "latitude", "breakdownLocation"]);
     } else if (currentPosition === 2) {
-      // Media upload is optional, so no validation needed to proceed
       isValid = true;
     }
 
@@ -204,13 +202,12 @@ const AddBreakdown = () => {
 
   const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
 
-  console.log("uploadedFiles", uploadedFiles)
   const pickMedia = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: [
-        "image/*",   // images
-        "video/*",   // videos (mp4, mov, etc.)
-        "audio/mpeg" // mp3
+        "image/*",
+        "video/*",
+        "audio/mpeg" 
       ],
       multiple: true,
     });
@@ -248,6 +245,7 @@ const AddBreakdown = () => {
       const foundBreakdownType = DropdownBreakType.find(
         (option) => option.value === setvalueData?.breakdownType
       );
+
       if (foundBreakdownType) {
         setValue('breakdownType', foundBreakdownType);
       }
@@ -266,7 +264,7 @@ const AddBreakdown = () => {
           mediaType: mediaItem.mediaType,
           url: mediaItem.mediaUrl,
         }));
-        setUploadedFiles(formattedMedia);
+        setserverUploadedFiles(formattedMedia);
       }
     } else if (!isEditMode) {
       // Reset form values when in add mode
@@ -285,20 +283,16 @@ const AddBreakdown = () => {
   }, [reset]);
 
   const onSubmit = async (data: any) => {
-    console.log("data", data)
     try {
-      // 1. Local file URLs निकालो
-      const localUris = uploadedFiles.map((file) => file.url);
+      const localFilesToUpload = uploadedFiles.filter(file => !file.url.startsWith(Env.IMAGEURL));
 
-      // 2. Upload करके server URLs लो
+      const localUris = localFilesToUpload.map((file) => file.url);
       const uploadedUrls = await uploadImage(localUris);
 
-      // 3. Final formatted media बनाओ
-      const formattedMedia = uploadedFiles.map((file, index) => ({
+      const newFormattedMedia = localFilesToUpload.map((file, index) => ({
         mediaType: file.mediaType,
-        url: uploadedUrls[index] || file.url, 
+        url: uploadedUrls[index],
       }));
-
 
       if (parsedData) {
         const response = await updateBreakDownApi({
@@ -312,15 +306,17 @@ const AddBreakdown = () => {
               latitude: data?.latitude,
               longitude: data?.longitude,
               vehicleId: Number(data?.vehicleId?.value),
-              mediaUrl: formattedMedia,
+              mediaUrl: newFormattedMedia,
             },
           },
         });
 
-        console.log("response", response)
+        console.log("response updates", response)
 
         if (response.data?.updateBreakdown?.id) {
           CustomToast("success");
+          setserverUploadedFiles(newFormattedMedia);
+          setUploadedFiles([]);
           reset(data);
         }
       } else {
@@ -334,7 +330,7 @@ const AddBreakdown = () => {
               latitude: data?.latitude,
               longitude: data?.longitude,
               vehicleId: Number(data?.vehicleId?.value),
-              mediaUrl: formattedMedia,
+              mediaUrl: newFormattedMedia,
             },
           },
         });
@@ -343,12 +339,12 @@ const AddBreakdown = () => {
           CustomToast("success");
           resetForm();
           setUploadedFiles([]);
+          setserverUploadedFiles([]);
         }
       }
 
       router.navigate("/(vehicle)/breakdown/BreakdownList");
     } catch (error) {
-      console.log("Submit Error ===>", error);
       CustomToast("error");
     }
   };
@@ -483,42 +479,67 @@ const AddBreakdown = () => {
 
             </View>
 
-            {uploadedFiles.map((file, index) => (
-              <View key={`media-preview-${index}`} style={styles.mediaPreview}>
-                <View key={`media-item-${index}`} style={styles.mediaItem}>
-                  {file.mediaType === "image" ? (
-                    <Image
-                      source={{
-                        uri: file.url.startsWith("http") || file.url.startsWith("file:")
-                          ? file.url // full URL or local file path
-                          : Env.IMAGEURL + file.url, // relative path from backend
-                      }}
-                      style={styles.mediaThumbnail}
-                    />
-                  ) : file.mediaType === "video" ? (
-                    <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
-                  ) : file.mediaType === "audio" ? (
-                    <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
-                  ) : (
-                    <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
-                  )}
-                  <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
-                    {file.url.split("/").pop()}
-                  </Text>
-                  <Pressable
-                    onPress={() => {
-                      const newFiles = uploadedFiles.filter((_, i) => i !== index);
-                      setUploadedFiles(newFiles);
-                    }}
-                    style={styles.closeButton}
-                  >
-                    <Ionicons name="close-circle" size={30} color="#FF3B30" />
-                  </Pressable>
-                </View>
+            {/* Display Server Images */}
+            {serverImage.length > 0 && (
+              <View style={styles.mediaPreviewContainer}>
+                <Text style={[styles.previewTitle, { color: Colors[theme].text }]}>Server Uploaded Media</Text>
+                {serverImage.map((file, index) => (
+                  <View key={`server-media-${index}`} style={styles.mediaItem}>
+                    {file.mediaType === "image" ? (
+                      <Image
+                        source={{ uri: Env.IMAGEURL + file.url }}
+                        style={styles.mediaThumbnail}
+                      />
+                    ) : file.mediaType === "video" ? (
+                      <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
+                    ) : file.mediaType === "audio" ? (
+                      <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
+                    ) : (
+                      <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
+                    )}
+                    <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
+                      {file.url.split("/").pop()}
+                    </Text>
+                    {/* Server images cannot be removed from here */}
+                  </View>
+                ))}
               </View>
-            ))}
+            )}
 
-
+            {/* Display Local Images */}
+            {uploadedFiles.length > 0 && (
+              <View style={styles.mediaPreviewContainer}>
+                <Text style={[styles.previewTitle, { color: Colors[theme].text }]}>Local Media</Text>
+                {uploadedFiles.map((file, index) => (
+                  <View key={`local-media-${index}`} style={styles.mediaItem}>
+                    {file.mediaType === "image" ? (
+                      <Image
+                        source={{ uri: file.url }}
+                        style={styles.mediaThumbnail}
+                      />
+                    ) : file.mediaType === "video" ? (
+                      <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
+                    ) : file.mediaType === "audio" ? (
+                      <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
+                    ) : (
+                      <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
+                    )}
+                    <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
+                      {file.url.split("/").pop()}
+                    </Text>
+                    <Pressable
+                      onPress={() => {
+                        const newFiles = uploadedFiles.filter((_, i) => i !== index);
+                        setUploadedFiles(newFiles);
+                      }}
+                      style={styles.closeButton}
+                    >
+                      <Ionicons name="close-circle" size={30} color="#FF3B30" />
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            )}
           </>
         )}
       </Animated.View>
@@ -729,8 +750,8 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontWeight: '500',
   },
-  mediaPreview: {
-    marginTop: 8,
+  mediaPreviewContainer: {
+    marginTop: ms(20),
     backgroundColor: '#FFFFFF',
     borderRadius: ms(12),
     padding: ms(20),
