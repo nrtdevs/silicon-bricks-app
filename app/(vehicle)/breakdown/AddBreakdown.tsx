@@ -83,7 +83,7 @@ const AddBreakdown = () => {
   const [createBreakDownApi, { loading, data: datacreate }] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
   const [updateBreakDownApi, { loading: updateloading, data: updatedata, error }] = useMutation<UpdateBreakdownMutation>(UpdateBreakdownDocument)
 
-
+  console.log("serverImage", serverImage)
   // Parse data to determine if it's edit mode
   const parsedData = data ? JSON.parse(data as string) : null;
   const isEditMode = Boolean(parsedData);
@@ -264,6 +264,7 @@ const AddBreakdown = () => {
         const formattedMedia = setvalueData.media.map(mediaItem => ({
           mediaType: mediaItem.mediaType,
           url: mediaItem.mediaUrl,
+          id: mediaItem?.id
         }));
         setserverUploadedFiles(formattedMedia);
       }
