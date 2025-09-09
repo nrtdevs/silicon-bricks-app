@@ -78,13 +78,12 @@ const AddBreakdown = () => {
   const [hasMore, setHasMore] = useState(true);
   const [serverImage, setserverUploadedFiles] = useState<Array<{ mediaType: string; url: string; id?: string }>>([])
   const [removedFileIds, setRemovedFileIds] = useState<string[]>([]);
-  const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
-  const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
+  const [VehiclesBreakdownType, { data: BreakdownTypeData }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
+  const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
   const [GetBreakdownByID, { data: GetByIdBreakdown }] = useLazyQuery(FindBreakdownByIdDocument)
-  const [createBreakDownApi, { loading, data: datacreate }] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
-  const [updateBreakDownApi, { loading: updateloading, data: updatedata, error }] = useMutation<UpdateBreakdownMutation>(UpdateBreakdownDocument)
+  const [createBreakDownApi] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
+  const [updateBreakDownApi] = useMutation<UpdateBreakdownMutation>(UpdateBreakdownDocument)
 
-  console.log("serverImage", removedFileIds)
   // Parse data to determine if it's edit mode
   const parsedData = data ? JSON.parse(data as string) : null;
   const isEditMode = Boolean(parsedData);
