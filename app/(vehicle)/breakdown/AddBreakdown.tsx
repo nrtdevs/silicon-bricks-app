@@ -80,8 +80,10 @@ const AddBreakdown = () => {
   const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
   const [GetBreakdownByID, { data: GetByIdBreakdown }] = useLazyQuery(FindBreakdownByIdDocument)
-  const [createBreakDownApi, { loading }] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
-  const [updateBreakDownApi, { loading: updateloading }] = useMutation<UpdateBreakdownMutation>(UpdateBreakdownDocument)
+  const [createBreakDownApi, { loading, data: datacreate }] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
+  const [updateBreakDownApi, { loading: updateloading, data: updatedata }] = useMutation<UpdateBreakdownMutation>(UpdateBreakdownDocument)
+
+  console.log("submit data ", datacreate, updatedata)
 
   // Parse data to determine if it's edit mode
   const parsedData = data ? JSON.parse(data as string) : null;
@@ -283,6 +285,7 @@ const AddBreakdown = () => {
   }, [reset]);
 
   const onSubmit = async (data: any) => {
+    console.log("data", data)
     try {
       const localFilesToUpload = uploadedFiles.filter(file => !file.url.startsWith(Env.IMAGEURL));
 
