@@ -81,9 +81,8 @@ const AddBreakdown = () => {
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
   const [GetBreakdownByID, { data: GetByIdBreakdown }] = useLazyQuery(FindBreakdownByIdDocument)
   const [createBreakDownApi, { loading, data: datacreate }] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
-  const [updateBreakDownApi, { loading: updateloading, data: updatedata }] = useMutation<UpdateBreakdownMutation>(UpdateBreakdownDocument)
+  const [updateBreakDownApi, { loading: updateloading, data: updatedata, error }] = useMutation<UpdateBreakdownMutation>(UpdateBreakdownDocument)
 
-  console.log("submit data ", datacreate, updatedata)
 
   // Parse data to determine if it's edit mode
   const parsedData = data ? JSON.parse(data as string) : null;
@@ -130,7 +129,7 @@ const AddBreakdown = () => {
       reset(defaultValues);
       setUploadedFiles([]);
       setCurrentPosition(0);
-      clearErrors(); 
+      clearErrors();
     }
   }, [isEditMode, breakdownId, GetBreakdownByID, clearErrors, reset]);
 
@@ -209,7 +208,7 @@ const AddBreakdown = () => {
       type: [
         "image/*",
         "video/*",
-        "audio/mpeg" 
+        "audio/mpeg"
       ],
       multiple: true,
     });
@@ -285,7 +284,6 @@ const AddBreakdown = () => {
   }, [reset]);
 
   const onSubmit = async (data: any) => {
-    console.log("data", data)
     try {
       const localFilesToUpload = uploadedFiles.filter(file => !file.url.startsWith(Env.IMAGEURL));
 
@@ -301,7 +299,7 @@ const AddBreakdown = () => {
         const response = await updateBreakDownApi({
           variables: {
             data: {
-              id: Number(parsedData.id),
+              id: Number(parsedData),
               breakdownDate: data?.breakdownDate,
               breakdownDescription: data?.breakdownDescription,
               breakdownLocation: data?.breakdownLocation,
@@ -310,11 +308,11 @@ const AddBreakdown = () => {
               longitude: data?.longitude,
               vehicleId: Number(data?.vehicleId?.value),
               mediaUrl: newFormattedMedia,
+              removedFileIds: []
             },
           },
         });
 
-        console.log("response updates", response)
 
         if (response.data?.updateBreakdown?.id) {
           CustomToast("success");
@@ -351,8 +349,6 @@ const AddBreakdown = () => {
       CustomToast("error");
     }
   };
-
-
 
   const renderStepContent = () => {
     const animatedStyle = {
@@ -548,6 +544,7 @@ const AddBreakdown = () => {
       </Animated.View>
     );
   };
+
 
   return (
     <CustomHeader
