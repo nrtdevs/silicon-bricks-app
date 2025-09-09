@@ -7,7 +7,7 @@ import CustomToast from "@/components/CustomToast";
 import { Env } from "@/constants/ApiEndpoints";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateBreakdownDocument, CreateBreakdownMutation, FindBreakdownByIdDocument, GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from "@/graphql/generated";
+import { CreateBreakdownDocument, CreateBreakdownMutation, FindBreakdownByIdDocument, GetBreakdownTypeSuggestionsDocument, UpdateBreakdownDocument, UpdateBreakdownMutation, VehiclesDropdownDocument } from "@/graphql/generated";
 import uploadImage from "@/utils/imageUpload";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Ionicons } from "@expo/vector-icons";
@@ -79,7 +79,8 @@ const AddBreakdown = () => {
   const [VehiclesBreakdownType, { data: BreakdownTypeData, loading: breakdownLoading, error: breakdownError }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
   const [VehiclesDropdownApi, { data: DropdownData, loading: dropdownLoading, error: dropdownError }] = useLazyQuery(VehiclesDropdownDocument);
   const [GetBreakdownByID, { data: GetByIdBreakdown }] = useLazyQuery(FindBreakdownByIdDocument)
-  const [createBreakBownApi, { loading }] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
+  const [createBreakDownApi, { loading }] = useMutation<CreateBreakdownMutation>(CreateBreakdownDocument);
+  const [updateBreakDownApi, { loading: updateloading }] = useMutation<UpdateBreakdownMutation>(UpdateBreakdownDocument)
 
   // Parse data to determine if it's edit mode
   const parsedData = data ? JSON.parse(data as string) : null;
@@ -204,7 +205,6 @@ const AddBreakdown = () => {
   const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
 
   console.log("uploadedFiles", uploadedFiles)
-
   const pickMedia = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: [
@@ -237,7 +237,7 @@ const AddBreakdown = () => {
 
   useEffect(() => {
     if (isEditMode && setvalueData) {
-    // Set basic form values
+      // Set basic form values
       setValue('breakdownDate', String(setvalueData?.breakdownDate || ''));
       setValue('breakdownDescription', String(setvalueData?.breakdownDescription || ''));
       setValue('breakdownLocation', String(setvalueData?.breakdownLocation || ''));
@@ -286,41 +286,72 @@ const AddBreakdown = () => {
 
   const onSubmit = async (data: any) => {
     try {
+      // 1. Local file URLs निकालो
       const localUris = uploadedFiles.map((file) => file.url);
 
+      // 2. Upload करके server URLs लो
       const uploadedUrls = await uploadImage(localUris);
 
+      // 3. Final formatted media बनाओ
       const formattedMedia = uploadedFiles.map((file, index) => ({
         mediaType: file.mediaType,
-        url: uploadedUrls[index] || "",
+        url: uploadedUrls[index] || file.url, 
       }));
 
-      const response = await createBreakBownApi({
-        variables: {
-          data: {
-            breakdownDate: data?.breakdownDate,
-            breakdownDescription: data?.breakdownDescription,
-            breakdownLocation: data?.breakdownLocation,
-            breakdownType: data?.breakdownType?.value,
-            latitude: data?.latitude,
-            longitude: data?.longitude,
-            vehicleId: Number(data?.vehicleId?.value),
-            mediaUrl: formattedMedia,
-          } 
-        },
-      });
 
+      if (parsedData) {
+        const response = await updateBreakDownApi({
+          variables: {
+            data: {
+              id: Number(parsedData.id),
+              breakdownDate: data?.breakdownDate,
+              breakdownDescription: data?.breakdownDescription,
+              breakdownLocation: data?.breakdownLocation,
+              breakdownType: data?.breakdownType?.value,
+              latitude: data?.latitude,
+              longitude: data?.longitude,
+              vehicleId: Number(data?.vehicleId?.value),
+              mediaUrl: formattedMedia,
+            },
+          },
+        });
 
-      if (response.data?.createBreakdown?.id) {
-        CustomToast("success");
-        resetForm();
-        setUploadedFiles([]); // reset local files
-        router.navigate("/(vehicle)/breakdown/BreakdownList");
+        console.log("response", response)
+
+        if (response.data?.updateBreakdown?.id) {
+          CustomToast("success");
+          reset(data);
+        }
+      } else {
+        const response = await createBreakDownApi({
+          variables: {
+            data: {
+              breakdownDate: data?.breakdownDate,
+              breakdownDescription: data?.breakdownDescription,
+              breakdownLocation: data?.breakdownLocation,
+              breakdownType: data?.breakdownType?.value,
+              latitude: data?.latitude,
+              longitude: data?.longitude,
+              vehicleId: Number(data?.vehicleId?.value),
+              mediaUrl: formattedMedia,
+            },
+          },
+        });
+
+        if (response.data?.createBreakdown?.id) {
+          CustomToast("success");
+          resetForm();
+          setUploadedFiles([]);
+        }
       }
+
+      router.navigate("/(vehicle)/breakdown/BreakdownList");
     } catch (error) {
+      console.log("Submit Error ===>", error);
       CustomToast("error");
     }
   };
+
 
 
   const renderStepContent = () => {
@@ -495,7 +526,7 @@ const AddBreakdown = () => {
 
   return (
     <CustomHeader
-      title={parsedData?.id ? "Update Service" : "Create Service"}
+      title={parsedData ? "Update Service" : "Create Service"}
       leftComponent={
         <Pressable
           style={styles.menuButton}
@@ -560,7 +591,7 @@ const AddBreakdown = () => {
                       >
                         <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
                         <Text style={styles.ButtonText}>
-                          {parsedData?.id ? "Update" : "Create"}
+                            {parsedData ? "Update" : "Create"}
                         </Text>
                       </Pressable>
                     )}

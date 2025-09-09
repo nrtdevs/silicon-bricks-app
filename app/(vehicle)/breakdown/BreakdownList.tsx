@@ -6,10 +6,10 @@ import { useTheme } from "@/context/ThemeContext";
 import { PaginatedBreakdownsDocument } from "@/graphql/generated";
 import { useLazyQuery } from "@apollo/client";
 import { Entypo } from "@expo/vector-icons";
-import { DrawerActions, useFocusEffect } from "@react-navigation/native";
+import { DrawerActions } from "@react-navigation/native";
 import { FAB } from "@rneui/themed";
 import { router, useNavigation } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
 
@@ -24,30 +24,18 @@ const BreakdownList = () => {
 
     const [getVehicleListApi, { data, loading, error }] = useLazyQuery(PaginatedBreakdownsDocument);
 
-    const handleRefresh = useCallback(() => {
+    const handleRefresh = () => {
         setRefreshing(true);
-        setCurrentPage(1);
         setHasMore(true);
-
-        // Clear existing data immediately for better UX
         setAllVehicles([]);
-
         getVehicleListApi({
             variables: { listInputDto: { limit, page: 1 } },
-            fetchPolicy: 'network-only' // Ensure we get fresh data
+            fetchPolicy: 'network-only' 
         }).finally(() => setRefreshing(false));
-    }, [limit]);
-
-    useFocusEffect(
-        useCallback(() => {
-            handleRefresh();
-        }, [handleRefresh])
-    );
+    }
 
     // Fetch data when currentPage changes (for pagination)
     useEffect(() => {
-        // Only fetch if currentPage is greater than 1 (subsequent pages)
-        // and if there's more data to load and not currently loading
         if (currentPage > 1 && hasMore && !loading) {
             getVehicleListApi({
                 variables: {
@@ -59,13 +47,12 @@ const BreakdownList = () => {
             });
         }
     }, [currentPage, hasMore, limit, loading, getVehicleListApi]);
+
     useEffect(() => {
         if (data?.paginatedBreakdowns?.data) {
-            // If we're on page 1, replace the data
             if (currentPage === 1) {
                 setAllVehicles(data.paginatedBreakdowns.data);
             } else {
-                // Otherwise append to existing data
                 setAllVehicles(prevVehicles => [...prevVehicles, ...data.paginatedBreakdowns.data]);
             }
 
@@ -209,7 +196,7 @@ const styles = StyleSheet.create({
         borderRadius: ms(5),
     },
     retryText: {
-        color: 'white',
+        color: 'red',
         fontWeight: 'bold',
     },
     loader: {

@@ -1134,6 +1134,22 @@ mutation CreateBreakdown($data: CreateBreakdownDto!) {
   }
 }
 
+# update breakdown 
+mutation UpdateBreakdown($data: UpdateBreakdownDto!) {
+  updateBreakdown(data: $data) {
+    id
+    vehicleId
+    breakdownType
+    breakdownDate
+    breakdownDescription
+    breakdownLocation
+    latitude
+    longitude
+    status
+    organizationId
+  }
+}
+
 # change break down status 
 mutation ChangeBreakdownStatus($data: BreakdownStatusDto!) {
   changeBreakdownStatus(data: $data) {

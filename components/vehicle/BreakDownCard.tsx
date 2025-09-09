@@ -253,6 +253,7 @@ const styles = ScaledSheet.create({
   modelText: {
     fontSize: "14@ms",
     opacity: 0.8,
+    textTransform: 'capitalize'
   },
   statusBadge: {
     flexDirection: 'row',
