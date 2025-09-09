@@ -481,7 +481,6 @@ const AddBreakdown = () => {
             {/* Display Server Images */}
             {serverImage.length > 0 && (
               <View style={styles.mediaPreviewContainer}>
-                <Text style={[styles.previewTitle, { color: Colors[theme].text }]}>Server Uploaded Media</Text>
                 {serverImage.map((file, index) => (
                   <View key={`server-media-${index}`} style={styles.mediaItem}>
                     {file.mediaType === "image" ? (
@@ -499,7 +498,6 @@ const AddBreakdown = () => {
                     <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
                       {file.url.split("/").pop()}
                     </Text>
-                    {/* Server images cannot be removed from here */}
                   </View>
                 ))}
               </View>
@@ -508,7 +506,6 @@ const AddBreakdown = () => {
             {/* Display Local Images */}
             {uploadedFiles.length > 0 && (
               <View style={styles.mediaPreviewContainer}>
-                <Text style={[styles.previewTitle, { color: Colors[theme].text }]}>Local Media</Text>
                 {uploadedFiles.map((file, index) => (
                   <View key={`local-media-${index}`} style={styles.mediaItem}>
                     {file.mediaType === "image" ? (
