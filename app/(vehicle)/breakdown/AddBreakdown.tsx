@@ -285,6 +285,7 @@ const AddBreakdown = () => {
   }, [reset]);
 
   const onSubmit = async (data: any) => {
+    console.log("data", data)
     try {
       // 1. Local file URLs निकालो
       const localUris = uploadedFiles.map((file) => file.url);
