@@ -10,7 +10,7 @@ import { DrawerActions } from "@react-navigation/native";
 import { FAB } from "@rneui/themed";
 import { router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
 
 const BreakdownList = () => {
@@ -21,6 +21,7 @@ const BreakdownList = () => {
     const [allVehicles, setAllVehicles] = useState<any[]>([]);
     const [hasMore, setHasMore] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false); // State for modal visibility
 
     const [getVehicleListApi, { data, loading, error }] = useLazyQuery(PaginatedBreakdownsDocument);
 
@@ -82,9 +83,7 @@ const BreakdownList = () => {
                     })
                 }
                 onDelete={() => { }}
-                onChangeStatus={() => {
-                   
-                }}
+                onChangeStatus={() => { }}
                 onView={() =>
                     router.navigate({
                         pathname: "/vehicle-details",
@@ -92,9 +91,22 @@ const BreakdownList = () => {
                         params: { data: JSON.stringify(item) },
                     })
                 }
+                dots={
+                    <Pressable onPress={() => setIsModalVisible(true)}>
+                        <Entypo name="dots-three-vertical" size={ms(15)} color={Colors[theme].text} />
+                    </Pressable>
+                }
             />
         );
     };
+
+    const dropdownItems = [
+        { label: 'Option 1', value: '1' },
+        { label: 'Option 2', value: '2' },
+        { label: 'Option 3', value: '3' },
+        { label: 'Option 4', value: '4' },
+        { label: 'Option 5', value: '5' },
+    ];
 
     // Render empty state if no data
     const renderEmptyComponent = () => {
@@ -168,6 +180,34 @@ const BreakdownList = () => {
                     }}
                     onPress={() => router.navigate("/(vehicle)/breakdown/AddBreakdown")}
                 />
+
+                {/* Modal for dots menu */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isModalVisible}
+                    onRequestClose={() => setIsModalVisible(false)}
+                >
+                    <Pressable style={styles.modalOverlay} onPress={() => setIsModalVisible(false)}>
+                        <View style={[styles.modalContent, { backgroundColor: Colors[theme].background }]}>
+                            <Text style={[styles.modalTitle, { color: Colors[theme].text }]}>Options</Text>
+                            {dropdownItems.map((item, index) => (
+                                <Pressable
+                                    key={index}
+                                    style={styles.dropdownItem}
+                                    onPress={() => {
+                                        console.log(item.value);
+                                        setIsModalVisible(false);
+                                    }}
+                                >
+                                    <Text style={[styles.dropdownItemText, { color: Colors[theme].text }]}>
+                                        {item.label}
+                                    </Text>
+                                </Pressable>
+                            ))}
+                        </View>
+                    </Pressable>
+                </Modal>
             </ThemedView>
         </CustomHeader>
     );
@@ -209,5 +249,30 @@ const styles = StyleSheet.create({
     errorText: {
         color: 'white',
         textAlign: 'center',
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalContent: {
+        width: ms(200),
+        borderRadius: ms(10),
+        padding: ms(15),
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: ms(18),
+        fontWeight: 'bold',
+        marginBottom: ms(15),
+    },
+    dropdownItem: {
+        paddingVertical: ms(10),
+        width: '100%',
+        alignItems: 'center',
+    },
+    dropdownItemText: {
+        fontSize: ms(16),
     },
 });

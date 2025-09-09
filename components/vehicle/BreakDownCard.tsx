@@ -24,6 +24,8 @@ interface VehicleCardProps {
   onDelete: () => void;
   onChangeStatus: () => void;
   onView: () => void;
+  dots: React.ReactNode; // Change type to React.ReactNode
+
 }
 
 const statusColors: Record<Breakdown_Status, readonly [string, string]> = {
@@ -89,9 +91,9 @@ const ActionButton: React.FC<ActionButtonProps> = ({ icon, text, onPress, bgColo
   );
 };
 
-const BreakDownCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onChangeStatus, onView }) => {
+const BreakDownCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onChangeStatus, onView, dots }) => {
   if (!item) {
-    return null; 
+    return null;
   }
 
   const { theme } = useTheme();
@@ -163,7 +165,11 @@ const BreakDownCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onC
             <ThemedText style={styles.statusText} type='default'>
               {currentStatus.toUpperCase()}
             </ThemedText>
+
           </LinearGradient>
+          <View style={styles.dotsContainer}>
+            {dots}
+          </View>
         </View>
 
         {/* Divider */}
@@ -327,5 +333,8 @@ const styles = ScaledSheet.create({
   },
   miniActionButton: {
     padding: "4@ms",
+  },
+  dotsContainer: {
+    padding: "8@ms", // Add padding to increase touch target
   },
 });
