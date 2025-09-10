@@ -226,7 +226,7 @@ const ExpenseList = () => {
 
         <FAB
           size="large"
-          title="Add Vehicle"
+          title="Add Expense"
           style={[styles.fab, { backgroundColor: Colors[theme].primary.main }]}
           titleStyle={styles.fabTitle}
           icon={{

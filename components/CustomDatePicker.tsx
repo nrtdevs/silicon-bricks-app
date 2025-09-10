@@ -22,6 +22,7 @@ const CustomDatePicker = ({ control, name, label, required, mode = "date" }: Cus
     const { theme } = useTheme();
 
     const formatValue = (date: Date) => {
+        const pad = (n: number) => n.toString().padStart(2, "0");
         switch (mode) {
             case "year":
                 return date.getFullYear().toString();
@@ -30,7 +31,8 @@ const CustomDatePicker = ({ control, name, label, required, mode = "date" }: Cus
             case "day":
                 return date.getDate().toString();
             default:
-                return date.toLocaleDateString();
+                // ✅ dd/mm/yyyy format
+                return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
         }
     };
 

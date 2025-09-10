@@ -1,17 +1,22 @@
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { router, useLocalSearchParams } from 'expo-router';
+import CustomDatePicker from '@/components/CustomDatePicker';
+import CustomDropdownApi from '@/components/CustomDropdownApi';
 import CustomHeader from '@/components/CustomHeader';
-import { Ionicons } from '@expo/vector-icons';
+import CustomInput from '@/components/CustomInput';
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
-import { ms } from 'react-native-size-matters';
-import CustomDropdownApi from '@/components/CustomDropdownApi';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useLazyQuery } from '@apollo/client';
 import { GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from '@/graphql/generated';
+import { useLazyQuery } from '@apollo/client';
+import { Ionicons } from '@expo/vector-icons';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ms } from 'react-native-size-matters';
+import { z } from 'zod';
+import * as DocumentPicker from "expo-document-picker";
+import { Image } from 'react-native';
+import { Env } from '@/constants/ApiEndpoints';
 
 const BreakDownSchema = z.object({
     breakdownDate: z.string().min(1, "Breakdown Date is required"),
@@ -62,6 +67,7 @@ const AddExpense = () => {
     const { theme } = useTheme();
     const [currentPage, setCurrentPage] = useState(1)
     const [hasMore, setHasMore] = useState(true);
+    const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
     const [VehiclesBreakdownType, { data: BreakdownTypeData }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
     const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof BreakDownSchema>>({
@@ -101,6 +107,32 @@ const AddExpense = () => {
         label: item || "",
         value: item || "",
     })) || [], [BreakDownData]);
+
+    const pickMedia = async () => {
+        const result = await DocumentPicker.getDocumentAsync({
+            type: [
+                "image/*",
+                "video/*",
+                "audio/mpeg"
+            ],
+            multiple: true,
+        });
+
+        if (!result.canceled && result.assets) {
+            const newFiles = result.assets.map((asset) => ({
+                mediaType: asset.mimeType?.includes("image")
+                    ? "image"
+                    : asset.mimeType?.includes("video")
+                        ? "video"
+                        : asset.mimeType?.includes("audio")
+                            ? "audio"
+                            : "file",
+                url: asset.uri,
+            }));
+
+            setUploadedFiles((prev) => [...prev, ...newFiles]);
+        }
+    };
     return (
         <CustomHeader
             title={parsedData ? "Update Expense" : "Create Expense"}
@@ -145,6 +177,102 @@ const AddExpense = () => {
                                 required={true}
                                 value={watchedVehicleId}
                             />
+                            <CustomDatePicker
+                                control={control}
+                                name="insuranceValidTill"
+                                label="Insurance Date"
+                                mode="date"
+                                required
+                            />
+                            <CustomInput
+                                name="amount"
+                                control={control}
+                                label="Amount"
+                                placeholder="Enter Amount"
+                                required={true}
+                                type='number'
+                                error={errors.breakdownDate?.message}
+                            />
+                            <CustomInput
+                                name="breakdownDescription"
+                                control={control}
+                                label="Description"
+                                placeholder="Describe the breakdown issue..."
+                                required={true}
+                                multiline={true}
+                                numberOfLines={5}
+                                error={errors.breakdownDescription?.message}
+                            />
+                            <View style={styles.mediaUploadArea}>
+                                <Ionicons name="cloud-upload-outline" size={48} color="#C7C7CC" />
+                                <Text style={styles.mediaUploadTitle}>Upload Photos, Videos & Audio</Text>
+
+
+                                {/* Image Upload */}
+                                <Pressable style={styles.uploadButton} onPress={pickMedia}>
+                                    <Ionicons name="cloud-upload-outline" size={20} color="#007AFF" />
+                                    <Text style={styles.uploadButtonText}>Upload Media</Text>
+                                </Pressable>
+
+                            </View>
+                            {/* Display Server Images */}
+                            {serverImage.length > 0 && (
+                                <View style={styles.mediaPreviewContainer}>
+                                    {serverImage.map((file, index) => (
+                                        <View key={`server-media-${index}`} style={styles.mediaItem}>
+                                            {file.mediaType === "image" ? (
+                                                <Image
+                                                    source={{ uri: Env.IMAGEURL + file.url }}
+                                                    style={styles.mediaThumbnail}
+                                                />
+                                            ) : file.mediaType === "video" ? (
+                                                <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
+                                            ) : file.mediaType === "audio" ? (
+                                                <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
+                                            ) : (
+                                                <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
+                                            )}
+                                            <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
+                                                {file.url.split("/").pop()}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
+
+                            {/* Display Local Images */}
+                            {uploadedFiles.length > 0 && (
+                                <View style={styles.mediaPreviewContainer}>
+                                    {uploadedFiles.map((file, index) => (
+                                        <View key={`local-media-${index}`} style={styles.mediaItem}>
+                                            {file.mediaType === "image" ? (
+                                                <Image
+                                                    source={{ uri: file.url }}
+                                                    style={styles.mediaThumbnail}
+                                                />
+                                            ) : file.mediaType === "video" ? (
+                                                <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
+                                            ) : file.mediaType === "audio" ? (
+                                                <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
+                                            ) : (
+                                                <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
+                                            )}
+                                            <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
+                                                {file.url.split("/").pop()}
+                                            </Text>
+                                            <Pressable
+                                                onPress={() => {
+                                                    const newFiles = uploadedFiles.filter((_, i) => i !== index);
+                                                    setUploadedFiles(newFiles);
+                                                }}
+                                                style={styles.closeButton}
+                                            >
+                                                <Ionicons name="close-circle" size={30} color="#FF3B30" />
+                                            </Pressable>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
                         </View>
                     </ScrollView>
                 </SafeAreaView>
@@ -172,4 +300,39 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         paddingBottom: ms(100),
     },
+    mediaUploadArea: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: ms(30),
+        paddingHorizontal: ms(10),
+        backgroundColor: '#F9F9F9',
+        borderRadius: ms(16),
+        borderWidth: 2,
+        borderColor: '#E5E5EA',
+        borderStyle: 'dashed',
+    },
+    mediaUploadTitle: {
+        fontSize: ms(18),
+        fontWeight: '600',
+        color: '#1C1C1E',
+        marginTop: ms(10),
+        marginBottom: ms(8),
+    },
+
+    uploadButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: ms(10),
+        paddingHorizontal: ms(20),
+        backgroundColor: '#FFFFFF',
+        borderRadius: ms(8),
+        borderWidth: 1,
+        borderColor: '#007AFF',
+    },
+    uploadButtonText: {
+        marginLeft: ms(6),
+        fontSize: ms(16),
+        color: '#007AFF',
+        fontWeight: '500',
+    }
 })
