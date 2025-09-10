@@ -5,12 +5,12 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
 import { PaginatedBreakdownsDocument } from "@/graphql/generated";
 import { useLazyQuery } from "@apollo/client";
-import { Entypo, MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { FAB } from "@rneui/themed";
 import { router, useNavigation } from "expo-router";
-import { useEffect, useState, useRef } from "react";
-import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View, Animated, Dimensions } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Animated, Dimensions, FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { ms } from "react-native-size-matters";
 
 const { width, height } = Dimensions.get('window');

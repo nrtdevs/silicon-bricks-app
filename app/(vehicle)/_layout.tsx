@@ -25,7 +25,7 @@ const CustomDrawerContent = (props: any) => {
         <ThemedText type='default' style={styles.drawerTitle}>Vehicle Management</ThemedText>
       </View>
       <DrawerItem
-        icon={({ color, size }) => <MaterialIcons name="home" size={ms(24)} color={Colors[theme].primary.main} />}
+        icon={({ color, size }) => <MaterialIcons name="dashboard" size={ms(24)} color={Colors[theme].primary.main} />}
         label="Dashboard"
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(vehicle)/(tabs)/home')}
@@ -37,13 +37,19 @@ const CustomDrawerContent = (props: any) => {
         onPress={() => router.push('/(vehicle)/vehicle-list')}
       />
       <DrawerItem
-        icon={({ color, size }) => <MaterialIcons name="directions-car" size={ms(24)} color={Colors[theme].primary.main} />}
+        icon={({ color, size }) => <MaterialIcons name="report-problem" size={ms(24)} color={Colors[theme].primary.main} />}
         label="Break Down"
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(vehicle)/breakdown/BreakdownList')}
       />
       <DrawerItem
-        icon={({ color, size }) => <MaterialIcons name="build" size={ms(24)} color={Colors[theme].primary.main} />}
+        icon={({ color, size }) => <MaterialIcons name="account-balance-wallet" size={ms(24)} color={Colors[theme].primary.main} />}
+        label="Expense"
+        labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
+        onPress={() => router.push('/(vehicle)/expense/ExpenseList')}
+      />
+      <DrawerItem
+        icon={({ color, size }) => <MaterialIcons name="home-repair-service" size={ms(24)} color={Colors[theme].primary.main} />}
         label="Service Center"
         labelStyle={{ color: Colors[theme].text, fontWeight: 'semibold', fontSize: ms(18) }}
         onPress={() => router.push('/(vehicle)/service/ServiceCenterList')}
