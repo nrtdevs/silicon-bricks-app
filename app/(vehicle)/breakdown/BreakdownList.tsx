@@ -442,6 +442,7 @@ const styles = StyleSheet.create({
         minWidth: ms(200),
         maxWidth: ms(250),
         borderRadius: ms(12),
+        marginRight:ms(5),
         paddingVertical: ms(8),
         elevation: 10,
         shadowColor: '#000',

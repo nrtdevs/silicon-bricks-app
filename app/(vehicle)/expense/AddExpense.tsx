@@ -59,12 +59,15 @@ const AddExpense = () => {
     const [hasMore, setHasMore] = useState(true);
     const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
-    const [GetExpenseTypeSuggestions, { data: ExpenseTypeData }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument); // Assuming GetBreakdownTypeSuggestionsDocument can be reused for expense types or a new one needs to be created.
+    const [GetExpenseTypeSuggestions, { data: ExpenseTypeData, error }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument); // Assuming GetBreakdownTypeSuggestionsDocument can be reused for expense types or a new one needs to be created.
     const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof ExpenseSchema>>({
         resolver: zodResolver(ExpenseSchema),
         defaultValues: defaultValues
     });
 
+
+
+    console.log("eroor", DropdownData, "error", error)
     // Fetch data function
     const fetchData = useCallback(() => {
         if (hasMore) {
@@ -85,16 +88,18 @@ const AddExpense = () => {
 
     const watchedExpenseType = watch("expenseType");
     const watchedVehicleId = watch("vehicleId");
-    const watchedBreakDownId = watch("breakDownId");
 
 
     const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions // Renamed for clarity
     const Maindata = DropdownData?.vehiclesDropdown.data || []
 
+    console.log("maindata", DropdownData)
+
     const dropdownOptions = useMemo(() => Maindata?.map((item) => ({
         label: item?.model || "",
         value: item?.id || "",
     })), [Maindata]);
+
     const DropdownExpenseType = useMemo(() => ExpenseTypeDataOptions?.map((item) => ({
         label: item || "",
         value: item || "",
@@ -169,16 +174,7 @@ const AddExpense = () => {
                                 required={true}
                                 value={watchedVehicleId}
                             />
-                            <CustomDropdownApi
-                                options={dropdownOptions}
-                                placeholder="Select Breakdown"
-                                control={control}
-                                name="breakDownId"
-                                error={errors.breakDownId as any}
-                                label="Breakdown"
-                                required={true}
-                                value={watchedBreakDownId}
-                            />
+
                             <CustomDatePicker
                                 control={control}
                                 name="expenseDate"
