@@ -124,10 +124,10 @@ const ExpenseCard: React.FC<VehicleCardProps> = ({
         <View style={styles.header}>
           <View style={styles.titleContainer}>
             <ThemedText type="title" style={styles.brandText}>
-              Vehicle : {item?.item?.vehicle?.model}
+              Vehicle : {item?.vehicle?.model}
             </ThemedText>
             <ThemedText type="subtitle" style={styles.modelText}>
-              Amount : {item?.item?.amount}
+              Amount : {item?.amount}
             </ThemedText>
           </View>
 
@@ -147,13 +147,13 @@ const ExpenseCard: React.FC<VehicleCardProps> = ({
           <DetailRow
             icon="pricetag"
             label="Type"
-            value={item?.item?.expenseType}
+            value={item?.expenseType}
             theme={theme}
           />
           <DetailRow
             icon="calendar"
             label="Date"
-            value={item?.item?.expenseDate}
+            value={item?.expenseDate}
             theme={theme}
           />
         </View>

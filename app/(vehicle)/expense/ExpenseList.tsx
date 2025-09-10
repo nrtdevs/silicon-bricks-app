@@ -49,6 +49,7 @@ const ExpenseList = () => {
     fetchPolicy: 'network-only',
   });
 
+
   const handleRefresh = () => {
     setRefreshing(true);
     setHasMore(true);
@@ -112,6 +113,7 @@ const ExpenseList = () => {
   };
 
   const renderItems = (item: any) => {
+
     return (
       <ExpenseCard
         item={item}
@@ -138,21 +140,21 @@ const ExpenseList = () => {
           </Pressable>
         }
         status={
-          item?.item?.status ? (
+          item?.status ? (
             <LinearGradient
-              colors={statusColors[item.item.status as ExpenseStatus]}
+              colors={statusColors[item.status as ExpenseStatus]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.statusBadge}
             >
               <Ionicons
-                name={statusIcons[item.item.status as ExpenseStatus]}
+                name={statusIcons[item.status as ExpenseStatus]}
                 size={ms(12)}
                 color={Colors.white}
                 style={styles.statusIcon}
               />
               <ThemedText style={styles.statusText} type='default'>
-                {(item.item.status as string).toUpperCase()}
+                {(item.status as string).toUpperCase()}
               </ThemedText>
             </LinearGradient>
           ) : null
@@ -224,7 +226,7 @@ const ExpenseList = () => {
 
         <FAB
           size="large"
-          title="Add Breakdown"
+          title="Add Vehicle"
           style={[styles.fab, { backgroundColor: Colors[theme].primary.main }]}
           titleStyle={styles.fabTitle}
           icon={{
@@ -232,7 +234,7 @@ const ExpenseList = () => {
             color: "white",
             size: ms(24),
           }}
-          onPress={() => router.navigate("/(vehicle)/breakdown/AddBreakdown")}
+          onPress={() => router.navigate("/(vehicle)/expense/AddExpense")}
         />
       </ThemedView>
     </CustomHeader>
