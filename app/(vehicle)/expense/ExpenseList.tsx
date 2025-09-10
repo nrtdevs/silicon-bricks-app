@@ -1,18 +1,36 @@
 import CustomHeader from '@/components/CustomHeader'
+import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView'
 import ExpenseCard from '@/components/vehicle/ExpenseCard'
 import { Colors } from '@/constants/Colors'
 import { useTheme } from '@/context/ThemeContext'
 import { PaginatedVehicleExpenseDocument, VehicleExpense } from '@/graphql/generated'
 import { useLazyQuery } from '@apollo/client'
-import { Entypo } from '@expo/vector-icons'
+import { Entypo, Ionicons } from '@expo/vector-icons'
 import { DrawerActions } from '@react-navigation/native'
 import { router, useNavigation } from 'expo-router'
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Dimensions, FlatList, Pressable, StyleSheet } from 'react-native'
+import { ActivityIndicator, Dimensions, FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 import { ms } from 'react-native-size-matters'
 
 const { width, height } = Dimensions.get('window');
+
+type ExpenseStatus = "active" | "pending" | "inactive" | "blocked";
+
+const statusColors: Record<ExpenseStatus, readonly [string, string]> = {
+  active: ['#10B981', '#059669'], // Green
+  pending: ['#F59E0B', '#D97706'], // Amber
+  inactive: ['#6B7280', '#4B5563'], // Gray
+  blocked: ['#EF4444', '#DC2626'], // Red
+};
+
+const statusIcons: Record<ExpenseStatus, keyof typeof Ionicons.glyphMap> = {
+  active: 'checkmark-circle',
+  pending: 'time',
+  inactive: 'close-circle',
+  blocked: 'alert-circle',
+};
 
 const ExpenseList = () => {
   const navigation = useNavigation();
@@ -24,6 +42,7 @@ const ExpenseList = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false); // New state for pull-to-refresh
   const [getVehicleExpenseApi, { data, loading }] = useLazyQuery(PaginatedVehicleExpenseDocument, {
     fetchPolicy: 'network-only',
   });
@@ -39,15 +58,26 @@ const ExpenseList = () => {
       },
       onCompleted: (res) => {
         const newData = res?.paginatedVehicleExpense?.data || [];
-        const totalFetched = expenses.length + newData.length;
         const totalAvailable = res?.paginatedVehicleExpense?.meta?.totalItems || 0;
 
-        setExpenses(prev => [...prev, ...(newData as VehicleExpense[])]);
-        setHasMore(totalFetched < totalAvailable);
+        setExpenses(prev => {
+          const updatedExpenses = refreshing ? (newData as VehicleExpense[]) : [...prev, ...(newData as VehicleExpense[])];
+          const totalFetched = updatedExpenses.length;
+          setHasMore(totalFetched < totalAvailable);
+          return updatedExpenses;
+        });
         setIsLoadingMore(false);
+        setRefreshing(false); 
       }
     });
-  }, [page]);
+  }, [page, refreshing]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setPage(1);
+    setExpenses([]);
+    setHasMore(true);
+  };
 
   const loadMore = () => {
     if (hasMore && !loading && !isLoadingMore) {
@@ -98,7 +128,26 @@ const ExpenseList = () => {
             <Entypo name="dots-three-vertical" size={ms(18)} color={Colors[theme].text} />
           </Pressable>
         }
-        status={item?.status === "pending" ? "red" : "green"} 
+        status={
+          item?.item?.status ? (
+            <LinearGradient
+              colors={statusColors[item.item.status as ExpenseStatus]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.statusBadge}
+            >
+              <Ionicons
+                name={statusIcons[item.item.status as ExpenseStatus]}
+                size={ms(12)}
+                color={Colors.white}
+                style={styles.statusIcon}
+              />
+              <ThemedText style={styles.statusText} type='default'>
+                {(item.item.status as string).toUpperCase()}
+              </ThemedText>
+            </LinearGradient>
+          ) : null
+        }
       />
     );
   };
@@ -122,6 +171,8 @@ const ExpenseList = () => {
           renderItem={renderItems}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
+          refreshing={refreshing}
+          onRefresh={onRefresh} 
           ListFooterComponent={
             isLoadingMore ? (
               <ActivityIndicator color={Colors[theme].text} style={{ marginVertical: 16 }} />
@@ -147,5 +198,20 @@ const styles = StyleSheet.create({
   dotsButton: {
     padding: ms(8),
     borderRadius: ms(20),
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: ms(10),
+    paddingVertical: ms(4),
+    borderRadius: ms(20),
+  },
+  statusIcon: {
+    marginRight: ms(4),
+  },
+  statusText: {
+    fontSize: ms(10),
+    color: Colors.white,
+    fontWeight: 'bold',
   },
 });
