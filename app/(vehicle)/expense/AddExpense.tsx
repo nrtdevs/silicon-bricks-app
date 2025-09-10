@@ -8,15 +8,13 @@ import { GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from '@
 import { useLazyQuery } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as DocumentPicker from "expo-document-picker";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ms } from 'react-native-size-matters';
 import { z } from 'zod';
-import * as DocumentPicker from "expo-document-picker";
-import { Image } from 'react-native';
-import { Env } from '@/constants/ApiEndpoints';
 
 const ExpenseSchema = z.object({
     amount: z.string().min(1, "Amount is required"),
@@ -65,9 +63,6 @@ const AddExpense = () => {
         defaultValues: defaultValues
     });
 
-
-
-    console.log("eroor", DropdownData, "error", error)
     // Fetch data function
     const fetchData = useCallback(() => {
         if (hasMore) {
@@ -83,6 +78,7 @@ const AddExpense = () => {
     }, [currentPage, hasMore, VehiclesDropdownApi]);
 
       useEffect(() => {
+          fetchData()
           GetExpenseTypeSuggestions();
       }, [GetExpenseTypeSuggestions]);
 
@@ -93,7 +89,6 @@ const AddExpense = () => {
     const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions // Renamed for clarity
     const Maindata = DropdownData?.vehiclesDropdown.data || []
 
-    console.log("maindata", DropdownData)
 
     const dropdownOptions = useMemo(() => Maindata?.map((item) => ({
         label: item?.model || "",
