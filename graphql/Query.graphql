@@ -1236,6 +1236,7 @@ query PaginatedVehicleExpense($listInputDto: ListInputDTO!, $isTrash: Boolean) {
       expenseType
       expenseDate
       amount
+      id
     }
   }
 }

@@ -267,7 +267,7 @@ const BreakdownList = () => {
 
                 <FlatList
                     data={allVehicles}
-                    keyExtractor={(item) => item?.id?.toString()}
+                    keyExtractor={(item) => item?.id}
                     onEndReached={loadMore}
                     onEndReachedThreshold={0.5}
                     refreshing={refreshing}

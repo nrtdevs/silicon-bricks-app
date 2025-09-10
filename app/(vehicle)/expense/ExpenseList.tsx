@@ -1,23 +1,26 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect } from 'react'
 import CustomHeader from '@/components/CustomHeader'
-import { Entypo } from '@expo/vector-icons'
-import { ms } from 'react-native-size-matters'
+import { ThemedView } from '@/components/ThemedView'
 import { Colors } from '@/constants/Colors'
 import { useTheme } from '@/context/ThemeContext'
+import { PaginatedVehicleExpenseDocument } from '@/graphql/generated'
+import { useLazyQuery } from '@apollo/client'
+import { Entypo } from '@expo/vector-icons'
 import { DrawerActions } from '@react-navigation/native'
 import { useNavigation } from 'expo-router'
-import { ThemedView } from '@/components/ThemedView'
-import { useLazyQuery } from '@apollo/client'
-import { PaginatedVehiclesDocument } from '@/graphql/generated'
+import React, { useEffect, useState } from 'react'
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ms } from 'react-native-size-matters'
 
 const ExpenseList = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [getVehicleExpenseApi, { data }] = useLazyQuery(PaginatedVehicleExpenseDocument);
 
-  const [getVehicleExpenseApi, { data, loading, error }] = useLazyQuery(PaginatedVehiclesDocument);
+  const MainData = data?.paginatedVehicleExpense?.data || []
 
-
+  console.log("data", MainData)
   useEffect(() => {
     getVehicleExpenseApi({
       variables: {
@@ -27,7 +30,12 @@ const ExpenseList = () => {
         }
       }
     })
-  })
+  }, [page])
+
+
+  const RenderItem = (item) =>{
+
+  }
 
 
   return (
@@ -43,9 +51,11 @@ const ExpenseList = () => {
       }
     >
       <ThemedView style={{ flex: 1 }}>
-        <View>
-          <Text>ExpenseList</Text>
-        </View>
+        <FlatList
+         keyExtractor={(item)=> item?.id}
+         data={MainData}
+         renderItem={(item)=> RenderItem(item)}
+        />
       </ThemedView>
     </CustomHeader>
   )
