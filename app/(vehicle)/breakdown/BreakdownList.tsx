@@ -19,7 +19,6 @@ const BreakdownList = () => {
     const navigation = useNavigation();
     const { theme } = useTheme();
     const [currentPage, setCurrentPage] = useState(1);
-    const [limit] = useState(10);
     const [allVehicles, setAllVehicles] = useState<any[]>([]);
     const [hasMore, setHasMore] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -27,7 +26,6 @@ const BreakdownList = () => {
     const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
     const [selectedItem, setSelectedItem] = useState<any>(null);
 
-    console.log("selectedItem", selectedItem)
     const scaleAnim = useRef(new Animated.Value(0)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -38,7 +36,7 @@ const BreakdownList = () => {
         setHasMore(true);
         setAllVehicles([]);
         getVehicleListApi({
-            variables: { listInputDto: { limit, page: 1 } },
+            variables: { listInputDto: { limit: 10, page: 1 } },
             fetchPolicy: 'network-only'
         }).finally(() => setRefreshing(false));
     }
@@ -48,13 +46,13 @@ const BreakdownList = () => {
             getVehicleListApi({
                 variables: {
                     listInputDto: {
-                        limit: limit,
+                        limit: 1,
                         page: currentPage
                     }
                 }
             });
         }
-    }, [currentPage, hasMore, limit, loading, getVehicleListApi]);
+    }, [currentPage, hasMore, loading, getVehicleListApi]);
 
     useEffect(() => {
         if (data?.paginatedBreakdowns?.data) {
@@ -64,7 +62,7 @@ const BreakdownList = () => {
                 setAllVehicles(prevVehicles => [...prevVehicles, ...data.paginatedBreakdowns.data]);
             }
 
-            if (data.paginatedBreakdowns.data.length < limit) {
+            if (data.paginatedBreakdowns.data.length < 10) {
                 setHasMore(false);
             } else {
                 setHasMore(true);

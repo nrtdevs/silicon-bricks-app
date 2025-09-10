@@ -1218,3 +1218,24 @@ query FindBreakdownById($findBreakdownByIdId: Int!) {
     }
   }
 }
+
+# vehicle expense paginated 
+query PaginatedVehicleExpense($listInputDto: ListInputDTO!, $isTrash: Boolean) {
+  paginatedVehicleExpense(ListInputDTO: $listInputDto, isTrash: $isTrash) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      vehicle {
+        id
+        model
+      }
+      expenseType
+      expenseDate
+      amount
+    }
+  }
+}
