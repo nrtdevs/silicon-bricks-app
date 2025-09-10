@@ -228,13 +228,13 @@ const AddExpense = () => {
                                                     style={styles.mediaThumbnail}
                                                 />
                                             ) : file.mediaType === "video" ? (
-                                                <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
+                                                <Ionicons name="videocam-outline" size={40} color="#007AFF" />
                                             ) : file.mediaType === "audio" ? (
-                                                <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
+                                                <Ionicons name="musical-notes-outline" size={32} color="#34C759" />
                                             ) : (
-                                                <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
+                                                <Ionicons name="document-outline" size={32} color="#8E8E93" />
                                             )}
-                                            <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
+                                            <Text numberOfLines={2} ellipsizeMode="tail" style={[styles.mediaFileName, { color: Colors[theme].text }]}>
                                                 {file.url.split("/").pop()}
                                             </Text>
                                             <Pressable
@@ -244,7 +244,7 @@ const AddExpense = () => {
                                                 }}
                                                 style={styles.closeButton}
                                             >
-                                                <Ionicons name="close-circle" size={30} color="#FF3B30" />
+                                                <Ionicons name="close-circle" size={24} color="#FF3B30" />
                                             </Pressable>
                                         </View>
                                     ))}
@@ -316,36 +316,46 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         marginTop: ms(20),
-        gap: ms(10),
+        justifyContent: 'space-around', // Distribute items evenly with space around them
+        paddingHorizontal: ms(5), // Add some horizontal padding to the container
     },
     mediaItem: {
         width: ms(100),
-        height: ms(100),
+        height: ms(115),
         borderRadius: ms(8),
-        overflow: 'hidden',
         backgroundColor: '#E5E5EA',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         position: 'relative',
+        padding: ms(5),
+        paddingTop: ms(10),
+        marginBottom: ms(10), // Add margin bottom for spacing between rows
     },
     mediaThumbnail: {
         width: '100%',
-        height: '100%',
+        height: '65%',
         resizeMode: 'cover',
+        borderRadius: ms(4),
     },
     IconStyle: {
-        position: 'absolute',
-        zIndex: 1,
+        // Removed absolute positioning for icons to allow them to be centered by alignItems and justifyContent of mediaItem
+        // The parent mediaItem now handles centering for non-image types
     },
     mediaFileName: {
-        fontSize: ms(10),
-        marginTop: ms(5),
+        fontSize: ms(9),
         textAlign: 'center',
+        marginTop: ms(5),
+        width: '100%',
+        color: Colors.light.text,
+        flexShrink: 1,
     },
     closeButton: {
         position: 'absolute',
-        top: ms(-10),
-        right: ms(-10),
-        zIndex: 2,
+        top: ms(-8),
+        right: ms(-8),
+        zIndex: 1000,
+        backgroundColor: Colors.light.background,
+        borderRadius: ms(15),
+        padding: ms(2),
     },
 })
