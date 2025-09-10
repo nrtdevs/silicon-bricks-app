@@ -41,13 +41,11 @@ const ExpenseList = () => {
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [allVehicles, setAllVehicles] = useState<any[]>([]);
-  const [hasMore, setHasMore] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [refreshing, setRefreshing] = useState(false); // New state for pull-to-refresh
-  const [getVehicleExpenseApi, { data, loading }] = useLazyQuery(PaginatedVehicleExpenseDocument, {
+  const [getVehicleExpenseApi, { data, loading, error }] = useLazyQuery(PaginatedVehicleExpenseDocument, {
     fetchPolicy: 'network-only',
   });
 
@@ -285,5 +283,39 @@ const styles = StyleSheet.create({
   fabTitle: {
     fontSize: ms(14),
     fontWeight: '600',
+  },
+  loader: {
+    marginVertical: ms(20),
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: ms(20),
+  },
+  emptyIcon: {
+    marginBottom: ms(10),
+  },
+  emptyText: {
+    fontSize: ms(18),
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: ms(5),
+  },
+  emptySubText: {
+    fontSize: ms(14),
+    textAlign: 'center',
+    marginBottom: ms(20),
+  },
+  retryButton: {
+    backgroundColor: Colors.light.primary.main,
+    paddingHorizontal: ms(20),
+    paddingVertical: ms(10),
+    borderRadius: ms(8),
+  },
+  retryText: {
+    color: Colors.white,
+    fontSize: ms(16),
+    fontWeight: 'bold',
   },
 });
