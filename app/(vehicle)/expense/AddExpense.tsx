@@ -1,5 +1,5 @@
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { router, useLocalSearchParams } from 'expo-router';
 import CustomHeader from '@/components/CustomHeader';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useLazyQuery } from '@apollo/client';
-import { GetBreakdownTypeSuggestionsDocument } from '@/graphql/generated';
+import { GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from '@/graphql/generated';
 
 const BreakDownSchema = z.object({
     breakdownDate: z.string().min(1, "Breakdown Date is required"),
@@ -60,18 +60,43 @@ const AddExpense = () => {
     const { data } = useLocalSearchParams();
     const parsedData = data ? JSON.parse(data as string) : null;
     const { theme } = useTheme();
+    const [currentPage, setCurrentPage] = useState(1)
+    const [hasMore, setHasMore] = useState(true);
+    const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
     const [VehiclesBreakdownType, { data: BreakdownTypeData }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
     const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof BreakDownSchema>>({
         resolver: zodResolver(BreakDownSchema),
         defaultValues: defaultValues
     });
 
+    // Fetch data function
+    const fetchData = useCallback(() => {
+        if (hasMore) {
+            VehiclesDropdownApi({
+                variables: {
+                    listInputDto: {
+                        limit: 10,
+                        page: currentPage
+                    }
+                }
+            });
+        }
+    }, [currentPage, hasMore, VehiclesDropdownApi]);
+
       useEffect(() => {
         VehiclesBreakdownType();
       }, [ VehiclesBreakdownType]);
 
     const watchedBreakdownType = watch("breakdownType");
+    const watchedVehicleId = watch("vehicleId");
+
     const BreakDownData = BreakdownTypeData?.getBreakdownTypeSuggestions
+    const Maindata = DropdownData?.vehiclesDropdown.data || []
+
+    const dropdownOptions = useMemo(() => Maindata?.map((item) => ({
+        label: item?.model || "",
+        value: item?.id || "",
+    })), [Maindata]);
     const DropdownBreakType = useMemo(() => BreakDownData?.map((item) => ({
         label: item || "",
         value: item || "",
@@ -110,6 +135,16 @@ const AddExpense = () => {
                                 required={true}
                                 value={watchedBreakdownType}
                             />
+                            <CustomDropdownApi
+                                options={dropdownOptions}
+                                placeholder="Select Vehicle"
+                                control={control}
+                                name="vehicleId"
+                                error={errors.vehicleId as any}
+                                label="Vehicle"
+                                required={true}
+                                value={watchedVehicleId}
+                            />
                         </View>
                     </ScrollView>
                 </SafeAreaView>
@@ -130,7 +165,8 @@ const styles = StyleSheet.create({
         flex: 1
     },
     safeArea: {
-        flex: 1
+        flex: 1,
+        padding: ms(10)
     },
     scrollViewContent: {
         flexGrow: 1,
