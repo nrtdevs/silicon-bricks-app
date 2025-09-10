@@ -38,7 +38,7 @@ const BreakdownList = () => {
         setAllVehicles([]);
         getVehicleListApi({
             variables: { listInputDto: { limit, page: 1 } },
-            fetchPolicy: 'network-only' 
+            fetchPolicy: 'network-only'
         }).finally(() => setRefreshing(false));
     }
 
@@ -130,36 +130,6 @@ const BreakdownList = () => {
         setSelectedItem(null);
     };
 
-    const handleMenuAction = (action: string) => {
-        closeModal();
-
-        switch (action) {
-            case 'edit':
-                router.navigate({
-                    pathname: "/(vehicle)/breakdown/AddBreakdown",
-                    params: { data: JSON.stringify(selectedItem?.id) },
-                });
-                break;
-            case 'view':
-                router.navigate({
-                    pathname: "/vehicle-details",
-                    params: { data: JSON.stringify(selectedItem) },
-                });
-                break;
-            case 'duplicate':
-                // Handle duplicate action
-                console.log('Duplicate item:', selectedItem);
-                break;
-            case 'share':
-                // Handle share action
-                console.log('Share item:', selectedItem);
-                break;
-            case 'delete':
-                // Handle delete action
-                console.log('Delete item:', selectedItem);
-                break;
-        }
-    };
 
     const renderItems = (item: any) => {
         return (
@@ -193,31 +163,57 @@ const BreakdownList = () => {
 
     const menuItems = [
         {
-            label: 'View Details',
-            value: 'view',
-            icon: <Ionicons name="eye-outline" size={ms(20)} color={Colors[theme].text} />
+            label: 'Add Expense',
+            value: 'expense',
+            icon: <MaterialIcons name="attach-money" size={ms(20)} color={Colors[theme].text} />
         },
         {
-            label: 'Edit Breakdown',
-            value: 'edit',
-            icon: <MaterialIcons name="edit" size={ms(20)} color={Colors[theme].text} />
+            label: 'Assign',
+            value: 'assign',
+            icon: <MaterialIcons name="person-add" size={ms(20)} color={Colors[theme].text} />
         },
         {
-            label: 'Duplicate',
-            value: 'duplicate',
-            icon: <Ionicons name="copy-outline" size={ms(20)} color={Colors[theme].text} />
+            label: 'Service Scheduled',
+            value: 'service',
+            icon: <Ionicons name="calendar-outline" size={ms(20)} color={Colors[theme].text} />
         },
         {
-            label: 'Share',
-            value: 'share',
-            icon: <Ionicons name="share-outline" size={ms(20)} color={Colors[theme].text} />
-        },
-        {
-            label: 'Delete',
-            value: 'delete',
-            icon: <MaterialIcons name="delete-outline" size={ms(20)} color="#FF3B30" />
+            label: 'Cancelled',
+            value: 'cancel',
+            icon: <MaterialIcons name="cancel" size={ms(20)} color={Colors[theme].danger.border} />
         },
     ];
+
+    const handleMenuAction = (action: string) => {
+        closeModal();
+
+        switch (action) {
+            case 'edit':
+                router.navigate({
+                    pathname: "/(vehicle)/breakdown/AddBreakdown",
+                    params: { data: JSON.stringify(selectedItem?.id) },
+                });
+                break;
+            case 'view':
+                router.navigate({
+                    pathname: "/vehicle-details",
+                    params: { data: JSON.stringify(selectedItem) },
+                });
+                break;
+            case 'duplicate':
+                // Handle duplicate action
+                console.log('Duplicate item:', selectedItem);
+                break;
+            case 'share':
+                // Handle share action
+                console.log('Share item:', selectedItem);
+                break;
+            case 'delete':
+                // Handle delete action
+                console.log('Delete item:', selectedItem);
+                break;
+        }
+    };
 
     const renderEmptyComponent = () => {
         if (loading && allVehicles.length === 0) {
@@ -340,7 +336,7 @@ const BreakdownList = () => {
                                         <Text style={[
                                             styles.dropdownItemText,
                                             {
-                                                color: item.value === 'delete' ? '#FF3B30' : Colors[theme].text,
+                                                color: item.value === 'cancel' ? Colors[theme].danger.border : Colors[theme].text,
                                                 marginLeft: ms(12)
                                             }
                                         ]}>
