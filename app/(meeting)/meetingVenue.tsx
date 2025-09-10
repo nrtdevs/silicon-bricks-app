@@ -16,6 +16,7 @@ import { router } from "expo-router"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Alert, FlatList, Modal, Pressable, View, ScrollView, TouchableOpacity } from "react-native"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters"
 
 const defaultValue = {
@@ -52,6 +53,7 @@ const MeetingVenue = () => {
     /// add and edit state 
     const [addEditManage, setAddEditManage] = useState(false);
     const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
+    const insets = useSafeAreaInsets();
     const [currentMeetingVenue, setCurrentMeetingVenue] = useState<{
         name: string;
         id: string;
@@ -483,7 +485,7 @@ const MeetingVenue = () => {
                     position: "absolute",
                     margin: 15,
                     right: 0,
-                    bottom: 0,
+                    bottom: insets.bottom,
                 }}
                 icon={{
                     name: "add",

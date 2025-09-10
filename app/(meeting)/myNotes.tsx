@@ -8,7 +8,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { Env } from "@/constants/ApiEndpoints";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "@/context/ThemeContext";
-import { CreateNotePadDocument, DeleteNotePadDocument, PaginatedNotePadDocument, UpdateNotePadDocument } from "@/graphql/generated";
+import { CreateNotePadDocument, DeleteNotePadDocument, EnableNotePadDocument, PaginatedNotePadDocument, UpdateNotePadDocument } from "@/graphql/generated";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Entypo, Feather, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { FAB } from "@rneui/themed";
@@ -17,6 +17,7 @@ import debounce from "lodash.debounce";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, Alert, FlatList, Modal, Pressable, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 
 
@@ -24,9 +25,14 @@ const defaultValue = {
     notesField: "",
     id: "",
 }
+const statusData = [
+    { label: "Pending", value: "pending" },
+    { label: "Completed", value: "completed" },
+];
+
 const MyNotes = () => {
     const { theme } = useTheme();
-    const [page,setPage] = useState(1);
+    const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [myNoteList, setMyNotesList] = useState();
@@ -109,6 +115,9 @@ const MyNotes = () => {
     const [addEditManage, setAddEditManage] = useState(false);
     const [createEditManage, setCreateEditManage] = useState(false);
     const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
+    const [noteId, setnoteId] = useState<string>("");
+    const [isNotesModalVisible, setNotesModalVisible] = useState(false);
+    const insets = useSafeAreaInsets();
     const [currentMeetingNote, setCurrentMeetingNote] = useState<{
         notesField: string;
         id: string;
@@ -162,6 +171,30 @@ const MyNotes = () => {
                     },
                 },
             });
+    };
+
+    /// status change api
+    const [enableNoteStatus, enableMeetingStatusState] = useMutation(EnableNotePadDocument, {
+        onCompleted: (data) => {
+            reset()
+            refetch();
+            setNotesModalVisible(false);
+            Alert.alert("success", "Status Update successfully!");
+        },
+        onError: (error) => {
+            Alert.alert("Error", error.message);
+        }
+    });
+    const onSubmitNotes = (data: any) => {
+        let param = {
+            "ids": [Number(noteId)],
+            "status": data.status.value,
+        }
+        enableNoteStatus({
+            variables: {
+                updateMeetingStatusInput: param
+            },
+        });
     };
     return (
         <CustomHeader
@@ -249,6 +282,27 @@ const MyNotes = () => {
                                         <Feather name="edit" size={16} color="#fff" />
                                         <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Edit</ThemedText>
                                     </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setnoteId(item.id);
+                                            setNotesModalVisible(true);
+                                        }}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            paddingVertical: vs(8),
+                                            paddingHorizontal: ms(12),
+                                            borderRadius: 10,
+                                            backgroundColor: "#8B5CF6",
+                                            opacity: 0.8
+                                        }}
+                                    >
+                                        <MaterialIcons name="autorenew" size={18} color='#fff' />
+                                        <ThemedText style={{ color: '#fff', marginLeft: 8, fontSize: 14, fontWeight: '500' }}>Status</ThemedText>
+                                    </TouchableOpacity>
+
                                     <TouchableOpacity
                                         onPress={() => {
                                             Alert.alert(
@@ -368,6 +422,75 @@ const MyNotes = () => {
                     </View>
                 </View>
             </Modal>
+            {/* status modal  */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isNotesModalVisible}
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0,0,0,0.5)', // Optional: dim background
+                    }}
+                >
+                    <View
+                        style={{
+                            backgroundColor: Colors[theme].cart,
+                            height: vs(250),
+                            width: s(300),
+                            borderRadius: 10,
+                            padding: 10,
+                        }}
+                    >
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                padding: 10,
+                            }}
+                        >
+                            <ThemedText type="subtitle">Change Status</ThemedText>
+                            <Pressable onPress={() => setNotesModalVisible(false)}>
+                                <Entypo
+                                    name="cross"
+                                    size={ms(20)}
+                                    color={Colors[theme].text}
+                                />
+                            </Pressable>
+                        </View>
+                        <View style={{ padding: 10 }}>
+                            <CustomValidation
+                                data={statusData}
+                                type="picker"
+                                hideStar
+                                control={control}
+                                name="status"
+                                label={`Status`}
+                                placeholder="Select status"
+                                rules={{
+                                    required: {
+                                        value: true,
+                                        message: "Select status",
+                                    },
+                                }}
+                            />
+                            <CustomButton
+                                title="Submit"
+                                onPress={() => {
+                                    handleSubmit(onSubmitNotes)();
+                                }}
+                                style={{
+                                    backgroundColor: Colors[theme].background,
+                                    marginTop: vs(20),
+                                }}
+                            />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
             <FAB
                 size="small"
                 title="Create Note"
@@ -375,7 +498,7 @@ const MyNotes = () => {
                     position: "absolute",
                     margin: 15,
                     right: 0,
-                    bottom: 0,
+                    bottom: insets.bottom,
                 }}
                 icon={{
                     name: "add",

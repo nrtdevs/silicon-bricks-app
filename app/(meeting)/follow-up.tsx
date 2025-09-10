@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import * as SecureStore from "expo-secure-store";
 import { Env } from "@/constants/ApiEndpoints";
 import debounce from "lodash.debounce";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const defaultValue = {
     body: "",
@@ -30,6 +31,7 @@ const defaultValue = {
 const FollowUp = () => {
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const insets = useSafeAreaInsets();
     const [userId, setUserId] = useState<number>(0);
     const [addEditManage, setAddEditManage] = useState(false);
     const [isAddEditModalVisible, setAddEditModalVisible] = useState(false);
@@ -483,7 +485,7 @@ const FollowUp = () => {
                     position: "absolute",
                     margin: 10,
                     right: 0,
-                    bottom: 0,
+                    bottom: insets.bottom,
                 }}
                 icon={{
                     name: "add",

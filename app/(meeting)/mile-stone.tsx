@@ -1,4 +1,4 @@
-import CustomHeader from "@/components/CustomHeader";
+ import CustomHeader from "@/components/CustomHeader";
 import NoDataFound from "@/components/NoDataFound";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";

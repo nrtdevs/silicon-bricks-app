@@ -18,6 +18,7 @@ import { FAB } from "@rneui/themed";
 import { router, useFocusEffect } from "expo-router";
 import { Env } from "@/constants/ApiEndpoints";
 import debounce from "lodash.debounce";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const defaultValue = {
     name: "",
@@ -31,6 +32,7 @@ const MeetingType = () => {
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [meetingTypeList, setMeetingTypeList] = useState();
     const [search, setSearch] = useState(false);
+    const insets = useSafeAreaInsets();
     /// serach state 
     const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -90,7 +92,6 @@ const MeetingType = () => {
                     },
                 },
             });
-
     };
 
     useEffect(() => {
@@ -372,7 +373,7 @@ const MeetingType = () => {
                     position: "absolute",
                     margin: 15,
                     right: 0,
-                    bottom: 0,
+                    bottom: insets.bottom,
                 }}
                 icon={{
                     name: "add",

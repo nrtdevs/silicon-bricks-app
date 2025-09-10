@@ -1113,3 +1113,34 @@ mutation UpdateServiceCenter($updateServiceCenterInput: UpdateServiceCenterDto!)
     name
   }
 }
+# Create chat message 
+mutation CreateChat($input: CreateChatInput!) {
+  createChat(input: $input) {
+    id
+    content
+    sender {
+      id
+    }
+    receiver {
+      id
+    }
+    organizationId
+    organization {
+      id
+    }
+    createdBy {
+      id
+    }
+  }
+}
+# Enable NotePad status
+mutation EnableNotePad($updateMeetingStatusInput: NotePadStatusDto!) {
+  enableNotePad(updateMeetingStatusInput: $updateMeetingStatusInput) {
+    ... on NotePad {
+      id
+      UserId
+      notesField
+      status
+    }
+  }
+}

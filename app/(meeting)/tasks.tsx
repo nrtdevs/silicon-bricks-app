@@ -17,6 +17,7 @@ import debounce from "lodash.debounce";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, Alert, FlatList, Modal, Pressable, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ms, s, ScaledSheet, vs } from "react-native-size-matters";
 
 const TaskScreen = () => {
@@ -26,6 +27,7 @@ const TaskScreen = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [neetingTaskList, setMeetingTaskList] = useState();
     const [search, setSearch] = useState(false);
+    const insets = useSafeAreaInsets();
     /// serach state 
     const [searchQuery, setSearchQuery] = useState<string>("");
     /// fetch Meeting task api 
@@ -381,7 +383,7 @@ const TaskScreen = () => {
                     position: "absolute",
                     margin: 10,
                     right: 0,
-                    bottom: 0,
+                    bottom: insets.bottom,
                 }}
                 icon={{
                     name: "add",

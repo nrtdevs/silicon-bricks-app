@@ -1141,3 +1141,11 @@ query PaginatedServiceCenters($listInputDto: ListInputDTO!) {
     }
   }
 }
+# Get chat Details 
+query GetChats($otherUserId: Int!) {
+  getChats(otherUserId: $otherUserId) {
+    id
+    content
+    organizationId
+  }
+}
