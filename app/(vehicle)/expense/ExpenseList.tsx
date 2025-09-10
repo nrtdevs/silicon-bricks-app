@@ -98,6 +98,7 @@ const ExpenseList = () => {
             <Entypo name="dots-three-vertical" size={ms(18)} color={Colors[theme].text} />
           </Pressable>
         }
+        status={item?.status === "pending" ? "red" : "green"} 
       />
     );
   };

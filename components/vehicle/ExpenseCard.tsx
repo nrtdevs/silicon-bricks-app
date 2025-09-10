@@ -8,7 +8,6 @@ import { Animated, Easing, Text, TouchableOpacity, View } from 'react-native';
 import { ms, ScaledSheet } from 'react-native-size-matters';
 import { ThemedText } from '../ThemedText';
 
-
 interface VehicleCardProps {
   item: any;
   onEdit: () => void;
@@ -16,35 +15,11 @@ interface VehicleCardProps {
   onChangeStatus: () => void;
   onView: () => void;
   dots: React.ReactNode; 
+  status?: string;
 
 }
 
-const statusColors: Record<Breakdown_Status, readonly [string, string]> = {
-  [Breakdown_Status.Approved]: ['#10B981', '#059669'],
-  [Breakdown_Status.Assigned]: ['#3B82F6', '#2563EB'],
-  [Breakdown_Status.Cancelled]: ['#EF4444', '#DC2626'],
-  [Breakdown_Status.InService]: ['#3B82F6', '#2563EB'],
-  [Breakdown_Status.Pending]: ['#F59E0B', '#D97706'],
-  [Breakdown_Status.Rejected]: ['#EF4444', '#DC2626'],
-  [Breakdown_Status.RepairFailed]: ['#EF4444', '#DC2626'],
-  [Breakdown_Status.Repaired]: ['#10B981', '#059669'],
-  [Breakdown_Status.ServiceScheduled]: ['#8B5CF6', '#7C3AED'],
-};
-
-const statusIcons: Record<Breakdown_Status, keyof typeof Ionicons.glyphMap> = {
-  [Breakdown_Status.Approved]: 'checkmark-circle',
-  [Breakdown_Status.Assigned]: 'person-add',
-  [Breakdown_Status.Cancelled]: 'close-circle',
-  [Breakdown_Status.InService]: 'hammer',
-  [Breakdown_Status.Pending]: 'time',
-  [Breakdown_Status.Rejected]: 'alert-circle',
-  [Breakdown_Status.RepairFailed]: 'warning',
-  [Breakdown_Status.Repaired]: 'build',
-  [Breakdown_Status.ServiceScheduled]: 'calendar',
-};
-
-
-interface DetailRowProps { icon: 'location'; label: string; value: string; theme: 'light' | 'dark'; }
+interface DetailRowProps { icon: 'location' | 'pricetag' | 'calendar'; label: string; value: string; theme: 'light' | 'dark'; }
 
 const DetailRow: React.FC<DetailRowProps> = ({ icon, label, value, theme }) => (
   <View style={styles.detailRow}>
@@ -87,13 +62,15 @@ const ExpenseCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onCha
     return null;
   }
 
-  console.log("item",item)
+  // Get status from props safely
+  const status: Breakdown_Status = item?.status as Breakdown_Status;
+
+  const currentStatus = status || "gray";
 
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const [scaleValue] = useState(new Animated.Value(1));
 
-  const currentStatus: Breakdown_Status = item.status && statusColors[item.status] ? item.status : Breakdown_Status.Pending;
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -144,22 +121,12 @@ const ExpenseCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onCha
           </View>
 
           <LinearGradient
-            colors={statusColors[currentStatus]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
+            colors={[currentStatus, currentStatus]} 
             style={styles.statusBadge}
           >
-            <Ionicons
-              name={statusIcons[currentStatus]}
-              size={ms(12)}
-              color={Colors.white}
-              style={styles.statusIcon}
-            />
-            <ThemedText style={styles.statusText} type='default'>
-              {currentStatus.toUpperCase()}
-            </ThemedText>
-
+            <ThemedText style={styles.statusText}>{status}</ThemedText>
           </LinearGradient>
+
           <View style={styles.dotsContainer}>
             {dots}
           </View>
@@ -171,14 +138,14 @@ const ExpenseCard: React.FC<VehicleCardProps> = ({ item, onEdit, onDelete, onCha
         {/* Vehicle Details */}
         <View style={styles.detailsContainer}>
           <DetailRow
-            icon="location"
-            label="Expense Type"
+            icon="pricetag"
+            label="Type"
             value={item?.item?.expenseType}
             theme={theme}
           />
           <DetailRow
-            icon="location"
-            label="Expense Date"
+            icon="calendar"
+            label="Date"
             value={item?.item?.expenseDate}
             theme={theme}
           />
