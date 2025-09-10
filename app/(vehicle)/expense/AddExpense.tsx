@@ -235,6 +235,7 @@ const AddExpense = () => {
                                             <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
                                                 {file.url.split("/").pop()}
                                             </Text>
+
                                         </View>
                                     ))}
                                 </View>
