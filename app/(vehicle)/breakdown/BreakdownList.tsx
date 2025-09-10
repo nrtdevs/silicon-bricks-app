@@ -27,6 +27,7 @@ const BreakdownList = () => {
     const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
     const [selectedItem, setSelectedItem] = useState<any>(null);
 
+    console.log("selectedItem", selectedItem)
     const scaleAnim = useRef(new Animated.Value(0)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -188,10 +189,10 @@ const BreakdownList = () => {
         closeModal();
 
         switch (action) {
-            case 'edit':
+            case 'expense':
                 router.navigate({
-                    pathname: "/(vehicle)/breakdown/AddBreakdown",
-                    params: { data: JSON.stringify(selectedItem?.id) },
+                    pathname: "/(vehicle)/breakdown/AddExpense",
+                    params: { data: JSON.stringify(Number(selectedItem?.id)) },
                 });
                 break;
             case 'view':
