@@ -18,28 +18,19 @@ import * as DocumentPicker from "expo-document-picker";
 import { Image } from 'react-native';
 import { Env } from '@/constants/ApiEndpoints';
 
-const BreakDownSchema = z.object({
-    breakdownDate: z.string().min(1, "Breakdown Date is required"),
-    breakdownDescription: z.string().min(1, "Breakdown Description is required"),
-    breakdownLocation: z.string().min(1, "Breakdown Location is required"),
-    breakdownType: z.object({
+const ExpenseSchema = z.object({
+    amount: z.string().min(1, "Amount is required"),
+    breakDownId: z.object({
         label: z.string(),
         value: z.string(),
-    }, { required_error: "Breakdown Type is required" }),
-    latitude: z.string()
-        .min(1, "Latitude is required")
-        .refine((val) => {
-            const num = parseFloat(val);
-            return !isNaN(num) && num >= -90 && num <= 90;
-        }, { message: "Invalid Latitude" }),
-
-    longitude: z.string()
-        .min(1, "Longitude is required")
-        .refine((val) => {
-            const num = parseFloat(val);
-            return !isNaN(num) && num >= -180 && num <= 180;
-        }, { message: "Invalid Longitude" }),
-    mediaUrl: z.array(z.object({
+    }, { required_error: "Breakdown is required" }),
+    description: z.string().min(1, "Description is required"),
+    expenseDate: z.string().min(1, "Expense Date is required"),
+    expenseType: z.object({
+        label: z.string(),
+        value: z.string(),
+    }, { required_error: "Expense Type is required" }),
+    uploadDoc: z.array(z.object({
         mediaType: z.string(),
         url: z.string(),
     })).optional(),
@@ -51,13 +42,12 @@ const BreakDownSchema = z.object({
 
 
 const defaultValues = {
-    breakdownDate: '',
-    breakdownDescription: '',
-    breakdownLocation: '',
-    breakdownType: undefined,
-    latitude: '',
-    longitude: '',
-    mediaUrl: [],
+    amount: '',
+    breakDownId: undefined,
+    description: '',
+    expenseDate: '',
+    expenseType: undefined,
+    uploadDoc: [],
     vehicleId: undefined,
 }
 
@@ -69,9 +59,9 @@ const AddExpense = () => {
     const [hasMore, setHasMore] = useState(true);
     const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
-    const [VehiclesBreakdownType, { data: BreakdownTypeData }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
-    const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof BreakDownSchema>>({
-        resolver: zodResolver(BreakDownSchema),
+    const [GetExpenseTypeSuggestions, { data: ExpenseTypeData }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument); // Assuming GetBreakdownTypeSuggestionsDocument can be reused for expense types or a new one needs to be created.
+    const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof ExpenseSchema>>({
+        resolver: zodResolver(ExpenseSchema),
         defaultValues: defaultValues
     });
 
@@ -90,23 +80,25 @@ const AddExpense = () => {
     }, [currentPage, hasMore, VehiclesDropdownApi]);
 
       useEffect(() => {
-        VehiclesBreakdownType();
-      }, [ VehiclesBreakdownType]);
+          GetExpenseTypeSuggestions();
+      }, [GetExpenseTypeSuggestions]);
 
-    const watchedBreakdownType = watch("breakdownType");
+    const watchedExpenseType = watch("expenseType");
     const watchedVehicleId = watch("vehicleId");
+    const watchedBreakDownId = watch("breakDownId");
 
-    const BreakDownData = BreakdownTypeData?.getBreakdownTypeSuggestions
+
+    const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions // Renamed for clarity
     const Maindata = DropdownData?.vehiclesDropdown.data || []
 
     const dropdownOptions = useMemo(() => Maindata?.map((item) => ({
         label: item?.model || "",
         value: item?.id || "",
     })), [Maindata]);
-    const DropdownBreakType = useMemo(() => BreakDownData?.map((item) => ({
+    const DropdownExpenseType = useMemo(() => ExpenseTypeDataOptions?.map((item) => ({
         label: item || "",
         value: item || "",
-    })) || [], [BreakDownData]);
+    })) || [], [ExpenseTypeDataOptions]);
 
     const pickMedia = async () => {
         const result = await DocumentPicker.getDocumentAsync({
@@ -158,14 +150,14 @@ const AddExpense = () => {
                     >
                         <View>
                             <CustomDropdownApi
-                                options={DropdownBreakType}
-                                placeholder="Select Breakdown Type"
+                                options={DropdownExpenseType}
+                                placeholder="Select Expense Type"
                                 control={control}
-                                name="breakdownType"
-                                error={errors.breakdownType as any}
-                                label="Breakdown Type"
+                                name="expenseType"
+                                error={errors.expenseType as any}
+                                label="Expense Type"
                                 required={true}
-                                value={watchedBreakdownType}
+                                value={watchedExpenseType}
                             />
                             <CustomDropdownApi
                                 options={dropdownOptions}
@@ -177,10 +169,20 @@ const AddExpense = () => {
                                 required={true}
                                 value={watchedVehicleId}
                             />
+                            <CustomDropdownApi
+                                options={dropdownOptions}
+                                placeholder="Select Breakdown"
+                                control={control}
+                                name="breakDownId"
+                                error={errors.breakDownId as any}
+                                label="Breakdown"
+                                required={true}
+                                value={watchedBreakDownId}
+                            />
                             <CustomDatePicker
                                 control={control}
-                                name="insuranceValidTill"
-                                label="Insurance Date"
+                                name="expenseDate"
+                                label="Expense Date"
                                 mode="date"
                                 required
                             />
@@ -191,17 +193,17 @@ const AddExpense = () => {
                                 placeholder="Enter Amount"
                                 required={true}
                                 type='number'
-                                error={errors.breakdownDate?.message}
+                                error={errors.amount?.message}
                             />
                             <CustomInput
-                                name="breakdownDescription"
+                                name="description"
                                 control={control}
                                 label="Description"
-                                placeholder="Describe the breakdown issue..."
+                                placeholder="Describe the expense..."
                                 required={true}
                                 multiline={true}
                                 numberOfLines={5}
-                                error={errors.breakdownDescription?.message}
+                                error={errors.description?.message}
                             />
                             <View style={styles.mediaUploadArea}>
                                 <Ionicons name="cloud-upload-outline" size={48} color="#C7C7CC" />
@@ -215,32 +217,6 @@ const AddExpense = () => {
                                 </Pressable>
 
                             </View>
-                            {/* Display Server Images */}
-                            {serverImage.length > 0 && (
-                                <View style={styles.mediaPreviewContainer}>
-                                    {serverImage.map((file, index) => (
-                                        <View key={`server-media-${index}`} style={styles.mediaItem}>
-                                            {file.mediaType === "image" ? (
-                                                <Image
-                                                    source={{ uri: Env.IMAGEURL + file.url }}
-                                                    style={styles.mediaThumbnail}
-                                                />
-                                            ) : file.mediaType === "video" ? (
-                                                <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
-                                            ) : file.mediaType === "audio" ? (
-                                                <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
-                                            ) : (
-                                                <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
-                                            )}
-                                            <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
-                                                {file.url.split("/").pop()}
-                                            </Text>
-
-                                        </View>
-                                    ))}
-                                </View>
-                            )}
-
                             {/* Display Local Images */}
                             {uploadedFiles.length > 0 && (
                                 <View style={styles.mediaPreviewContainer}>
@@ -335,5 +311,41 @@ const styles = StyleSheet.create({
         fontSize: ms(16),
         color: '#007AFF',
         fontWeight: '500',
-    }
+    },
+    mediaPreviewContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: ms(20),
+        gap: ms(10),
+    },
+    mediaItem: {
+        width: ms(100),
+        height: ms(100),
+        borderRadius: ms(8),
+        overflow: 'hidden',
+        backgroundColor: '#E5E5EA',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+    },
+    mediaThumbnail: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    IconStyle: {
+        position: 'absolute',
+        zIndex: 1,
+    },
+    mediaFileName: {
+        fontSize: ms(10),
+        marginTop: ms(5),
+        textAlign: 'center',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: ms(-10),
+        right: ms(-10),
+        zIndex: 2,
+    },
 })
