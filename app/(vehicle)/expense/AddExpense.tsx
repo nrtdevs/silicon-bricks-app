@@ -6,7 +6,8 @@ import CustomInput from '@/components/CustomInput';
 import CustomToast from '@/components/CustomToast';
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
-import { CreateVehicleExpenseDocument, GetBreakdownTypeSuggestionsDocument, UpdateVehicleExpenseDocument, VehiclesDropdownDocument } from '@/graphql/generated';
+import { BreakdownDropdownDocument, CreateVehicleExpenseDocument, CreateVehicleExpenseMutation, GetBreakdownTypeSuggestionsDocument, UpdateVehicleExpenseDocument, VehiclesDropdownDocument } from '@/graphql/generated';
+import uploadImage from '@/utils/imageUpload';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +17,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ms } from 'react-native-size-matters';
+import Toast from 'react-native-toast-message';
 import { z } from 'zod';
 
 const ExpenseSchema = z.object({
@@ -60,10 +62,10 @@ const AddExpense = () => {
     const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
     const [GetExpenseTypeSuggestions, { data: ExpenseTypeData, error }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
-
+    const [GetBreakdownApi, { data: Breakdown }] = useLazyQuery(BreakdownDropdownDocument)
 
     //Create Update 
-    const [createExpenseApi, { loading }] = useMutation(CreateVehicleExpenseDocument);
+    const [createExpenseApi, { loading }] = useMutation<CreateVehicleExpenseMutation>(CreateVehicleExpenseDocument);
     const [UpdateExpenseApi, { loading: updateLoading }] = useMutation(UpdateVehicleExpenseDocument);
 
     const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof ExpenseSchema>>({
@@ -92,9 +94,10 @@ const AddExpense = () => {
 
     const watchedExpenseType = watch("expenseType");
     const watchedVehicleId = watch("vehicleId");
+    const breakdownId = watch('breakDownId')
 
 
-    const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions // Renamed for clarity
+    const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions 
     const Maindata = DropdownData?.vehiclesDropdown.data || []
 
 
@@ -135,7 +138,22 @@ const AddExpense = () => {
     };
 
     const onSubmit = async (data: any) => {
+        console.log("data", data)
         try {
+            const localUris = uploadedFiles.map((file) => file.url);
+            const uploadedUrls = await uploadImage(localUris);
+
+            const newFormattedMedia = uploadedFiles.map((file, index) => ({
+                mediaType: file.mediaType,
+                url: uploadedUrls[index],
+            }));
+
+            Toast.show({
+                type: "success",
+                text1: "Image Uploaded",
+            });
+
+
             if (parsedData) {
                 UpdateExpenseApi({
                     variables: {
@@ -147,7 +165,7 @@ const AddExpense = () => {
                             expenseType: data?.expenseType,
                             vehicleId: data?.vehicleId?.value,
                             breakDownId: data?.breakDownId?.value,
-                            uploadDoc: 
+                            uploadDoc: JSON.stringify(newFormattedMedia)
                         }
                     }
                 })
@@ -155,17 +173,18 @@ const AddExpense = () => {
                 createExpenseApi({
                     variables: {
                         data: {
-                            amount: data?.amount,
+                            amount: Number(data?.amount),
                             description: data?.description,
                             expenseDate: data?.expenseDate,
-                            expenseType: data?.expenseType,
+                            expenseType: data?.expenseType?.value,
                             vehicleId: data?.vehicleId?.value,
                             breakDownId: data?.breakDownId?.value,
-                            uploadDoc: 
-        }
+                            uploadDoc: JSON.stringify(newFormattedMedia)
+                        }
                     }
                 })
             }
+            router.navigate("/(vehicle)/expense/ExpenseList");
         } catch (error) {
             CustomToast("error");
         }
@@ -214,6 +233,16 @@ const AddExpense = () => {
                                 label="Vehicle"
                                 required={true}
                                 value={watchedVehicleId}
+                            />
+                            <CustomDropdownApi
+                                options={dropdownOptions}
+                                placeholder="Select BreakDown"
+                                control={control}
+                                name="breakDownId"
+                                error={errors.breakDownId as any}
+                                label="BreakDown"
+                                required={true}
+                                value={breakdownId}
                             />
 
                             <CustomDatePicker

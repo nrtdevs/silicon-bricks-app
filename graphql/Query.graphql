@@ -1241,3 +1241,22 @@ query PaginatedVehicleExpense($listInputDto: ListInputDTO!, $isTrash: Boolean) {
     }
   }
 }
+
+# breakdown dropdown 
+query BreakdownDropdown($listInputDto: ListInputDTO!) {
+  breakdownDropdown(ListInputDTO: $listInputDto) {
+    meta {
+      totalItems
+      totalPages
+      currentPage
+      limit
+    }
+    data {
+      id
+      vehicle {
+        id
+        model
+      }
+    }
+  }
+}

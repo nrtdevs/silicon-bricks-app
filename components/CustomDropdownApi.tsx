@@ -38,7 +38,7 @@ const CustomDropdownApi = ({ options, onSelect, placeholder = "Select an option"
     const openModal = () => {
         setModalVisible(true);
         Animated.timing(slideAnim, {
-            toValue: 0,  // 👈 modal bottom se 0 position par slide karega
+            toValue: 0,  
             duration: 300,
             useNativeDriver: true,
         }).start();
@@ -46,7 +46,7 @@ const CustomDropdownApi = ({ options, onSelect, placeholder = "Select an option"
 
     const closeModal = () => {
         Animated.timing(slideAnim, {
-            toValue: screenHeight, // 👈 screen ke bahar slide back
+            toValue: screenHeight, 
             duration: 300,
             useNativeDriver: true,
         }).start(() => {
