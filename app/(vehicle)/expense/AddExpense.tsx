@@ -66,7 +66,9 @@ const AddExpense = () => {
     const [FindVehicleByid, { data: FindData }] = useLazyQuery(FindVehicleExpenseByIdDocument)
 
 
-    const EditDataSave = FindData?.findVehicleExpenseById || []
+    const EditDataSave = FindData?.findVehicleExpenseById
+
+    console.log(EditDataSave)
 
     //Create Update 
     const [createExpenseApi, { loading, error }] = useMutation<CreateVehicleExpenseMutation>(CreateVehicleExpenseDocument);
@@ -103,16 +105,47 @@ const AddExpense = () => {
         GetExpenseTypeSuggestions(); 
     }, [parsedData, fetchData, GetExpenseTypeSuggestions]);
 
+
+    const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions;
+    const Maindata = DropdownData?.vehiclesDropdown.data || [];
+    const BreakdownDataOptions = Breakdown?.breakdownDropdown.data || [];
+
+
+    const dropdownOptions = useMemo(() => Maindata?.map((item) => ({
+        label: item?.model || "",
+        value: item?.id || "",
+    })), [Maindata]);
+
+    const DropdownExpenseType = useMemo(() => ExpenseTypeDataOptions?.map((item) => ({
+        label: item || "",
+        value: item || "",
+    })) || [], [ExpenseTypeDataOptions]);
+
+    const DropdownBreakdown = useMemo(() => BreakdownDataOptions?.map((item) => ({
+        label: item?.breakdownType || "",
+        value: item?.id || "",
+    })) || [], [BreakdownDataOptions]);
+
+
     useEffect(() => {
         if (EditDataSave) {
             reset({
-                amount: Number(Number(EditDataSave?.amount)),
+                amount: String(EditDataSave?.amount),
                 // breakDownId: details.breakDownId ? { label: details.breakDown?.name || "", value: details.breakDownId } : undefined,
                 // description: details.description || '',
-                // expenseDate: details.expenseDate || '',
+                expenseDate: EditDataSave.expenseDate,
                 // expenseType: details.expenseType ? { label: details.expenseType, value: details.expenseType } : undefined,
                 // uploadDoc: details.uploadDoc ? JSON.parse(details.uploadDoc) : [],
                 // vehicleId: details.vehicleId ? { label: details.vehicle?.model || "", value: details.vehicleId } : undefined,
+
+                // Find and set breakdownType
+                const foundExpenseype = DropdownExpenseType.find(
+                    (option) => option.value === EditDataSave?.expenseType
+                );
+
+                if(foundExpenseype) {
+                    setValue('expenseType', foundExpenseype);
+                }
             });
             // Also set uploadedFiles state for display
             // if (EditDataSave.uploadDoc) {
@@ -140,25 +173,7 @@ const AddExpense = () => {
     }, [breakdownId]);
 
 
-    const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions;
-    const Maindata = DropdownData?.vehiclesDropdown.data || [];
-    const BreakdownDataOptions = Breakdown?.breakdownDropdown.data || [];
 
-
-    const dropdownOptions = useMemo(() => Maindata?.map((item) => ({
-        label: item?.model || "",
-        value: item?.id || "",
-    })), [Maindata]);
-
-    const DropdownExpenseType = useMemo(() => ExpenseTypeDataOptions?.map((item) => ({
-        label: item || "",
-        value: item || "",
-    })) || [], [ExpenseTypeDataOptions]);
-
-    const DropdownBreakdown = useMemo(() => BreakdownDataOptions?.map((item) => ({
-        label: item?.breakdownType || "",
-        value: item?.id || "",
-    })) || [], [BreakdownDataOptions]);
 
     const pickMedia = async () => {
         const result = await DocumentPicker.getDocumentAsync({
