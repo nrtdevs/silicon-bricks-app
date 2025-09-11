@@ -3,6 +3,7 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomDropdownApi from '@/components/CustomDropdownApi';
 import CustomHeader from '@/components/CustomHeader';
 import CustomInput from '@/components/CustomInput';
+import { Env } from '@/constants/ApiEndpoints';
 import { Colors } from '@/constants/Colors';
 import { formatDate } from '@/constants/Dateformat';
 import { useTheme } from '@/context/ThemeContext';
@@ -59,6 +60,8 @@ const AddExpense = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [hasMore, setHasMore] = useState(true);
     const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
+    const [serverImage, setserverUploadedFiles] = useState<Array<{ mediaType: string; url: string; id?: string }>>([])
+    const [removedFileIds, setRemovedFileIds] = useState<string[]>([]);
     const [isUploadingImages, setIsUploadingImages] = useState(false); 
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
     const [GetExpenseTypeSuggestions, { data: ExpenseTypeData }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
@@ -215,7 +218,8 @@ const AddExpense = () => {
                             expenseType: data?.expenseType?.value,
                             vehicleId: data?.vehicleId?.value,
                             breakDownId: data?.breakDownId?.value,
-                            uploadDoc: JSON.stringify(newFormattedMedia)
+                            uploadDoc: JSON.stringify(newFormattedMedia),
+                            removedFileIds: removedFileIds
                         }
                     }
                 });
@@ -332,6 +336,42 @@ const AddExpense = () => {
                                 </Pressable>
 
                             </View>
+                            {/* Display Server Images */}
+                            {serverImage.length > 0 && (
+                                <View style={styles.mediaPreviewContainer}>
+                                    {serverImage.map((file, index) => (
+                                        <View key={`server-media-${index}`} style={styles.mediaItem}>
+                                            {file.mediaType === "image" ? (
+                                                <Image
+                                                    source={{ uri: Env.IMAGEURL + file.url }}
+                                                    style={styles.mediaThumbnail}
+                                                />
+                                            ) : file.mediaType === "video" ? (
+                                                <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
+                                            ) : file.mediaType === "audio" ? (
+                                                <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
+                                            ) : (
+                                                <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
+                                            )}
+                                            <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
+                                                {file.url.split("/").pop()}
+                                            </Text>
+                                            <Pressable
+                                                onPress={() => {
+                                                    const id = file?.id;
+                                                    if (id) {
+                                                        setRemovedFileIds((prev) => [...prev, String(id)]);
+                                                        setserverUploadedFiles((prev) => prev.filter((item) => item.id !== id));
+                                                    }
+                                                }}
+                                                style={styles.closeButton}
+                                            >
+                                                <Ionicons name="close-circle" size={30} color="#FF3B30" />
+                                            </Pressable>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
                             {/* Display Local Images */}
                             {uploadedFiles.length > 0 && (
                                 <View style={styles.mediaPreviewContainer}>
