@@ -63,7 +63,6 @@ const AddExpense = () => {
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
     const [GetExpenseTypeSuggestions, { data: ExpenseTypeData, error }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
     const [GetBreakdownApi, { data: Breakdown }] = useLazyQuery(BreakdownDropdownDocument);
-    console.log("Breakdown", Breakdown)
 
     //Create Update 
     const [createExpenseApi, { loading }] = useMutation<CreateVehicleExpenseMutation>(CreateVehicleExpenseDocument);
@@ -151,7 +150,7 @@ const AddExpense = () => {
     })) || [], [ExpenseTypeDataOptions]);
 
     const DropdownBreakdown = useMemo(() => BreakdownDataOptions?.map((item) => ({
-        label: item?.vehicle?.model || "",
+        label: item?.breakdownType || "",
         value: item?.id || "",
     })) || [], [BreakdownDataOptions]);
 
@@ -182,7 +181,6 @@ const AddExpense = () => {
     };
 
     const onSubmit = async (data: any) => {
-        console.log("data", data)
         try {
             const localUris = uploadedFiles.map((file) => file.url);
             const uploadedUrls = await uploadImage(localUris);
@@ -191,6 +189,7 @@ const AddExpense = () => {
                 mediaType: file.mediaType,
                 url: uploadedUrls[index],
             }));
+            console.log("data", newFormattedMedia)
 
             Toast.show({
                 type: "success",
