@@ -1,11 +1,13 @@
+import CustomButton from '@/components/CustomButton';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomDropdownApi from '@/components/CustomDropdownApi';
 import CustomHeader from '@/components/CustomHeader';
 import CustomInput from '@/components/CustomInput';
+import CustomToast from '@/components/CustomToast';
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
-import { GetBreakdownTypeSuggestionsDocument, VehiclesDropdownDocument } from '@/graphql/generated';
-import { useLazyQuery } from '@apollo/client';
+import { CreateVehicleExpenseDocument, GetBreakdownTypeSuggestionsDocument, UpdateVehicleExpenseDocument, VehiclesDropdownDocument } from '@/graphql/generated';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as DocumentPicker from "expo-document-picker";
@@ -17,7 +19,7 @@ import { ms } from 'react-native-size-matters';
 import { z } from 'zod';
 
 const ExpenseSchema = z.object({
-    amount: z.string().min(1, "Amount is required"),
+    amount: z.string().min(1, "Amount is required").max(100),
     breakDownId: z.object({
         label: z.string(),
         value: z.string(),
@@ -57,7 +59,13 @@ const AddExpense = () => {
     const [hasMore, setHasMore] = useState(true);
     const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
-    const [GetExpenseTypeSuggestions, { data: ExpenseTypeData, error }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument); // Assuming GetBreakdownTypeSuggestionsDocument can be reused for expense types or a new one needs to be created.
+    const [GetExpenseTypeSuggestions, { data: ExpenseTypeData, error }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
+
+
+    //Create Update 
+    const [createExpenseApi, { loading }] = useMutation(CreateVehicleExpenseDocument);
+    const [UpdateExpenseApi, { loading: updateLoading }] = useMutation(UpdateVehicleExpenseDocument);
+
     const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof ExpenseSchema>>({
         resolver: zodResolver(ExpenseSchema),
         defaultValues: defaultValues
@@ -77,10 +85,10 @@ const AddExpense = () => {
         }
     }, [currentPage, hasMore, VehiclesDropdownApi]);
 
-      useEffect(() => {
-          fetchData()
-          GetExpenseTypeSuggestions();
-      }, [GetExpenseTypeSuggestions]);
+    useEffect(() => {
+        fetchData()
+        GetExpenseTypeSuggestions();
+    }, [GetExpenseTypeSuggestions]);
 
     const watchedExpenseType = watch("expenseType");
     const watchedVehicleId = watch("vehicleId");
@@ -125,6 +133,44 @@ const AddExpense = () => {
             setUploadedFiles((prev) => [...prev, ...newFiles]);
         }
     };
+
+    const onSubmit = async (data: any) => {
+        try {
+            if (parsedData) {
+                UpdateExpenseApi({
+                    variables: {
+                        updateVehicleExpenseInput: {
+                            id: Number(parsedData),
+                            amount: data?.amount,
+                            description: data?.description,
+                            expenseDate: data?.expenseDate,
+                            expenseType: data?.expenseType,
+                            vehicleId: data?.vehicleId?.value,
+                            breakDownId: data?.breakDownId?.value,
+                            uploadDoc: 
+                        }
+                    }
+                })
+            } else {
+                createExpenseApi({
+                    variables: {
+                        data: {
+                            amount: data?.amount,
+                            description: data?.description,
+                            expenseDate: data?.expenseDate,
+                            expenseType: data?.expenseType,
+                            vehicleId: data?.vehicleId?.value,
+                            breakDownId: data?.breakDownId?.value,
+                            uploadDoc: 
+        }
+                    }
+                })
+            }
+        } catch (error) {
+            CustomToast("error");
+        }
+    }
+
     return (
         <CustomHeader
             title={parsedData ? "Update Expense" : "Create Expense"}
@@ -241,6 +287,11 @@ const AddExpense = () => {
                                     ))}
                                 </View>
                             )}
+                            <CustomButton
+                                title={parsedData?.id ? "Update Expense" : "Create Expense"}
+                                onPress={handleSubmit(onSubmit)}
+                                style={styles.button}
+                            />
                         </View>
                     </ScrollView>
                 </SafeAreaView>
@@ -263,6 +314,9 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         padding: ms(10)
+    },
+    button: {
+        marginTop: ms(15)
     },
     scrollViewContent: {
         flexGrow: 1,

@@ -1157,3 +1157,22 @@ mutation ChangeBreakdownStatus($data: BreakdownStatusDto!) {
     status
   }
 }
+
+# create vehicle expense 
+mutation CreateVehicleExpense($data: CreateVehicleExpenseDto!) {
+  createVehicleExpense(data: $data) {
+    amount
+    expenseDate
+    expenseType
+  }
+}
+
+# update vehicle expense
+mutation UpdateVehicleExpense($updateVehicleExpenseInput: UpdateVehicleExpenseDto!) {
+  updateVehicleExpense(updateVehicleExpenseInput: $updateVehicleExpenseInput) {
+    amount
+    description
+    expenseDate
+    expenseType
+  }
+}
