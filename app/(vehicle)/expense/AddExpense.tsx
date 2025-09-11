@@ -4,8 +4,9 @@ import CustomDropdownApi from '@/components/CustomDropdownApi';
 import CustomHeader from '@/components/CustomHeader';
 import CustomInput from '@/components/CustomInput';
 import { Colors } from '@/constants/Colors';
+import { formatDate } from '@/constants/Dateformat';
 import { useTheme } from '@/context/ThemeContext';
-import { BreakdownDropdownDocument, CreateVehicleExpenseDocument, CreateVehicleExpenseMutation, GetBreakdownTypeSuggestionsDocument, UpdateVehicleExpenseDocument, VehiclesDropdownDocument } from '@/graphql/generated';
+import { BreakdownDropdownDocument, CreateVehicleExpenseDocument, CreateVehicleExpenseMutation, GetBreakdownTypeSuggestionsDocument, UpdateVehicleExpenseDocument, UpdateVehicleExpenseMutation, VehiclesDropdownDocument } from '@/graphql/generated';
 import uploadImage from '@/utils/imageUpload';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,9 +15,8 @@ import * as DocumentPicker from "expo-document-picker";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ms } from 'react-native-size-matters';
-import Toast from 'react-native-toast-message';
 import { z } from 'zod';
 
 const ExpenseSchema = z.object({
@@ -59,18 +59,23 @@ const AddExpense = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [hasMore, setHasMore] = useState(true);
     const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
+    const [isUploadingImages, setIsUploadingImages] = useState(false); // New state for image upload loading
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
-    const [GetExpenseTypeSuggestions, { data: ExpenseTypeData, error }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
+    const [GetExpenseTypeSuggestions, { data: ExpenseTypeData }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
     const [GetBreakdownApi, { data: Breakdown }] = useLazyQuery(BreakdownDropdownDocument);
 
     //Create Update 
-    const [createExpenseApi, { loading }] = useMutation<CreateVehicleExpenseMutation>(CreateVehicleExpenseDocument);
-    const [UpdateExpenseApi, { loading: updateLoading }] = useMutation(UpdateVehicleExpenseDocument);
+    const [createExpenseApi, { loading, error }] = useMutation<CreateVehicleExpenseMutation>(CreateVehicleExpenseDocument);
+    const [UpdateExpenseApi, { loading: updateLoading }] = useMutation<UpdateVehicleExpenseMutation>(UpdateVehicleExpenseDocument);
 
+    console.log("erorr", error?.graphQLErrors)
     const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof ExpenseSchema>>({
         resolver: zodResolver(ExpenseSchema),
         defaultValues: defaultValues
     });
+
+
+
 
     // Fetch data function
     const fetchData = useCallback(() => {
@@ -179,9 +184,9 @@ const AddExpense = () => {
         }
     };
 
-    const onSubmit = async (data: any) => {
-        console.log("data", data)
+    const onSubmit = async (data: z.infer<typeof ExpenseSchema>) => {
         try {
+            setIsUploadingImages(true);
             const localUris = uploadedFiles.map((file) => file.url);
             const uploadedUrls = await uploadImage(localUris);
 
@@ -189,65 +194,42 @@ const AddExpense = () => {
                 mediaType: file.mediaType,
                 url: uploadedUrls[index],
             }));
-            console.log("data", newFormattedMedia)
-
-            if (uploadedFiles.length > 0 && uploadedUrls.length > 0) {
-                Toast.show({
-                    type: "success",
-                    text1: "Images Uploaded",
-                    text2: "All files uploaded successfully ✅",
-                });
-            }
-
-            console.log("uploaded image") 
 
             if (parsedData) {
-                console.log("update")
                 await UpdateExpenseApi({
                     variables: {
                         updateVehicleExpenseInput: {
                             id: Number(parsedData),
-                            amount: data?.amount,
+                            amount: Number(data?.amount),
                             description: data?.description,
                             expenseDate: data?.expenseDate,
-                            expenseType: data?.expenseType,
+                            expenseType: data?.expenseType?.value,
                             vehicleId: data?.vehicleId?.value,
                             breakDownId: data?.breakDownId?.value,
                             uploadDoc: JSON.stringify(newFormattedMedia)
                         }
                     }
                 });
-                Toast.show({
-                    type: "success",
-                    text1: "Expense Updated Successfully",
-                });
             } else {
-                console.log("create")
                 await createExpenseApi({
                     variables: {
                         data: {
                             amount: Number(data?.amount),
                             description: data?.description,
-                            expenseDate: data?.expenseDate,
+                            expenseDate: formatDate(String(data?.expenseDate)),
                             expenseType: data?.expenseType?.value,
-                            vehicleId: data?.vehicleId?.value,
-                            breakDownId: data?.breakDownId?.value || null,
+                            vehicleId: Number(data?.vehicleId?.value),
+                            breakDownId: Number(data?.breakDownId?.value),
                             uploadDoc: JSON.stringify(newFormattedMedia)
                         }
                     }
                 });
-                Toast.show({
-                    type: "success",
-                    text1: "Expense Created Successfully",
-                });
             }
             router.navigate("/(vehicle)/expense/ExpenseList");
         } catch (error) {
-            Toast.show({
-                type: "error",
-                text1: "Images Uploaded",
-                text2: "All files uploaded successfully ✅",
-            });
+            console.log(error)
+        } finally {
+            setIsUploadingImages(false); 
         }
     }
 
@@ -383,6 +365,17 @@ const AddExpense = () => {
                     </ScrollView>
                 </SafeAreaView>
             </View>
+            <Modal
+                transparent={true}
+                animationType="fade"
+                visible={isUploadingImages}
+                onRequestClose={() => { }}
+            >
+                <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="large" color={Colors[theme].tint} />
+                    <Text style={[styles.loadingText, { color: Colors[theme].text }]}>Uploading Images...</Text>
+                </View>
+            </Modal>
         </CustomHeader>
     )
 }
@@ -489,5 +482,16 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.light.background,
         borderRadius: ms(15),
         padding: ms(2),
+    },
+    loadingOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    loadingText: {
+        marginTop: ms(10),
+        fontSize: ms(16),
+        fontWeight: '500',
     },
 })
