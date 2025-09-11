@@ -3,7 +3,6 @@ import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomDropdownApi from '@/components/CustomDropdownApi';
 import CustomHeader from '@/components/CustomHeader';
 import CustomInput from '@/components/CustomInput';
-import CustomToast from '@/components/CustomToast';
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/ThemeContext';
 import { BreakdownDropdownDocument, CreateVehicleExpenseDocument, CreateVehicleExpenseMutation, GetBreakdownTypeSuggestionsDocument, UpdateVehicleExpenseDocument, VehiclesDropdownDocument } from '@/graphql/generated';
@@ -15,9 +14,8 @@ import * as DocumentPicker from "expo-document-picker";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Button, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ms } from 'react-native-size-matters';
-import Toast from 'react-native-toast-message';
 import { z } from 'zod';
 
 const ExpenseSchema = z.object({
@@ -189,15 +187,6 @@ const AddExpense = () => {
                 mediaType: file.mediaType,
                 url: uploadedUrls[index],
             }));
-            console.log("data", newFormattedMedia)
-
-            if (uploadedFiles.length > 0 && uploadedUrls.length > 0) {
-                Toast.show({
-                    type: "success",
-                    text1: "Images Uploaded",
-                    text2: "All files uploaded successfully ✅",
-                });
-            }
 
             if (parsedData) {
                 await UpdateExpenseApi({
@@ -214,10 +203,7 @@ const AddExpense = () => {
                         }
                     }
                 });
-                Toast.show({
-                    type: "success",
-                    text1: "Expense Updated Successfully",
-                });
+
             } else {
                 await createExpenseApi({
                     variables: {
@@ -232,31 +218,14 @@ const AddExpense = () => {
                         }
                     }
                 });
-                Toast.show({
-                    type: "success",
-                    text1: "Expense Created Successfully",
-                });
             }
             router.navigate("/(vehicle)/expense/ExpenseList");
         } catch (error) {
-            Toast.show({
-                type: "error",
-                text1: "Images Uploaded",
-                text2: "All files uploaded successfully ✅",
-            });
+            console.log(error)
         }
     }
 
-    const showToast = () => {
-        Toast.show({
-            type: "success", // "success" | "error" | "info"
-            text1: "Hello 👋",
-            text2: "This is a toast message 🚀",
-            position: "bottom", // 👈 aapne yeh sahi likha hai
-            visibilityTime: 3000, // 3 seconds
-            autoHide: true,
-        });
-    };
+
 
     return (
         <CustomHeader
@@ -282,10 +251,6 @@ const AddExpense = () => {
                         keyboardShouldPersistTaps="handled"
                     >
                         <View>
-                            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                                <Button title="Show Toast" onPress={showToast} />
-                                <Toast />
-                            </View>
                             <CustomDropdownApi
                                 options={DropdownExpenseType}
                                 placeholder="Select Expense Type"
