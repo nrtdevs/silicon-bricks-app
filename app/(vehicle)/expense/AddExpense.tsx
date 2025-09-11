@@ -20,13 +20,13 @@ import Toast from 'react-native-toast-message';
 import { z } from 'zod';
 
 const ExpenseSchema = z.object({
-    amount: z.string().min(1, "Amount is required").max(100),
+    amount: z.string().min(1, "Amount is required").max(100).optional(),
     breakDownId: z.object({
         label: z.string(),
         value: z.string(),
     }).optional(),
-    description: z.string().min(1, "Description is required"),
-    expenseDate: z.string().min(1, "Expense Date is required"),
+    description: z.string().min(1, "Description is required").optional(),
+    expenseDate: z.string().min(1, "Expense Date is required").optional(),
     expenseType: z.object({
         label: z.string(),
         value: z.string(),
@@ -180,7 +180,7 @@ const AddExpense = () => {
     };
 
     const onSubmit = async (data: any) => {
-        console.log("data")
+        console.log("data", data)
         try {
             const localUris = uploadedFiles.map((file) => file.url);
             const uploadedUrls = await uploadImage(localUris);
