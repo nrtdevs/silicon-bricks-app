@@ -131,26 +131,18 @@ const AddExpense = () => {
         if (EditDataSave) {
             reset({
                 amount: String(EditDataSave?.amount),
-                // breakDownId: details.breakDownId ? { label: details.breakDown?.name || "", value: details.breakDownId } : undefined,
-                // description: details.description || '',
+                breakDownId: EditDataSave.breakDown?.id ? { label: EditDataSave.breakDown?.breakdownType || "", value: EditDataSave.breakDown.id } : undefined,
+                description: EditDataSave.description || '',
                 expenseDate: EditDataSave.expenseDate,
-                // expenseType: details.expenseType ? { label: details.expenseType, value: details.expenseType } : undefined,
-                // uploadDoc: details.uploadDoc ? JSON.parse(details.uploadDoc) : [],
-                // vehicleId: details.vehicleId ? { label: details.vehicle?.model || "", value: details.vehicleId } : undefined,
-
-                // Find and set breakdownType
-                const foundExpenseype = DropdownExpenseType.find(
-                    (option) => option.value === EditDataSave?.expenseType
-                );
-
-                if(foundExpenseype) {
-                    setValue('expenseType', foundExpenseype);
-                }
+                expenseType: EditDataSave?.expenseType ? { label: EditDataSave?.expenseType || "", value: EditDataSave.expenseType } : undefined,
+                uploadDoc: EditDataSave.uploadDoc ? JSON.parse(EditDataSave.uploadDoc) : [],
+                vehicleId: EditDataSave.vehicle?.id ? { label: EditDataSave.vehicle?.model || "", value: EditDataSave.vehicle.id } : undefined,
             });
+
             // Also set uploadedFiles state for display
-            // if (EditDataSave.uploadDoc) {
-            //     setUploadedFiles(JSON.parse(EditDataSave.uploadDoc));
-            // }
+            if (EditDataSave.uploadDoc) {
+                setUploadedFiles(JSON.parse(EditDataSave.uploadDoc));
+            }
         }
     }, [EditDataSave, reset]);
 
