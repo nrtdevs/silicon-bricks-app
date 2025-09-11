@@ -55,14 +55,15 @@ const defaultValues = {
 
 const AddExpense = () => {
     const { data } = useLocalSearchParams();
-    const parsedData = data ? JSON.parse(data as string) : null;
+    const parsedData = data ? Number(data as string) : null; // Assuming 'data' is the ID string
     const { theme } = useTheme();
     const [currentPage, setCurrentPage] = useState(1)
     const [hasMore, setHasMore] = useState(true);
     const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
     const [GetExpenseTypeSuggestions, { data: ExpenseTypeData, error }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
-    const [GetBreakdownApi, { data: Breakdown }] = useLazyQuery(BreakdownDropdownDocument)
+    const [GetBreakdownApi, { data: Breakdown }] = useLazyQuery(BreakdownDropdownDocument);
+    console.log("Breakdown", Breakdown)
 
     //Create Update 
     const [createExpenseApi, { loading }] = useMutation<CreateVehicleExpenseMutation>(CreateVehicleExpenseDocument);
@@ -88,17 +89,55 @@ const AddExpense = () => {
     }, [currentPage, hasMore, VehiclesDropdownApi]);
 
     useEffect(() => {
-        fetchData()
-        GetExpenseTypeSuggestions();
-    }, [GetExpenseTypeSuggestions]);
+        // if (parsedData) { // If in edit mode
+        //     getExpenseDetails({ variables: { id: parsedData } });
+        // }
+        fetchData(); // Fetch vehicles
+        GetExpenseTypeSuggestions(); // Fetch expense types
+    }, [parsedData, fetchData, GetExpenseTypeSuggestions]);
+
+    // useEffect(() => {
+    //     if (expenseData?.getVehicleExpenseById) {
+    //         const details = expenseData.getVehicleExpenseById;
+    //         // Pre-fill the form with existing data
+    //         reset({
+    //             amount: String(details.amount), // Convert number to string for input
+    //             breakDownId: details.breakDownId ? { label: details.breakDown?.name || "", value: details.breakDownId } : undefined,
+    //             description: details.description || '',
+    //             expenseDate: details.expenseDate || '',
+    //             expenseType: details.expenseType ? { label: details.expenseType, value: details.expenseType } : undefined,
+    //             uploadDoc: details.uploadDoc ? JSON.parse(details.uploadDoc) : [],
+    //             vehicleId: details.vehicleId ? { label: details.vehicle?.model || "", value: details.vehicleId } : undefined,
+    //         });
+    //         // Also set uploadedFiles state for display
+    //         if (details.uploadDoc) {
+    //             setUploadedFiles(JSON.parse(details.uploadDoc));
+    //         }
+    //     }
+    // }, [expenseData, reset]);
 
     const watchedExpenseType = watch("expenseType");
     const watchedVehicleId = watch("vehicleId");
-    const breakdownId = watch('breakDownId')
+    const breakdownId = watch('breakDownId');
+
+    useEffect(() => {
+
+        GetBreakdownApi({
+            variables: {
+                listInputDto: {
+                    limit: 10,
+                    page: 1,
+                    search: breakdownId?.value
+                }
+            }
+        });
+
+    }, [breakdownId]);
 
 
-    const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions 
-    const Maindata = DropdownData?.vehiclesDropdown.data || []
+    const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions;
+    const Maindata = DropdownData?.vehiclesDropdown.data || [];
+    const BreakdownDataOptions = Breakdown?.breakdownDropdown.data || [];
 
 
     const dropdownOptions = useMemo(() => Maindata?.map((item) => ({
@@ -110,6 +149,11 @@ const AddExpense = () => {
         label: item || "",
         value: item || "",
     })) || [], [ExpenseTypeDataOptions]);
+
+    const DropdownBreakdown = useMemo(() => BreakdownDataOptions?.map((item) => ({
+        label: item?.vehicle?.model || "",
+        value: item?.id || "",
+    })) || [], [BreakdownDataOptions]);
 
     const pickMedia = async () => {
         const result = await DocumentPicker.getDocumentAsync({
@@ -235,7 +279,7 @@ const AddExpense = () => {
                                 value={watchedVehicleId}
                             />
                             <CustomDropdownApi
-                                options={dropdownOptions}
+                                options={DropdownBreakdown}
                                 placeholder="Select BreakDown"
                                 control={control}
                                 name="breakDownId"
@@ -317,7 +361,7 @@ const AddExpense = () => {
                                 </View>
                             )}
                             <CustomButton
-                                title={parsedData?.id ? "Update Expense" : "Create Expense"}
+                                title={parsedData ? "Update Expense" : "Create Expense"}
                                 onPress={handleSubmit(onSubmit)}
                                 style={styles.button}
                             />
