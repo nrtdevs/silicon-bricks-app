@@ -15,7 +15,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Button, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ms } from 'react-native-size-matters';
 import Toast from 'react-native-toast-message';
 import { z } from 'zod';
@@ -191,14 +191,16 @@ const AddExpense = () => {
             }));
             console.log("data", newFormattedMedia)
 
-            Toast.show({
-                type: "success",
-                text1: "Image Uploaded",
-            });
-
+            if (uploadedFiles.length > 0 && uploadedUrls.length > 0) {
+                Toast.show({
+                    type: "success",
+                    text1: "Images Uploaded",
+                    text2: "All files uploaded successfully ✅",
+                });
+            }
 
             if (parsedData) {
-                UpdateExpenseApi({
+                await UpdateExpenseApi({
                     variables: {
                         updateVehicleExpenseInput: {
                             id: Number(parsedData),
@@ -211,9 +213,13 @@ const AddExpense = () => {
                             uploadDoc: JSON.stringify(newFormattedMedia)
                         }
                     }
-                })
+                });
+                Toast.show({
+                    type: "success",
+                    text1: "Expense Updated Successfully",
+                });
             } else {
-                createExpenseApi({
+                await createExpenseApi({
                     variables: {
                         data: {
                             amount: Number(data?.amount),
@@ -225,13 +231,32 @@ const AddExpense = () => {
                             uploadDoc: JSON.stringify(newFormattedMedia)
                         }
                     }
-                })
+                });
+                Toast.show({
+                    type: "success",
+                    text1: "Expense Created Successfully",
+                });
             }
             router.navigate("/(vehicle)/expense/ExpenseList");
         } catch (error) {
-            CustomToast("error");
+            Toast.show({
+                type: "error",
+                text1: "Images Uploaded",
+                text2: "All files uploaded successfully ✅",
+            });
         }
     }
+
+    const showToast = () => {
+        Toast.show({
+            type: "success", // "success" | "error" | "info"
+            text1: "Hello 👋",
+            text2: "This is a toast message 🚀",
+            position: "bottom", // 👈 aapne yeh sahi likha hai
+            visibilityTime: 3000, // 3 seconds
+            autoHide: true,
+        });
+    };
 
     return (
         <CustomHeader
@@ -257,6 +282,10 @@ const AddExpense = () => {
                         keyboardShouldPersistTaps="handled"
                     >
                         <View>
+                            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                                <Button title="Show Toast" onPress={showToast} />
+                                <Toast />
+                            </View>
                             <CustomDropdownApi
                                 options={DropdownExpenseType}
                                 placeholder="Select Expense Type"
