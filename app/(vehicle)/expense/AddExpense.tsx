@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ms } from 'react-native-size-matters';
+import Toast from 'react-native-toast-message';
 import { z } from 'zod';
 
 const ExpenseSchema = z.object({
@@ -23,13 +24,13 @@ const ExpenseSchema = z.object({
     breakDownId: z.object({
         label: z.string(),
         value: z.string(),
-    }, { required_error: "Breakdown is required" }),
+    }).optional(),
     description: z.string().min(1, "Description is required"),
     expenseDate: z.string().min(1, "Expense Date is required"),
     expenseType: z.object({
         label: z.string(),
         value: z.string(),
-    }, { required_error: "Expense Type is required" }),
+    }).optional(),
     uploadDoc: z.array(z.object({
         mediaType: z.string(),
         url: z.string(),
@@ -37,7 +38,7 @@ const ExpenseSchema = z.object({
     vehicleId: z.object({
         label: z.string(),
         value: z.string(),
-    }, { required_error: "Vehicle is required" }),
+    }).optional(),
 });
 
 
@@ -179,6 +180,7 @@ const AddExpense = () => {
     };
 
     const onSubmit = async (data: any) => {
+        console.log("data")
         try {
             const localUris = uploadedFiles.map((file) => file.url);
             const uploadedUrls = await uploadImage(localUris);
@@ -187,8 +189,20 @@ const AddExpense = () => {
                 mediaType: file.mediaType,
                 url: uploadedUrls[index],
             }));
+            console.log("data", newFormattedMedia)
+
+            if (uploadedFiles.length > 0 && uploadedUrls.length > 0) {
+                Toast.show({
+                    type: "success",
+                    text1: "Images Uploaded",
+                    text2: "All files uploaded successfully ✅",
+                });
+            }
+
+            console.log("uploaded image") 
 
             if (parsedData) {
+                console.log("update")
                 await UpdateExpenseApi({
                     variables: {
                         updateVehicleExpenseInput: {
@@ -203,8 +217,12 @@ const AddExpense = () => {
                         }
                     }
                 });
-
+                Toast.show({
+                    type: "success",
+                    text1: "Expense Updated Successfully",
+                });
             } else {
+                console.log("create")
                 await createExpenseApi({
                     variables: {
                         data: {
@@ -213,19 +231,25 @@ const AddExpense = () => {
                             expenseDate: data?.expenseDate,
                             expenseType: data?.expenseType?.value,
                             vehicleId: data?.vehicleId?.value,
-                            breakDownId: data?.breakDownId?.value,
+                            breakDownId: data?.breakDownId?.value || null,
                             uploadDoc: JSON.stringify(newFormattedMedia)
                         }
                     }
                 });
+                Toast.show({
+                    type: "success",
+                    text1: "Expense Created Successfully",
+                });
             }
             router.navigate("/(vehicle)/expense/ExpenseList");
         } catch (error) {
-            console.log(error)
+            Toast.show({
+                type: "error",
+                text1: "Images Uploaded",
+                text2: "All files uploaded successfully ✅",
+            });
         }
     }
-
-
 
     return (
         <CustomHeader
@@ -258,7 +282,6 @@ const AddExpense = () => {
                                 name="expenseType"
                                 error={errors.expenseType as any}
                                 label="Expense Type"
-                                required={true}
                                 value={watchedExpenseType}
                             />
                             <CustomDropdownApi
@@ -268,7 +291,6 @@ const AddExpense = () => {
                                 name="vehicleId"
                                 error={errors.vehicleId as any}
                                 label="Vehicle"
-                                required={true}
                                 value={watchedVehicleId}
                             />
                             <CustomDropdownApi
@@ -278,7 +300,6 @@ const AddExpense = () => {
                                 name="breakDownId"
                                 error={errors.breakDownId as any}
                                 label="BreakDown"
-                                required={true}
                                 value={breakdownId}
                             />
 
