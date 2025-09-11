@@ -1257,3 +1257,22 @@ query BreakdownDropdown($listInputDto: ListInputDTO!) {
     }
   }
 }
+
+#find vehickle by id 
+query FindVehicleExpenseById($findVehicleExpenseByIdId: Int!) {
+  findVehicleExpenseById(id: $findVehicleExpenseByIdId) {
+    expenseType
+    vehicle {
+      id
+      model
+    }
+    breakDown {
+      id
+      breakdownType
+    }
+    expenseDate
+    amount
+    description
+    uploadDoc
+  }
+}

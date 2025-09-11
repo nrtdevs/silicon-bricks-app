@@ -6,7 +6,7 @@ import CustomInput from '@/components/CustomInput';
 import { Colors } from '@/constants/Colors';
 import { formatDate } from '@/constants/Dateformat';
 import { useTheme } from '@/context/ThemeContext';
-import { BreakdownDropdownDocument, CreateVehicleExpenseDocument, CreateVehicleExpenseMutation, GetBreakdownTypeSuggestionsDocument, UpdateVehicleExpenseDocument, UpdateVehicleExpenseMutation, VehiclesDropdownDocument } from '@/graphql/generated';
+import { BreakdownDropdownDocument, CreateVehicleExpenseDocument, CreateVehicleExpenseMutation, FindVehicleExpenseByIdDocument, GetBreakdownTypeSuggestionsDocument, UpdateVehicleExpenseDocument, UpdateVehicleExpenseMutation, VehiclesDropdownDocument } from '@/graphql/generated';
 import uploadImage from '@/utils/imageUpload';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { Ionicons } from '@expo/vector-icons';
@@ -54,28 +54,28 @@ const defaultValues = {
 
 const AddExpense = () => {
     const { data } = useLocalSearchParams();
-    const parsedData = data ? Number(data as string) : null; // Assuming 'data' is the ID string
+    const parsedData = data ? JSON.parse(data as string) : null;
     const { theme } = useTheme();
     const [currentPage, setCurrentPage] = useState(1)
     const [hasMore, setHasMore] = useState(true);
     const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
-    const [isUploadingImages, setIsUploadingImages] = useState(false); // New state for image upload loading
+    const [isUploadingImages, setIsUploadingImages] = useState(false); 
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
     const [GetExpenseTypeSuggestions, { data: ExpenseTypeData }] = useLazyQuery(GetBreakdownTypeSuggestionsDocument);
     const [GetBreakdownApi, { data: Breakdown }] = useLazyQuery(BreakdownDropdownDocument);
+    const [FindVehicleByid, { data: FindData }] = useLazyQuery(FindVehicleExpenseByIdDocument)
+
+
+    const EditDataSave = FindData?.findVehicleExpenseById || []
 
     //Create Update 
     const [createExpenseApi, { loading, error }] = useMutation<CreateVehicleExpenseMutation>(CreateVehicleExpenseDocument);
     const [UpdateExpenseApi, { loading: updateLoading }] = useMutation<UpdateVehicleExpenseMutation>(UpdateVehicleExpenseDocument);
 
-    console.log("erorr", error?.graphQLErrors)
     const { control, handleSubmit, formState: { errors }, reset, watch, setValue, trigger, clearErrors } = useForm<z.infer<typeof ExpenseSchema>>({
         resolver: zodResolver(ExpenseSchema),
         defaultValues: defaultValues
     });
-
-
-
 
     // Fetch data function
     const fetchData = useCallback(() => {
@@ -92,32 +92,34 @@ const AddExpense = () => {
     }, [currentPage, hasMore, VehiclesDropdownApi]);
 
     useEffect(() => {
-        // if (parsedData) { // If in edit mode
-        //     getExpenseDetails({ variables: { id: parsedData } });
-        // }
-        fetchData(); // Fetch vehicles
-        GetExpenseTypeSuggestions(); // Fetch expense types
+        if (parsedData) {
+            FindVehicleByid({
+                variables: {
+                    findVehicleExpenseByIdId: Number(parsedData)
+                }
+            })
+        }
+        fetchData();
+        GetExpenseTypeSuggestions(); 
     }, [parsedData, fetchData, GetExpenseTypeSuggestions]);
 
-    // useEffect(() => {
-    //     if (expenseData?.getVehicleExpenseById) {
-    //         const details = expenseData.getVehicleExpenseById;
-    //         // Pre-fill the form with existing data
-    //         reset({
-    //             amount: String(details.amount), // Convert number to string for input
-    //             breakDownId: details.breakDownId ? { label: details.breakDown?.name || "", value: details.breakDownId } : undefined,
-    //             description: details.description || '',
-    //             expenseDate: details.expenseDate || '',
-    //             expenseType: details.expenseType ? { label: details.expenseType, value: details.expenseType } : undefined,
-    //             uploadDoc: details.uploadDoc ? JSON.parse(details.uploadDoc) : [],
-    //             vehicleId: details.vehicleId ? { label: details.vehicle?.model || "", value: details.vehicleId } : undefined,
-    //         });
-    //         // Also set uploadedFiles state for display
-    //         if (details.uploadDoc) {
-    //             setUploadedFiles(JSON.parse(details.uploadDoc));
-    //         }
-    //     }
-    // }, [expenseData, reset]);
+    useEffect(() => {
+        if (EditDataSave) {
+            reset({
+                amount: Number(Number(EditDataSave?.amount)),
+                // breakDownId: details.breakDownId ? { label: details.breakDown?.name || "", value: details.breakDownId } : undefined,
+                // description: details.description || '',
+                // expenseDate: details.expenseDate || '',
+                // expenseType: details.expenseType ? { label: details.expenseType, value: details.expenseType } : undefined,
+                // uploadDoc: details.uploadDoc ? JSON.parse(details.uploadDoc) : [],
+                // vehicleId: details.vehicleId ? { label: details.vehicle?.model || "", value: details.vehicleId } : undefined,
+            });
+            // Also set uploadedFiles state for display
+            // if (EditDataSave.uploadDoc) {
+            //     setUploadedFiles(JSON.parse(EditDataSave.uploadDoc));
+            // }
+        }
+    }, [EditDataSave, reset]);
 
     const watchedExpenseType = watch("expenseType");
     const watchedVehicleId = watch("vehicleId");
@@ -441,8 +443,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         marginTop: ms(20),
-        justifyContent: 'space-around', // Distribute items evenly with space around them
-        paddingHorizontal: ms(5), // Add some horizontal padding to the container
+        justifyContent: 'space-around', 
+        paddingHorizontal: ms(5), 
     },
     mediaItem: {
         width: ms(100),
@@ -454,7 +456,7 @@ const styles = StyleSheet.create({
         position: 'relative',
         padding: ms(5),
         paddingTop: ms(10),
-        marginBottom: ms(10), // Add margin bottom for spacing between rows
+        marginBottom: ms(10), 
     },
     mediaThumbnail: {
         width: '100%',
@@ -463,8 +465,7 @@ const styles = StyleSheet.create({
         borderRadius: ms(4),
     },
     IconStyle: {
-        // Removed absolute positioning for icons to allow them to be centered by alignItems and justifyContent of mediaItem
-        // The parent mediaItem now handles centering for non-image types
+       
     },
     mediaFileName: {
         fontSize: ms(9),

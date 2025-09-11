@@ -113,13 +113,12 @@ const ExpenseList = () => {
   };
 
   const renderItems = (item: any) => {
-
     return (
       <ExpenseCard
         item={item}
         onEdit={() =>
           router.navigate({
-            pathname: "/(vehicle)/breakdown/AddBreakdown",
+            pathname: "/(vehicle)/expense/AddExpense",
             params: { data: JSON.stringify(item?.id) },
           })
         }
