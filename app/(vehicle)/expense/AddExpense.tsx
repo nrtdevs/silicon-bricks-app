@@ -21,17 +21,17 @@ import { ms } from 'react-native-size-matters';
 import { z } from 'zod';
 
 const ExpenseSchema = z.object({
-    amount: z.string().min(1, "Amount is required").max(100).optional(),
+    amount: z.string().min(1, "Amount is required").max(100),
     breakDownId: z.object({
         label: z.string(),
         value: z.string(),
-    }).optional(),
-    description: z.string().min(1, "Description is required").optional(),
-    expenseDate: z.string().min(1, "Expense Date is required").optional(),
+    }, { required_error: "BreakDown is required" }),
+    description: z.string().min(1, "Description is required"),
+    expenseDate: z.string().min(1, "Expense Date is required"),
     expenseType: z.object({
         label: z.string(),
         value: z.string(),
-    }).optional(),
+    }, { required_error: "Expense is required" }),
     uploadDoc: z.array(z.object({
         mediaType: z.string(),
         url: z.string(),
@@ -39,7 +39,7 @@ const ExpenseSchema = z.object({
     vehicleId: z.object({
         label: z.string(),
         value: z.string(),
-    }).optional(),
+    }, { required_error: "Vehicle is required" }),
 });
 
 
@@ -57,10 +57,8 @@ const AddExpense = () => {
     const { data } = useLocalSearchParams();
     const parsedData = data ? JSON.parse(data as string) : null;
     const { theme } = useTheme();
-    const [currentPage, setCurrentPage] = useState(1)
-    const [hasMore, setHasMore] = useState(true);
-    const [uploadedFiles, setUploadedFiles] = useState<{ mediaType: string; url: string }[]>([]);
-    const [serverImage, setserverUploadedFiles] = useState<Array<{ mediaType: string; url: string; id?: string }>>([])
+    const [localSelectedFiles, setLocalSelectedFiles] = useState<{ mediaType: string; url: string }[]>([]);
+    const [serverImage, setServerUploadedFiles] = useState<Array<{ mediaType: string; url: string; id?: string }>>([])
     const [removedFileIds, setRemovedFileIds] = useState<string[]>([]);
     const [isUploadingImages, setIsUploadingImages] = useState(false); 
     const [VehiclesDropdownApi, { data: DropdownData }] = useLazyQuery(VehiclesDropdownDocument);
@@ -70,8 +68,6 @@ const AddExpense = () => {
 
 
     const EditDataSave = FindData?.findVehicleExpenseById
-
-    console.log(EditDataSave)
 
     //Create Update 
     const [createExpenseApi, { loading, error }] = useMutation<CreateVehicleExpenseMutation>(CreateVehicleExpenseDocument);
@@ -84,17 +80,15 @@ const AddExpense = () => {
 
     // Fetch data function
     const fetchData = useCallback(() => {
-        if (hasMore) {
-            VehiclesDropdownApi({
-                variables: {
-                    listInputDto: {
-                        limit: 10,
-                        page: currentPage
-                    }
+        VehiclesDropdownApi({
+            variables: {
+                listInputDto: {
+                    limit: 100,
+                    page: 1
                 }
-            });
-        }
-    }, [currentPage, hasMore, VehiclesDropdownApi]);
+            }
+        });
+    }, [VehiclesDropdownApi]);
 
     useEffect(() => {
         if (parsedData) {
@@ -106,7 +100,15 @@ const AddExpense = () => {
         }
         fetchData();
         GetExpenseTypeSuggestions(); 
-    }, [parsedData, fetchData, GetExpenseTypeSuggestions]);
+        GetBreakdownApi({
+            variables: {
+                listInputDto: {
+                    limit: 100, // Fetch a reasonable limit
+                    page: 1,
+                }
+            }
+        });
+    }, [parsedData, fetchData, GetExpenseTypeSuggestions, GetBreakdownApi]);
 
 
     const ExpenseTypeDataOptions = ExpenseTypeData?.getBreakdownTypeSuggestions;
@@ -131,41 +133,33 @@ const AddExpense = () => {
 
 
     useEffect(() => {
-        if (EditDataSave) {
+        if (parsedData && EditDataSave) {
+            const parsedUploadDoc = EditDataSave.uploadDoc ? JSON.parse(EditDataSave.uploadDoc) : [];
             reset({
                 amount: String(EditDataSave?.amount),
                 breakDownId: EditDataSave.breakDown?.id ? { label: EditDataSave.breakDown?.breakdownType || "", value: EditDataSave.breakDown.id } : undefined,
                 description: EditDataSave.description || '',
                 expenseDate: EditDataSave.expenseDate,
                 expenseType: EditDataSave?.expenseType ? { label: EditDataSave?.expenseType || "", value: EditDataSave.expenseType } : undefined,
-                uploadDoc: EditDataSave.uploadDoc ? JSON.parse(EditDataSave.uploadDoc) : [],
+                uploadDoc: parsedUploadDoc,
                 vehicleId: EditDataSave.vehicle?.id ? { label: EditDataSave.vehicle?.model || "", value: EditDataSave.vehicle.id } : undefined,
             });
 
-            // Also set uploadedFiles state for display
-            if (EditDataSave.uploadDoc) {
-                setUploadedFiles(JSON.parse(EditDataSave.uploadDoc));
-            }
+            // Set serverImage state for display and tracking removals
+            setServerUploadedFiles(parsedUploadDoc);
+            setLocalSelectedFiles([]); // Clear local files when editing existing data
+            setRemovedFileIds([]); // Clear removed file IDs
+        } else {
+            reset(defaultValues);
+            setServerUploadedFiles([]); // Clear server images for new entry
+            setLocalSelectedFiles([]); // Clear local files for new entry
+            setRemovedFileIds([]); // Clear removed file IDs for new entry
         }
-    }, [EditDataSave, reset]);
+    }, [EditDataSave, parsedData, reset]);
 
     const watchedExpenseType = watch("expenseType");
     const watchedVehicleId = watch("vehicleId");
     const breakdownId = watch('breakDownId');
-
-    useEffect(() => {
-
-        GetBreakdownApi({
-            variables: {
-                listInputDto: {
-                    limit: 10,
-                    page: 1,
-                    search: breakdownId?.value
-                }
-            }
-        });
-
-    }, [breakdownId]);
 
 
 
@@ -192,20 +186,25 @@ const AddExpense = () => {
                 url: asset.uri,
             }));
 
-            setUploadedFiles((prev) => [...prev, ...newFiles]);
+            setLocalSelectedFiles((prev) => [...prev, ...newFiles]);
         }
     };
 
     const onSubmit = async (data: z.infer<typeof ExpenseSchema>) => {
         try {
             setIsUploadingImages(true);
-            const localUris = uploadedFiles.map((file) => file.url);
+            const localUris = localSelectedFiles.map((file) => file.url);
             const uploadedUrls = await uploadImage(localUris);
 
-            const newFormattedMedia = uploadedFiles.map((file, index) => ({
+            const newlyUploadedMedia = localSelectedFiles.map((file, index) => ({
                 mediaType: file.mediaType,
                 url: uploadedUrls[index],
             }));
+
+            // Filter out removed files from serverImage and combine with newly uploaded media
+            const finalUploadDoc = serverImage
+                .filter(file => !removedFileIds.includes(file.id || ''))
+                .concat(newlyUploadedMedia);
 
             if (parsedData) {
                 await UpdateExpenseApi({
@@ -218,7 +217,7 @@ const AddExpense = () => {
                             expenseType: data?.expenseType?.value,
                             vehicleId: data?.vehicleId?.value,
                             breakDownId: data?.breakDownId?.value,
-                            uploadDoc: JSON.stringify(newFormattedMedia),
+                            uploadDoc: JSON.stringify(finalUploadDoc),
                             removedFileIds: removedFileIds
                         }
                     }
@@ -233,14 +232,14 @@ const AddExpense = () => {
                             expenseType: data?.expenseType?.value,
                             vehicleId: Number(data?.vehicleId?.value),
                             breakDownId: Number(data?.breakDownId?.value),
-                            uploadDoc: JSON.stringify(newFormattedMedia)
+                            uploadDoc: JSON.stringify(finalUploadDoc)
                         }
                     }
                 });
             }
             router.navigate("/(vehicle)/expense/ExpenseList");
         } catch (error) {
-            console.log(error)
+            console.error("Submission error:", error)
         } finally {
             setIsUploadingImages(false); 
         }
@@ -278,6 +277,7 @@ const AddExpense = () => {
                                 error={errors.expenseType as any}
                                 label="Expense Type"
                                 value={watchedExpenseType}
+                                required
                             />
                             <CustomDropdownApi
                                 options={dropdownOptions}
@@ -287,6 +287,7 @@ const AddExpense = () => {
                                 error={errors.vehicleId as any}
                                 label="Vehicle"
                                 value={watchedVehicleId}
+                                required
                             />
                             <CustomDropdownApi
                                 options={DropdownBreakdown}
@@ -296,6 +297,7 @@ const AddExpense = () => {
                                 error={errors.breakDownId as any}
                                 label="BreakDown"
                                 value={breakdownId}
+                                required
                             />
 
                             <CustomDatePicker
@@ -325,14 +327,14 @@ const AddExpense = () => {
                                 error={errors.description?.message}
                             />
                             <View style={styles.mediaUploadArea}>
-                                <Ionicons name="cloud-upload-outline" size={48} color="#C7C7CC" />
-                                <Text style={styles.mediaUploadTitle}>Upload Photos, Videos & Audio</Text>
+                                <Ionicons name="cloud-upload-outline" size={48} color={Colors[theme].lightText} />
+                                <Text style={[styles.mediaUploadTitle, { color: Colors[theme].text }]}>Upload Photos, Videos & Audio</Text>
 
 
                                 {/* Image Upload */}
-                                <Pressable style={styles.uploadButton} onPress={pickMedia}>
-                                    <Ionicons name="cloud-upload-outline" size={20} color="#007AFF" />
-                                    <Text style={styles.uploadButtonText}>Upload Media</Text>
+                                <Pressable style={[styles.uploadButton, { borderColor: Colors[theme].tint }]} onPress={pickMedia}>
+                                    <Ionicons name="cloud-upload-outline" size={20} color={Colors[theme].tint} />
+                                    <Text style={[styles.uploadButtonText, { color: Colors[theme].tint }]}>Upload Media</Text>
                                 </Pressable>
 
                             </View>
@@ -340,18 +342,18 @@ const AddExpense = () => {
                             {serverImage.length > 0 && (
                                 <View style={styles.mediaPreviewContainer}>
                                     {serverImage.map((file, index) => (
-                                        <View key={`server-media-${index}`} style={styles.mediaItem}>
+                                        <View key={`server-media-${index}`} style={[styles.mediaItem, { backgroundColor: Colors[theme].cart }]}>
                                             {file.mediaType === "image" ? (
                                                 <Image
                                                     source={{ uri: Env.IMAGEURL + file.url }}
                                                     style={styles.mediaThumbnail}
                                                 />
                                             ) : file.mediaType === "video" ? (
-                                                <Ionicons name="videocam-outline" size={40} color="#007AFF" style={styles.IconStyle} />
+                                                    <Ionicons name="videocam-outline" size={40} color={Colors[theme].tint} />
                                             ) : file.mediaType === "audio" ? (
-                                                <Ionicons name="musical-notes-outline" size={32} color="#34C759" style={styles.IconStyle} />
+                                                        <Ionicons name="musical-notes-outline" size={32} color={Colors[theme].tint} />
                                             ) : (
-                                                <Ionicons name="document-outline" size={32} color="#8E8E93" style={styles.IconStyle} />
+                                                            <Ionicons name="document-outline" size={32} color={Colors[theme].tint} />
                                             )}
                                             <Text style={[styles.mediaFileName, { color: Colors[theme].text }]}>
                                                 {file.url.split("/").pop()}
@@ -361,45 +363,45 @@ const AddExpense = () => {
                                                     const id = file?.id;
                                                     if (id) {
                                                         setRemovedFileIds((prev) => [...prev, String(id)]);
-                                                        setserverUploadedFiles((prev) => prev.filter((item) => item.id !== id));
+                                                        setServerUploadedFiles((prev) => prev.filter((item) => item.id !== id));
                                                     }
                                                 }}
-                                                style={styles.closeButton}
+                                                style={[styles.closeButton, { backgroundColor: Colors[theme].background }]}
                                             >
-                                                <Ionicons name="close-circle" size={30} color="#FF3B30" />
+                                                <Ionicons name="close-circle" size={30} color={Colors.red} />
                                             </Pressable>
                                         </View>
                                     ))}
                                 </View>
                             )}
                             {/* Display Local Images */}
-                            {uploadedFiles.length > 0 && (
+                            {localSelectedFiles.length > 0 && (
                                 <View style={styles.mediaPreviewContainer}>
-                                    {uploadedFiles.map((file, index) => (
-                                        <View key={`local-media-${index}`} style={styles.mediaItem}>
+                                    {localSelectedFiles.map((file, index) => (
+                                        <View key={`local-media-${index}`} style={[styles.mediaItem, { backgroundColor: Colors[theme].cart }]}>
                                             {file.mediaType === "image" ? (
                                                 <Image
                                                     source={{ uri: file.url }}
                                                     style={styles.mediaThumbnail}
                                                 />
                                             ) : file.mediaType === "video" ? (
-                                                <Ionicons name="videocam-outline" size={40} color="#007AFF" />
+                                                    <Ionicons name="videocam-outline" size={40} color={Colors[theme].tint} />
                                             ) : file.mediaType === "audio" ? (
-                                                <Ionicons name="musical-notes-outline" size={32} color="#34C759" />
+                                                        <Ionicons name="musical-notes-outline" size={32} color={Colors[theme].tint} />
                                             ) : (
-                                                <Ionicons name="document-outline" size={32} color="#8E8E93" />
+                                                            <Ionicons name="document-outline" size={32} color={Colors[theme].tint} />
                                             )}
                                             <Text numberOfLines={2} ellipsizeMode="tail" style={[styles.mediaFileName, { color: Colors[theme].text }]}>
                                                 {file.url.split("/").pop()}
                                             </Text>
                                             <Pressable
                                                 onPress={() => {
-                                                    const newFiles = uploadedFiles.filter((_, i) => i !== index);
-                                                    setUploadedFiles(newFiles);
+                                                    const newFiles = localSelectedFiles.filter((_, i) => i !== index);
+                                                    setLocalSelectedFiles(newFiles);
                                                 }}
-                                                style={styles.closeButton}
+                                                style={[styles.closeButton, { backgroundColor: Colors[theme].background }]}
                                             >
-                                                <Ionicons name="close-circle" size={24} color="#FF3B30" />
+                                                <Ionicons name="close-circle" size={24} color={Colors.red} />
                                             </Pressable>
                                         </View>
                                     ))}
@@ -456,16 +458,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: ms(30),
         paddingHorizontal: ms(10),
-        backgroundColor: '#F9F9F9',
         borderRadius: ms(16),
         borderWidth: 2,
-        borderColor: '#E5E5EA',
         borderStyle: 'dashed',
     },
     mediaUploadTitle: {
         fontSize: ms(18),
         fontWeight: '600',
-        color: '#1C1C1E',
         marginTop: ms(10),
         marginBottom: ms(8),
     },
@@ -475,15 +474,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: ms(10),
         paddingHorizontal: ms(20),
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#FFFFFF', // This will be overridden by inline style
         borderRadius: ms(8),
         borderWidth: 1,
-        borderColor: '#007AFF',
     },
     uploadButtonText: {
         marginLeft: ms(6),
         fontSize: ms(16),
-        color: '#007AFF',
         fontWeight: '500',
     },
     mediaPreviewContainer: {
@@ -497,7 +494,6 @@ const styles = StyleSheet.create({
         width: ms(100),
         height: ms(115),
         borderRadius: ms(8),
-        backgroundColor: '#E5E5EA',
         alignItems: 'center',
         justifyContent: 'space-between',
         position: 'relative',
@@ -511,15 +507,12 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
         borderRadius: ms(4),
     },
-    IconStyle: {
-       
-    },
     mediaFileName: {
         fontSize: ms(9),
         textAlign: 'center',
         marginTop: ms(5),
         width: '100%',
-        color: Colors.light.text,
+        color: Colors.light.text, // This will be overridden by inline style
         flexShrink: 1,
     },
     closeButton: {
@@ -527,7 +520,6 @@ const styles = StyleSheet.create({
         top: ms(-8),
         right: ms(-8),
         zIndex: 1000,
-        backgroundColor: Colors.light.background,
         borderRadius: ms(15),
         padding: ms(2),
     },
