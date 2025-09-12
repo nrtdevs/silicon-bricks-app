@@ -1,4 +1,5 @@
 import CustomButton from '@/components/CustomButton';
+import CustomDotsLoader from '@/components/CustomCircleLoader';
 import CustomDatePicker from '@/components/CustomDatePicker';
 import CustomDropdownApi from '@/components/CustomDropdownApi';
 import CustomHeader from '@/components/CustomHeader';
@@ -16,7 +17,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ActivityIndicator, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ms } from 'react-native-size-matters';
 import { z } from 'zod';
 
@@ -423,8 +424,8 @@ const AddExpense = () => {
                 onRequestClose={() => { }}
             >
                 <View style={styles.loadingOverlay}>
-                    <ActivityIndicator size="large" color={Colors[theme].tint} />
-                    <Text style={[styles.loadingText, { color: Colors[theme].text }]}>Uploading Images...</Text>
+                    <CustomDotsLoader size={80} dotSize={12} dotCount={12} loadingText='Uploading Images...' />
+                    <Text style={styles.loadingText}></Text>
                 </View>
             </Modal>
         </CustomHeader>
